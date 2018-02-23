@@ -1,0 +1,54 @@
+{% extends "layouts/base.html" %} 
+
+{% block main %}
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-5 col-xl-4">
+    <div class="card mt-4">
+      <div class="card-header text-center">登录FT中文网</div>
+
+      <div class="card-body">
+        {% if not userinfo %}
+        <form action="/login" method="post">
+          
+          {% if errors.authFailed%}
+            <div class="invalid-feedback">
+              Incorrent user name or password
+            </div>
+          {% endif %}
+          
+          <div class="form-group">
+            <label for="credentialsEmail">邮箱</label>
+            <input class="form-control" id="credentialsEmail" type="text" name="credentials[email]" value="{{credentials.email}}" required>
+
+            {% if errors.emptyEmail %}
+              <div class="invalid-feedback">用户名不能为空</div>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="credentialsPassword">密码</label>
+            <input class="form-control" id="credentialsPassword" type="password" name="credentials[password]" required> 
+
+            {% if errors.emptyPassword %}
+              <div class="invalid-feedback">密码不能为空</div>
+            {% endif %}
+          </div>
+          <button class="btn btn-block btn-primary" type="submit">Login</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-5 col-xl-4">
+      <div class="mt-4">
+        <h5>其他登录方式</h5>
+        <ul>
+          <li><a href="">微信</a></li>
+          <li><a href="">微博</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+{% endblock %}

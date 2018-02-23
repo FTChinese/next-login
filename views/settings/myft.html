@@ -1,0 +1,61 @@
+{% extends "../layouts/settings.html" %}
+
+{% block content %}
+<section>
+  <h2>Current myFT accounts</h2>
+  <p>Your personal access token is currently accosiated with the following FTC accounts:</p>
+  <ul class="list-group">
+    {% for account in myftAccounts %}
+      <li class="list-group-item">
+        {{account.myftEmail}}
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section>
+  <h2>Change/Associate myFT account</h2>
+  <p>This is the email account you used to login <a href="http://www.ftchinese.com" target="_blank">ftchinese.com</a>. Since you logged in here with the CMS account, the personal access token generated  has no right to access you personal info registered at ftchinese.com. To be able to access your personal info at ftchinese.com provided by FTC API, you need to tell me the email you used to login ftchinese.com.</p>
+
+  <form accept-charset="UTF-8" method="post">
+    <div>
+      <input type="hidden" name="authenticityToken" value="{{authenticity}}">
+    </div>
+    <div class="form-group">
+      <label for="">Email</label>
+      <input class="form-control{% if errors.emptyEmail or errors.emailNotFound %} is-invalid{% endif %}"
+      type="email"
+      name="credentials[email]"
+      value="{{credentials.email}}"
+      required>
+
+      {% if errors.emptyEmail %}
+        <div class="invalid-feedback">邮箱不能为空</div>
+      {% endif %}
+
+      {% if errors.emailNotFound %}
+        <div class="invalid-feedback">该邮箱不存在</div>
+      {% endif %}
+    </div>
+    <div class="form-group">
+      <label for="">Password</label>
+      <input class="form-control{% if errors.emptyPassword or errors.pwNotMatched %} is-invalid{% endif %}"
+      type="password"
+      name="credentials[password]"
+      value=""
+      required>
+      {% if errors.emptyPassword %}
+        <div class="invalid-feedback">密码不能为空</div>
+      {% endif %}
+
+      {% if errors and errors.pwNotMatched %}
+        <div class="invalid-feedback">密码错误</div>
+      {% endif %}
+    </div>
+    <button class="btn btn-primary" type="submit">
+      Verify
+    </button>
+  </form>
+</section>
+
+{% endblock %}

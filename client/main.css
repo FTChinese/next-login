@@ -1,0 +1,33 @@
+body {
+    min-height: 100vh;
+    background-color: #FFF1E5;
+}
+.btn-primary {
+    background-color: #0d7680;
+    color: #fff;
+    border-color: #0d7680;
+}
+.o-header {
+    background-color: #fff1e5;
+    color: #33302e;
+    border-bottom: 1px solid #ccc1b7;
+}
+
+.o-header a {
+    color: #33302e;
+}
+
+.navbar-brand {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.o-footer {
+    box-sizing: border-box;
+    height: 100px;
+    line-height: 100px;
+    /* padding-top: 50px; */
+    margin-top: 100px;
+    color: #99979c;
+    /* background-color: #2a2730; */
+}
