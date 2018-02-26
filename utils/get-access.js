@@ -34,8 +34,7 @@ module.exports = async function(fromFile=false) {
   }
 
   debug('Request access token to oauth server');
-  const resp = await got(endpoint, {
-    method: 'POST',
+  const resp = await got.post(endpoint, {
     form: true,
     json: true,
     auth: `${clientId}:${clientSecret}`,
