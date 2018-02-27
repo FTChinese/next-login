@@ -1,37 +1,19 @@
 const debug = require('debug')('login:access-data');
 const got = require('got');
-const loadJsonFile = require('load-json-file');
-const writeJsonFile = require('write-json-file');
-const {resolve} = require('path');
 
 const endpoint = process.env.OAUTH_ENDPOINT_TOKEN || 'http://localhost:9001/token';
 const clientId = process.env.N_LOGIN_CLIENT_ID || '1acc31b7db001aa88302';
 const clientSecret = process.env.N_LOGIN_CLIENT_SECRET || 'b367d4adfb20d21c5969e78e2318edd3a7b77ecabcf32f971ae77a55aaac7181';
 
 /**
- * @param {boolean} fromFile - try to load from file system if true. If the file exists, it returns; otherwise it will request to oauth endpoint.
  * @return {Object | null}
  * @type {Object} accessData
  * @property {string} access_token
  * @property {number} expires_in
  * @property {string} token_type = "Bearer"
+ * 
  */
 module.exports = async function(fromFile=false) {
-
-  const accessFile = resolve(__dirname, `../.tmp/access.json`);
-  if (fromFile) {
-    debug('Load previsouly saved access token from file system')
-    try {
-      const accessData = await loadJsonFile(accessFile);
-
-      if (accessData && accessData.access_token) {
-        debug('Load access data from file sytem ok')
-        return accessData;
-      }
-    } catch(e) {
-      debug('Error loading access token from file: %o', e)
-    }
-  }
 
   debug('Request access token to oauth server');
   const resp = await got.post(endpoint, {
@@ -49,11 +31,7 @@ module.exports = async function(fromFile=false) {
   }
   const accessData = resp.body;
 
-  try {
-    await writeJsonFile(accessFile, accessData);
-  } catch(e) {
-    debug("Save access data error: %o", e);
-  }
+  debug('Access Data: %O', accessData);
 
   // osin respond 200 even when it returns error message. Example:
   /**
@@ -67,6 +45,5 @@ module.exports = async function(fromFile=false) {
     return null;
   }
 
-  debug('Get access token data');
   return accessData;
 }

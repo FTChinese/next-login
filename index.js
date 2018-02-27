@@ -11,10 +11,10 @@ const handleErrors = require('./middlewares/handle-errors');
 const inlineMin = require('./middlewares/inline-min');
 
 const login = require('./server/login');
-const account = require('./server/account');
+const settings = require('./server/settings');
 const logout = require('./server/logout');
 
-const getAccess = require('./utils/get-access');
+const fetchAccess = require('./utils/fetch-access');
 
 const app = new Koa();
 const router = new Router();
@@ -47,8 +47,8 @@ app.use(handleErrors());
 app.use(bodyParser());
 
 router.use('/login', login);
-router.use('/account', account);
 router.use('/logout', logout);
+router.use('/settings', settings);
 
 app.use(router.routes());
 
@@ -63,7 +63,7 @@ async function bootUp(app) {
   const port = process.env.PORT || 3000;
 
   try {
-    app.context.accessData = await getAccess(true);
+    app.context.accessData = await fetchAccess();
   } catch (e) {
     debug("Get access token error: %O", e)
   }

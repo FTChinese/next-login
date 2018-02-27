@@ -1,12 +1,10 @@
-const loadJsonFile = require('load-json-file');
-const {resolve} = require('path');
+const test = require('ava');
+const fetchAccess = require('../utils/fetch-access');
 
-async function test() {
-  const accessData = await loadJsonFile(resolve(__dirname, `../.tmp/access.json`));
+test('fetchAccessToken', async t => {
+  const accessData = await fetchAccess();
 
-  console.log(accessData);
-}
+  console.log("Access Data: %o", accessData);
 
-test().catch(err => {
-  console.log(err);
+  t.not(accessData, null);
 });

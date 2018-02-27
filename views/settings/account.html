@@ -1,0 +1,18 @@
+{% extends "layouts/base.html" %} 
+
+{% block main %}
+
+<div class="row">
+  <div class="col-12">
+    <div class="row">
+      <span class="col-md-2">邮箱</span>
+      <span class="col-md-10">{{account.email}}</span>
+    </div>
+    <div class="row">
+      <span class="col-md-2">手机</span>
+      <span class="col-md-10">{{account.mobileNumber}}</span>
+    </div>
+  </div>
+  
+</div>
+{% endblock %}
