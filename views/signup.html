@@ -1,0 +1,31 @@
+{% extends "layouts/base.html" %} 
+
+{% block main %}
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-5 col-xl-4">
+    <div class="mt-4">
+      <div class="text-center">创建FT中文网账号</div>
+      <form method="post">
+        
+        <div class="form-group">
+          <label for="userEmail">邮箱</label>
+          <input class="form-control" id="userEmail" type="text" name="user[email]" value="{{user.email}}" required>
+        </div>
+
+        <div class="form-group">
+          <label for="userPassword">密码</label>
+          <input class="form-control" id="userPassword" type="password" name="user[password]" required> 
+        </div>
+
+        
+        <button class="btn btn-block btn-primary" type="submit">注册</button>
+      </form>
+      <small class="">注册即代表您同意FT中文网<a href="http://www.ftchinese.com/m/corp/service.html" target="_blank">《用户注册协议》</a></small>
+
+      <p class="text-center">已有账号？<a href="/login?source=signup">登录</a></p>
+    </div>
+
+    <button type="button" class="btn btn-secondary btn-block">下载FT中文网APP</button>
+  </div>
+</div>
+{% endblock %}
