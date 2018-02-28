@@ -1,4 +1,4 @@
-const debug = require('debug')('login:account');
+const debug = require('debug')('user:account');
 const Router = require('koa-router');
 const request = require('superagent');
 const render = require('../../utils/render');

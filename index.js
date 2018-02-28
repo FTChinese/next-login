@@ -47,6 +47,7 @@ app.use(handleErrors());
 app.use(bodyParser());
 
 router.use('/login', login);
+// router.use('/password-reset');
 router.use('/logout', logout);
 router.use('/settings', settings);
 

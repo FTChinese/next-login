@@ -1,4 +1,4 @@
-const debug = require('debug')('login:server');
+const debug = require('debug')('user:login');
 const Router = require('koa-router');
 const render = require('../utils/render');
 const {ErrorForbidden} = require('../utils/http-errors');
@@ -40,7 +40,7 @@ router.post('/', async (ctx, next) => {
   /**
    * @type {Object}
    * @property {string} sub - uuid
-   * @property {string} name - displable user name
+   * @property {string} name - displayable user name
    */
   const authResult = resp.body;
 
@@ -57,10 +57,7 @@ router.post('/', async (ctx, next) => {
     email: credentials.email
   };
 
-  return ctx.redirect('/settings');
+  return ctx.redirect('/settings/profile');
 });
-
-
-
 
 module.exports = router.routes();
