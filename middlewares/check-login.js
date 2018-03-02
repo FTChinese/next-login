@@ -2,7 +2,7 @@ const debug = require('debug')('user:check-login');
 
 // Those paths must be ignored in whatever cases prevent infinite loop:
 // A user is definitely not logged in if he goes to `/login`, and you check it and redirect hime to `/login`; before the page could be shown, he is checked again as not logged in, and redirect to login ... 
-const defaultIgnore = ['/login', '/signup', '/signup-check']
+const defaultIgnore = ['/login', '/signup', '/signup-check'];
 
 /**
  * checkLogin - This middleware will add userinfo to ctx.state
@@ -11,6 +11,19 @@ const defaultIgnore = ['/login', '/signup', '/signup-check']
  * @return {Async Function}
  */
 function checkLogin(ignorePaths=[]) {
+  if (!Array.isArray(ignorePaths)) {
+    throw new Error('checkLogin only accepts an array of strings');
+  }
+
+  const ignore = new Set(defaultIgnore);
+
+  for (const elem of ignorePaths) {
+    if ('string' !== typeof elem) {
+      throw new Error('checkLogin only accepts an array of strings');
+    }
+    ignore.add(elem);
+  }
+
   return async (ctx, next) => {
     // Do nothing for `/favicon.ico`
     if (ctx.path == '/favicon.ico') return;
@@ -35,10 +48,10 @@ function checkLogin(ignorePaths=[]) {
      * @property {number} id
      */
     ctx.state.userinfo = null;
-    ignorePaths = defaultIgnore.concat(ignorePaths);
-    debug("Path to ignore: %o", ignorePaths);
+    
+    debug("Path to ignore: %o", ignore);
 
-    if (ignorePaths.includes(ctx.path)) {
+    if (ignore.has(ctx.path)) {
       return await next();
     }
 
