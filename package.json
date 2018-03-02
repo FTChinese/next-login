@@ -28,6 +28,7 @@
     "got": "^8.2.0",
     "html-minifier": "^3.5.9",
     "inline-source": "^6.1.2",
+    "joi": "^13.1.1",
     "koa": "^2.5.0",
     "koa-bodyparser": "^4.2.0",
     "koa-logger": "^3.1.0",

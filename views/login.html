@@ -8,32 +8,26 @@
       <div class="text-center">登录FT中文网</div>
       <form action="/login" method="post">
         
-        {% if errors.authFailed%}
-          <div class="invalid-feedback">
-            Incorrent user name or password
-          </div>
+        {% if errors.invalidCredentials %}
+          <div class="form-errortext text-center">用户名或密码不合法</div>
+        {% endif %}
+
+        {% if errors.loginFaild %}
+          <div class="form-errortext text-center">用户名或密码无效</div>
         {% endif %}
         
         <div class="form-group">
           <label for="credentialsEmail">邮箱</label>
-          <input class="form-control" id="credentialsEmail" type="text" name="credentials[email]" value="{{credentials.email}}" required>
-
-          {% if errors.emptyEmail %}
-            <div class="invalid-feedback">用户名不能为空</div>
-          {% endif %}
+          <input class="form-control" id="credentialsEmail" type="email" name="credentials[email]" value="{{credentials.email}}" required>
         </div>
 
         <div class="form-group">
-          <label for="credentialsPassword">密码 <span><a href="/pasword-reset">忘记密码?</a></span></label>
+          <label class="clearfix d-block" for="credentialsPassword">密码 <a class="float-right" href="/pasword-reset">忘记密码?</a></label>
           <input class="form-control" id="credentialsPassword" type="password" name="credentials[password]" required> 
-
-          {% if errors.emptyPassword %}
-            <div class="invalid-feedback">密码不能为空</div>
-          {% endif %}
         </div>
         <button class="btn btn-block btn-primary" type="submit">Login</button>
       </form>
-      <p>还没有FT中文网账号?<a href="/signup?source=login">创建</a></p>
+      <p class="text-center pt-3">还没有FT中文网账号?<a href="/signup?source=login">创建</a></p>
       {% endif %}
     </div>
   </div>

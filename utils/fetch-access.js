@@ -1,4 +1,4 @@
-const debug = require('debug')('login:access-data');
+const debug = require('debug')('user:fetch-access-token');
 const got = require('got');
 
 const endpoint = process.env.OAUTH_ENDPOINT_TOKEN || 'http://localhost:9001/token';

@@ -31,3 +31,13 @@ body {
     color: #99979c;
     /* background-color: #2a2730; */
 }
+
+.form-errortext {
+    color: #c00;
+    font-size: 14px;
+    line-height: 16px;
+    clear: both;
+    display: block;
+    margin-top: -1px;
+    padding: 3px 0;
+}

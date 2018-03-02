@@ -48,6 +48,10 @@ app.use(handleErrors());
 app.use(bodyParser());
 
 router.use('/signup', signup);
+// singup-check/username
+// singup-check/email
+// Response 403 Forbidden if name is taken
+// Submit as form-data
 router.use('/login', login);
 // router.use('/password-reset');
 router.use('/logout', logout);
