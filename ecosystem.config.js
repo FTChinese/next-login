@@ -14,12 +14,12 @@ module.exports = {
       interpreter: interpreter,
       env: {
         NODE_ENV: "development",
-        PORT: 3000,
+        PORT: 4100,
         DEBUG: "login*"
       },
       env_production : {
         NODE_ENV: "production",
-        PORT: 3000,
+        PORT: 4100,
         DEBUG: "login*"
       },
       max_restart: 10,

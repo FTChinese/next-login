@@ -10,7 +10,7 @@ test('authenticateUser', async t => {
     const resp = await request.post('http://localhost:8000/authenticate')
     .auth(accessData.access_token, {type: 'bearer'})
     .send({
-      email: 'michaelmartinez685@example.com',
+      email: 'matthewharris773@example.com',
       password: '12345678'
     });
 
@@ -19,6 +19,6 @@ test('authenticateUser', async t => {
     t.is(resp.status, 200)
   } catch (err) {
     console.log("Status: %d", err.status)
-    console.log("Body: %o", err.resp.body);
+    console.log("Body: %o", err.response.body);
   }
 });

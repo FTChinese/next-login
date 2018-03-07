@@ -1,4 +1,4 @@
-{% extends "layouts/base.html" %} 
+{% extends "layouts/base.html" %}
 
 {% block main %}
 <div class="row justify-content-center">
@@ -6,20 +6,40 @@
     <div class="mt-4">
       <div class="text-center">创建FT中文网账号</div>
       <form method="post">
-        
+        <div>
+          <input type="hidden" name="_csrf" value="{{csrf}}">
+        </div>
         <div class="form-group">
           <label for="userEmail">邮箱</label>
-          <input class="form-control" id="userEmail" type="text" name="user[email]" value="{{user.email}}" required>
-          <small class="form-text text-muted">用此邮箱登录FT中文网</small>
+
+          <input class="form-control"
+          id="userEmail"
+          type="text"
+          name="user[email]"
+          value="{{user.email}}"
+          required>
+          <small class="form-text text-muted">用于登录FT中文网</small>
+
+          {% if errors.email %}
+          <div class="form-errortext">{{errors.email}}</div>
+          {% endif %}
         </div>
 
         <div class="form-group">
           <label for="userPassword">密码</label>
-          <input class="form-control" id="userPassword" type="password" name="user[password]" required>
+          <input class="form-control"
+          id="userPassword"
+          type="password"
+          name="user[password]"
+          required>
           <small class="form-text text-muted">8-20个字符，不能使用空格、表情符号</small>
+
+          {% if errors.password %}
+          <div class="form-errortext">{{errors.password}}</div>
+          {% endif %}
         </div>
 
-        
+
         <button class="btn btn-block btn-primary" type="submit">注册</button>
       </form>
       <small class="">注册即代表您同意FT中文网<a href="http://www.ftchinese.com/m/corp/service.html" target="_blank">《用户注册协议》</a></small>

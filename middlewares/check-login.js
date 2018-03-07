@@ -1,7 +1,7 @@
 const debug = require('debug')('user:check-login');
 
 // Those paths must be ignored in whatever cases prevent infinite loop:
-// A user is definitely not logged in if he goes to `/login`, and you check it and redirect hime to `/login`; before the page could be shown, he is checked again as not logged in, and redirect to login ... 
+// A user is definitely not logged in if he goes to `/login`, and you check it and redirect hime to `/login`; before the page could be shown, he is checked again as not logged in, and redirect to login ...
 const defaultIgnore = ['/login', '/signup', '/signup-check'];
 
 /**
@@ -29,13 +29,12 @@ function checkLogin(ignorePaths=[]) {
     if (ctx.path == '/favicon.ico') return;
 
     if (isLoggedIn(ctx)) {
-      console.log('user logged in');
       debug('Session data: %O', ctx.session);
-  
+
       ctx.state.userinfo = {
-        userName: ctx.session.user.sub
+        userName: ctx.session.user.name
       };
-  
+
       debug('userinfo: %O', ctx.state.userinfo);
       return await next();
     }
@@ -48,7 +47,7 @@ function checkLogin(ignorePaths=[]) {
      * @property {number} id
      */
     ctx.state.userinfo = null;
-    
+
     debug("Path to ignore: %o", ignore);
 
     if (ignore.has(ctx.path)) {

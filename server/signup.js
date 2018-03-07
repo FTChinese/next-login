@@ -1,36 +1,87 @@
 const debug = require('debug')('user:signup');
-const Router = require('koa-router');;
+const Router = require('koa-router');
+const Joi = require('joi');
+const schema = require('./schema');
+const {gatherAPIErrors} = require('../utils/http-errors');
+
 const render = require('../utils/render');
 const request = require('superagent');
 
 const router = new Router();
 
 router.get('/', async (ctx, next) => {
-  ctx.body = await render('signup.html');
+
+  /**
+   * @type {{source: string, email: string}} query
+   */
+  const query = ctx.query;
+
+  ctx.state.user = {
+    email: query.email
+  };
+
+  debug(ctx.state);
+
+  ctx.body = await render('signup.html', ctx.state);
 });
 
 router.post('/', async (ctx, next) => {
-
   /**
-   * @type {Object}
-   * @property {string} email
-   * @property {string} password
+   * @type {{email: string, password: string}} user
    */
   const user = ctx.request.body.user;
 
-  debug("User: %O", user);
+  try {
+    /**
+     * @type {{email: string, password: string}} validated
+     */
+    const validated = await Joi.validate(user, schema.credentials, {
+      abortEarly: false
+    });
 
-  if (!user.email || !user.password) {
-    throw new Error('user email or password does not exist');
+    debug('Post to /new-user');
+
+    const resp = await request.post('http://localhost:8000/new-user')
+      .auth(ctx.accessData.access_token, {type: 'bearer'})
+      .send(validated);
+
+    const idToken = resp.body;
+
+    debug('Create new user result: %O', idToken);
+
+    // Keep login state
+    debug('Set session');
+
+    ctx.session.user = {
+      sub: idToken.sub,
+      name: idToken.name,
+      email: user.email.trim()
+    };
+
+    return ctx.redirect('/settings/profile');
+
+  } catch (e) {
+    // handle validation errors
+    const joiErrs = schema.gatherErrors(e);
+    if (joiErrs) {
+      debug('Validation errors: %O', joiErrs)
+      ctx.state.errors = joiErrs;
+    }
+
+    // handle api errors. Since user input has already been validated, API will not produce missing_field errors.
+    if (422 == e.status) {
+      debug('Error response body: %O', e.response.body);
+
+      ctx.state.errors = gatherAPIErrors(e.response.body);
+    }
+
+    ctx.state.user = {
+      email: user.email.trim()
+    };
+
+    return ctx.body = await render('signup.html', ctx.state);
   }
-
-  const resp = await request.post('http://localhost:8000/new-user')
-    .ok(res => res.status < 500)
-    .auth(ctx.accessData.access_token, {type: 'bearer'})
-    .send(user);
-
-  
-  ctx.body = resp.body;
 });
+
 
 module.exports = router.routes();

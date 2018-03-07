@@ -1,15 +1,12 @@
 const debug = require('debug')('user:login');
 const Router = require('koa-router');
 const Joi = require('joi');
+const schema = require('./schema');
+
 const render = require('../utils/render');
 const {ErrorForbidden} = require('../utils/http-errors');
 const request = require('superagent');
 const router = new Router();
-
-const schema = Joi.object().keys({
-  email: Joi.string().email().min(3).max(30).required(),
-  password: Joi.string().regex(/^[a-zA-Z0-9]{8,20}$/).required()
-});
 
 router.get('/', async (ctx) => {
   /**
@@ -17,70 +14,84 @@ router.get('/', async (ctx) => {
    * 1. If query parameter has `from=<url>` and this from url is a legal `ftchinese.com` hostname, redirect them to the from url; otherwise redirect them to home page
    * 2. If there is no query parameter named `from`, we should lead user to its account page.
    */
-  ctx.state.errors = ctx.session.errors;
-
-  debug("Template data: %o", ctx.state);
   ctx.body = await render('login.html', ctx.state);
-
-  delete ctx.session.errors;
 });
 
 router.post('/', async (ctx, next) => {
   /**
-   * @type {Object} credentials
-   * @property {string} email
-   * @property {string} password
+   * @type {{email: string, password: string}} credentials
    */
   const credentials = ctx.request.body.credentials;
 
   try {
     debug("Validate: %O", credentials);
 
-    const result = await Joi.validate(credentials, schema);
+    /**
+     * @type {{email: string, password: string}} validated
+     */
+    const validated = await Joi.validate(credentials, schema.credentials);
+    debug("Validate result: %O", validated);
 
-    console.log("Validate result: %O", result);
-
-  } catch (e) {
-    debug("Validation error: %O", e)
-
-    ctx.session.errors = {
-      invalidCredentials: true
-    }
-    return ctx.redirect('/login');
-  }
-
-  try {
     const resp = await request.post('http://localhost:8000/authenticate')
-    .auth(ctx.accessData.access_token, {type: 'bearer'})
-    .send(credentials);
+      .auth(ctx.accessData.access_token, {type: 'bearer'})
+      .send(credentials);
 
-  /**
-   * @type {Object}
-   * @property {string} sub - uuid
-   * @property {string} name - displayable user name
-   */
-    const authResult = resp.body;
-    debug('Authentication result: %o', authResult);
+    /**
+     * @type {{sub: string, name: string}} idToken
+     */
+    const idToken = resp.body;
+    debug('Authentication result: %o', idToken);
 
-    // After successful authentication, save user information to cookie.
+    // Keep login state
     ctx.session.user = {
-      sub: authResult.sub,
-      name: authResult.name,
-      email: credentials.email
+      sub: idToken.sub,
+      name: idToken.name,
+      email: credentials.email.trim()
     };
+
+    return ctx.redirect('/settings/profile');
+
   } catch (e) {
-    // Errors thrown by requesting to API
-    debug("Error: %O", e);
-
-    ctx.session.errors = {
-      loginFailed: true
+    // Make the form stikcy.
+    ctx.state.credentials = {
+      email: credentials.email.trim()
     };
 
-    return ctx.redirect('/login');
-  }
+    // Handle validation error
+    const joiErrs = schema.gatherErrors(e);
+    if (joiErrs) {
+      debug('Joi validation errors: %O', joiErrs);
+      ctx.state.errors = {
+        credentials: "用户名或密码无效"
+      };
+      return await next();
+    }
 
-  // Everything OK.
-  return ctx.redirect('/settings/profile');
+    // API error e.status == 400, e.status == 422 should not be exposed to user.
+
+    // Handle API error
+    if (404 == e.status) {
+      // Email not registered yet. Lead user to signup page.
+      debug('Email not found');
+      ctx.state.errors = {
+        notFound: credentials.email.trim()
+      };
+      return await next();
+    }
+
+    if (401 == e.status) {
+      // Unauthorized means password incorrect
+      debug('Password incorrect');
+      ctx.state.errors = {
+        credentials: "用户名或密码无效"
+      };
+      return await next();
+    }
+
+    throw e
+  }
+}, async (ctx, next) => {
+  return ctx.body = await render('login.html', ctx.state);
 });
 
 module.exports = router.routes();

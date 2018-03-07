@@ -23,6 +23,21 @@
   <header class="navbar navbar-expand-lg o-header">
     <div class="container">
       <a class="navbar-brand" href="/">FT中文网</a>
+
+      {% if userinfo %}
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">myFT</a>
+
+          <div class="dropdown-menu">
+            
+            <a class="dropdown-item" href="/settings/profile">设置</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/logout">退出</a>
+          </div>
+        </li>
+      </ul>
+      {% endif %}
     </div>
   </header>
 

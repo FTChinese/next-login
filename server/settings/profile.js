@@ -15,14 +15,18 @@ router.get('/', async (ctx, next) => {
 
   debug('Access token: %s; uuid: %s', accessToken, uuid);
 
-  const resp = await request.get('http://localhost:8000/user/profile')
-    .auth(`${ctx.accessData.access_token}.${ctx.session.user.sub}`, {type: 'bearer'});
+  try {
+    const resp = await request.get('http://localhost:8000/user/profile')
+      .auth(`${ctx.accessData.access_token}.${ctx.session.user.sub}`, {type: 'bearer'});
 
-  console.log('User profile: %o', resp.body);
+    console.log('User profile: %o', resp.body);
 
-  ctx.state.profile = resp.body;
+    ctx.state.profile = resp.body;
 
-  ctx.body = await render('settings/profile.html', ctx.state);
+    ctx.body = await render('settings/profile.html', ctx.state);
+  } catch (e) {
+    console.log(e)
+  }
 });
 
 router.post('/', async (ctx, next) => {

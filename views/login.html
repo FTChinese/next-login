@@ -1,31 +1,48 @@
-{% extends "layouts/base.html" %} 
+{% extends "layouts/base.html" %}
 
 {% block main %}
 <div class="row justify-content-center">
   <div class="col-md-7 col-lg-5 col-xl-4">
     <div class="mt-4">
       {% if not userinfo %}
-      <div class="text-center">登录FT中文网</div>
-      <form action="/login" method="post">
-        
-        {% if errors.invalidCredentials %}
-          <div class="form-errortext text-center">用户名或密码不合法</div>
+      <h4 class="text-center">登录FT中文网</h4>
+
+      <form method="post">
+
+        {% if errors.credentials %}
+          <div class="form-errortext text-center">{{errors.credentials}}</div>
         {% endif %}
 
-        {% if errors.loginFaild %}
-          <div class="form-errortext text-center">用户名或密码无效</div>
-        {% endif %}
-        
         <div class="form-group">
           <label for="credentialsEmail">邮箱</label>
-          <input class="form-control" id="credentialsEmail" type="email" name="credentials[email]" value="{{credentials.email}}" required>
+          <input class="form-control"
+          id="credentialsEmail"
+          type="email"
+          name="credentials[email]" value="{{credentials.email}}"
+          required>
+
+          {% if errors.notFound %}
+          <small class="form-text text-muted">该邮箱尚未注册，您可以使用该邮箱<a href="/signup?source=login&email={{errors.notFound}}">创建FT中文网账号</a></small>
+          {% endif %}
         </div>
 
         <div class="form-group">
-          <label class="clearfix d-block" for="credentialsPassword">密码 <a class="float-right" href="/pasword-reset">忘记密码?</a></label>
-          <input class="form-control" id="credentialsPassword" type="password" name="credentials[password]" required> 
+          <label class="clearfix d-block" for="credentialsPassword">密码
+            <a class="float-right" href="/pasword-reset">忘记密码?</a>
+          </label>
+          <input class="form-control"
+          id="credentialsPassword"
+          type="password"
+          name="credentials[password]"
+          required>
         </div>
-        <button class="btn btn-block btn-primary" type="submit">Login</button>
+        <div class="form-check">
+            <input class="form-check-input" id="rememberMe" type="checkbox" name="rememberMe" value="true" checked>
+            <label for="rememberMe">记住我</label>
+        </div>
+
+        <button class="btn btn-block btn-primary" type="submit">登录</button>
+
       </form>
       <p class="text-center pt-3">还没有FT中文网账号?<a href="/signup?source=login">创建</a></p>
       {% endif %}

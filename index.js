@@ -48,8 +48,8 @@ app.use(handleErrors());
 app.use(bodyParser());
 
 router.use('/signup', signup);
-// singup-check/username
-// singup-check/email
+// singup/check-username
+// singup/check-email
 // Response 403 Forbidden if name is taken
 // Submit as form-data
 router.use('/login', login);
@@ -60,7 +60,6 @@ router.use('/settings', settings);
 app.use(router.routes());
 
 /**
- * 
  * @param {Koa} app - a Koa instance
  */
 async function bootUp(app) {
@@ -74,7 +73,7 @@ async function bootUp(app) {
   } catch (e) {
     debug("Get access token error: %O", e)
   }
-  
+
   // Create HTTP server
   const server = app.listen(port);
 
