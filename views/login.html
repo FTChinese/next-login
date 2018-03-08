@@ -18,7 +18,9 @@
           <input class="form-control"
           id="credentialsEmail"
           type="email"
-          name="credentials[email]" value="{{credentials.email}}"
+          name="credentials[email]"
+          value="{{credentials.email}}"
+          placeholder="电子邮箱"
           required>
 
           {% if errors.notFound %}
@@ -28,12 +30,13 @@
 
         <div class="form-group">
           <label class="clearfix d-block" for="credentialsPassword">密码
-            <a class="float-right" href="/pasword-reset">忘记密码?</a>
+            <a class="float-right" href="/password-reset">忘记密码?</a>
           </label>
           <input class="form-control"
           id="credentialsPassword"
           type="password"
           name="credentials[password]"
+          placeholder="密码"
           required>
         </div>
         <div class="form-check">

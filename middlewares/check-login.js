@@ -2,7 +2,7 @@ const debug = require('debug')('user:check-login');
 
 // Those paths must be ignored in whatever cases prevent infinite loop:
 // A user is definitely not logged in if he goes to `/login`, and you check it and redirect hime to `/login`; before the page could be shown, he is checked again as not logged in, and redirect to login ...
-const defaultIgnore = ['/login', '/signup', '/signup-check'];
+const defaultIgnore = ['/login', '/signup', '/password-reset'];
 
 /**
  * checkLogin - This middleware will add userinfo to ctx.state
@@ -54,7 +54,8 @@ function checkLogin(ignorePaths=[]) {
       return await next();
     }
 
-    // If current page is not `/login`, redirect user to login.
+    // If current page is not in hte ignore list, redirect to login.
+    debug('Redirecting to login...');
     ctx.redirect('/login');
   }
 }

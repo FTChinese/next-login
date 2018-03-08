@@ -12,8 +12,9 @@ const inlineMin = require('./middlewares/inline-min');
 
 const signup = require('./server/signup');
 const login = require('./server/login');
-const settings = require('./server/settings');
 const logout = require('./server/logout');
+const settings = require('./server/settings');
+const passwordReset = require('./server/password-reset');
 
 const fetchAccess = require('./utils/fetch-access');
 
@@ -43,7 +44,6 @@ app.use(async function (ctx, next) {
 
 app.use(inlineMin());
 app.use(session(app));
-app.use(checkLogin());
 app.use(handleErrors());
 app.use(bodyParser());
 
@@ -53,9 +53,9 @@ router.use('/signup', signup);
 // Response 403 Forbidden if name is taken
 // Submit as form-data
 router.use('/login', login);
-// router.use('/password-reset');
 router.use('/logout', logout);
-router.use('/settings', settings);
+router.use('/password-reset', passwordReset);
+router.use('/settings', checkLogin(), settings);
 
 app.use(router.routes());
 

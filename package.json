@@ -36,6 +36,8 @@
     "koa-session": "^5.8.1",
     "load-json-file": "^4.0.0",
     "marked": "^0.3.16",
+    "node-cache": "^4.1.1",
+    "nodemailer": "^4.4.0",
     "nunjucks": "^3.1.0",
     "nunjucks-markdown": "^2.0.1",
     "superagent": "^3.8.2",
