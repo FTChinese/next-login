@@ -14,6 +14,9 @@ const router = new Router();
  * @description Ask user to enter email
  */
 router.get('/', async (ctx, next) => {
+  /**
+   * @type {{invalidLink: boolean, emailSent: boolean, pwReset: true}}
+   */
   const invalidLink = ctx.session.invalidLink;
   if (invalidLink) {
     ctx.state.errors = {
@@ -150,7 +153,8 @@ router.post('/:code', async (ctx, next) => {
 
     debug('API success reponse: %O', resp.noContent);
 
-    ctx.body = await render('password/reset-success.html', ctx.state);
+    ctx.session.pwReset = true;
+    return ctx.redirect(dirname(ctx.path));
 
   } catch (e) {
     const joiErrs = schema.gatherErrors(e);

@@ -35,15 +35,11 @@
     "koa-logger": "^3.1.0",
     "koa-router": "^7.4.0",
     "koa-session": "^5.8.1",
-    "load-json-file": "^4.0.0",
-    "mailgen": "^2.0.2",
     "marked": "^0.3.16",
-    "node-cache": "^4.1.1",
     "nodemailer": "^4.4.0",
     "nunjucks": "^3.1.0",
     "nunjucks-markdown": "^2.0.1",
-    "superagent": "^3.8.2",
-    "write-json-file": "^2.3.0"
+    "superagent": "^3.8.2"
   },
   "devDependencies": {
     "ava": "^0.25.0",
