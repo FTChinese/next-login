@@ -8,6 +8,11 @@ exports.credentials = email.keys({
   password: Joi.string().trim().min(8).max(20).required()
 });
 
+exports.reset = Joi.object().keys({
+  password: Joi.string().trim().min(8).max(20).required(),
+  passwordConfirmation: Joi.string().trim().min(8).max(20).required()
+});
+
 /**
  * @param {Object} err
  * @param {boolean} err.isJoi

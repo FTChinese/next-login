@@ -1,0 +1,30 @@
+{% extends "layouts/base.html" %}
+
+{% block main %}
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-5 col-xl-4">
+    <div class="mt-4">
+      <h4 class="text-center">更改 {{email}} 的密码</h4>
+
+      <form method="post">
+        <div class="form-group">
+          <label for="password">密码</label>
+          <input class="form-control"
+          type="password"
+          name="password"
+          required>
+        </div>
+        <div class="form-group">
+          <label for="">再次输入确认</label>
+          <input class="form-control"
+          type="password"
+          name="passwordConfirmation"
+          required>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">更改密码</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

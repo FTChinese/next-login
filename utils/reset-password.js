@@ -1,0 +1,52 @@
+// redis://user:password@hostname:port/db
+const redisUri = process.env.NODE_ENV === 'production' ? process.env.REDIS_URI : 'redis://@localhost:6379/';
+
+const Redis = require('ioredis');
+const nodemailer = require('nodemailer');
+
+const redis = new Redis(redisUri, {
+  keyPrefix: 'reset:'
+});
+
+const random = require('../utils/random');
+
+const transporter = nodemailer.createTransport({
+  host: process.env.MAILER_HOST,
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.MAILER_USER,
+    pass: process.env.MAILER_PASS
+  }
+});
+
+exports.generateCode = function () {
+  return random.hex();
+};
+
+exports.sendEmail = function({name, address, code}) {
+  const mailOptions = {
+    from: {
+      name: 'FT中文网',
+      address: 'report@ftchinese.com'
+    },
+    to: {
+      name: name || '',
+      address
+    },
+    subject: '[FTC]重置密码',
+    text: `重置密码请点击 http://localhost:4100/password-reset/${code}。本链接三小时内有效。`
+  };
+
+  return transporter.sendMail(mailOptions);
+};
+
+exports.store = function({code, address}) {
+  return redis.set(code, address, 'EX', 3 * 60 * 60);
+};
+
+exports.load = function(code) {
+  return redis.get(code);
+};
+
+

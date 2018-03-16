@@ -5,6 +5,10 @@
   <div class="col-md-7 col-lg-5 col-xl-4">
     <div class="mt-4">
       <h4 class="text-center">找回密码</h4>
+      
+      {% if errors.invalidLink %}
+        <div class="form-errortext">您似乎点击了无效的重置密码链接，请重试</div>
+      {% endif %}
 
       {% if not emailSent %}
       <form method="post">
