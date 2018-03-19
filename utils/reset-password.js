@@ -49,4 +49,8 @@ exports.load = function(code) {
   return redis.get(code);
 };
 
+exports.delete = function(code) {
+  return redis.del(code);
+}
+
 

@@ -1,9 +1,10 @@
 {% extends "password/base.html" %}
 
 {% block action %}
-
-  {% if errors.code %}
-  <p>It seems you clicked a wrong link.</p>
+  <h4 class="text-center">找回密码</h4>
+  
+  {% if errors.invalidLink %}
+  <div class="form-errortext">您似乎点击了无效的重置密码链接，请重试</div>
   {% endif %}
 
   <form method="post">
