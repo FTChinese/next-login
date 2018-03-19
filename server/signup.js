@@ -2,7 +2,7 @@ const debug = require('debug')('user:signup');
 const Router = require('koa-router');
 const Joi = require('joi');
 const schema = require('./schema');
-const {gatherAPIErrors} = require('../utils/http-errors');
+const {isAlradyExists} = require('../utils/check-error');
 
 const render = require('../utils/render');
 const request = require('superagent');
@@ -58,21 +58,23 @@ router.post('/', async (ctx, next) => {
       email: user.email.trim()
     };
 
-    return ctx.redirect('/settings/profile');
+    return ctx.redirect('/profile');
 
   } catch (e) {
     // handle validation errors
     const joiErrs = schema.gatherErrors(e);
     if (joiErrs) {
-      debug('Validation errors: %O', joiErrs)
+      debug('Validation errors: %O', joiErrs);
       ctx.state.errors = joiErrs;
     }
 
     // handle api errors. Since user input has already been validated, API will not produce missing_field errors.
-    if (422 == e.status) {
-      debug('Error response body: %O', e.response.body);
+    if (422 == e.status && isAlradyExists(e.response.body.errors)) {
+      debug('Email already exists');
 
-      ctx.state.errors = gatherAPIErrors(e.response.body);
+      ctx.state.errors = {
+        email: '该邮箱已经存在'
+      };
     }
 
     ctx.state.user = {

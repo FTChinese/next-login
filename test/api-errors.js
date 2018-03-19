@@ -12,10 +12,3 @@ const errMsg = {
   ]
 }
 
-test('gather', async t => {
-  const result = gatherAPIErrors(errMsg);
-
-  console.log(result);
-
-  t.truthy(result);
-});

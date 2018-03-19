@@ -1,0 +1,43 @@
+{% extends "layouts/base.html" %} 
+
+{% block main %}
+
+<div class="row">
+  {% include "profile/nav.html" %}
+  <div class="col-9">
+ 
+    <section class="pt-2 mb-3">
+      <h5>更改用户名</h5>
+      <form action="/user/{{id}}/rename" method="post">
+        <div>
+          <input type="hidden" name="user[oldName]" value="{{account.name}}">
+        </div>
+        <div class="form-group">
+          <input class="form-control" type="text" name="user[name]" id="userName" value="{{account.name}}">
+        </div>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </form>
+    </section>
+    <section class="pt-2 mb-3">
+      <h5>更改手机号码</h5>
+      <form action="/user/{{id}}/mobile-phone">
+        <div>
+          <input type="hidden" name="user[oldMobileNumber]" value="{{account.mobileNumber}}">
+        </div>
+        <div class="form-group">
+          <input class="form-control" type="text" name="user[mobileNumber]" value="{{account.mobileNumber}}">
+        </div>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </form>
+    </section>
+    <section class="pt-2 mb-3">
+      <h5>社交账号</h5>
+      <ul>
+        <li><a href="#">绑定微信</a></li>
+        <li><a href="#">绑定微博</a></li>
+        <li><a href="#">绑定QQ</a></li>
+      </ul>
+    </section>
+  </div>
+</div>
+{% endblock %}

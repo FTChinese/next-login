@@ -1,16 +1,33 @@
 const Joi = require('joi');
 
-const email = exports.email = Joi.object().keys({
-  email: Joi.string().trim().email().min(3).max(30).required()
+const keys = {
+  email: Joi.string().trim().email().min(3).max(30).required(),
+  password: Joi.string().trim().min(8).max(20).required()
+};
+
+exports.email = Joi.object().keys({
+  email: keys.email
 });
 
-exports.credentials = email.keys({
-  password: Joi.string().trim().min(8).max(20).required()
+exports.changeEmail = Joi.object().keys({
+  current: keys.email,
+  new: keys.email
+});
+
+exports.changePassword = Joi.object().keys({
+  currentPassword: keys.password,
+  password: keys.password,
+  passwordConfirmation: keys.password
+})
+
+exports.credentials = Joi.object().keys({
+  email: keys.email,
+  password: keys.password
 });
 
 exports.reset = Joi.object().keys({
-  password: Joi.string().trim().min(8).max(20).required(),
-  passwordConfirmation: Joi.string().trim().min(8).max(20).required()
+  password: keys.password,
+  passwordConfirmation: keys.password
 });
 
 /**
