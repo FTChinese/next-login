@@ -4,14 +4,15 @@
   "description": "myft",
   "main": "index.js",
   "scripts": {
+    "start": "npm run serve",
+    "build": "npm run build-ts",
+    "serve": "node dist/server.js",
+    "build-ts": "tsc",
+    "watch-ts": "tsc -w",
     "test": "ava",
     "postversion": "git push && git push --tags",
     "postinstall": "",
-    "clean": "rm -rf dist/*",
-    "build-sass": "node-sass --include-path=bower_components --output-style=compressed client/main.scss public/styles/main.css",
-    "build-js": "rollup -c",
-    "build": "npm run build-sass && npm run build-js",
-    "start": "npm run build && nodemon app.js"
+    "clean": "rm -rf dist/*"
   },
   "repository": {
     "type": "git",
@@ -39,9 +40,11 @@
     "nodemailer": "^4.4.0",
     "nunjucks": "^3.1.0",
     "nunjucks-markdown": "^2.0.1",
-    "superagent": "^3.8.2"
+    "superagent": "^3.8.2",
+    "winston": "^2.4.1"
   },
   "devDependencies": {
+    "@types/winston": "^2.3.8",
     "ava": "^0.25.0",
     "bootstrap": "^4.0.0",
     "bootstrap.native": "^2.0.21",
