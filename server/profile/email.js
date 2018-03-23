@@ -21,7 +21,8 @@ router.get('/', async (ctx, next) => {
 
   try {
     const resp = await request.get('http://localhost:8000/user/profile')
-      .auth(`${ctx.accessData.access_token}.${ctx.session.user.sub}`, {type: 'bearer'});
+      .set('X-User-Id', ctx.session.user.sub)
+      .auth(ctx.accessData.access_token, {type: 'bearer'});
 
     const email = resp.body.email;
     debug('User email: %o', email);
@@ -58,7 +59,8 @@ router.post('/', async (ctx, next) => {
     // 422 Unprocessable Entity if email is taken
     // If email changed, we should also send activation letter
     const resp = await request.patch('http://localhost:8000/user/email')
-      .auth(`${ctx.accessData.access_token}.${ctx.session.user.sub}`, {type: 'bearer'})
+      .set('X-User-Id', ctx.session.user.sub)
+      .auth(ctx.accessData.access_token, {type: 'bearer'})
       .send({email: email.new});
 
     ctx.session.emailUpdated = true;

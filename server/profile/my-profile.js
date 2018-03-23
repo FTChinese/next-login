@@ -17,7 +17,8 @@ router.get('/', async (ctx, next) => {
 
   try {
     const resp = await request.get('http://localhost:8000/user/profile')
-      .auth(`${ctx.accessData.access_token}.${ctx.session.user.sub}`, {type: 'bearer'});
+      .set('X-User-Id', ctx.session.user.sub)
+      .auth(ctx.accessData.access_token, {type: 'bearer'});
 
     console.log('User profile: %o', resp.body);
 

@@ -49,7 +49,7 @@ router.post('/', async (ctx, next) => {
       email: credentials.email.trim()
     };
 
-    return ctx.redirect('/settings/profile');
+    return ctx.redirect('/profile');
 
   } catch (e) {
     // Make the form stikcy.
