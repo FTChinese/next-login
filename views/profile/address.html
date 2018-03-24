@@ -5,38 +5,65 @@
 <div class="row">
   {% include "profile/nav.html" %}
   <div class="col-9">
+    {% if flash.addressSaved %}
+    <p>地址已保存</p>
+    {% endif %}
     <form method="post">
 
       <div class="form-group">
         <label for="province">地址</label>
-        <input type="text" class="form-control" id="address" value="{{profile.address}}">
+        <input type="text"
+        id="profileAddress"
+        class="form-control"
+        name="profile[address]"
+        value="{{profile.address}}">
       </div>
 
       <div class="form-row">
         <div class="form-group col-md-4">
           <label for="province">省/直辖市</label>
-          <input type="text" class="form-control" id="address" value="{{profile.province}}">
+          <input type="text"
+          id="addressProvince"
+          class="form-control"
+          name="address[province]"
+          value="{{address.province}}">
         </div>
         
         <div class="form-group col-md-4">
           <label for="city">市</label>
-          <input type="text" class="form-control" id="city" value="{{profile.city}}">
+          <input type="text"
+          id="addressCity"
+          class="form-control"
+          name="address[city]"
+          value="{{address.city}}">
         </div>
 
         <div class="form-group col-md-4">
           <label for="district">区/县</label>
-          <input type="text" class="form-control" id="district" value="{{profile.district}}">
+          <input type="text"
+          id="districtDistrict"
+          class="form-control"
+          name="address[district]"
+          value="{{address.district}}">
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group col-md-10">
           <label for="street">街道</label>
-          <input type="text" class="form-control" id="street" value="{{profile.street}}">
+          <input type="text"
+          id="addressStreet"
+          class="form-control"
+          name="address[street]"
+          value="{{address.street}}">
         </div>
         <div class="form-group col-md-2">
           <label for="zipCode">邮编</label>
-          <input type="text" class="form-control" id="zipCode" value="{{profile.zipCode}}">
+          <input type="text"
+          id="profileZipCode"
+          class="form-control"
+          name="profile[zipCode]"
+          value="{{profile.zipCode}}">
         </div>
       </div>
       

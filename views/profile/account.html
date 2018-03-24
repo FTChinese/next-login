@@ -5,27 +5,46 @@
 <div class="row">
   {% include "profile/nav.html" %}
   <div class="col-9">
- 
+    {% if flash.nameUpdated %}
+    <p>用户名已更新</p>
+    {% endif %}
+    {% if flash.mobileUpdated %}
+    <p>手机号码已更新</p>
+    {% endif %}
     <section class="pt-2 mb-3">
-      <h5>更改用户名</h5>
-      <form action="/user/{{id}}/rename" method="post">
+      <h5>用户名</h5>
+      <form action="/profile/account/rename" method="post">
         <div>
-          <input type="hidden" name="user[oldName]" value="{{account.name}}">
+          <input type="hidden"
+          name="user[oldName]"
+          value="{{user.name}}">
         </div>
         <div class="form-group">
-          <input class="form-control" type="text" name="user[name]" id="userName" value="{{account.name}}">
+          <input class="form-control"
+          id="userName"
+          type="text"
+          name="user[name]"
+          value="{{user.name}}">
+
+          <small class="form-text text-muted">20字符以内</small>
         </div>
+        
         <button type="submit" class="btn btn-primary">保存</button>
       </form>
     </section>
+
     <section class="pt-2 mb-3">
-      <h5>更改手机号码</h5>
-      <form action="/user/{{id}}/mobile-phone">
+      <h5>手机号码</h5>
+      <form action="/profile/account/mobile" method="post">
         <div>
-          <input type="hidden" name="user[oldMobileNumber]" value="{{account.mobileNumber}}">
+          <input type="hidden" name="user[oldMobileNumber]" value="{{user.mobileNumber}}">
         </div>
         <div class="form-group">
-          <input class="form-control" type="text" name="user[mobileNumber]" value="{{account.mobileNumber}}">
+          <input class="form-control"
+          id="userMobileNumber"
+          type="text"
+          name="user[mobileNumber]"
+          value="{{user.mobileNumber}}">
         </div>
         <button type="submit" class="btn btn-primary">保存</button>
       </form>

@@ -4,32 +4,38 @@
 <div class="row">
   {% include "profile/nav.html" %}
   <div class="col-9">
+    {% if flash.letterSaved %}
+    <p>邮件设置已保存</p>
+    {% endif %}
     <section>
       <h5>邮件设置</h5>
       <form method="post">
         <div class="form-check">
           <input class="form-check-input"
-          id="newsletterTodayFocus"
+          id="letterTodayFocus"
           type="checkbox"
-          name="newsletter[todayFocus]"
-          {% if newsletter.todayFocus %} checked{% endif %}>
-          <label class="form-check-label" for="newsletterTodayFocus">接收“今日焦点”邮件</label>
+          name="letter[todayFocus]"
+          value="true"
+          {% if letter.todayFocus %} checked{% endif %}>
+          <label class="form-check-label" for="letterTodayFocus">接收“今日焦点”邮件</label>
         </div>
         <div class="form-check">
           <input class="form-check-input"
-          id="newsletterWeeklyChoice"
+          id="letterWeeklyChoice"
           type="checkbox"
-          name="newsletter[weeklyChoice]"
-          {% if newsletter.weeklyChoice %} checked{% endif %}>
-          <label class="form-check-label" for="newsletterWeeklyChoice">接收“一周精选”邮件</label>
+          name="letter[weeklyChoice]"
+          value="true"
+          {% if letter.weeklyChoice %} checked{% endif %}>
+          <label class="form-check-label" for="letterWeeklyChoice">接收“一周精选”邮件</label>
         </div>
         <div class="form-check">
           <input class="form-check-input"
-          id="newsletterAfternoonExpress"
+          id="letterAfternoonExpress"
           type="checkbox"
-          name="newsletter[afternoonExpress]"
-          {% if newsletter.afternoonExpress %} checked{% endif %}>
-          <label class="form-check-label" for="newsletterAfternoonExpress">接收“午后速递”邮件</label>
+          name="letter[afternoonExpress]"
+          value="true"
+          {% if letter.afternoonExpress %} checked{% endif %}>
+          <label class="form-check-label" for="letterAfternoonExpress">接收“午后速递”邮件</label>
         </div>
         <button type="submit" class="btn btn-primary">保存</button>
       </form>

@@ -1,7 +1,8 @@
 const debug = require('debug')('user:settings');
 const request = require('superagent');
 const Router = require('koa-router');
-const myProfile = require('./my-profile');
+const Joi = require('joi');
+const schema = require('../schema');
 const account = require('./account');
 const email = require('./email');
 const password = require('./password');
@@ -47,10 +48,25 @@ router.get('/', async (ctx, next) => {
 router.post('/', async (ctx, next) => {
 
   /**
-   * @todo Validate input data
-   * PATH /user/profile
+   * @type {{familyName: string, givenName: string, gender: string, birthdate: string}}
    */
-  ctx.redirect('/profile');
+  let profile = ctx.request.body.profile;
+
+  try {
+    profile = await Joi.validate(profile, schema.profile, {
+      abortEarly: false,
+      convert: false
+    });
+
+    const resp = await request.patch('http://localhost:8000/user/profile')
+      .set('X-User-Id', ctx.session.user.sub)
+      .auth(ctx.accessData.access_token, {type: 'bearer'})
+      .send(profile);
+
+    return ctx.redirect(ctx.path);
+  } catch (e) {
+    throw e;
+  }
 });
 
 module.exports = router.routes();

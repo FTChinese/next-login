@@ -30,6 +30,33 @@ exports.reset = Joi.object().keys({
   passwordConfirmation: keys.password
 });
 
+exports.profile = Joi.object().keys({
+  familyName: Joi.string().trim().min(1).max(10),
+  givenName: Joi.string().trim(),
+  gender: Joi.string().trim(),
+  birthdate: Joi.string().trim()
+});
+
+exports.username = Joi.object().keys({
+  oldName: Joi.string().trim(),
+  name: Joi.string().trim().min(1).max(20).required()
+});
+
+exports.mobile = Joi.object().keys({
+  oldMobileNumber: Joi.string().trim(),
+  mobileNumber: Joi.string().trim().min(1).required()
+});
+
+exports.letter = Joi.object().keys({
+  todayFocus: Joi.boolean(),
+  weeklyChoice: Joi.boolean(),
+  afternoonExpress: Joi.boolean()
+});
+
+exports.address = Joi.object().keys({
+  address: Joi.string().trim(),
+  zipCode: Joi.string().trim()
+})
 /**
  * @param {Object} err
  * @param {boolean} err.isJoi
