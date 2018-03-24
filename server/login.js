@@ -21,7 +21,7 @@ router.post('/', async (ctx, next) => {
   /**
    * @type {{email: string, password: string}} credentials
    */
-  const credentials = ctx.request.body.credentials;
+  let credentials = ctx.request.body.credentials;
 
   try {
     debug("Validate: %O", credentials);
@@ -29,8 +29,11 @@ router.post('/', async (ctx, next) => {
     /**
      * @type {{email: string, password: string}} validated
      */
-    const validated = await Joi.validate(credentials, schema.credentials);
-    debug("Validate result: %O", validated);
+    credentials = await Joi.validate(credentials, schema.credentials);
+    
+    credentials.lastLoginIP = ctx.ip;
+
+    debug("Validated credentials: %O", credentials);
 
     const resp = await request.post('http://localhost:8000/authenticate')
       .auth(ctx.accessData.access_token, {type: 'bearer'})
