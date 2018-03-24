@@ -15,6 +15,8 @@ router.get('/', async (ctx, next) => {
    * @type {{source: string, email: string}} query
    */
   const query = ctx.query;
+  const ip = ctx.request.ip;
+  debug("IP: %s", ip);
 
   ctx.state.user = {
     email: query.email
@@ -29,23 +31,25 @@ router.post('/', async (ctx, next) => {
   /**
    * @type {{email: string, password: string}} user
    */
-  const user = ctx.request.body.user;
+  let user = ctx.request.body.user;
 
   try {
-    /**
-     * @type {{email: string, password: string}} validated
-     */
-    const validated = await Joi.validate(user, schema.credentials, {
+    user = await Joi.validate(user, schema.credentials, {
       abortEarly: false
     });
 
+    user.signupIP = ctx.ip;
     debug('Post to /new-user');
 
     const resp = await request.post('http://localhost:8000/new-user')
       .auth(ctx.accessData.access_token, {type: 'bearer'})
-      .send(validated);
+      .send(user);
 
     const idToken = resp.body;
+
+    /**
+     * @todo Send activation email
+     */
 
     debug('Create new user result: %O', idToken);
 
@@ -55,18 +59,25 @@ router.post('/', async (ctx, next) => {
     ctx.session.user = {
       sub: idToken.sub,
       name: idToken.name,
-      email: user.email.trim()
+      email: user.email
     };
 
     return ctx.redirect('/profile');
 
   } catch (e) {
+    ctx.state.user = {
+      email: user.email
+    };
+
     // handle validation errors
     const joiErrs = schema.gatherErrors(e);
     if (joiErrs) {
       debug('Validation errors: %O', joiErrs);
       ctx.state.errors = joiErrs;
+      return await next()
     }
+
+    debug('Error: %O', e);
 
     // handle api errors. Since user input has already been validated, API will not produce missing_field errors.
     if (422 == e.status && isAlradyExists(e.response.body.errors)) {
@@ -75,14 +86,14 @@ router.post('/', async (ctx, next) => {
       ctx.state.errors = {
         email: '该邮箱已经存在'
       };
+
+      return await next();
     }
-
-    ctx.state.user = {
-      email: user.email.trim()
-    };
-
-    return ctx.body = await render('signup.html', ctx.state);
+    
+    throw e;
   }
+}, async (ctx, next) => {
+  return ctx.body = await render('signup.html', ctx.state);
 });
 
 module.exports = router.routes();
