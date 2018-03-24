@@ -13,7 +13,6 @@ const inlineMin = require('./middlewares/inline-min');
 const signup = require('./server/signup');
 const login = require('./server/login');
 const logout = require('./server/logout');
-const settings = require('./server/settings');
 const passwordReset = require('./server/password-reset');
 const profile = require('./server/profile');
 
@@ -56,7 +55,6 @@ router.use('/signup', signup);
 router.use('/login', login);
 router.use('/logout', logout);
 router.use('/password-reset', passwordReset);
-router.use('/settings', checkLogin(), settings);
 router.use('/profile', checkLogin(), profile);
 
 app.use(router.routes());
