@@ -98,7 +98,7 @@ async function bootUp(app) {
      */
     app.context.accessData = await fetchAccess();
   } catch (e) {
-    log.errror("Get access token error: %O", e)
+    debug("Get access token error: %O", e)
   }
 
   // Create HTTP server
@@ -106,16 +106,16 @@ async function bootUp(app) {
 
   // Logging server error.
   server.on('error', (error) => {
-    log.error(`Server error: %O`, error);
+    debug(`Server error: %O`, error);
   });
 
   // Listening event handler
   server.on('listening', () => {
-    log.info(`${appName} running on ${server.address().port}`);
+    debug(`${appName} running on ${server.address().port}`);
   });
 }
 
 bootUp(app)
   .catch(err => {
-    log.info('Bootup error: %O', err);
+    debug('Bootup error: %O', err);
   });

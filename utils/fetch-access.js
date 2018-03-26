@@ -5,6 +5,8 @@ const endpoint = process.env.OAUTH_ENDPOINT_TOKEN || 'http://localhost:9001/toke
 const clientId = process.env.N_LOGIN_CLIENT_ID || '1acc31b7db001aa88302';
 const clientSecret = process.env.N_LOGIN_CLIENT_SECRET || 'b367d4adfb20d21c5969e78e2318edd3a7b77ecabcf32f971ae77a55aaac7181';
 
+debug('Token endpoint: %s', endpoint);
+debug('Client ID: %s', clientId);
 /**
  * @return {Object | null}
  * @type {Object} accessData

@@ -15,12 +15,12 @@ module.exports = {
       env: {
         NODE_ENV: "development",
         PORT: 4100,
-        DEBUG: "login*"
+        DEBUG: "user*"
       },
       env_production : {
         NODE_ENV: "production",
         PORT: 4100,
-        DEBUG: "login*"
+        DEBUG: "user*"
       },
       max_restart: 10,
       error_file: path.resolve(process.env.HOME, 'logs/login-err.log'),
