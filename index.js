@@ -40,7 +40,10 @@ app.use(async function (ctx, next) {
     year: new Date().getFullYear()
   };
   debug(ctx.state.env);
-
+  debug('Origin: %s', ctx.origin);
+  debug('Host: %s', ctx.host);
+  debug('Hostname: %s', ctx.hostname);
+  
   await next();
 });
 app.use(async function (ctx, next) {
