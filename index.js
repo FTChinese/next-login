@@ -44,8 +44,9 @@ app.use(async function (ctx, next) {
   await next();
 });
 app.use(async function (ctx, next) {
-  debug('Middleare: check access token');
+  debug('Middleware: check access token');
   if (ctx.accessData) {
+    debug('Access data %O', ctx.accessData);
     const createdAt = ctx.accessData.created_at;
     const expiresIn = ctx.accessData.expires_in;
     const expiresAt = moment.utc(createdAt).add(expiresIn, 'seconds');
