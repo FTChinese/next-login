@@ -10,7 +10,8 @@ test('reset', async t => {
   const info = await reset.sendEmail({
     code,
     name: "Weiguo Ni",
-    address
+    address,
+    hostname: 'localhost:4100'
   });
   console.log('Email sent: %s', info.messageId);
 

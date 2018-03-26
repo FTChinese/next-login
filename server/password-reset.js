@@ -85,7 +85,8 @@ router.post('/', async (ctx, next) => {
     const info = await reset.sendEmail({
       address,
       name: '',
-      code
+      code,
+      hostname: ctx.hostname
     });
     debug('Email sent: %s', info.messageId);
 
