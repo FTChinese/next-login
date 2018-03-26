@@ -1,5 +1,5 @@
 const path = require('path');
-const interpreter = path.resolve(process.env.HOME, 'n/n/versions/node/9.5.0/bin/node');
+const interpreter = path.resolve(process.env.HOME, 'n/n/versions/node/9.9.0/bin/node');
 
 module.exports = {
   /**
@@ -8,7 +8,7 @@ module.exports = {
    */
   apps : [
     {
-      name      : "next-myft",
+      name      : "next-user",
       script    : "./index.js",
       cwd: __dirname,
       interpreter: interpreter,

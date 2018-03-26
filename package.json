@@ -5,10 +5,6 @@
   "main": "index.js",
   "scripts": {
     "start": "npm run serve",
-    "build": "npm run build-ts",
-    "serve": "node dist/server.js",
-    "build-ts": "tsc",
-    "watch-ts": "tsc -w",
     "test": "ava",
     "postversion": "git push && git push --tags",
     "postinstall": "",
