@@ -1,5 +1,5 @@
 const debug = require('debug')('user:index');
-const logger = require('./utils/logger')
+const log = require('./utils/logger')
 const path = require('path');
 const Koa = require('koa');
 const Router = require('koa-router');
@@ -87,7 +87,7 @@ app.use(router.routes());
  * @param {Koa} app - a Koa instance
  */
 async function bootUp(app) {
-  const appName = 'next-myft';
+  const appName = 'next-user';
   debug('booting %s', appName);
 
   const port = process.env.PORT || 3000;
@@ -98,7 +98,7 @@ async function bootUp(app) {
      */
     app.context.accessData = await fetchAccess();
   } catch (e) {
-    logger.errror("Get access token error: %O", e)
+    log.errror("Get access token error: %O", e)
   }
 
   // Create HTTP server
@@ -106,16 +106,16 @@ async function bootUp(app) {
 
   // Logging server error.
   server.on('error', (error) => {
-    logger.error(`Server error: %O`, error);
+    log.error(`Server error: %O`, error);
   });
 
   // Listening event handler
   server.on('listening', () => {
-    logger.info(`${appName} running on %o`, server.address());
+    log.info(`${appName} running on ${server.address().port}`);
   });
 }
 
 bootUp(app)
   .catch(err => {
-    logger.info('Bootup error: %O', err);
+    log.info('Bootup error: %O', err);
   });
