@@ -85,7 +85,7 @@ router.post('/', async (ctx, next) => {
       address,
       name: '',
       code,
-      hostname: ctx.hostname
+      host: ctx.host
     });
     debug('Email sent: %s', info.messageId);
 

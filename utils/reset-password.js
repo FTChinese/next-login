@@ -27,7 +27,7 @@ exports.generateCode = function () {
   return random.hex();
 };
 
-exports.sendEmail = function({name, address, code, hostname}) {
+exports.sendEmail = function({name, address, code, host}) {
   const mailOptions = {
     from: {
       name: 'FT中文网',
@@ -39,8 +39,8 @@ exports.sendEmail = function({name, address, code, hostname}) {
     },
     subject: '[FTC]重置密码',
     text: `重置密码请点击以下链接
-    
-http://${hostname}/password-reset/${code}
+
+http://${host}/password-reset/${code}
 本链接三小时内有效。
 
 FT中文网`
