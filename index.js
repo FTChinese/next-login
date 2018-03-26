@@ -5,6 +5,7 @@ const Router = require('koa-router');
 const logger = require('koa-logger');
 const bodyParser = require('koa-bodyparser');
 const session = require('koa-session');
+const moment = require('moment');
 
 const checkLogin = require('./middlewares/check-login');
 const handleErrors = require('./middlewares/handle-errors');
@@ -41,6 +42,30 @@ app.use(async function (ctx, next) {
 
   await next();
 });
+app.use(async function (ctx, next) {
+  debug('Middleare: check access token');
+  if (ctx.accessData) {
+    const createdAt = ctx.accessData.created_at;
+    const expiresIn = ctx.accessData.expires_in;
+    const expiresAt = moment.utc(createdAt).add(expiresIn, 'seconds');
+
+    // If the access token is already expired
+    if (expiresAt.isBefore(moment.utc(), 'seconds')) {
+      debug('Access data expired');
+      delete app.context.accessData;
+    }
+  }
+  await next();
+});
+
+app.use(async function(ctx, next) {
+  if (!ctx.accessData) {
+    debug('Access data is not found.');
+    app.context.accessData = await fetchAccess();
+  }
+
+  await next();
+});
 
 app.use(inlineMin());
 app.use(session(app));
@@ -67,6 +92,9 @@ async function bootUp(app) {
   const port = process.env.PORT || 3000;
 
   try {
+    /**
+     * @type {{access_token: string, created_at: string, expires_in: number, token_type: string}}
+     */
     app.context.accessData = await fetchAccess();
   } catch (e) {
     debug("Get access token error: %O", e)

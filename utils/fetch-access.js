@@ -13,7 +13,7 @@ const clientSecret = process.env.N_LOGIN_CLIENT_SECRET || 'b367d4adfb20d21c5969e
  * @property {string} token_type = "Bearer"
  * 
  */
-module.exports = async function(fromFile=false) {
+module.exports = async function() {
 
   debug('Request access token to oauth server');
   const resp = await got.post(endpoint, {
