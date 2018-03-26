@@ -6,7 +6,6 @@ const request = require('superagent');
 const Joi = require('joi');
 const schema = require('./schema');
 const render = require('../utils/render');
-const sendEmail = require('../utils/send-email');
 const reset = require('../utils/reset-password');
 
 const router = new Router();
