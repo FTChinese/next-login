@@ -1,4 +1,5 @@
 const debug = require('debug')('user:index');
+const logger = require('./utils/logger')
 const path = require('path');
 const Koa = require('koa');
 const Router = require('koa-router');
@@ -97,7 +98,7 @@ async function bootUp(app) {
      */
     app.context.accessData = await fetchAccess();
   } catch (e) {
-    debug("Get access token error: %O", e)
+    logger.errror("Get access token error: %O", e)
   }
 
   // Create HTTP server
@@ -105,16 +106,16 @@ async function bootUp(app) {
 
   // Logging server error.
   server.on('error', (error) => {
-    debug(`Server error: %O`, error);
+    logger.error(`Server error: %O`, error);
   });
 
   // Listening event handler
   server.on('listening', () => {
-    debug(`${appName} running on %o`, server.address());
+    logger.info(`${appName} running on %o`, server.address());
   });
 }
 
 bootUp(app)
   .catch(err => {
-    debug('Bootup error: %O', err);
+    logger.info('Bootup error: %O', err);
   });

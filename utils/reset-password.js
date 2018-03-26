@@ -1,5 +1,8 @@
+const logger = require('../utils/logger');
 // redis://user:password@hostname:port/db
 const redisUri = process.env.NODE_ENV === 'production' ? process.env.REDIS_URI : 'redis://@localhost:6379/';
+
+logger.info(`Using redis ${redisUri}`);
 
 const Redis = require('ioredis');
 const nodemailer = require('nodemailer');
