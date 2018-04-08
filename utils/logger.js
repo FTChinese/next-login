@@ -1,17 +1,26 @@
 const winston = require('winston');
+const logDir = process.env.LOG_DIR || '.';
 
 const logger = winston.createLogger({
   level: 'info',
-  format: winston.format.json(),
+  // It seems the order matters.
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.label({label: 'user'}),
+    winston.format.json(),
+  ),
   transports: [
-    new winston.transports.File({ filename: 'error.log', level: 'error', maxsize: 1000000}),
-    new winston.transports.File({ filename: 'combined.log'})
+    new winston.transports.File({ filename: `${logDir}/error.log`, level: 'error', maxsize: 1000000}),
+    new winston.transports.File({ filename: `${logDir}/combined.log`, maxsize: 1000000})
   ]
 });
 
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
-    format: winston.format.simple()
+    format: winston.format.combine(
+      winston.format.colorize({ all: true }),
+      winston.format.simple()
+    )
   }));
 }
 
