@@ -62,7 +62,7 @@ router.post('/', async (ctx, next) => {
       subject: '验证注册邮箱',
       text: `点击以下链接验证您在FT中文网注册的邮箱：
       
-http://${ctx.host}/password-reset/${idToken.activationCode}
+http://${ctx.host}/email-verify/${idToken.activationCode}
 
 FT中文网`
     });
