@@ -42,7 +42,6 @@
     "winston": "^3.0.0-rc3"
   },
   "devDependencies": {
-    "@types/winston": "^2.3.8",
     "ava": "^0.25.0",
     "bootstrap": "^4.0.0",
     "bootstrap.native": "^2.0.21",
