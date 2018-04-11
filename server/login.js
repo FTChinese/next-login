@@ -40,7 +40,8 @@ router.post('/', async (ctx, next) => {
       .send(credentials);
 
     /**
-     * @type {{sub: string, name: string}} idToken
+     * @type {{sub: string, email: string, name: string, isVIP: boolean, emailVerified: boolean}}
+     * If emailVerified == false, show a banner to urge user to verify.
      */
     const idToken = resp.body;
     debug('Authentication result: %o', idToken);

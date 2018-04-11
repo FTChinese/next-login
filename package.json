@@ -45,6 +45,7 @@
     "ava": "^0.25.0",
     "bootstrap": "^4.0.0",
     "bootstrap.native": "^2.0.21",
+    "chance": "^1.0.13",
     "koa-static": "^4.0.2"
   }
 }
