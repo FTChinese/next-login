@@ -1,4 +1,4 @@
-const debug = require('../util/debug')('user:index');
+const debug = require('./utils/debug')('user:index');
 const log = require('./utils/logger')
 const path = require('path');
 const Koa = require('koa');
@@ -14,6 +14,7 @@ const inlineMin = require('./middlewares/inline-min');
 
 const signup = require('./server/signup');
 const login = require('./server/login');
+const wechat = require('./server/login/wechat');
 const logout = require('./server/logout');
 const passwordReset = require('./server/password-reset');
 const profile = require('./server/profile');
@@ -39,24 +40,24 @@ app.use(async function (ctx, next) {
     isProduction: process.env.NODE_ENV === 'production',
     year: new Date().getFullYear()
   };
-  debug(ctx.state.env);
-  debug('Origin: %s', ctx.origin);
-  debug('Host: %s', ctx.host);
-  debug('Hostname: %s', ctx.hostname);
+  debug.info(ctx.state.env);
+  debug.info('Origin: %s', ctx.origin);
+  debug.info('Host: %s', ctx.host);
+  debug.info('Hostname: %s', ctx.hostname);
   
   await next();
 });
 app.use(async function (ctx, next) {
-  debug('Middleware: check access token');
+  debug.info('Middleware: check access token');
   if (ctx.accessData) {
-    debug('Access data %O', ctx.accessData);
+    debug.info('Access data %O', ctx.accessData);
     const createdAt = ctx.accessData.created_at;
     const expiresIn = ctx.accessData.expires_in;
     const expiresAt = moment.utc(createdAt).add(expiresIn, 'seconds');
 
     // If the access token is already expired
     if (expiresAt.isBefore(moment.utc(), 'seconds')) {
-      debug('Access data expired');
+      debug.info('Access data expired');
       delete app.context.accessData;
     }
   }
@@ -81,6 +82,7 @@ router.use('/signup', signup);
 // singup/check-username
 // singup/check-email
 router.use('/login', login);
+router.use('/login/weixin', wechat);
 router.use('/logout', logout);
 router.use('/password-reset', passwordReset);
 router.use('/profile', checkLogin(), profile);
@@ -92,7 +94,7 @@ app.use(router.routes());
  */
 async function bootUp(app) {
   const appName = 'next-user';
-  debug('booting %s', appName);
+  debug.info('booting %s', appName);
 
   const port = process.env.PORT || 3000;
 
@@ -115,7 +117,7 @@ async function bootUp(app) {
 
   // Listening event handler
   server.on('listening', () => {
-    debug.log('%s running on %O', appName, server.address());
+    debug.info('%s running on %O', appName, server.address());
   });
 }
 
