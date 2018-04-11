@@ -53,7 +53,7 @@ router.get('/callback', async (ctx, next) => {
       appid: appId,
       secret: appSecret,
       code: query.code,
-      grant_type: authorization_code
+      grant_type: 'authorization_code'
     });
 
   ctx.body = resp;
