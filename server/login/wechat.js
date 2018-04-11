@@ -1,4 +1,5 @@
 const Router = require('koa-router');
+const request = require('superagent');
 const router = new Router();
 const debug = require('../../utils/debug')('user:wxlogin');
 const logger = require('../../utils/logger');
@@ -31,9 +32,27 @@ router.get('/', async (ctx, next) => {
 
 // Redirect params example { code: '061UDrZE1T4fx00XOaZE1ZRiZE1UDrZY', state: 'AmKWbR91Zrlg' }
 router.get('/callback', async (ctx, next) => {
+  /**
+   * @type {{code: string, state: string}}
+   */
   const query = ctx.query;
 
-  ctx.body = query;
+  if (!query.code) {
+    ctx.body = 'Not authorized';
+    return;
+  }
+
+  debug.info('Request wechat access token');
+  
+  const resp = await request.get('https://api.weixin.qq.com/sns/oauth2/access_token')
+    .query({
+      appid: appId,
+      secret: appSecret,
+      code: query.code,
+      grant_type: authorization_code
+    });
+
+  ctx.body = resp;
 });
 
 module.exports = router.routes();
