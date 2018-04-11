@@ -11,6 +11,10 @@ const appId = process.env.WX_WEB_APPID;
 const appSecret = process.env.WX_WEB_SECRET;
 const redirectUri = 'http://www.ftacademy.cn/wxlogin/callback.php'
 
+if (!appId || !appSecret) {
+  debug.info('App id and secret not set');
+}
+
 router.get('/', async (ctx, next) => {
   const state = await random.state();
 
@@ -43,7 +47,7 @@ router.get('/callback', async (ctx, next) => {
   }
 
   debug.info('Request wechat access token');
-  
+
   const resp = await request.get('https://api.weixin.qq.com/sns/oauth2/access_token')
     .query({
       appid: appId,
