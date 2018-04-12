@@ -16,7 +16,8 @@ if (!appId || !appSecret) {
 }
 
 router.get('/', async (ctx, next) => {
-  const state = await random.state();
+  // We use hex form to distinguish from wechat base64url form.
+  const state = await random.hex(6);
 
   const redirectTo = new UrlBuilder(baseUrl)
     .query({
@@ -35,28 +36,29 @@ router.get('/', async (ctx, next) => {
 });
 
 // Redirect params example { code: '061UDrZE1T4fx00XOaZE1ZRiZE1UDrZY', state: 'AmKWbR91Zrlg' }
-router.get('/callback', async (ctx, next) => {
+router.post('/callback', async (ctx, next) => {
   /**
-   * @type {{code: string, state: string}}
+   * @type {{state: string, access_token: string, expires_in: number, refresh_token: string, openid: string, scope: string, unionid: string}}
    */
-  const query = ctx.query;
+  const reqBody = ctx.request.body;
 
-  if (!query.code) {
-    ctx.body = 'Not authorized';
+  // If request body does not have previsously sent state, reject.
+  if (!reqBody.state) {
+    ctx.status = 403
+    ctx.body = {
+      message: 'Forbidden'
+    };
     return;
   }
 
-  debug.info('Request wechat access token');
+  // Check if the state is the one sent, and if it is expired.
 
-  const resp = await request.get('https://api.weixin.qq.com/sns/oauth2/access_token')
-    .query({
-      appid: appId,
-      secret: appSecret,
-      code: query.code,
-      grant_type: 'authorization_code'
-    });
+  // If check passed, save response to database.
 
-  ctx.body = resp;
+  // Use access token to request user info.
+
+
+  ctx.status = 204;
 });
 
 module.exports = router.routes();
