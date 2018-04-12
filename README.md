@@ -64,3 +64,29 @@ UNIQUE INDEX (unionid)
 ```
 
 But be careful wechat might change the lenght any time. So it might be better to store as varchar if you don't mind taking up larger disk space.
+
+## Sitemap
+
+### Users
+* GET /users/password/reset
+* POST /users/password/reset
+* GET /users/password/reset/:code
+* POST /users/password/reset/:code
+* GET /users/email/verification/:code
+
+### User
+* GET /user/signup
+* POST /user/signup
+* GET /user/login
+* POST /user/login
+* GET /user/login/weixin
+* GET /user/logout
+
+### Profile
+* /user/profile
+* /user/profile/account
+* /user/profile/email
+* /user/profile/password
+* /user/profile/notification
+* /user/profile/membership
+* /user/profile/address
