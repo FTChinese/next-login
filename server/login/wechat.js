@@ -2,6 +2,7 @@ const Router = require('koa-router');
 const request = require('superagent');
 const router = new Router();
 const debug = require('../../utils/debug')('user:wxlogin');
+const redis = require('../../utils/connect-redis')({keyPrefix: 'wxoauth:state:'});
 const logger = require('../../utils/logger');
 const random = require('../../utils/random');
 const UrlBuilder = require('../../utils/url-builder.js');
@@ -30,6 +31,8 @@ router.get('/', async (ctx, next) => {
     .hash('wechat_redirect')
     .toString();
 
+  await redis.set(state, 'wxlogin', 'EX', 5 * 60);
+
   debug.info('Redirect to: %s', redirectTo);
 
   ctx.redirect(redirectTo);
@@ -53,6 +56,15 @@ router.post('/callback', async (ctx, next) => {
 
   // Check if the state is the one sent, and if it is expired.
 
+  const stateInfo = await redis.get(reqBody.state);
+
+  if (!stateInfo) {
+    ctx.status = 403
+    ctx.body = {
+      message: 'State code not found'
+    }
+    return;
+  }
   // If check passed, save response to database.
 
   // Use access token to request user info.

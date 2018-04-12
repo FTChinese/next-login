@@ -1,16 +1,6 @@
-const Redis = require('ioredis');
-const logger = require('../utils/logger');
+const redis = require('./connect-redis')({keyPrefix: 'reset:'});
 const random = require('../utils/random');
 const sendEmail = require('./send-email');
-
-// redis://user:password@hostname:port/db
-const redisUri = process.env.NODE_ENV === 'production' ? process.env.REDIS_URI : 'redis://@localhost:6379/';
-
-logger.info(`Using redis ${redisUri}`);
-
-const redis = new Redis(redisUri, {
-  keyPrefix: 'reset:'
-});
 
 exports.generateCode = function () {
   return random.hex();
