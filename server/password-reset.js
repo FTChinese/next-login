@@ -69,9 +69,15 @@ router.post('/', async (ctx, next) => {
 
     debug('Input validated: %O', validated);
 
+    // We might need to set up a dedicated service to send emails.
+    // Request to API for reset code.
+    // Ask the email service to send email.
+    
     // check whether this email exists.
+    // POST to API /users/password-reset
     const resp = await request.get(`http://localhost:8000/is-taken?email=${validated.email}`)
-      .auth(ctx.accessData.access_token, {type: 'bearer'})
+      .auth(ctx.accessData.access_token, {type: 'bearer'});
+
     debug('API response: email exists');
 
     // Generate a code
