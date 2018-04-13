@@ -18,7 +18,7 @@ To run this app locally, you must:
 
 ## Wechat
 
-We use hex encoding of random bytes as state code, just for easy recognition since wechat uses base64 encoding.
+We use hex encoding of random bytes as state code, just for easy recognition since wechat uses base64url encoding.
 
 Currently (as of April 12, 2018), OAuth 2.0 data returned by wechat are base64url encoded cryptographic random bytes.
 
@@ -28,7 +28,7 @@ Currently (as of April 12, 2018), OAuth 2.0 data returned by wechat are base64ur
 
 You can reverse them into binary and save in database as binary type.
 
-Note: not base64 decode. They are slightly different. You can refer to [The Base16, Base32, and Base64 Data Encodings](https://tools.ietf.org/html/rfc4648). Here's a summary of the difference:
+Note: base64url is not the same as base64 decode. They are slightly different. You can refer to [The Base16, Base32, and Base64 Data Encodings](https://tools.ietf.org/html/rfc4648). Here's a summary of the difference:
 
 Characters in base 64
 ```
