@@ -1,4 +1,4 @@
-To run the test you have to have those fields set in you environment variable (and a running SQL database with actually data populated).
+To run the test you have to have those fields set in you environment variable (and a running SQL database with actually data populated). Refer to `sql-schema` repo on GitLab. 
 
 ```
 export OAUTH_ENDPOINT_TOKEN='http://localhost:9001/token'
@@ -10,9 +10,10 @@ export N_TEST_TOKEN='<random-string>'
 ```
 
 To run this app locally, you must:
-1. Populate MySQL with OAuth 2.0 data;
-2. Compile and launch oauth-provider app;
-3. Compile and launch next-api app;
+1. Populate MySQL with OAuth 2.0 data; see `sql-schema/oauth`
+2. Populate MySQL with some example user data. You can run `TestCreateUser` function in `next-api/usermodel/account_test.go` to generate random demo data.
+2. Compile and launch `oauth-provider` app;
+3. Compile and launch `next-api` app;
 4. Install and run Redis.
 
 ## Wechat
