@@ -101,6 +101,8 @@ But be careful wechat might change the lenght any time. So it might be better to
 
 ## Emails
 
+NOTE: Currently sending email to user is embedded in this app powered by `node-mailer`. To accommodate future requirements and, more importantly, for easy scaling, it's better to set up a dedicated email service (exposing a restful API?) to centrally handle various email-related operations.
+
 Send emails to user:
 
 * Initial signup. Requries user to verify the email address. The email should expire in a few days. A user could only use basic funtionalities of the site before email verified. For example, accept user memebership only after email is correct.
