@@ -1,3 +1,9 @@
+## Table of Content
+
+* [How wechat OAuth 2.0 access token is designed](#wechat)
+* [Site Map](#sitemap)
+* [Sending Emails](#emails)
+
 To run the test you have to have those fields set in you environment variable (and a running SQL database with actually data populated). Refer to `sql-schema` repo on GitLab. 
 
 ```
