@@ -80,6 +80,7 @@ But be careful wechat might change the lenght any time. So it might be better to
 * GET /user/login
 * POST /user/login
 * GET /user/login/weixin
+* GET /user/login/weibo
 * GET /user/logout
 
 ### Profile
@@ -90,3 +91,13 @@ But be careful wechat might change the lenght any time. So it might be better to
 * /user/profile/notification
 * /user/profile/membership
 * /user/profile/address
+
+## Emails
+
+Send emails to user:
+
+* Initial signup. Requries user to verify the email address. The email should expire in a few days. A user could only use basic funtionalities of the site before email verified. For example, accept user memebership only after email is correct.
+* Purchased memebership. Tells user its rights and privileges, membership duration, etc..
+* Prior to membership expiration. Notify user to renew subscription, othwewise membership will be discontinued.
+* Password reset. If user forgot password, send reset password email which should expire in a short period, say, 3 hours.
+* Daily newsletter as we already did.
