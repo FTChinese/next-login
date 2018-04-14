@@ -3,5 +3,5 @@ const Redis = require('ioredis');
 const redisUri = process.env.NODE_ENV === 'production' ? process.env.REDIS_URI : 'redis://@localhost:6379/';
 
 module.exports = function(options) {
-  return new new Redis(redisUri, opitons);
+  return new Redis(redisUri, options);
 };
