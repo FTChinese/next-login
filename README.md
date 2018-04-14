@@ -34,23 +34,17 @@ Currently (as of April 12, 2018), OAuth 2.0 data returned by wechat are base64ur
 
 You can reverse them into binary and save in database as binary type.
 
-Note: base64url is not the same as base64 decode. They are slightly different. You can refer to [The Base16, Base32, and Base64 Data Encodings](https://tools.ietf.org/html/rfc4648). Here's a summary of the difference:
+Note: *base64url* is slightly different from *base64*. You can refer to [The Base16, Base32, and Base64 Data Encodings](https://tools.ietf.org/html/rfc4648). Here's a summary of the difference:
 
-Characters in base 64
-```
-62 +
-63 -
-pad =
-```
+Some characters in base64 are replaced in base64url with URL and filename safe alphabet:
 
-are replaced in base 64 encoding with URL and filename safe alphabet with:
-```
-62 -
-63 _
-```
-and padding sign `=` are removed.
+Position | base64 | base64url
+-------- | ------ | --------
+62 | `+` | `-`
+63 | `/` | `_`
+(pad) | `=` | removed
 
-To get the binary data:
+To get the binary data in Node.js:
 ```js
 const str = 'your-token-string';
 // 1. Turn to base 64 encoding:
@@ -60,6 +54,8 @@ const base64Str = (str + '==='.slice((str.length + 3) % 4))
 // 2. Base 64 string to buffer:
 cosnt buf = Buffer.from(base64Str, 'base64');
 ```
+
+In Golang, standard libary actually provides variables to manipulate base64 and base64url encoding and decoding. Base64 equivalent is `StdEncoding` and base64url is `RawURLEncoding`.
 
 MySQL schema:
 ```sql
