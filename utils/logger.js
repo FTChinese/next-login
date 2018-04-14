@@ -1,5 +1,6 @@
 const winston = require('winston');
 const logDir = process.env.LOG_DIR || '.';
+const prefix = 'next-user';
 
 const logger = winston.createLogger({
   level: 'info',
@@ -10,8 +11,8 @@ const logger = winston.createLogger({
     winston.format.json(),
   ),
   transports: [
-    new winston.transports.File({ filename: `${logDir}/error.log`, level: 'error', maxsize: 1000000}),
-    new winston.transports.File({ filename: `${logDir}/combined.log`, maxsize: 1000000})
+    new winston.transports.File({ filename: `${logDir}/${prefix}error.log`, level: 'error', maxsize: 1000000}),
+    new winston.transports.File({ filename: `${logDir}/${prefix}combined.log`, maxsize: 1000000})
   ]
 });
 
