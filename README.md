@@ -105,4 +105,4 @@ Send emails to user:
 * Purchased memebership. Tells user its rights and privileges, membership duration, etc..
 * Prior to membership expiration. Notify user to renew subscription, othwewise membership will be discontinued.
 * Password reset. If user forgot password, send reset password email which should expire in a short period, say, 3 hours.
-* Daily newsletter as we already did.
+* Daily newsletter as we already did. Remember, Newsletter should only be sent after email is verified!
