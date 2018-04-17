@@ -1,0 +1,21 @@
+digraph {
+    label="User login flow"
+    start[shape="box", style=rounded];
+    end[shape="box", style=rounded];
+    input[shape="parallelogram", style=""];
+    signup[shape="box", style=rounded];
+    email_exists[shape="diamond", style=""];
+    password_matched[shape="diamond", style=""];
+    
+
+    start -> input;
+    input -> email_exists;
+    email_exists -> password_matched[label="yes"];
+    email_exists -> signup[label="no"];
+    password_matched -> end[label="yes"];
+    password_matched -> input[label="no"];
+
+    start[label="Login"]
+    input[label="email+password"];
+    end[label="Set session data"];
+}

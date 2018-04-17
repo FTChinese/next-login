@@ -1,0 +1,23 @@
+digraph {
+    label = "Signup Email Verification"
+
+    start[shape="box", style=rounded];
+    end[shape="box", style=rounded];
+    token_valid[shape="diamond", style=""];
+    resend[shape="box", style=""];
+    login[shape="box", style=rounded];
+    is_loggedin[shape="diamond", style=""];
+
+    start -> token_valid;
+    token_valid -> resend[label="No"];
+    token_valid -> is_loggedin[label="Yes"];
+    is_loggedin -> end[label="Yes"];
+    is_loggedin -> login[label="No"];
+
+    start[label="Verify email"]
+    resend[label="Resend email"];
+    token_valid[label="Activation token valid?"]
+    is_loggedin[label="Already logged in?"]
+    login[label="Redirect to Login"]
+    end[label="Update UI\nSet session data"];
+}

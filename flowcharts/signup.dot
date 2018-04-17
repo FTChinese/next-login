@@ -1,0 +1,21 @@
+digraph {
+    label = "Signup Flow"
+
+    start[shape="box", style=rounded];
+    end[shape="box", style=rounded];
+    input[shape="parallelogram", style=""];
+    email_exists[shape="diamond", style=""];
+    send_email[shape="box", style=""];
+    login[shape="box", style=rounded];
+
+    start -> input;
+    input -> email_exists;
+    email_exists -> login[label="Yes"];
+    email_exists -> send_email[label="No"];
+    send_email -> end;
+
+    start[label="Signup"]
+    input[label="email+password"];
+    send_email[label="Send activation email"];
+    end[label="Set session data\nRedirect"];
+}
