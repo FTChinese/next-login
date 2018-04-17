@@ -1,3 +1,6 @@
+/**
+ * Loggin with Wechat
+ */
 const Router = require('koa-router');
 const request = require('superagent');
 const router = new Router();
@@ -16,7 +19,7 @@ if (!appId || !appSecret) {
   debug.info('App id and secret not set');
 }
 
-router.get('/', async (ctx, next) => {
+exports.authRequest = async function (ctx) {
   // We use hex form to distinguish from wechat base64url form.
   const state = await random.hex(6);
 
@@ -36,10 +39,10 @@ router.get('/', async (ctx, next) => {
   debug.info('Redirect to: %s', redirectTo);
 
   ctx.redirect(redirectTo);
-});
+};
 
 // Redirect params example { code: '061UDrZE1T4fx00XOaZE1ZRiZE1UDrZY', state: 'AmKWbR91Zrlg' }
-router.post('/callback', async (ctx, next) => {
+exports.accessResponse = async function (ctx) {
   /**
    * @type {{state: string, access_token: string, expires_in: number, refresh_token: string, openid: string, scope: string, unionid: string}}
    */
@@ -65,12 +68,6 @@ router.post('/callback', async (ctx, next) => {
     }
     return;
   }
-  // If check passed, save response to database.
 
-  // Use access token to request user info.
-
-
-  ctx.status = 204;
-});
-
-module.exports = router.routes();
+  ctx.status = reqBody;
+};

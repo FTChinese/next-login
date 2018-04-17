@@ -1,17 +1,13 @@
-const debug = require('../utils/debug')('user:signup');
-const Router = require('koa-router');
+const debug = require('../../utils/debug')('user:signup');
 const Joi = require('joi');
-const sendEmail = require('../utils/send-email');
-const schema = require('./schema');
-const {isAlradyExists} = require('../utils/check-error');
+const sendEmail = require('../../utils/send-email');
+const schema = require('../schema');
+const {isAlradyExists} = require('../../utils/check-error');
 
-const render = require('../utils/render');
+const render = require('../../utils/render');
 const request = require('superagent');
 
-const router = new Router();
-
-router.get('/', async (ctx, next) => {
-
+exports.showPage = async function (ctx) {
   /**
    * @type {{source: string, email: string}} query
    */
@@ -25,10 +21,10 @@ router.get('/', async (ctx, next) => {
 
   debug.info(ctx.state);
 
-  ctx.body = await render('signup.html', ctx.state);
-});
+  ctx.body = await render('new-user/signup.html', ctx.state);
+};
 
-router.post('/', async (ctx, next) => {
+exports.handleCredentials = async function (ctx, next) {
   /**
    * @type {{email: string, password: string}} user
    */
@@ -106,8 +102,4 @@ FT中文网`
     
     return ctx.body = e.response.body;
   }
-}, async (ctx, next) => {
-  return ctx.body = await render('signup.html', ctx.state);
-});
-
-module.exports = router.routes();
+};

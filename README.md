@@ -70,23 +70,32 @@ But be careful wechat might change the lenght any time. So it might be better to
 
 ## Sitemap
 
-### Users
-* GET /users/password/reset
-* POST /users/password/reset
-* GET /users/password/reset/:code
-* POST /users/password/reset/:code
-* GET /users/email/verification/:code
-
-### User
+### User Signup
 * GET /user/signup
 * POST /user/signup
+* GET /user/signup/verify/:token
+* POST /user/signup/check-username
+* POST /user/signup/check-email
+
+### Reset password
+* GET /user/password/reset
+* POST /user/password/reset
+* GET /user/password/reset/:code
+* POST /user/password/reset/:code
+
+### Login
 * GET /user/login
 * POST /user/login
-* GET /user/login/weixin
+* GET /user/login/wechat
+* POST /user/login/wechat/callback
 * GET /user/login/weibo
+
 * GET /user/logout
 
 ### Profile
+
+The following requires authentication.
+
 * /user/profile
 * /user/profile/account
 * /user/profile/email

@@ -222,6 +222,4 @@ router.post('/:code', async (ctx, next) => {
   ctx.body = await render('password/new-password.html', ctx.state);
 });
 
-
-
 module.exports = router.routes();

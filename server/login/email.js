@@ -1,23 +1,23 @@
+/**
+ * Loggin with user's signup email on FTC site.
+ */
 const debug = require('debug')('user:login');
-const Router = require('koa-router');
 const Joi = require('joi');
-const schema = require('./schema');
-
-const render = require('../utils/render');
-const {ErrorForbidden} = require('../utils/http-errors');
 const request = require('superagent');
-const router = new Router();
+const schema = require('../schema');
+const render = require('../../utils/render');
+const {ErrorForbidden} = require('../../utils/http-errors');
 
-router.get('/', async (ctx) => {
+exports.showPage = async function (ctx) {
   /**
    * @todo If logged in users visit this page, redirect them away:
    * 1. If query parameter has `from=<url>` and this from url is a legal `ftchinese.com` hostname, redirect them to the from url; otherwise redirect them to home page
    * 2. If there is no query parameter named `from`, we should lead user to its account page.
    */
   ctx.body = await render('login.html', ctx.state);
-});
+};
 
-router.post('/', async (ctx, next) => {
+exports.handleLogin = async function (ctx, next) {
   /**
    * @type {{email: string, password: string}} credentials
    */
@@ -92,10 +92,6 @@ router.post('/', async (ctx, next) => {
       return await next();
     }
 
-    throw e
+    throw e;
   }
-}, async (ctx, next) => {
-  return ctx.body = await render('login.html', ctx.state);
-});
-
-module.exports = router.routes();
+};

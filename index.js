@@ -12,9 +12,8 @@ const checkLogin = require('./middlewares/check-login');
 const handleErrors = require('./middlewares/handle-errors');
 const inlineMin = require('./middlewares/inline-min');
 
-const signup = require('./server/signup');
+const newUser = require('./server/new-user');
 const login = require('./server/login');
-const wechat = require('./server/login/wechat');
 const logout = require('./server/logout');
 const passwordReset = require('./server/password-reset');
 const profile = require('./server/profile');
@@ -78,16 +77,15 @@ app.use(session(app));
 app.use(handleErrors());
 app.use(bodyParser());
 
-router.use('/signup', signup);
-// singup/check-username
-// singup/check-email
+router.use('/signup', newUser);
 router.use('/login', login);
-router.use('/login/weixin', wechat);
 router.use('/logout', logout);
 router.use('/password-reset', passwordReset);
 router.use('/profile', checkLogin(), profile);
 
 app.use(router.routes());
+
+console.log(router.stack.map(layer => layer.path));
 
 /**
  * @param {Koa} app - a Koa instance
