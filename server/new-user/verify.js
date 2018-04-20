@@ -2,11 +2,34 @@ const request = require('superagent');
 const debug = require('../../utils/debug')('user:verify');
 const render = require('../../utils/render');
 
+// Requires login.
 exports.checkToken = async function(ctx) {
   const token = ctx.params.token;
+  const email = ctx.session.user.email;
 
-  debug.info('Email verification token: %s', token)
-  ctx.state.token = token;
+  debug.info('Email: %s, verification token: %s', email, token);
+  
+  try {
+    const resp = await request.put('http://localhost:8000/users/verify')
+      .auth(ctx.accessData.access_token, {type: 'bearer'})
+      .send({token, email});
+    
+    /**
+     * @type {{name: string, email: string, isVIP: boolean, verified: boolean}}
+     */
+    const account = resp.body;
+    ctx.session.user.verified = account.verified;
+
+    ctx.redirect('/profile/email');
+  } catch (e) {
+    debug.info(e.response.body);
+
+    ctx.session.errors = {
+      verify: true
+    };
+    ctx.redirect('/profile/email');
+  }
+
 
   // Ask API if this token is valid: valid, not exist, already used, expired.
 

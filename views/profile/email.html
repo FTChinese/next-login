@@ -24,7 +24,11 @@
           {% endif %}
         </div>
         <button type="submit" class="btn btn-primary">更新</button>
+        {% if not userinfo.verified %}
+        <a href="">发送验证邮件</a>
+        {% endif %}
       </form>
+
     </section>
     
   </div>

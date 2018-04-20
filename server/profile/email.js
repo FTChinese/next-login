@@ -10,6 +10,7 @@ const router = new Router();
 
 router.get('/', async (ctx, next) => {
   const emailUpdated = ctx.session.emailUpdated;
+  ctx.state.errors = ctx.session.errors;
 
   const accessToken = ctx.accessData.access_token;
   const uuid = ctx.session.user.sub;
@@ -40,6 +41,7 @@ router.get('/', async (ctx, next) => {
     throw e;
   } finally {
     delete ctx.session.emailUpdated;
+    delete ctx.session.errors;
   }
 });
 

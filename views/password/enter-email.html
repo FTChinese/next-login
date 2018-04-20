@@ -1,6 +1,6 @@
-{% extends "password/base.html" %}
+{% extends "layouts/center.html" %}
 
-{% block action %}
+{% block content %}
   <h4 class="text-center">找回密码</h4>
   
   {% if errors.invalidLink %}
@@ -27,6 +27,7 @@
       {% if errors.notFound %}
       <div class="form-errortext">该邮箱尚未注册，您可以使用该邮箱<a href="/signup?source=password-reset&email={{errors.notFound}}">创建FT中文网账号</a></div>
       {% endif %}
+
     </div>
 
     <button class="btn btn-block btn-primary" type="submit">发送邮件</button>

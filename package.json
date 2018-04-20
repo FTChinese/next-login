@@ -39,6 +39,7 @@
     "nunjucks": "^3.1.0",
     "nunjucks-markdown": "^2.0.1",
     "superagent": "^3.8.2",
+    "validator": "^9.4.1",
     "winston": "^3.0.0-rc3"
   },
   "devDependencies": {

@@ -1,0 +1,52 @@
+{% extends "layouts/base.html" %}
+
+{% block main %}
+<div class="row">
+  <div class="col">
+    <h2>欢迎来到FT中文网，{{userinfo.name}}</h2>
+
+    <p>成为会员</p>
+    <form action="" method="post">
+      <div class="card-deck">
+        <div class="card">
+          <img class="card-image-top" src="http://via.placeholder.com/350x150" alt="Free">
+          <div class="card-body">
+            <h5 class="card-title">Free</h5>
+            <p class="card-text">Free Membership</p>
+          </div>
+          <div class="card-footer text-center">
+            <a class="btn btn-secondary" href="/profile/email">继续使用免费账号</a>
+          </div>
+        </div>
+    
+        <div class="card">
+          <img class="card-image-top" src="http://via.placeholder.com/350x150" alt="Free">
+          <div class="card-body">
+            <h5 class="card-title">Standard</h5>
+            <p class="card-text">Standard Membership</p>
+            <p class="card-text">RMB 198</p>
+          </div>
+          <div class="card-footer text-center">
+            <button class="btn btn-primary" class="/signup/plan" name="plan" value="standard">选择标准会员</button>
+          </div>
+        </div>
+    
+        <div class="card">
+          <img class="card-image-top" src="http://via.placeholder.com/350x150" alt="Free">
+          <div class="card-body">
+            <h5 class="card-title">Premium</h5>
+            <p class="card-text">Premium Membership</p>
+            <p class="card-text">RMB 1998</p>
+          </div>
+          <div class="card-footer text-center">
+            <button class="btn btn-primary" class="/signup/plan" name="plan" value="standard">选择高级会员</button>
+          </div>
+        </div>
+      </div>
+      <small class="form-text text-muted">以后随时可以更改或升级会员资格</small>
+      <a class="btn btn-primary" href="/profile/email">跳过</button>
+    </form>    
+  </div>
+</div>
+
+{% endblock %}

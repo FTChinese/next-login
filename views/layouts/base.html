@@ -41,7 +41,15 @@
     </div>
   </header>
 
-  {% block flash %}{% endblock %}
+  {% block flash %}
+    {% if userinfo and (not userinfo.verified) %}
+    <div>请验证您的注册邮箱</div>
+    {% endif %}
+
+    {% if errors.verify %}
+    <div>验证{{userinfo.email}}时出错</div>
+    {% endif %}
+  {% endblock %}
 
   <main class="page-content" role="main">
     <div class="container">

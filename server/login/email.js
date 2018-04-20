@@ -40,17 +40,18 @@ exports.handleLogin = async function (ctx, next) {
       .send(credentials);
 
     /**
-     * @type {{sub: string, email: string, name: string, isVIP: boolean, emailVerified: boolean}}
-     * If emailVerified == false, show a banner to urge user to verify.
+     * @type {{sub: string, email: string, name: string, isVIP: boolean, verified: boolean}}
      */
-    const idToken = resp.body;
-    debug('Authentication result: %o', idToken);
+    const account = resp.body;
+    debug('Authentication result: %o', account);
 
     // Keep login state
     ctx.session.user = {
-      sub: idToken.sub,
-      name: idToken.name,
-      email: credentials.email.trim()
+      sub: account.sub,
+      name: account.name,
+      email: account.email,
+      isVIP: account.isVIP,
+      verified: account.verified
     };
 
     return ctx.redirect('/profile');

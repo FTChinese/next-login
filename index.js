@@ -15,7 +15,7 @@ const inlineMin = require('./middlewares/inline-min');
 const newUser = require('./server/new-user');
 const login = require('./server/login');
 const logout = require('./server/logout');
-const passwordReset = require('./server/password-reset');
+const passwordReset = require('./server/password');
 const profile = require('./server/profile');
 
 const fetchAccess = require('./utils/fetch-access');

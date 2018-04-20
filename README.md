@@ -73,7 +73,24 @@ But be careful wechat might change the lenght any time. So it might be better to
 ### User Signup
 * GET /user/signup
 * POST /user/signup
+After signup, redirect user to /profile/email and urge them to verify. There should be a `resend` button.
+
+* GET /user/signup/plan
 * GET /user/signup/verify/:token
+Each email has only one token valid
+
+Only perform verification after user login.
+If user is not loggedin, go to login and redirect to this url.
+https://github.com/login?return_to=https%3A%2F%2Fgithub.com%2Fusers%2Fvictor-nee%2Femails%2F50159604%2Fconfirm_verification%2F0328eb800de254aecaf29b017551574df630bf53
+
+If the verification token is invalid, show "There was an error verifying email."
+
+After verification, redirect to homepage.
+If the token is invalid, redirect to login.
+If user already loggedin, ignore this verification request. Redirect to user settings
+
+After verified, send a welcome letter.
+
 * POST /user/signup/check-username
 * POST /user/signup/check-email
 
@@ -99,6 +116,8 @@ The following requires authentication.
 * /user/profile
 * /user/profile/account
 * /user/profile/email
+Send verification letter if user changed email.
+
 * /user/profile/password
 * /user/profile/notification
 * /user/profile/membership
