@@ -3,6 +3,8 @@
 {% block content %}
   <h4 class="text-center">找回密码</h4>
   
+  {# If the token in the link user clickd does not exist, is already used, or is expired, the link is invalid. #}
+
   {% if errors.invalidLink %}
   <div class="form-errortext">您似乎点击了无效的重置密码链接，请重试</div>
   {% endif %}
@@ -18,14 +20,14 @@
       placeholder="登录FT中文网所用的邮箱"
       required>
 
-      {% if errors.email %}
+      {% if errors.invalidEmail %}
       <div class="form-errortext">
-        {{errors.email}}
+        您输入的邮箱地址无效，请使用有效的电子邮箱
       </div>
       {% endif %}
 
       {% if errors.notFound %}
-      <div class="form-errortext">该邮箱尚未注册，您可以使用该邮箱<a href="/signup?source=password-reset&email={{errors.notFound}}">创建FT中文网账号</a></div>
+      <div class="form-errortext">该邮箱尚未注册，您可以使用该邮箱<a href="/signup?source=password-reset&email={{email}}">创建FT中文网账号</a></div>
       {% endif %}
 
     </div>

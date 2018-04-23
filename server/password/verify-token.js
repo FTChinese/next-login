@@ -1,20 +1,46 @@
-const debug = require('../../utils/debug')('user:enter-email');
+const {dirname} = require('path')
+const request = require('superagent');
+const debug = require('../../utils/debug')('user:verify-rest-token');
 const render = require('../../utils/render');
 
+/**
+ * @description User clicked link in password reset email and get here: /password-reset/:token.
+ * NOTE: The token can only be used once.
+ */
 module.exports = async function (ctx, next) {
-  // if code is invalid, redirect to `/password-reset`
-  // Query database, find out which email this code is linked to.
-  const code = ctx.params.code;
-  const address = await reset.load(code);
+  const token = ctx.params.code;
 
-  // If `code` cannot be found, redirect to /passwrod-reset with error message and ask user to enter email.
-  if (!address) {
-    ctx.session.invalidLink = true;
-    const redirectTo = dirname(ctx.path);
-    return ctx.redirect(redirectTo);
+  try {
+    // Get the email associated with the token.
+    // Response 404 Not Found if the token does not exist, is used, or is expired.
+    // 200 OK with body {email: "email-address"}
+    const resp = await request.get(`http://localhost:8000/users/password/verify/${token}`)
+        .auth(ctx.accessData.access_token, {type: 'bearer'});
+
+    // If the email for `code` is found, show user the form to enter new password two times.
+    ctx.state.email = address;
+    ctx.body = await render('password/new-password.html', ctx.state);
+
+  } catch (e) {
+    debug.error(e);
+    // if this is not a superagent error
+    if (!e.response) {
+      throw e;
+    }
+
+    // If the token does not exist, redirect to /password-reset page, tell the user link is invalid and ask user to resend email
+    if (404 === e.status) {
+      ctx.session.invalidLink = true;
+
+      // Redirect to /password-reset
+      const redirectTo = dirname(ctx.path);
+
+      debug.info('Email associated with token %s not found. Redirect to %s', token, redirectTo);
+
+      return ctx.redirect(redirectTo);
+    }
+
+    // Display API error for now.
+    ctx.body = e.response.body;
   }
-
-  // If the email for `code` is found, show user the form the enter new password two times.
-  ctx.state.email = address;
-  ctx.body = await render('password/new-password.html', ctx.state);
 }

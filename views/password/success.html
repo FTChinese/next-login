@@ -1,7 +1,10 @@
 {% extends "layouts/center.html" %}
 
 {% block content %}
-
+  {# This template serves two purposes: 
+    1. Tell user password reset email is sent;
+    2. Tell user password is reset.
+  #}
   {% if success.emailSent %}
   <p>检查您的邮件，点击邮件中的“重置密码”按钮修改您的密码。如果几分钟内没有看到邮件，请检查是否被放进了垃圾邮件列表。</p>
   {% endif %}

@@ -10,18 +10,15 @@ const router = new Router();
 
 // Ask user to enter email
 router.get('/', enterEmail);
+
 // Collect user entered email, check if email is valid, and send letter.
-router.post('/', sendLetter, async (ctx, next) => {
-  ctx.body = await render('password/enter-email.html', ctx.state);
-});
+// If email is invalid, it will to to enterEmail and redisplay the page.
+router.post('/', sendLetter, enterEmail);
 
 // User clicked the link in email. Check if the token is valid and return the email associated with the token. Then ask user to enter new password
 router.get('/:code', verifyToken);
 
 // Collect new password.
-router.post('/:code', reset, async (ctx, next) => {
-  // This is used to display error message only.
-  ctx.body = await render('password/new-password.html', ctx.state);
-});
+router.post('/:code', reset.do, reset.showErrors);
 
 module.exports = router.routes();
