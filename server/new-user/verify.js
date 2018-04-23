@@ -18,6 +18,8 @@ exports.checkToken = async function(ctx) {
      * @type {{name: string, email: string, isVIP: boolean, verified: boolean}}
      */
     const account = resp.body;
+    debug.info("Account info after verification: %O", account);
+
     ctx.session.user.verified = account.verified;
 
     ctx.redirect('/profile/email');

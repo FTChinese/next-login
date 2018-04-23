@@ -31,11 +31,13 @@ function checkLogin(ignorePaths=[]) {
     if (isLoggedIn(ctx)) {
       debug('Session data: %O', ctx.session);
 
-      ctx.state.userinfo = {
-        userName: ctx.session.user.name
+      ctx.state.user = {
+        name: ctx.session.user.name,
+        isVIP: ctx.session.user.isVIP,
+        verified: ctx.session.user.verified
       };
 
-      debug('userinfo: %O', ctx.state.userinfo);
+      debug('userinfo: %O', ctx.state.user);
       return await next();
     }
 

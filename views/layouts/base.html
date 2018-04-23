@@ -24,7 +24,7 @@
     <div class="container">
       <a class="navbar-brand" href="/">FT中文网</a>
 
-      {% if userinfo %}
+      {% if user %}
       <ul class="navbar-nav">
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">myFT</a>
@@ -42,13 +42,15 @@
   </header>
 
   {% block flash %}
-    {% if userinfo and (not userinfo.verified) %}
-    <div>请验证您的注册邮箱</div>
-    {% endif %}
+    <div class="container">
+      {% if user and (not user.verified) %}
+      <div>请验证您的注册邮箱</div>
+      {% endif %}
 
-    {% if errors.verify %}
-    <div>验证{{userinfo.email}}时出错</div>
-    {% endif %}
+      {% if errors.verify %}
+      <div>验证{{userinfo.email}}时出错</div>
+      {% endif %}
+    </div>
   {% endblock %}
 
   <main class="page-content" role="main">
