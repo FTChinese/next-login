@@ -1,7 +1,7 @@
 /**
  * Loggin with user's signup email on FTC site.
  */
-const debug = require('debug')('user:login');
+const debug = require('../../utils/debug')('user:login');
 const Joi = require('joi');
 const request = require('superagent');
 const schema = require('../schema');
@@ -18,13 +18,14 @@ exports.showPage = async function (ctx) {
 };
 
 exports.handleLogin = async function (ctx, next) {
+  let returnTo = ctx.query.return_to;
   /**
    * @type {{email: string, password: string}} credentials
    */
   let credentials = ctx.request.body.credentials;
 
   try {
-    debug("Validate: %O", credentials);
+    debug.info("Validate: %O", credentials);
 
     /**
      * @type {{email: string, password: string}} validated
@@ -33,7 +34,7 @@ exports.handleLogin = async function (ctx, next) {
     
     credentials.lastLoginIP = ctx.ip;
 
-    debug("Validated credentials: %O", credentials);
+    debug.info("Validated credentials: %O", credentials);
 
     const resp = await request.post('http://localhost:8000/authenticate')
       .auth(ctx.accessData.access_token, {type: 'bearer'})
@@ -43,7 +44,7 @@ exports.handleLogin = async function (ctx, next) {
      * @type {{sub: string, email: string, name: string, isVIP: boolean, verified: boolean}}
      */
     const account = resp.body;
-    debug('Authentication result: %o', account);
+    debug.info('Authentication result: %o', account);
 
     // Keep login state
     ctx.session.user = {
@@ -54,6 +55,9 @@ exports.handleLogin = async function (ctx, next) {
       verified: account.verified
     };
 
+    if (returnTo) {
+      return ctx.redirect(returnTo);
+    }
     return ctx.redirect('/profile');
 
   } catch (e) {
@@ -65,7 +69,7 @@ exports.handleLogin = async function (ctx, next) {
     // Handle validation error
     const joiErrs = schema.gatherErrors(e);
     if (joiErrs) {
-      debug('Joi validation errors: %O', joiErrs);
+      debug.info('Joi validation errors: %O', joiErrs);
       ctx.state.errors = {
         credentials: "用户名或密码无效"
       };
@@ -77,7 +81,7 @@ exports.handleLogin = async function (ctx, next) {
     // Handle API error
     if (404 == e.status) {
       // Email not registered yet. Lead user to signup page.
-      debug('Email not found');
+      debug.info('Email not found');
       ctx.state.errors = {
         notFound: credentials.email.trim()
       };
@@ -86,7 +90,7 @@ exports.handleLogin = async function (ctx, next) {
 
     if (401 == e.status) {
       // Unauthorized means password incorrect
-      debug('Password incorrect');
+      debug.info('Password incorrect');
       ctx.state.errors = {
         credentials: "用户名或密码无效"
       };
