@@ -52,7 +52,7 @@ exports.do = async (ctx, next) => {
         password: pw.password
       });
 
-    debug('API success reponse: %O', resp.noContent);
+    debug.info('API success reponse: %O', resp.noContent);
     
     ctx.session.success = {
       pwReset: true
