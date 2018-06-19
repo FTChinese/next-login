@@ -1,33 +1,20 @@
 const Joi = require('joi');
 
-const keys = {
-  email: Joi.string().trim().email().min(3).max(30).required(),
-  password: Joi.string().trim().min(8).max(20).required()
-};
+const email = Joi.string().trim().email().min(3).max(30).required();
+const password = Joi.string().trim().min(8).max(20).required();
 
 exports.email = Joi.object().keys({
-  email: keys.email
+  email
 });
-
-exports.changeEmail = Joi.object().keys({
-  current: keys.email,
-  new: keys.email
-});
-
-exports.changePassword = Joi.object().keys({
-  currentPassword: keys.password,
-  password: keys.password,
-  passwordConfirmation: keys.password
-})
 
 exports.credentials = Joi.object().keys({
-  email: keys.email,
-  password: keys.password
+  email,
+  password
 });
 
 exports.reset = Joi.object().keys({
-  password: keys.password,
-  passwordConfirmation: keys.password
+  password,
+  passwordConfirmation: password
 });
 
 exports.profile = Joi.object().keys({
@@ -35,6 +22,17 @@ exports.profile = Joi.object().keys({
   givenName: Joi.string().trim(),
   gender: Joi.string().trim(),
   birthdate: Joi.string().trim()
+});
+
+exports.changeEmail = Joi.object().keys({
+  current: email,
+  new: email
+});
+
+exports.changePassword = Joi.object().keys({
+  currentPassword: password,
+  password: password,
+  passwordConfirmation: password
 });
 
 exports.username = Joi.object().keys({
