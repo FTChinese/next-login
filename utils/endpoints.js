@@ -1,5 +1,6 @@
 const baseUrl = "http://localhost:8000";
 
 module.exports = {
-  createAccount = "/users/new",
+  createAccount: `${baseUrl}/users/new`,
+  verifyEmail: `${baseUrl}/users/verify`,
 };
