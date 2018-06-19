@@ -6,7 +6,7 @@ const request = require('superagent');
 const router = new Router();
 const debug = require('../../utils/debug')('user:wxlogin');
 const redis = require('../../utils/connect-redis')({keyPrefix: 'wxoauth:state:'});
-const logger = require('../../utils/logger');
+// const logger = require('../../utils/logger');
 const random = require('../../utils/random');
 const UrlBuilder = require('../../utils/url-builder.js');
 
