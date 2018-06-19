@@ -1,5 +1,5 @@
 const request = require('superagent');
-const validator = require('validator');
+// const validator = require('validator');
 
 const debug = require('../../utils/debug')('user:send-letter');
 const render = require('../../utils/render');
