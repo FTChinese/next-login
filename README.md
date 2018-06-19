@@ -71,12 +71,13 @@ But be careful wechat might change the lenght any time. So it might be better to
 ## Sitemap
 
 ### User Signup
-* GET /user/signup
-* POST /user/signup
-After signup, redirect user to /profile/email and urge them to verify. There should be a `resend` button.
+* GET `/user/signup`
+* POST `/user/signup`
+* POST `/user/signup/check-username`
+* POST `/user/signup/check-email`
 
-* GET /user/signup/plan
-* GET /user/signup/verify/:token
+* GET `/user/plan`
+* GET `/user/verify/:token`
 Each email has only one token valid
 
 Only perform verification after user login.
@@ -91,23 +92,20 @@ If user already loggedin, ignore this verification request. Redirect to user set
 
 After verified, send a welcome letter.
 
-* POST /user/signup/check-username
-* POST /user/signup/check-email
-
 ### Reset password
-* GET /user/password/reset
-* POST /user/password/reset
-* GET /user/password/reset/:code
-* POST /user/password/reset/:code
+* GET `/user/password-reset` Ask user to enter email
+* POST `/user/password-reset` User entered email
+* GET `/user/password-reset/:token` User clicked reset link.
+* POST `/user/password/reset/:token`  User submitted new password
 
 ### Login
-* GET /user/login
-* POST /user/login
-* GET /user/login/wechat
-* POST /user/login/wechat/callback
-* GET /user/login/weibo
+* GET `/user/login`
+* POST `/user/login`
+* GET `/user/login/wechat`
+* POST `/user/login/wechat/callback`
+* GET `/user/login/weibo`
 
-* GET /user/logout
+* GET `/user/logout`
 
 ### Profile
 
