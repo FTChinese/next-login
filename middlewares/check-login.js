@@ -1,10 +1,6 @@
 const {escape} = require('querystring')
 const debug = require('../utils/debug')('user:check-login');
 
-// Those paths must be ignored in whatever cases prevent infinite loop:
-// A user is definitely not logged in if he goes to `/login`, and you check it and redirect hime to `/login`; before the page could be shown, he is checked again as not logged in, and redirect to login ...
-const defaultIgnore = ['/login', '/signup', '/password-reset'];
-
 /**
  * checkLogin - This middleware will add userinfo to ctx.state
  *
@@ -23,7 +19,7 @@ function checkLogin() {
 
       ctx.state.user = {
         name: ctx.session.user.name,
-        isVIP: ctx.session.user.isVIP,
+        isVip: ctx.session.user.isVip,
         verified: ctx.session.user.verified
       };
 
