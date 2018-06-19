@@ -1,6 +1,6 @@
 const debug = require('../../utils/debug')('user:signup');
 const Joi = require('joi');
-const sendEmail = require('../../utils/send-email');
+// const sendEmail = require('../../utils/send-email');
 const schema = require('../schema');
 const {isAlradyExists} = require('../../utils/check-error');
 
