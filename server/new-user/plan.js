@@ -1,15 +1,20 @@
+const request = require('superagent');
+const Router = require('koa-router');
 const render = require('../../utils/render');
 const debug = require('../../utils/debug')('user:plan');
+const endpoints = require('../../utils/endpoints');
 
-exports.showPage = async function (ctx) {
+const router = new Router();
+
+router.get('/', async (ctx, next) => {
   ctx.body = await render('new-user/plan.html', ctx.state);
-}
+});
 
-// This step should check login status.
-exports.handlePlan = async function (ctx) {
+router.post('/', async (ctx, next) => {
   const reqBody = ctx.request.body;
   debug.info(reqBody);
 
   ctx.body = reqBody;
-  // ctx.redirect('/profile/email');
-}
+});
+
+module.exports = router.routes()
