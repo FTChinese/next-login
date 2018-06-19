@@ -1,18 +1,20 @@
 const request = require('superagent');
+const Router = require('koa-router');
 const debug = require('../../utils/debug')('user:verify');
 const render = require('../../utils/render');
+const endpoints = require('../../utils/endpoints');
 
-// Requires login.
-exports.checkToken = async function(ctx) {
+const router = new Router();
+
+router.get('/:token', async function(ctx) {
   const token = ctx.params.token;
   const email = ctx.session.user.email;
 
   debug.info('Email: %s, verification token: %s', email, token);
   
   try {
-    const resp = await request.put('http://localhost:8000/users/verify')
-      .auth(ctx.accessData.access_token, {type: 'bearer'})
-      .send({token, email});
+    const resp = await request.put(`${endpoints.verifyEmail}/${token}`)
+      .send({email});
     
     /**
      * @type {{name: string, email: string, isVIP: boolean, verified: boolean}}
@@ -31,11 +33,6 @@ exports.checkToken = async function(ctx) {
     };
     ctx.redirect('/profile/email');
   }
+});
 
-
-  // Ask API if this token is valid: valid, not exist, already used, expired.
-
-  // If the token is valid, API should flag this token as used, flag the user as active.
-  // After receiving aknowlegment from API, the client should show a success message, and lead user to login (if not logged in yet) or refresh login info.
-  ctx.body = await render('new-user/verify.html', ctx.state);
-};
+module.exports = router.routes();
