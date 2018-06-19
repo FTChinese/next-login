@@ -6,7 +6,7 @@ const Joi = require('joi');
 const request = require('superagent');
 const schema = require('../schema');
 const render = require('../../utils/render');
-const {ErrorForbidden} = require('../../utils/http-errors');
+const {ErrorForbidden} = require('../../utils/errors');
 
 exports.showPage = async function (ctx) {
   /**
