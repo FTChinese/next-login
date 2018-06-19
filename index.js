@@ -1,12 +1,12 @@
 const debug = require('./utils/debug')('user:index');
-const log = require('./utils/logger')
+// const log = require('./utils/logger');
 const path = require('path');
 const Koa = require('koa');
 const Router = require('koa-router');
 const logger = require('koa-logger');
 const bodyParser = require('koa-bodyparser');
 const session = require('koa-session');
-const moment = require('moment');
+// const moment = require('moment');
 
 const checkLogin = require('./middlewares/check-login');
 const handleErrors = require('./middlewares/handle-errors');
@@ -18,7 +18,7 @@ const logout = require('./server/logout');
 const passwordReset = require('./server/password');
 const profile = require('./server/profile');
 
-const fetchAccess = require('./utils/fetch-access');
+// const fetchAccess = require('./utils/fetch-access');
 
 const app = new Koa();
 const router = new Router();
@@ -46,40 +46,40 @@ app.use(async function (ctx, next) {
   
   await next();
 });
-app.use(async function (ctx, next) {
-  debug.info('Middleware: check access token');
-  if (ctx.accessData) {
-    debug.info('Access data %O', ctx.accessData);
-    const createdAt = ctx.accessData.created_at;
-    const expiresIn = ctx.accessData.expires_in;
-    const expiresAt = moment.utc(createdAt).add(expiresIn, 'seconds');
+// app.use(async function (ctx, next) {
+//   debug.info('Middleware: check access token');
+//   if (ctx.accessData) {
+//     debug.info('Access data %O', ctx.accessData);
+//     const createdAt = ctx.accessData.created_at;
+//     const expiresIn = ctx.accessData.expires_in;
+//     const expiresAt = moment.utc(createdAt).add(expiresIn, 'seconds');
 
-    // If the access token is already expired
-    if (expiresAt.isBefore(moment.utc(), 'seconds')) {
-      debug.info('Access data expired');
-      delete app.context.accessData;
-    }
-  }
-  await next();
-});
+//     // If the access token is already expired
+//     if (expiresAt.isBefore(moment.utc(), 'seconds')) {
+//       debug.info('Access data expired');
+//       delete app.context.accessData;
+//     }
+//   }
+//   await next();
+// });
 
-app.use(async function(ctx, next) {
-  if (!ctx.accessData) {
-    debug('Access data is not found.');
-    app.context.accessData = await fetchAccess();
-  }
+// app.use(async function(ctx, next) {
+//   if (!ctx.accessData) {
+//     debug.info('Access data is not found.');
+//     app.context.accessData = await fetchAccess();
+//   }
 
-  await next();
-});
+//   await next();
+// });
 
 app.use(inlineMin());
 app.use(session(app));
 app.use(handleErrors());
 app.use(bodyParser());
 
-router.use('/signup', newUser);
 router.use('/login', login);
 router.use('/logout', logout);
+router.use('/signup', newUser);
 router.use('/password-reset', passwordReset);
 router.use('/profile', checkLogin(), profile);
 
@@ -96,14 +96,14 @@ async function bootUp(app) {
 
   const port = process.env.PORT || 3000;
 
-  try {
-    /**
-     * @type {{access_token: string, created_at: string, expires_in: number, token_type: string}}
-     */
-    app.context.accessData = await fetchAccess();
-  } catch (e) {
-    debug.error("Get access token error: %O", e)
-  }
+  // try {
+  //   /**
+  //    * @type {{access_token: string, created_at: string, expires_in: number, token_type: string}}
+  //    */
+  //   app.context.accessData = await fetchAccess();
+  // } catch (e) {
+  //   debug.error("Get access token error: %O", e)
+  // }
 
   // Create HTTP server
   const server = app.listen(port);
