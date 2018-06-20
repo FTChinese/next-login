@@ -3,7 +3,7 @@ body {
     font-family: "Helvetica Neue", "Lucida Grande", Verdana, "PingFang SC", "PingFang TC", "Hiragino Sans GB", "Heiti SC", "Heiti TC", "WenQuanYi Micro Hei", "Microsoft YaHei", "Microsoft JhengHei", STHeiti, sans-serif;
     background-color: #FFF1E5; }
   
-a {
+a, .text-teal {
     color: #0d7680
 }
 
@@ -86,17 +86,12 @@ a:hover {
     border-bottom: 1px solid #ccc1b7;
 }
 
-.o-header a {
+.navbar-brand, .dropdown-toggle {
     color: #33302e;
 }
 
-.o-header a:hover {
+.navbar-brand:hover, .dropdown-toggle:hover {
     color: #4D4845
-}
-
-.navbar-brand {
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .o-footer {
