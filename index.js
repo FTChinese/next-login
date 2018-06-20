@@ -12,13 +12,13 @@ const checkLogin = require('./middlewares/check-login');
 const handleErrors = require('./middlewares/handle-errors');
 const inlineMin = require('./middlewares/inline-min');
 
-const newUser = require('./server/new-user');
+const signup = require('./server/signup');
+const plan = require('./server/plan');
+const verify = require('./server/verify');
 const login = require('./server/login');
 const logout = require('./server/logout');
 const passwordReset = require('./server/password');
 const profile = require('./server/profile');
-
-// const fetchAccess = require('./utils/fetch-access');
 
 const app = new Koa();
 const router = new Router();
@@ -79,8 +79,10 @@ app.use(bodyParser());
 
 router.use('/login', login);
 router.use('/logout', logout);
-router.use('/signup', newUser);
+router.use('/signup', signup);
+router.use('/plan', plan);
 router.use('/password-reset', passwordReset);
+router.use('/verify', checkLogin(), verify);
 router.use('/profile', checkLogin(), profile);
 
 app.use(router.routes());
