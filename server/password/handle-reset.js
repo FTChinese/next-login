@@ -1,15 +1,15 @@
 const request = require('superagent');
-const Router = require('koa-router');
+// const Router = require('koa-router');
 const schema = require('../schema');
 const debug = require('../../utils/debug')('user:handle-reset');
 const render = require('../../utils/render');
 const endpoints = require('../../utils/endpoints');
 const {handleJoiErr, handleApiUnprocessable, isSuperAgentErr} = require('../../utils/errors');
 
-const router = new Router();
+// const router = new Router();
 
 // User clicked link from email
-router.get('/:token', async function (ctx) {
+exports.verifyToken = async function (ctx) {
   const token = ctx.params.token;
 
   try {
@@ -39,9 +39,9 @@ router.get('/:token', async function (ctx) {
     // Display other API errors for now.
     ctx.body = e.response.body;
   }
-});
+};
 
-router.post('/:code', async (ctx, next) => {
+exports.newPassword = async (ctx, next) => {
   const token = ctx.params.token;
 
   /**
@@ -110,8 +110,6 @@ router.post('/:code', async (ctx, next) => {
     // Display other API error for now.
     return ctx.body = e.response.body;
   }
-}, async function(ctx) {
-  ctx.body = await render('password/new-password.html', ctx.state);
-});
+};
 
-module.exports = router.routes();
+// module.exports = router.routes();
