@@ -5,7 +5,7 @@ const router = new Router();
 
 router.get('/', async (ctx, next) => {
   ctx.session = null;
-  ctx.redirect('login');
+  ctx.redirect('/login');
   return;
 });
 
