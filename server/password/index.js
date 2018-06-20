@@ -107,6 +107,9 @@ router.post('/', async function (ctx, next) {
 
 // Verify password reset token and show reset password page.
 // Submit new password.
-router.use('/', handleReset);
+router.get('/:token', handleReset.verifyToken);
+router.post('/:token', handleReset.newPassword, async function(ctx) {
+  ctx.body = await render('password/new-password.html', ctx.state);
+});
 
 module.exports = router.routes();
