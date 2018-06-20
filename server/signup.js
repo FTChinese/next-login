@@ -2,12 +2,12 @@ const request = require('superagent');
 const Router = require('koa-router');
 const Joi = require('joi');
 
-const schema = require('../schema');
+const schema = require('./schema');
 
-const render = require('../../utils/render');
-const {handleJoiErr, handleAPIUnprocessable} = require('../../utils/errors');
-const debug = require('../../utils/debug')('user:login');
-const endpoints = require('../../utils/endpoints');
+const render = require('../utils/render');
+const {handleJoiErr, handleAPIUnprocessable} = require('../utils/errors');
+const debug = require('../utils/debug')('user:signup');
+const endpoints = require('../utils/endpoints');
 
 const router = new Router();
 
@@ -17,18 +17,6 @@ const config = {
 
 // Show signup page
 router.get('/', async (ctx) => {
-/**
-   * @type {{source: string, email: string}} query
-   */
-  const query = ctx.query;
-  const ip = ctx.request.ip;
-  debug.info("IP: %s", ip);
-
-  // Prepopulate email if user is redirected from signup page.
-  ctx.state.user = {
-    email: query.email
-  };
-
   debug.info(ctx.state);
 
   ctx.body = await render('new-user/signup.html', ctx.state);
