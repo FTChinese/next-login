@@ -7,6 +7,14 @@
   <div class="col-9">
 
     <section class="pt-2 mb-3">
+      {% if user and (not user.verified) %}
+      <div>请验证您的注册邮箱</div>
+      {% endif %}
+
+      {% if errors.verifyFailed %}
+      <div>您似乎点击了无效的验证链接</div>
+      {% endif %}
+
       {% if emailUpdated %}
       <p>邮箱已更新，我们给您的新邮箱发送了激活邮件，请点击邮件中的链接确认新邮箱有效</p>
       {% endif %}

@@ -20,14 +20,8 @@
       placeholder="登录FT中文网所用的邮箱"
       required>
 
-      {% if errors.invalidEmail %}
-      <div class="form-errortext">
-        您输入的邮箱地址无效，请使用有效的电子邮箱
-      </div>
-      {% endif %}
-
-      {% if errors.notFound %}
-      <div class="form-errortext">该邮箱尚未注册，您可以使用该邮箱<a href="/signup?source=password-reset&email={{email}}">创建FT中文网账号</a></div>
+      {% if errors.email %}
+      <div class="form-errortext">{{errors.email.message}}</div>
       {% endif %}
 
     </div>

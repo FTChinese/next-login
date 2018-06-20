@@ -77,7 +77,7 @@ exports.handleJoiErr = function(joiErr) {
  * @param {Object} err.response
  * @param {number} err.status
  */
-exports.handleApiErr = function(err) {
+exports.handleApiUnprocessable = function(err) {
   if (!err.response) {
     throw err;
   }
@@ -132,4 +132,16 @@ exports.handleApiErr = function(err) {
   };
 
   return ret;
+}
+
+/**
+ * 
+ * @param {Object} e 
+ * @return {boolean}
+ */
+exports.isSuperAgentErr = function (e) {
+  if (e.response && e.response.body && e.status) {
+    return true;
+  }
+  return false;
 }

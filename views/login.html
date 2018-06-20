@@ -4,12 +4,12 @@
 <div class="row justify-content-center">
   <div class="col-md-7 col-lg-5 col-xl-4">
     <div class="mt-4">
-      {% if not userinfo %}
+      {% if not user %}
       <h4 class="text-center">登录FT中文网</h4>
 
       <form method="post">
 
-        {% if errors.credentials %}
+        {% if errors.notFound %}
           <div class="form-errortext text-center">{{errors.credentials}}</div>
         {% endif %}
 
@@ -23,8 +23,8 @@
           placeholder="电子邮箱"
           required>
 
-          {% if errors.notFound %}
-          <small class="form-text text-muted">该邮箱尚未注册，您可以使用该邮箱<a href="/signup?source=login&email={{errors.notFound}}">创建FT中文网账号</a></small>
+          {% if errors.email %}
+          <div class="form-errortext">{{errors.email.message}}</div>
           {% endif %}
         </div>
 
@@ -36,6 +36,10 @@
           name="credentials[password]"
           placeholder="密码"
           required>
+
+          {% if errors.password %}
+          <div class="form-errortext">{{errors.password.message}}</div>
+          {% endif %}
         </div>
         <div class="form-check clearfix">
             <input class="form-check-input"
