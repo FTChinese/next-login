@@ -14,7 +14,7 @@ exports.credentials = Joi.object().keys({
 
 exports.reset = Joi.object().keys({
   password,
-  passwordConfirmation: password
+  confirmPassword: password
 });
 
 exports.profile = Joi.object().keys({
