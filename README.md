@@ -59,10 +59,10 @@ In Golang, standard libary actually provides variables to manipulate base64 and 
 
 MySQL schema:
 ```sql
-access_token BINARY(66),
-refresh_token BINARY(66),
-openid BINARY(15),
-unionid BINARY(15),
+access_token VARBINARY(66),
+refresh_token VARBINARY(66),
+openid VARBINARY(15),
+unionid VARBINARY(15),
 UNIQUE INDEX (unionid)
 ```
 
