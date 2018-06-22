@@ -1,12 +1,11 @@
 const Router = require('koa-router');
 const _ = require('lodash');
 const request = require('superagent');
-const Joi = require('joi');
 const schema = require('../schema');
 
 const render = require('../../utils/render');
 const debug = require('../../utils/debug')('user:password-reset');
-const {handleJoiErr, handleApiUnprocessable} = require('../../utils/errors');
+const {processJoiError, processApiError} = require('../../utils/errors');
 const endpoints = require('../../utils/endpoints');
 
 const handleReset = require('./handle-reset');
@@ -22,7 +21,7 @@ router.get('/', async (ctx) => {
   /**
    * @type {{email: boolean, reset: boolean}}
    */
-  const ok = ctx.session.ok;
+  const alert = ctx.session.alert;
 
   /**
    * This part is enabled only after email is sent or password is reset.
@@ -58,7 +57,7 @@ router.post('/', async function (ctx, next) {
    */
   const result = schema.email.validate(ctx.request.body);
   if (result.error) {
-    const errors = handleJoiErr(result.error)
+    const errors = processJoiError(result.error)
     ctx.state.errors = errors;
 
     return await next();
@@ -71,7 +70,7 @@ router.post('/', async function (ctx, next) {
     await request.post(endpoints.resetLetter)
       .send({email});
 
-    ctx.session.success = {
+    ctx.session.alert = {
       emailSent: true
     };
 
@@ -79,27 +78,8 @@ router.post('/', async function (ctx, next) {
     return ctx.redirect(ctx.path);
 
   } catch (e) {
-    // Know error could be 400, 404, 422
-
-    // If account for this email is not found
-    if (404 === e.status) {
-      ctx.state.email = email;
-      ctx.state.errors = {
-        email: {
-          value: email,
-          message: '您输入的邮箱不存在'
-        }
-      };
+      ctx.state.errors = processApiError(e);
       return await next();
-    }
-
-    if (422 === e.status) {
-      ctx.state.errors = handleApiUnprocessable(e)
-      return await next();
-    }
-    
-    // Directly output API error response for now.
-    return ctx.body = e.response.body;
   }
 }, async (ctx) => {
   ctx.body = await render('password/enter-email.html', ctx.state);
