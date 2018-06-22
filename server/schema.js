@@ -3,11 +3,12 @@ const Joi = require('joi');
 const email = Joi.string().trim().email().min(3).max(30).required();
 const password = Joi.string().trim().min(8).max(20).required();
 
-exports.email = Joi.object().keys({
-  email
+exports.login = Joi.object().keys({
+  email,
+  password: Joi.string().trim().required()
 });
 
-exports.credentials = Joi.object().keys({
+exports.account = Joi.object().keys({
   email,
   password
 });
@@ -18,10 +19,14 @@ exports.reset = Joi.object().keys({
 });
 
 exports.profile = Joi.object().keys({
-  familyName: Joi.string().trim().min(1).max(10),
-  givenName: Joi.string().trim(),
-  gender: Joi.string().trim(),
-  birthdate: Joi.string().trim()
+  familyName: Joi.string().trim().max(50).allow('').default(null),
+  givenName: Joi.string().trim().max(50).allow('').default(null),
+  gender: Joi.string().trim().valid(['M', 'F', '']).default(null),
+  birthdate: Joi.string().trim().min(8).max(10).allow('').default(null)
+});
+
+exports.email = Joi.object().keys({
+  email
 });
 
 exports.changeEmail = Joi.object().keys({
@@ -30,53 +35,29 @@ exports.changeEmail = Joi.object().keys({
 });
 
 exports.changePassword = Joi.object().keys({
-  currentPassword: password,
-  password: password,
-  passwordConfirmation: password
+  oldPassword: Joi.string().trim().required(),
+  newPassword: password,
+  confirmPassword: password
 });
 
 exports.username = Joi.object().keys({
-  oldName: Joi.string().trim(),
   name: Joi.string().trim().min(1).max(20).required()
 });
 
 exports.mobile = Joi.object().keys({
-  oldMobileNumber: Joi.string().trim(),
-  mobileNumber: Joi.string().trim().min(1).required()
+  mobile: Joi.string().trim().min(1).required()
 });
 
 exports.letter = Joi.object().keys({
-  todayFocus: Joi.boolean(),
-  weeklyChoice: Joi.boolean(),
-  afternoonExpress: Joi.boolean()
+  todayFocus: Joi.boolean().default(false),
+  weeklyChoice: Joi.boolean().default(false),
+  afternoonExpress: Joi.boolean().default(false),
 });
 
 exports.address = Joi.object().keys({
-  address: Joi.string().trim(),
-  zipCode: Joi.string().trim()
-})
-/**
- * @param {Object} err
- * @param {boolean} err.isJoi
- * @param {string} err.name=ValidationError
- * @param {Object[]} err.details
- * @param {string} err.details.message
- * @param {string[]} err.details.path
- * @param {string} err.details.type
- * @param {Object} err.details.context
- * @param {number} err.details.context.limit
- * @param {number} err.details.context.value
- * @param {string} err.details.context.key
- * @param {string} err.details.context.label
- * @return {Object}
- */
-exports.gatherErrors = function (err) {
-  if (!err.isJoi || err.name !== 'ValidationError') {
-    return null;
-  }
-
-  return err.details.reduce((acc, cur) => {
-    acc[cur.context.key] = cur.message;
-    return acc;
-  }, {});
-};
+  province: Joi.string().trim().allow(''),
+  city: Joi.string().trim().allow(''),
+  district: Joi.string().trim().allow(''),
+  street: Joi.string().trim().allow(''),
+  zipCode: Joi.string().trim().allow(''),
+});

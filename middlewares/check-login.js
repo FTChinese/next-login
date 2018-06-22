@@ -23,7 +23,7 @@ function checkLogin() {
         verified: ctx.session.user.verified
       };
 
-      debug.info('userinfo: %O', ctx.state.user);
+      debug.info('user: %O', ctx.state.user);
       return await next();
     }
 

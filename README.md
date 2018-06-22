@@ -103,20 +103,18 @@ The following steps require user login.
 The following requires authentication.
 
 * `/user/profile`
-* `/user/profile/account`
-* `/user/profile/email`
-Send verification letter if user changed email.
-
+* `/user/account`
+* `/user/email`
+* `/user/email/request-verification`
+* `/user/email/confirm-verification`
+* `/user/profile/name`
+* `/user/profile/mobile`
 * `/user/profile/password`
 * `/user/profile/notification`
 * `/user/profile/membership`
 * `/user/profile/address`
 
 ## Emails
-
-NOTE: Currently sending email to user is embedded in this app powered by [`node-mailer`](https://github.com/nodemailer/nodemailer). To accommodate future requirements and, more importantly, for easy scaling, it's better to set up a dedicated email service (exposing a restful API?) to centrally handle various email-related operations.
-
-Send emails to user:
 
 * Initial signup. Requries user to verify the email address. The email should expire in a few days. A user could only use basic funtionalities of the site before email verified. For example, accept user memebership only after email is correct.
 * Purchased memebership. Tells user its rights and privileges, membership duration, etc..

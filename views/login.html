@@ -9,8 +9,8 @@
 
       <form method="post">
 
-        {% if errors.notFound %}
-          <div class="form-errortext text-center">{{errors.credentials}}</div>
+        {% if errors.credentials %}
+          <div class="form-errortext text-center">{{errors.credentials.message}}</div>
         {% endif %}
 
         <div class="form-group">

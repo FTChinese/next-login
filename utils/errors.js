@@ -1,3 +1,18 @@
+const debug = require('./debug')('user:errors');
+const codes = Object.freeze({
+  notFound: 'not_found',
+  missing: 'missing',
+  missingField: 'missing_field',
+  invalid: 'invalid',
+  exists: 'alrady_exists'
+});
+
+const keys = Object.freeze({
+  email: 'email',
+  credentials: 'credentials',
+  password: 'password',
+});
+
 exports.ErrorForbidden = class extends Error {
   constructor(message='Forbidden') {
     super(message);
@@ -14,26 +29,123 @@ exports.ErrorNotFound = class extends Error {
 
 /**
  * 
- * @param {Error} joiErr 
- * @param {boolean} joiErr.isJoi
- * @param {string} joiErr.name - ValidationError
- * @param {Object[]} joiErr.details
- * @param {string} joiErr.details[].message
- * @param {string[]} joiErr.details[].path
- * @param {string} joiErr.details[].type
- * @param {Object} joiErr.details[].context
- * @param {number} joiErr.details[].context.limit
- * @param {string} joiErr.details[].context.value
- * @param {string} joiErr.details[].context.encoding
- * @param {string} joiErr.details[].context.key
- * @param {string} joiErr.details[].context.label
+ * @param {SuperAgentError} body 
+ * @param {string} key 
+ * @return {Object}
  */
-exports.handleJoiErr = function(joiErr) {
+function apiNotFound (body, key) {
+
+  const ret = {};
+  let message = '';
+
+  switch (key) {
+    case keys.credentials:
+      message = '邮箱或密码错误';
+      break;
+
+    default:
+      message = body.message;
+      break;
+  }
+
+  ret[key] = {
+    code: codes.notFound,
+    message,
+  }
+
+  debug.info('Not found: %O', ret);
+
+  return ret;
+}
+
+/**
+ * 
+ * @param {APIErrorBody} body 
+ * @param {string} key 
+ * @return {Object}
+ */
+function apiForbidden (body, key) {
+  const ret = {};
+  let message = '';
+
+  switch (key) {
+    case 'oldPassword':
+      message = '当前密码不对';
+      break;
+
+    default:
+      message = body.message
+      break;
+  }
+
+  ret[key] = {
+    code: 'fobidden',
+    message,
+  };
+
+  return ret;
+}
+/**
+ * @param {APIErrorBody} body
+ * @return {Object}
+ */
+function apiUnprocessable (body) {
+
+  const error = body.error;
+  const ret = {};
+  const key = error.field;
+  let message;
+
+  switch (key) {
+    case keys.email:
+      message = '邮箱地址';
+      break;
+
+    default:
+      break;
+  }
+
+  switch (error.code) {
+    case codes.missing:
+      message = '请求的资源不存在';
+      break;
+
+    case codes.missingField:
+      message += '不能为空';
+      break;
+
+    case codes.invalid:
+      message += '无效';
+      break;
+
+    case codes.exists:
+      message += '已经存在';
+      break;
+
+    default:
+      message = error.message || 'API错误';
+      break;
+  }
+
+  ret[key] = {
+    code: error.code,
+    message
+  };
+
+  return ret;
+}
+
+/**
+ * @param {JoiErr} joiErr 
+ * @returns {Object} - The value of each key is UIError
+ */
+exports.processJoiError = function(joiErr) {
   if (!joiErr.isJoi) {
     throw joiErr;
   }
 
   const ret = {};
+  debug.info('Joi errror details: %O', joiErr.details);
 
   for (const detail of joiErr.details) {
     const key = detail.context.key;
@@ -65,83 +177,56 @@ exports.handleJoiErr = function(joiErr) {
 
     ret[key] = {
       value,
+      code: codes.invalid,
       message
     }
   }
 
+  debug.info('Validation err from Joi: %O', ret);
   return ret;
 };
 
 /**
- * @param {Object} err
- * @param {Object} err.response
- * @param {number} err.status
+ * @param {SuperAgentError} err 
+ * @param {string} key
+ * @returns {Object}
  */
-exports.handleApiUnprocessable = function(err) {
-  if (!err.response) {
-    throw err;
-  }
-  
-  if (422 !== err.status) {
+exports.processApiError = function(err, key='') {
+  if (!exports.isSuperAgentError(err)) {
     throw err;
   }
 
-  /**
-   * @type {{message: string, error: Object}}
-   */
   const body = err.response.body;
-  /**
-   * @type {{field: string, code: string, message: string}}
-   * code: missing | missing_field | invalid | already_exists
-   */
-  const error = body.error;
-  const ret = {};
-  const key = error.field;
-  let message;
 
-  switch (key) {
-    case 'email':
-      message = '邮箱地址';
-      break;
+  debug.error('API error response: %O', body);
 
-    default:
-      message = key;
-      break;
-  }
+  switch (err.status) {
+    case 403:
+      return apiForbidden(body, key);
 
-  switch (error.code) {
-    case 'missing_field':
-      message += '不能为空';
-      break;
+    case 404:
+      return apiNotFound(body, key)
 
-    case 'invalid':
-      message += '无效';
-      break;
-
-    case 'already_exists':
-      message += '已经存在';
-      break;
+    case 422:
+      return apiUnprocessable(body)
 
     default:
-      message += err.message || 'API Error';
-      break;
+      return {
+        serverError: {
+          message: '服务器错误，请稍后再试'
+        }
+      };
   }
-
-  ret[key] = {
-    message
-  };
-
-  return ret;
-}
+};
 
 /**
- * 
- * @param {Object} e 
+ * @param {SuperAgentError} e
  * @return {boolean}
  */
-exports.isSuperAgentErr = function (e) {
+exports.isSuperAgentError = function (e) {
   if (e.response && e.response.body && e.status) {
     return true;
   }
   return false;
-}
+};
+

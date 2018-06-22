@@ -1,0 +1,75 @@
+{% extends "layouts/profile.html" %} 
+
+{% block content %}
+
+{% if alert.saved %}
+  <div class="alert alert-success" role="alert">保存成功</div>
+{% endif %}
+
+<form method="post">
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="familyName">姓</label>
+      <input type="text" class="form-control"
+      id="familyName"
+      name="profile[familyName]"
+      value="{{profile.familyName}}">
+
+      {% if errors.familyName %}
+        <div class="form-errortext">{{errors.familyName.message}}</div>
+      {% endif %}
+    </div>
+  
+    <div class="form-group col-md-6">
+      <label for="givenName">名</label>
+      <input type="text" class="form-control"
+      id="givenName"
+      name="profile[givenName]"
+      value="{{profile.givenName}}">
+
+      {% if errors.givenName %}
+        <div class="form-errortext">{{errors.givenName.message}}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>性别</label>
+    <div class="form-check">
+      <input class="form-check-input"
+      id="genderM"
+      type="radio"
+      name="profile[gender]"
+      value="M"
+      {% if profile.gender == "M" %} checked{% endif %}>
+      <label class="form-check-label" for="genderM">男</label>
+    </div>
+    
+    <div class="form-check">
+      <input class="form-check-input"
+      id="genderF"
+      type="radio"
+      name="profile[gender]" 
+      value="F"
+      {% if profile.gender == "F" %} checked{% endif %}>
+      <label class="form-check-label" for="genderF">女</label>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="birthdate">生日</label>
+    <input class="form-control"
+    id="birthdate"
+    type="date"
+    name="profile[birthdate]"
+    value="{{profile.birthdate}}">
+
+    {% if errors.birthdate %}
+      <div class="form-errortext">{{errors.birthdate.message}}</div>
+    {% endif %}
+  </div>
+
+  <button type="submit" class="btn btn-primary">保存</button>
+</form>
+
+{% endblock %}

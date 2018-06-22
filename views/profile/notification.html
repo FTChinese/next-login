@@ -1,12 +1,11 @@
-{% extends "layouts/base.html" %} 
+{% extends "layouts/profile.html" %} 
 
-{% block main %}
-<div class="row">
-  {% include "profile/nav.html" %}
-  <div class="col-9">
-    {% if flash.letterSaved %}
-    <p>邮件设置已保存</p>
+{% block content %}
+
+    {% if alert.saved %}
+      <div class="alert alert-success" role="alert">邮件设置已保存</div>
     {% endif %}
+    
     <section>
       <h5>邮件设置</h5>
       <form method="post">
@@ -40,6 +39,5 @@
         <button type="submit" class="btn btn-primary">保存</button>
       </form>
     </section>
-  </div>
-</div>
+
 {% endblock %}

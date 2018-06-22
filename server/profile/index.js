@@ -1,72 +1,82 @@
-const debug = require('debug')('user:settings');
 const request = require('superagent');
 const Router = require('koa-router');
-const Joi = require('joi');
+
+const debug = require('../../utils/debug')('user:profile');
+const endpoints = require('../../utils/endpoints');
+const {processJoiError, processApiError, isSuperAgentError} = require('../../utils/errors');
+const render = require('../../utils/render');
+
 const schema = require('../schema');
 const account = require('./account');
 const email = require('./email');
+const name = require('./name');
+const mobile = require('./mobile');
 const password = require('./password');
 const notification = require('./notification');
 const membership = require('./membership');
 const address = require('./address');
 
-const render = require('../../utils/render');
-
 const router = new Router();
 
-router.use('/account', account);
-router.use('/email', email);
-router.use('/password', password);
-router.use('/notification', notification);
-router.use('/membership', membership);
-router.use('/address', address);
+// Show basic profile
+router.get('/', async (ctx) => {
 
-router.get('/', async (ctx, next) => {
-  const accessToken = ctx.accessData.access_token;
-  const uuid = ctx.session.user.sub;
-  if (!uuid) {
-    throw new Error('No UUID found. Access denied');
-  }
+  const resp = await request.get(endpoints.profile)
+    .set('X-User-Id', ctx.session.user.id);
 
-  debug('Access token: %s; uuid: %s', accessToken, uuid);
+  console.log('User profile: %o', resp.body);
 
-  try {
-    const resp = await request.get('http://localhost:8000/user/profile')
-      .set('X-User-Id', ctx.session.user.sub)
-      .auth(ctx.accessData.access_token, {type: 'bearer'});
+  /**
+   * @type {Profile}
+   */
+  const profile = resp.body;
+  ctx.state.profile = profile;
 
-    console.log('User profile: %o', resp.body);
-
-    ctx.state.profile = resp.body;
-
-    ctx.body = await render('profile/my-profile.html', ctx.state);
-  } catch (e) {
-    throw e;
-  }
+  ctx.body = await render('profile/home.html', ctx.state);
 });
 
-router.post('/', async (ctx, next) => {
+// Update basic profile
+router.post('/', async (ctx) => {
+
+  const result = schema.profile.validate(ctx.request.body.profile, {abortEarly: false});
+
+  if (result.error) {
+    ctx.session.errors = processJoiError(result.error);
+    
+    return ctx.redirect(ctx.path);
+  }
 
   /**
    * @type {{familyName: string, givenName: string, gender: string, birthdate: string}}
    */
-  let profile = ctx.request.body.profile;
+  const profile = result.value;
 
   try {
-    profile = await Joi.validate(profile, schema.profile, {
-      abortEarly: false,
-      convert: false
-    });
-
-    const resp = await request.patch('http://localhost:8000/user/profile')
-      .set('X-User-Id', ctx.session.user.sub)
-      .auth(ctx.accessData.access_token, {type: 'bearer'})
+    await request.patch(endpoints.profile)
+      .set('X-User-Id', ctx.session.user.id)
       .send(profile);
+
+    ctx.session.alert = {
+      saved: true
+    };
 
     return ctx.redirect(ctx.path);
   } catch (e) {
-    throw e;
+    const errors = processApiError(e);
+
+    ctx.session.errors = errors;
+
+    return ctx.redirect(ctx.path);
   }
 });
+
+router.use('/account', account);
+router.use('/email', email);
+router.use('/name', name);
+router.use('/mobile', mobile);
+router.use('/password', password);
+router.use('/notification', notification);
+router.use('/membership', membership);
+router.use('/address', address);
 
 module.exports = router.routes();

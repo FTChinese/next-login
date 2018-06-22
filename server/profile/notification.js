@@ -1,64 +1,56 @@
-const debug = require('debug')('user:account');
 const Router = require('koa-router');
 const request = require('superagent');
-const Joi = require('joi');
+
 const schema = require('../schema');
+
+const debug = require('../../utils/debug')('user:account');
 const render = require('../../utils/render');
+const endpoints = require('../../utils/endpoints');
+const {processJoiError, processApiError, isSuperAgentError} = require('../../utils/errors');
 
 const router = new Router();
 
 router.get('/', async (ctx, next) => {
-  const accessToken = ctx.accessData.access_token;
-  const uuid = ctx.session.user.sub;
-  if (!uuid) {
-    throw new Error('No UUID found. Access denied');
-  }
 
-  debug('Access token: %s; uuid: %s', accessToken, uuid);
+  const resp = await request.get(endpoints.profile)
+    .set('X-User-Id', ctx.session.user.id)
 
-  const flash = {
-    letterSaved: ctx.session.letterSaved
-  };
-
-  const resp = await request.get('http://localhost:8000/user/profile')
-    .set('X-User-Id', ctx.session.user.sub)
-    .auth(ctx.accessData.access_token, {type: 'bearer'});
-
+  /**
+   * @type {Profile}
+   */
+  const profile = resp.body;
   console.log('User account: %o', resp.body);
 
-  ctx.state.letter = resp.body.newsletter;
-  ctx.state.flash = flash;
+  ctx.state.letter = profile.newsletter;
 
   ctx.body = await render('profile/notification.html', ctx.state);
-
-  delete ctx.session.letterSaved;
 });
 
 router.post('/', async (ctx, next) => {
-  const letter = {
-    todayFocus: false,
-    weeklyChoice: false,
-    afternoonExpress: false
-  };
 
+  const result = schema.letter.validate(ctx.request.body.letter);
+
+  if (result.error) {
+    const errors = processJoiError(result.error);
+    ctx.session.errors = errors;
+    return ctx.redirect(ctx.path);
+  }
   try {
-    let l = ctx.request.body.letter || {};
 
-    l = await Joi.validate(l, schema.letter);
-
-    Object.assign(letter, l);
-
-    debug(letter);
-
-    const resp = await request.patch('http://localhost:8000/user/newsletter')
-      .set('X-User-Id', ctx.session.user.sub)
-      .auth(ctx.accessData.access_token, {type: 'bearer'})
+    const resp = await request.patch(endpoints.newsletter)
+      .set('X-User-Id', ctx.session.user.id)
       .send(letter);
     
-    ctx.session.letterSaved = true;
+    ctx.session.alert = {
+      saved: true
+    };
+
     return ctx.redirect(ctx.path);
   } catch (e) {
-    throw(e);
+    const errors = processApiError(e)
+    ctx.session.errors = errors;
+
+    return ctx.redirect(ctx.path);
   }
 });
 

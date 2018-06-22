@@ -1,11 +1,18 @@
 const test = require('ava');
 const Joi = require('joi');
 const schema = require('../server/schema');
-const {handleJoiErr} = require('../utils/errors');
+const {processJoiError} = require('../utils/errors');
 
 const credentials = {
   email: 'foo',
-  // password: '1234567'
+  password: '1234567'
+};
+
+const profile = {
+  familyName: '',
+  givenName: '',
+  birthdate: '',
+  gender: 'female'
 };
 
 test('credentials', async t => {
@@ -30,8 +37,21 @@ test('handleJoiErr', async t => {
 
     console.log(result)
   } catch (e) {
-    console.log("Formatted error: %o", handleJoiErr(e));
+    console.log("Formatted error: %o", processJoiError(e));
   }
 
   t.pass();
 });
+
+test('profile', async t => {
+  const result = schema.profile.validate(profile, {abortEarly: false})
+
+  if (result.error) {
+    console.log(result.error);
+  }
+
+  console.log(result.value);
+
+  t.pass();
+});
+

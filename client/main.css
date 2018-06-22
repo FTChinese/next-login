@@ -10,7 +10,7 @@ a, .text-teal {
 a:hover {
     color: #4D4845;
 }
-  .btn {
+  .alert, .btn {
     border-radius: 0; }
   
   .btn-primary {

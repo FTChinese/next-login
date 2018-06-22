@@ -1,54 +1,68 @@
-const debug = require('debug')('user:address');
 const Router = require('koa-router');
 const request = require('superagent');
 const Joi = require('joi');
 const schema = require('../schema');
+
+const debug = require('../../utils/debug')('user:address');
 const render = require('../../utils/render');
+const endpoints = require('../../utils/endpoints');
+const {processJoiError, processApiError, isSuperAgentError} = require('../../utils/errors');
+
 const router = new Router();
 
-router.get('/', async (ctx, next) => {
+// Show address
+router.get('/', async (ctx) => {
+  const resp = await request.get(endpoints.profile)
+    .set('X-User-Id', ctx.session.user.id);
 
-  const flash = {
-    addressSaved: ctx.session.addressSaved
-  };
+  /**
+   * @type {Profile}
+   */
+  const profile = resp.body;
+  const address = profile.address;
+  debug.info('User address: %O', address);
 
-  const resp = await request.get('http://localhost:8000/user/profile')
-    .set('X-User-Id', ctx.session.user.sub)
-    .auth(ctx.accessData.access_token, {type: 'bearer'});
-
-  console.log('User account: %o', resp.body);
-
-  ctx.state.profile = resp.body;
-  ctx.state.flash = flash;
+  ctx.state.address = address;
 
   ctx.body = await render('profile/address.html', ctx.state);
-  
-  delete ctx.session.addressSaved;
 });
 
+// Update address
 router.post('/', async (ctx, next) => {
-  let profile = ctx.request.body.profile;
-  const address = ctx.request.body.address;
+
+  const result = schema.address.validate(ctx.request.body.address, {abortEarly: false});
+  if (result.error) {
+    ctx.session.errors = processJoiError(result.error);
+    
+    return ctx.redirect(ctx.path);
+  }
+
+  /**
+   * @type {Address}
+   */
+  const address = result.value;
+
+  // Testing only currently.
+  return ctx.body = address;
 
   try {
-    profile = await Joi.validate(profile, schema.address);
 
-    const resp = await request.patch('http://localhost:8000/user/profile')
-      .set('X-User-Id', ctx.session.user.sub)
-      .auth(ctx.accessData.access_token, {type: 'bearer'})
-      .send(profile);
+    await request.patch(endpoints.address)
+      .set('X-User-Id', ctx.session.user.id)
+      .send(address);
 
-    ctx.session.addressSaved = true;
+    ctx.session.alert = {
+      saved: true
+    };
 
     return ctx.redirect(ctx.path);
 
   } catch (e) {
-    throw e;
+    const errors = processApiError(e)
+    ctx.session.errors = errors;
+
+    return ctx.redirect(ctx.path);
   }
-  ctx.body = {
-    profile,
-    address
-  };
 });
 
 module.exports = router.routes();

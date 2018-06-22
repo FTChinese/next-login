@@ -1,15 +1,11 @@
-{% extends "layouts/base.html" %} 
+{% extends "layouts/profile.html" %} 
 
-{% block main %}
+{% block content %}
 
-<div class="row">
-  {% include "profile/nav.html" %}
-  <div class="col-9">
-    <p>会员类型：</p>
-    <p>会员期限：</p>
-    <p>权益：</p>
-    <a href="#">退订</a>
-    <p>退款按照即日起到会员终止日期的比例退还。<a href="#" target="_blank">详情</a></p>
-  </div>
-</div>
+<p>会员类型：</p>
+<p>会员期限：</p>
+<p>权益：</p>
+<a href="#">退订</a>
+<p>退款按照即日起到会员终止日期的比例退还。<a href="#" target="_blank">详情</a></p>
+
 {% endblock %}

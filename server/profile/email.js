@@ -1,104 +1,105 @@
-const debug = require('debug')('user:address');
 const Router = require('koa-router');
 const request = require('superagent');
-const render = require('../../utils/render');
-const Joi = require('joi');
+const {dirname} = require('path');
 const schema = require('../schema');
-const {isAlradyExists} = require('../../utils/check-error');
+
+const debug = require('../../utils/debug')('user:email');
+const endpoints = require('../../utils/endpoints');
+const {processJoiError, processApiError, isSuperAgentError} = require('../../utils/errors');
 
 const router = new Router();
 
-router.get('/', async (ctx, next) => {
-  const emailUpdated = ctx.session.emailUpdated;
-  ctx.state.errors = ctx.session.errors;
+router.post('/', async (ctx) => {
 
-  const accessToken = ctx.accessData.access_token;
-  const uuid = ctx.session.user.sub;
-  if (!uuid) {
-    throw new Error('No UUID found. Access denied');
+  const redirectTo = `${dirname(ctx.path)}/account`;
+
+  const result = schema.email.validate(ctx.request.body.account);
+  if (result.error) {
+    const errors = processJoiError(result.error);
+
+    ctx.session.errors = errors;
+
+    return ctx.redirect(redirectTo);
   }
 
-  debug('Access token: %s; uuid: %s', accessToken, uuid);
+  /**
+   * @type {{email: string}}
+   */
+  const account = result.value;
 
   try {
-    const resp = await request.get('http://localhost:8000/user/profile')
-      .set('X-User-Id', ctx.session.user.sub)
-      .auth(ctx.accessData.access_token, {type: 'bearer'});
+    const resp = await request.patch(endpoints.email)
+      .set('X-User-Id', ctx.session.user.id)
+      .send(account);
 
-    const email = resp.body.email;
-    debug('User email: %o', email);
-
-    ctx.state.email = {
-      current: email,
-      new: email
-    };
-
-    ctx.state.emailUpdated = emailUpdated;
-
-    ctx.body = await render('profile/email.html', ctx.state);
-
+    // If resp.status === 204, the email is not altered
+    if (200 === resp.status) {
+      debug.info('Email changed')
+      ctx.session.alert = {
+        email: true
+      };
+    }
+    
+    return ctx.redirect(redirectTo);
   } catch (e) {
-    throw e;
-  } finally {
-    delete ctx.session.emailUpdated;
-    delete ctx.session.errors;
+
+    const errors = processApiError(e);
+    ctx.session.errors = errors;
+
+    return ctx.redirect(redirectTo);
   }
 });
 
-router.post('/', async (ctx, next) => {
-  let email = ctx.request.body.email;
+router.post('/request-verification', async (ctx) => {
+  const redirectTo = `${dirname(dirname(ctx.path))}/account`;
 
   try {
-    email = await Joi.validate(email, schema.changeEmail);
+    await request.post(endpoints.requestVerification)
+      .set('X-User-Id', ctx.session.user.id);
 
-    // If user submit without any modification
-    if (email.current === email.new) {
-      debug('Use did not change email');
-      return ctx.redirect(ctx.path);
-    }
-
-    // 204 No Content
-    // 422 Unprocessable Entity if email is taken
-    // If email changed, we should also send activation letter
-    const resp = await request.patch('http://localhost:8000/user/email')
-      .set('X-User-Id', ctx.session.user.sub)
-      .auth(ctx.accessData.access_token, {type: 'bearer'})
-      .send({email: email.new});
-
-    ctx.session.emailUpdated = true;
-
-    return ctx.redirect(ctx.path);
-  } catch (e) {
-    ctx.state.email = {
-      current: email.current,
-      new: email.current
+    ctx.session.alert = {
+      resent: true
     };
 
-    const joiErrs = schema.gatherErrors(e);
-
-    if (joiErrs) {
-      debug('Validation errors: %O', joiErrs);
-      ctx.state.errors = {
-        email: `您输入的邮箱地址"${email.new}"不合法`
-      };
-      return await next();
-    }
-
-    if (422 == e.status && isAlradyExists('email', e.response.body.errors)) {
-
-      ctx.state.errors = {
-        email: `无法把您的邮箱更改成"${email.new}"，它已经被别人注册了`
-      };
-
-      return await next();
-    }
-
-    debug('Response error body: %O', e.response.body);
-
+    return ctx.redirect(redirectTo);
+  } catch (e) {
+    debug.error(e);
     throw e;
   }
-}, async (ctx, next) => {
-  ctx.body = await render('profile/email.html', ctx.state);
+});
+
+router.get('/confirm-verification/:token', async (ctx) => {
+  const token = ctx.params.token;
+
+  try {
+    const resp = await request.put(`${endpoints.verifyEmail}/${token}`)
+      .set('X-User-Id', ctx.session.user.id);
+
+    /**
+     * @type {User}
+     */
+    const user = resp.body;
+    debug.info("User info after verification: %O", user);
+
+    ctx.session.user.verified = user.verified;
+
+    ctx.redirect('/profile/account');
+
+  } catch (e) {
+    if (!isSuperAgentError(e)) {
+      throw e;
+    }
+
+    if (404 === e.status) {
+      debug.info('Verify email respond not found');
+      
+      ctx.session.alert = {
+        invalidLink: true
+      }
+    }
+
+    ctx.redirect('/profile/account');
+  }
 });
 
 module.exports = router.routes();

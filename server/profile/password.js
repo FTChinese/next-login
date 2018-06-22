@@ -1,10 +1,12 @@
-const debug = require('debug')('user:password');
 const Router = require('koa-router');
 const request = require('superagent');
-const Joi = require('joi');
+
 const schema = require('../schema');
-const {isAlradyExists} = require('../../utils/check-error');
+
+const debug = require('../../utils/debug')('user:password');
 const render = require('../../utils/render');
+const endpoints = require('../../utils/endpoints');
+const {processJoiError, processApiError} = require('../../utils/errors');
 
 const router = new Router();
 
@@ -13,43 +15,50 @@ router.get('/', async (ctx, next) => {
 });
 
 router.post('/', async (ctx, next) => {
+
+  // Validate
+  const result = schema.changePassword.validate(ctx.request.body);
+  if (result.error) {
+    const errors = processJoiError(result.error);
+    ctx.session.errors = errors;
+
+    return ctx.redirect(ctx.path);
+  }
+
   /**
-   * @type {{currentPassword: string, password: string, passwordConfirmation: string}}
+   * @type {{oldPassword: string, newPassword: string, confirmPassword: string}}
    */
-  let user = ctx.request.body;
+  const pass = result.value;
+  // Ensure new password confirmed
+  if (pass.newPassword !== pass.confirmPassword) {
+    ctx.state.errors = {
+      confirmPassword: {
+        message: '两次输入的新密码必须相同'
+      }
+    };
+
+    return await next();
+  }
 
   try {
-    user = await Joi.validate(user, schema.changePassword);
+    await request.patch(endpoints.password)
+      .send({
+        oldPassword: pass.oldPassword,
+        newPassword: pass.newPassword
+      });
 
-    // User is using current password as new password
-    if (user.currentPassword == user.password) {
-      debug('Use is using current password');
-      ctx.state.errors = {
-        notChanged: '新密码应该不同于当前密码'
-      }
-      return await next();
-    }
+    ctx.session.alert = {
+      saved: true
+    };
 
-    // Confirmed password does not match the new one
-    if (user.password == user.passwordConfirmation) {
-      debug('Confirmation password mismatch');
-      ctx.state.errors = {
-        confirmMismatch: '两次输入的新密码不同'
-      };
-
-      return await next();
-    }
-
-    /**
-     * @todo Authenticate user with current password
-     * Update user password
-     */
+    return ctx.redirect(ctx.path);
 
   } catch (e) {
-    debug(e);
+
+    ctx.state.errors = processApiError(e, 'oldPassword');
+
+    return ctx.redirect(ctx.path);
   }
-}, async (ctx, next) => {
-  ctx.body = await render('profile/password.html', ctx.state);
 });
 
 module.exports = router.routes();

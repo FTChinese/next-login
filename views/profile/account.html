@@ -1,62 +1,134 @@
-{% extends "layouts/base.html" %} 
+{% extends "layouts/profile.html" %} 
 
-{% block main %}
+{% block content %}
 
-<div class="row">
-  {% include "profile/nav.html" %}
-  <div class="col-9">
-    {% if flash.nameUpdated %}
-    <p>用户名已更新</p>
+  {% if user and (not user.verified) %}
+    <div class="alert alert-primary" role="alert">请验证您的登录邮箱</div>
+  {% endif %}
+
+  {% if alert.invalidLink %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <span>您似乎点击了无效的验证链接</span>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  {% endif %}
+
+  {% if alert.resent %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <span>验证邮件已发送</span>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  {% endif %}
+
+  {% if alert.email %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <span>邮箱已更新，我们给您的新邮箱发送了激活邮件，请点击邮件中的链接确认新邮箱有效</span>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  {% endif %}
+
+  {% if alert.name %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <span>用户名已更新</span>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  {% endif %}
+
+  {% if alert.mobile %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <span>手机号码已更新</span>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  {% endif %}
+
+  <section class="pt-2 mb-3">
+    <h5>登录邮箱</h5>
+    <form method="post" action="/profile/email">
+
+      <div class="form-group">
+        <input class="form-control"
+        id="email"
+        type="email" 
+        name="account[email]" 
+        value="{{account.email}}"
+        required>
+
+        {% if errors.email %}
+          <div class="form-errortext">{{errors.email.message}}</div>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn btn-primary">更新</button>
+    </form>
+
+    {% if not user.verified %}
+      <div class="d-flex align-items-center">
+        <span>邮箱未验证</span>
+        <form action="/profile/email/request-verification" method="post">
+          <button class="btn btn-link">重新发送验证邮件</button>
+        </form>
+      </div>
     {% endif %}
-    {% if flash.mobileUpdated %}
-    <p>手机号码已更新</p>
-    {% endif %}
-    <section class="pt-2 mb-3">
-      <h5>用户名</h5>
-      <form action="/profile/account/rename" method="post">
-        <div>
-          <input type="hidden"
-          name="user[oldName]"
-          value="{{user.name}}">
-        </div>
-        <div class="form-group">
-          <input class="form-control"
-          id="userName"
-          type="text"
-          name="user[name]"
-          value="{{user.name}}">
+  </section>
 
-          <small class="form-text text-muted">20字符以内</small>
-        </div>
-        
-        <button type="submit" class="btn btn-primary">保存</button>
-      </form>
-    </section>
+  <section class="pt-2 mb-3">
+    <h5>用户名</h5>
+    <form action="/profile/name" method="post">
 
-    <section class="pt-2 mb-3">
-      <h5>手机号码</h5>
-      <form action="/profile/account/mobile" method="post">
-        <div>
-          <input type="hidden" name="user[oldMobileNumber]" value="{{user.mobileNumber}}">
-        </div>
-        <div class="form-group">
-          <input class="form-control"
-          id="userMobileNumber"
-          type="text"
-          name="user[mobileNumber]"
-          value="{{user.mobileNumber}}">
-        </div>
-        <button type="submit" class="btn btn-primary">保存</button>
-      </form>
-    </section>
-    <section class="pt-2 mb-3">
-      <h5>社交账号</h5>
-      <ul>
-        <li><a href="#">绑定微信</a></li>
-        <li><a href="#">绑定微博</a></li>
-        <li><a href="#">绑定QQ</a></li>
-      </ul>
-    </section>
-  </div>
-</div>
+      <div class="form-group">
+        <input class="form-control"
+        id="name"
+        type="text"
+        name="account[name]"
+        value="{{account.name}}">
+
+        <small class="form-text text-muted">20字符以内</small>
+
+        {% if errors.name %}
+          <div class="form-errortext">{{errors.name.message}}</div>
+        {% endif %}
+      </div>
+      
+      <button type="submit" class="btn btn-primary">保存</button>
+    </form>
+  </section>
+
+  <section class="pt-2 mb-3">
+    <h5>手机号码</h5>
+    <form action="/profile/mobile" method="post">
+
+      <div class="form-group">
+        <input class="form-control"
+        id="mobile"
+        type="text"
+        name="account[mobile]"
+        value="{{account.mobileNumber}}">
+
+        {% if errors.mobile %}
+          <div class="form-errortext">{{errors.mobile.message}}</div>
+        {% endif %}
+      </div>
+      <button type="submit" class="btn btn-primary">保存</button>
+    </form>
+  </section>
+
+  <section class="pt-2 mb-3">
+    <h5>社交账号</h5>
+    <ul>
+      <li><a href="#">绑定微信</a></li>
+      <li><a href="#">绑定微博</a></li>
+      <li><a href="#">绑定QQ</a></li>
+    </ul>
+  </section>
+
 {% endblock %}

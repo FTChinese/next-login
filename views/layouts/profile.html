@@ -1,4 +1,8 @@
-<div class="col-sm-3">
+{% extends "layouts/base.html" %}
+
+{% block main %}
+<div class="row">
+  <div class="col-sm-3">
     <ul class="nav flex-column">
       <li class="nav-item">
         <a class="nav-link" href="/profile">我的资料</a>
@@ -7,9 +11,6 @@
         <a class="nav-link" href="/profile/account">账号</a>
       </li>
       <li></li>
-      <li class="nav-item">
-        <a class="nav-link" href="/profile/email">邮箱</a>
-      </li>
       <li class="nav-item">
         <a class="nav-link" href="/profile/password">密码</a>
       </li>
@@ -24,3 +25,11 @@
       </li>
     </ul>
   </div>
+
+  <div class="col-9">
+      <div class="mt-4">
+          {% block content %}{% endblock %}
+      </div>
+  </div>
+</div>
+{% endblock %}

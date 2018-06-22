@@ -8,9 +8,6 @@ const router = new Router();
 
 router.get('/:token', async function(ctx) {
   const token = ctx.params.token;
-  const email = ctx.session.user.email;
-
-  debug.info('Email: %s, verification token: %s', email, token);
   
   try {
     const resp = await request.put(`${endpoints.verifyEmail}/${token}`)
