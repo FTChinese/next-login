@@ -1,26 +1,54 @@
 ## Table of Content
 
-* [How wechat OAuth 2.0 access token is designed](#wechat)
 * [Site Map](#sitemap)
+* [Wechat OAuth 2.0 access token](#wechat)
 * [Sending Emails](#emails)
 
 To run the test you have to have those fields set in you environment variable (and a running SQL database with actually data populated). Refer to `sql-schema` repo on GitLab. 
 
-```
-export OAUTH_ENDPOINT_TOKEN='http://localhost:9001/token'
-export N_LOGIN_CLIENT_ID='<random-string>'
-export N_LOGIN_CLIENT_SECRET='<random-string>'
+## Sitemap
 
-export N_TEST_UUID='<uuid>'
-export N_TEST_TOKEN='<random-string>'
-```
+### Signup
+* GET `/signup`
+* POST `/signup`
+* POST `/signup/check-username`
+* POST `/signup/check-email`
 
-To run this app locally, you must:
-1. Populate MySQL with OAuth 2.0 data; see `sql-schema/oauth`
-2. Populate MySQL with some example user data. You can run `TestCreateUser` function in `next-api/usermodel/account_test.go` to generate random demo data.
-2. Compile and launch `oauth-provider` app;
-3. Compile and launch `next-api` app;
-4. Install and run Redis.
+### Subscribe
+
+* GET `/plan`
+
+### Reset password
+* GET `/password-reset` Ask user to enter email
+* POST `/password-reset` User entered email
+* GET `/password-reset/:token` User clicked reset link.
+* POST `/password-reset/:token`  User submitted new password
+
+### Login
+* GET `/login`
+* POST `/login`
+* GET `/login/wechat`
+* POST `/login/wechat/callback`
+* GET `/login/weibo`
+
+* GET `/logout`
+
+### Settings
+
+The following requires authentication.
+
+* GET `/profile` Basic profile
+* GET `/email` Email related data
+* POST `/email` Update email
+* POST `/email/newletter`
+* POST `/email/request-verification` Resend verification letter
+* GET `/email/confirm-verification/:token` Verify email
+* GET `/account`
+* POST `/account/password`
+* POST `/account/name`
+* POST `/account/mobile`
+* GET `/membership`
+* GET `/address`
 
 ## Wechat
 
@@ -67,52 +95,6 @@ UNIQUE INDEX (unionid)
 ```
 
 But be careful wechat might change the lenght any time. So it might be better to store as varchar if you don't mind taking up larger disk space.
-
-## Sitemap
-
-### User Signup
-* GET `/user/signup`
-* POST `/user/signup`
-* POST `/user/signup/check-username`
-* POST `/user/signup/check-email`
-
-* GET `/user/plan`
-
-The following steps require user login.
-
-### Verify email
-* GET `/user/verify/:token` Verify a email
-
-### Reset password
-* GET `/user/password-reset` Ask user to enter email
-* POST `/user/password-reset` User entered email
-* GET `/user/password-reset/:token` User clicked reset link.
-* POST `/user/password-reset/:token`  User submitted new password
-
-### Login
-* GET `/user/login`
-* POST `/user/login`
-* GET `/user/login/wechat`
-* POST `/user/login/wechat/callback`
-* GET `/user/login/weibo`
-
-* GET `/user/logout`
-
-### Profile
-
-The following requires authentication.
-
-* `/user/profile`
-* `/user/account`
-* `/user/email`
-* `/user/email/request-verification`
-* `/user/email/confirm-verification`
-* `/user/profile/name`
-* `/user/profile/mobile`
-* `/user/profile/password`
-* `/user/profile/notification`
-* `/user/profile/membership`
-* `/user/profile/address`
 
 ## Emails
 
