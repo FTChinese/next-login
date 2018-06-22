@@ -9,6 +9,31 @@ const {processJoiError, processApiError, isSuperAgentError} = require('../../uti
 
 const router = new Router();
 
+router.get('/', async (ctx, next) => {
+  const errors = ctx.session.errors;
+  const alert = ctx.session.alert;
+
+  const resp = await request.get(endpoints.profile)
+  .set('X-User-Id', ctx.session.user.id)
+
+  const profile = resp.body;
+  ctx.state.email = {
+    current: profile.email,
+    new: profile.new
+  };
+  
+  ctx.state.letter = profile.newsletter;
+
+  ctx.state.errors = errors;
+  ctx.state.alert = alert;
+  
+  ctx.body = await render('email.html', ctx.state);
+
+  delete ctx.session.errors;
+  delete ctx.session.alert;
+
+});
+
 router.post('/', async (ctx) => {
 
   const redirectTo = `${dirname(ctx.path)}/account`;
@@ -47,6 +72,34 @@ router.post('/', async (ctx) => {
     ctx.session.errors = errors;
 
     return ctx.redirect(redirectTo);
+  }
+});
+
+router.post('/newsletter', async (ctx, next) => {
+
+  const result = schema.letter.validate(ctx.request.body.letter);
+
+  if (result.error) {
+    const errors = processJoiError(result.error);
+    ctx.session.errors = errors;
+    return ctx.redirect(ctx.path);
+  }
+  try {
+
+    const resp = await request.patch(endpoints.newsletter)
+      .set('X-User-Id', ctx.session.user.id)
+      .send(letter);
+    
+    ctx.session.alert = {
+      saved: true
+    };
+
+    return ctx.redirect(ctx.path);
+  } catch (e) {
+    const errors = processApiError(e)
+    ctx.session.errors = errors;
+
+    return ctx.redirect(ctx.path);
   }
 });
 

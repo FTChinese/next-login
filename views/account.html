@@ -1,0 +1,117 @@
+{% extends "layouts/profile.html" %} 
+
+{% block content %}
+
+  {% if alert.saved %}
+    <div class="alert alert-success" role="alert">密码修改成功</div>
+  {% endif %}
+
+  {% if alert.name %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <span>用户名已更新</span>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  {% endif %}
+
+  {% if alert.mobile %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <span>手机号码已更新</span>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  {% endif %}
+
+  <section>
+    <h5>更改密码</h5>
+
+    <form method="post" action="/profile/password">
+      <div class="form-group">
+        <label for="oldPassword">当前密码</label>
+        <input type="password"
+        class="form-control"
+        id="oldPassword"
+        name="oldPassword"
+        required>
+    
+        {% if errors.oldPassword %}
+          <div class="form-errortext">{{errors.oldPassword.message}}</div>
+        {% endif %}
+      </div>
+    
+      <div class="form-group">
+        <label for="newPassword">新密码</label>
+        <input type="password"
+        class="form-control"
+        id="newPassword"
+        name="newPassword"
+        required>
+        <small class="form-text text-muted">8-20个字符，不能使用空格、表情符号</small>
+    
+        {% if errors.newPassword %}
+          <div class="form-errortext">{{errors.newPassword.message}}</div>
+        {% endif %}
+      </div>
+    
+      <div class="form-group">
+        <label for="confirmPassword">再次输入新密码</label>
+        <input type="password"
+        class="form-control"
+        id="confirmPassword"
+        name="confirmPassword"
+        required>
+    
+        {% if errors.confirmPassword %}
+          <div class="form-errortext">{{errors.confirmPassword.message}}</div>
+        {% endif %}
+      </div>
+      
+      <button type="submit" class="btn btn-primary">保存密码</button>
+      <a href="/password-reset" target="_blank">忘记密码？</a>
+    </form>    
+  </section>
+
+  <section class="pt-2 mb-3">
+    <h5>用户名</h5>
+    <form action="/profile/name" method="post">
+
+      <div class="form-group">
+        <input class="form-control"
+        id="name"
+        type="text"
+        name="account[name]"
+        value="{{account.name}}">
+
+        <small class="form-text text-muted">20字符以内</small>
+
+        {% if errors.name %}
+          <div class="form-errortext">{{errors.name.message}}</div>
+        {% endif %}
+      </div>
+      
+      <button type="submit" class="btn btn-primary">保存</button>
+    </form>
+  </section>
+
+  <section class="pt-2 mb-3">
+    <h5>手机号码</h5>
+    <form action="/profile/mobile" method="post">
+
+      <div class="form-group">
+        <input class="form-control"
+        id="mobile"
+        type="text"
+        name="account[mobile]"
+        value="{{account.mobileNumber}}">
+
+        {% if errors.mobile %}
+          <div class="form-errortext">{{errors.mobile.message}}</div>
+        {% endif %}
+      </div>
+      <button type="submit" class="btn btn-primary">保存</button>
+    </form>
+  </section>
+
+{% endblock %}

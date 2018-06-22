@@ -1,7 +1,7 @@
 const debug = require('../../utils/debug')('user:login');
 const render = require('../../utils/render');
 const endpoints = require('../../utils/endpoints');
-const {processJoiError, processApiError, isSuperAgentErr} = require('../../utils/errors');
+const {processJoiError, processApiError} = require('../../utils/errors');
 
 const request = require('superagent');
 const schema = require('../schema');
@@ -63,9 +63,6 @@ router.post('/', async function (ctx, next) {
     return ctx.redirect('/profile');
 
   } catch (e) {
-    if (!isSuperAgentErr(e)) {
-      throw e;
-    }
     // Make the form stikcy.
     ctx.state.credentials = {
       email: credentials.email

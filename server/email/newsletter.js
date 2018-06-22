@@ -26,32 +26,6 @@ router.get('/', async (ctx, next) => {
   ctx.body = await render('profile/notification.html', ctx.state);
 });
 
-router.post('/', async (ctx, next) => {
 
-  const result = schema.letter.validate(ctx.request.body.letter);
-
-  if (result.error) {
-    const errors = processJoiError(result.error);
-    ctx.session.errors = errors;
-    return ctx.redirect(ctx.path);
-  }
-  try {
-
-    const resp = await request.patch(endpoints.newsletter)
-      .set('X-User-Id', ctx.session.user.id)
-      .send(letter);
-    
-    ctx.session.alert = {
-      saved: true
-    };
-
-    return ctx.redirect(ctx.path);
-  } catch (e) {
-    const errors = processApiError(e)
-    ctx.session.errors = errors;
-
-    return ctx.redirect(ctx.path);
-  }
-});
 
 module.exports = router.routes();

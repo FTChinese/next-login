@@ -1,0 +1,109 @@
+{% extends "layouts/profile.html" %} 
+
+{% block content %}
+
+{% if user and (not user.verified) %}
+  <div class="alert alert-primary" role="alert">请验证您的登录邮箱</div>
+{% endif %}
+
+{% if alert.invalid == "link" %}
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <span>您似乎点击了无效的验证链接</span>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+{% endif %}
+
+{% if alert.done == "letter" %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <span>验证邮件已发送</span>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+{% endif %}
+
+{% if alert.saved == "email" %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <span>邮箱已更新，我们给您的新邮箱发送了激活邮件，请点击邮件中的链接确认新邮箱有效</span>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+{% endif %}
+
+{% if alert.saved == "newletter" %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <span>邮件设置已保存</span>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+{% endif %}
+
+<section class="pt-2 mb-3">
+  <h5>登录邮箱</h5>
+  <form method="post" action="/profile/email">
+
+    <div class="form-group">
+      <input class="form-control"
+      id="email"
+      type="email" 
+      name="account[email]" 
+      value="{{account.email}}"
+      required>
+
+      {% if errors.email %}
+        <div class="form-errortext">{{errors.email.message}}</div>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">更新</button>
+  </form>
+
+  {% if not user.verified %}
+    <div class="d-flex align-items-center">
+      <span>邮箱未验证</span>
+      <form action="/profile/email/request-verification" method="post">
+        <button class="btn btn-link">重新发送验证邮件</button>
+      </form>
+    </div>
+  {% endif %}
+</section>
+
+<section>
+  <h5>邮件设置</h5>
+  <form method="post">
+    <div class="form-check">
+      <input class="form-check-input"
+      id="letterTodayFocus"
+      type="checkbox"
+      name="letter[todayFocus]"
+      value="true"
+      {% if letter.todayFocus %} checked{% endif %}>
+      <label class="form-check-label" for="letterTodayFocus">接收“今日焦点”邮件</label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input"
+      id="letterWeeklyChoice"
+      type="checkbox"
+      name="letter[weeklyChoice]"
+      value="true"
+      {% if letter.weeklyChoice %} checked{% endif %}>
+      <label class="form-check-label" for="letterWeeklyChoice">接收“一周精选”邮件</label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input"
+      id="letterAfternoonExpress"
+      type="checkbox"
+      name="letter[afternoonExpress]"
+      value="true"
+      {% if letter.afternoonExpress %} checked{% endif %}>
+      <label class="form-check-label" for="letterAfternoonExpress">接收“午后速递”邮件</label>
+    </div>
+    <button type="submit" class="btn btn-primary">保存</button>
+  </form>
+</section>
+
+{% endblock %}

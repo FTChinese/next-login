@@ -20,7 +20,7 @@ router.get('/', async (ctx, next) => {
   ctx.state.errors = errors;
   ctx.state.alert = alert;
   
-  ctx.body = await render('profile/account.html', ctx.state);
+  ctx.body = await render('account.html', ctx.state);
 
   delete ctx.session.errors;
   delete ctx.session.alert;
