@@ -30,7 +30,6 @@ To run the test you have to have those fields set in you environment variable (a
 * GET `/login/wechat`
 * POST `/login/wechat/callback`
 * GET `/login/weibo`
-
 * GET `/logout`
 
 ### Settings
