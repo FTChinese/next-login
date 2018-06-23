@@ -9,12 +9,13 @@ const {processJoiError, processApiError, isSuperAgentError} = require('../../uti
 
 const router = new Router();
 
+// Show email setting page
 router.get('/', async (ctx, next) => {
   const errors = ctx.session.errors;
   const alert = ctx.session.alert;
 
   const resp = await request.get(endpoints.profile)
-  .set('X-User-Id', ctx.session.user.id)
+    .set('X-User-Id', ctx.session.user.id)
 
   const profile = resp.body;
   ctx.state.email = {
@@ -34,6 +35,7 @@ router.get('/', async (ctx, next) => {
 
 });
 
+// Chnage email
 router.post('/', async (ctx) => {
 
   const redirectTo = `${dirname(ctx.path)}/account`;
@@ -75,6 +77,7 @@ router.post('/', async (ctx) => {
   }
 });
 
+// Change newsletter setting
 router.post('/newsletter', async (ctx, next) => {
 
   const result = schema.letter.validate(ctx.request.body.letter);
@@ -103,6 +106,7 @@ router.post('/newsletter', async (ctx, next) => {
   }
 });
 
+// Resend verfication letter
 router.post('/request-verification', async (ctx) => {
   const redirectTo = `${dirname(dirname(ctx.path))}/account`;
 
@@ -121,6 +125,7 @@ router.post('/request-verification', async (ctx) => {
   }
 });
 
+// Confirm verfication token
 router.get('/confirm-verification/:token', async (ctx) => {
   const token = ctx.params.token;
 

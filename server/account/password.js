@@ -4,15 +4,10 @@ const request = require('superagent');
 const schema = require('../schema');
 
 const debug = require('../../utils/debug')('user:password');
-const render = require('../../utils/render');
 const endpoints = require('../../utils/endpoints');
 const {processJoiError, processApiError} = require('../../utils/errors');
 
 const router = new Router();
-
-router.get('/', async (ctx, next) => {
-  ctx.body = await render('profile/password.html', ctx.state);
-});
 
 router.post('/', async (ctx, next) => {
 

@@ -14,11 +14,14 @@ const inlineMin = require('./middlewares/inline-min');
 
 const signup = require('./server/signup');
 const plan = require('./server/plan');
-const verify = require('./server/verify');
 const login = require('./server/login');
 const logout = require('./server/logout');
 const passwordReset = require('./server/password');
 const profile = require('./server/profile');
+const email = require('./server/email');
+const account = require('./server/account');
+const membership = require('./server/membership');
+const address = require('./server/address');
 
 const app = new Koa();
 const router = new Router();
@@ -82,8 +85,11 @@ router.use('/logout', logout);
 router.use('/signup', signup);
 router.use('/plan', plan);
 router.use('/password-reset', passwordReset);
-router.use('/verify', checkLogin(), verify);
 router.use('/profile', checkLogin(), profile);
+router.use('/email', checkLogin(), email);
+router.use('/account', checkLogin(), account);
+router.use('/membership', checkLogin(), membership);
+router.use('/address', checkLogin(), address);
 
 app.use(router.routes());
 

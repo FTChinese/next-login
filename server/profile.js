@@ -6,15 +6,8 @@ const endpoints = require('../../utils/endpoints');
 const {processJoiError, processApiError, isSuperAgentError} = require('../../utils/errors');
 const render = require('../../utils/render');
 
-const schema = require('../schema');
-const account = require('./account');
-const email = require('./email');
-const name = require('./name');
-const mobile = require('./mobile');
-const password = require('./password');
-const notification = require('./notification');
-const membership = require('./membership');
-const address = require('./address');
+const membership = require('../membership');
+const address = require('../address');
 
 const router = new Router();
 
@@ -69,14 +62,5 @@ router.post('/', async (ctx) => {
     return ctx.redirect(ctx.path);
   }
 });
-
-router.use('/account', account);
-router.use('/email', email);
-router.use('/name', name);
-router.use('/mobile', mobile);
-router.use('/password', password);
-router.use('/notification', notification);
-router.use('/membership', membership);
-router.use('/address', address);
 
 module.exports = router.routes();
