@@ -84,11 +84,29 @@ declare interface APIErrorBody {
         message: string
     }
 }
-// Pass error message to template using this data structure
-declare interface UIError {
-    value?: string, // Template could redisplay the errored value
-    code: string, // Template could tell exactly what's wrong
-    message: string, // Template show a descriptive message to user
+
+declare interface InvalidError {
+    // a string by joining JoiErr's path field using underscore. For exaple, if `path: ["email"]`, the key will be `email`; if `path: ["user", "name"]`, the key will be `user_name`.
+    field: string,
+    // JoiErrDetail's type field
+    type: string,
+    // A message id to search for localized text.
+    msg: string 
+}
+
+// An object of unkonwn keys with know value structure.
+// The key is the value of InvalidError.field, or APIErrorBody.error.field
+declare interface InvalidFields {
+    [key: string]: {
+        type: string, // InvalidError.type, or APIErrorBody.error.code
+        message: string, // User-friedly error message
+    }
+}
+
+// Possbile data passed in redirect.
+declare interface Alert {
+    done: string,
+    saved: string,
 }
 
 declare interface JoiErr {
@@ -99,10 +117,10 @@ declare interface JoiErr {
 
 declare interface JoiErrDetail {
     message: string, // '"email" must be a valid email'
-    path: string[], // [ 'email', [length]: 1 ]
+    path: string[], // path to schema keys. null if you schema does not have any named properties.
     type: string, // string.email, any.required, string.min, string.max
     context: {
-        key: string,
+        key: string, // Last element in path
         label: string,
         value?: string,
         limit?: number // If type is string.min or string.max

@@ -1,85 +1,70 @@
 const request = require('superagent');
 const Router = require('koa-router');
-const Joi = require('joi');
 
 const schema = require('./schema');
 
 const render = require('../utils/render');
-const {handleJoiErr, handleAPIUnprocessable} = require('../utils/errors');
+const {processJoiError, processApiError} = require('../utils/errors');
 const debug = require('../utils/debug')('user:signup');
 const endpoints = require('../utils/endpoints');
 
 const router = new Router();
 
-const config = {
-  path: '/signup',
-};
-
 // Show signup page
 router.get('/', async (ctx) => {
-  debug.info(ctx.state);
 
-  ctx.body = await render('new-user/signup.html', ctx.state);
+  ctx.body = await render('signup.html', ctx.state);
 });
 
 // User submitted account to be created.
 router.post('/', async (ctx, next) => {
+  const result = schema.account.validate(ctx.request.body.account, { abortEarly: false });
+
+  if (result.error) {
+    ctx.state.errors = processJoiError(result.error);
+    ctx.state.account = {
+      email: result.value.email
+    }
+
+    return await next();
+  }
   /**
    * @type {{email: string, password: string, ip: string}} user
    */
-  let user = ctx.request.body.user;
-
-  // Validate 
-  try {
-    user = await Joi.validate(user, schema.credentials, {abortEarly: false});
-
-  } catch (e) {
-    const errors = handleJoiErr(e);
-    ctx.state.errors = errors;
-    ctx.state.user = {
-      email: user.email
-    };
-    
-    return await next();
-  }
-
-  const ip = ctx.request.ip;
-  user.ip = ip;
+  const account = result.value;
+  account.ip = ctx.ip;
 
   // Request to API
   try {
     const resp = await request.post(endpoints.createAccount)
-      .send(user);
+      .send(account);
 
-    // After user account is created, set session data so that user status it changed from anonymous to loggedin.
     /**
      * @type {User}
      */
-    const u = resp.body;
+    const user = resp.body;
 
     ctx.session.user = {
-      id: u.id,
-      name: u.name,
-      avatar: u.avatar,
-      isVip: u.isVip,
-      verified: u.verified,
-    }
+      id: user.id,
+      name: user.name,
+      avatar: user.avatar,
+      isVip: user.isVip,
+      verified: user.verified,
+    };
+    ctx.cookies.set('logged_in', 'yes');
 
-    return ctx.redirect(`${ctx.path}/plan`);
+    return ctx.redirect(`/email`);
+
   } catch (e) {
-    const errors = handleAPIUnprocessable(e);
-
-    ctx.status = e.status || 400;
-    ctx.state.errors = errors;
-
-    ctx.state.user = {
-      email: user.email
-    }
+    ctx.state.errors = processApiError(e);
+    ctx.state.account = {
+      email: account.email
+    };
 
     return await next();
   }
 }, async(ctx) => {
-  ctx.body = await render('new-user/signup.html', ctx.state);
+  ctx.body = await render('signup.html', ctx.state);
 });
 
 module.exports = router.routes();

@@ -1,12 +1,12 @@
+const request = require('superagent');
+const Router = require('koa-router');
+const schema = require('../schema');
+
 const debug = require('../../utils/debug')('user:login');
 const render = require('../../utils/render');
 const endpoints = require('../../utils/endpoints');
 const {processJoiError, processApiError} = require('../../utils/errors');
 
-const request = require('superagent');
-const schema = require('../schema');
-
-const Router = require('koa-router');
 // const wechat = require('./wechat');
 
 const router = new Router();
@@ -22,15 +22,13 @@ router.post('/', async function (ctx, next) {
   let remeberMe = ctx.request.body.remeberMe;
 
   // Validate input
-  /**
-   * @type {JoiResult}
-   */
   const result = schema.login.validate(ctx.request.body.credentials, { abortEarly: false });
 
   if (result.error) {
-    const errors = processJoiError(result.error);
-
-    ctx.state.errors = errors;
+    ctx.state.errors = processJoiError(result.error);
+    ctx.state.credentials = {
+      email: result.value.email
+    };
 
     return await next();
   }
@@ -56,19 +54,21 @@ router.post('/', async function (ctx, next) {
     ctx.session.user = {
       id: user.id,
       name: user.name,
+      avatar: user.avatar,
       isVip: user.isVip,
       verified: user.verified
     };
+    ctx.cookies.set('logged_in', 'yes');
 
     return ctx.redirect('/profile');
 
   } catch (e) {
-    // Make the form stikcy.
+    // 400, 422, 404
+    ctx.state.errors = processApiError(e, 'credentials');
+
     ctx.state.credentials = {
       email: credentials.email
     };
-
-    ctx.state.errors = processApiError(e, 'credentials');
 
     return await next();
   }

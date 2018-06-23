@@ -1,7 +1,7 @@
 const Joi = require('joi');
 
-const email = Joi.string().trim().email().min(3).max(30).required();
-const password = Joi.string().trim().min(8).max(20).required();
+const email = Joi.string().trim().email().min(3).max(254).required();
+const password = Joi.string().trim().min(8).max(128).required();
 
 exports.login = Joi.object().keys({
   email,

@@ -49,6 +49,14 @@
 
   <main class="page-content" role="main">
     <div class="container">
+      {% if errors.server %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <span>{{errors.server.message}}</span>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+      {% endif %}
       {% block main %}{% endblock %}
     </div>
   </main>

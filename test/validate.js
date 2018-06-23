@@ -55,3 +55,27 @@ test('profile', async t => {
   t.pass();
 });
 
+test('joi', async t => {
+  const data = {
+    customer: {
+      income: 100
+    }
+  }
+
+  const schema = {
+    customer: {
+      income: Joi.number().min(500)
+    }
+  };
+
+  const result = Joi.validate(data, schema);
+
+  if (result.error) {
+    console.log("Validation error: %o", result.error);
+  }
+
+  console.log(result.value);
+
+  t.pass()
+});
+

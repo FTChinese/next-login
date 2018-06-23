@@ -1,14 +1,15 @@
 const Router = require('koa-router');
 const _ = require('lodash');
+const {dirname} = require('path');
 const request = require('superagent');
 const schema = require('../schema');
 
 const render = require('../../utils/render');
 const debug = require('../../utils/debug')('user:password-reset');
-const {processJoiError, processApiError} = require('../../utils/errors');
+const {processJoiError, processApiError, buildInvalidField, buildAlertDone} = require('../../utils/errors');
 const endpoints = require('../../utils/endpoints');
 
-const handleReset = require('./handle-reset');
+const message = require('../../utils/message');
 
 const router = new Router();
 
@@ -19,46 +20,38 @@ const router = new Router();
 // After password is reset, the input box is hidden and another success message is shown.
 router.get('/', async (ctx) => {
   /**
-   * @type {{email: boolean, reset: boolean}}
+   * @type {{letter: boolean, reset: boolean}}
    */
   const alert = ctx.session.alert;
 
   /**
    * This part is enabled only after email is sent or password is reset.
    */
-  if (!_.isEmpty(ok)) {
-    ctx.state.ok = ok;
+  if (!_.isEmpty(alert)) {
+    ctx.state.alert = alert;
     ctx.body = await render('password/success.html', ctx.state);
 
-    delete ctx.session.ok;
+    delete ctx.session.alert;
     return;
   }
 
-  /**
-   * @type {boolean}
-   */
-  const invalidLink = ctx.session.invalidLink;
-  if (invalidLink) {
-    ctx.state.errors = {
-      invalidLink
-    };
+  if (ctx.session.errors) {
+    ctx.state.errors = ctx.session.errors;
   }
   
   ctx.body = await render('password/enter-email.html', ctx.state);
 
-  delete ctx.session.invalidLink;
+  delete ctx.state.errors;
 });
 
 // Collect user entered email, check if email is valid, and send letter.
 router.post('/', async function (ctx, next) {
-  /**
-   * Validate input data
-   * @type {{error: Object, value: Object}}
-   */
+
   const result = schema.email.validate(ctx.request.body);
   if (result.error) {
-    const errors = processJoiError(result.error)
-    ctx.state.errors = errors;
+    ctx.state.errors = processJoiError(result.error)
+    
+    ctx.state.email = result.value.email;
 
     return await next();
   }
@@ -70,25 +63,89 @@ router.post('/', async function (ctx, next) {
     await request.post(endpoints.resetLetter)
       .send({email});
 
-    ctx.session.alert = {
-      emailSent: true
-    };
+    // Tell redirected page what message to show.
+    ctx.session.alert = buildAlertDone('letter');
 
     // Redirect to /password-reset
     return ctx.redirect(ctx.path);
 
   } catch (e) {
-      ctx.state.errors = processApiError(e);
-      return await next();
+    // 400, 422, 404
+    ctx.state.errors = processApiError(e, 'email');
+    ctx.state.email = email;
+
+    return await next();
   }
 }, async (ctx) => {
   ctx.body = await render('password/enter-email.html', ctx.state);
 });
 
 // Verify password reset token and show reset password page.
-// Submit new password.
-router.get('/:token', handleReset.verifyToken);
-router.post('/:token', handleReset.newPassword, async function(ctx) {
+// API response has only two results: 200 or 404
+router.get('/:token', async (ctx) => {
+  const token = ctx.params.token;
+
+  try {
+    const resp = await request.get(`${endpoints.verifyResetToken}/${token}`);
+
+    /**
+     * User if found and show page to enter new password
+     * @type {User}
+     */
+    const user = resp.body;
+    ctx.state.email = user.email;
+
+    return ctx.body = await render('password/new-password.html', ctx.state);
+
+  } catch (e) {
+    ctx.session.errors = processApiError(e, 'token');
+
+    ctx.redirect(dirname(ctx.path));
+  }
+});
+
+router.post('/:token', async (ctx, next) => {
+  const token = ctx.params.token;
+
+  const result = schema.reset.validate(ctx.request.body);
+
+  if (result.error) {
+    ctx.state.errors = processJoiError(result.error);
+
+    return await next();
+  }
+  
+  /**
+   * @type {{password: string, confirmPassword: string}}
+   */
+  const pws = result.value
+
+  // Check if the password equals confirmed one
+  if (pws.password !== pws.confirmPassword) {
+    ctx.state.errors = buildInvalidField('confirmPassword', 'mismatched');
+
+    return await next();
+  }
+
+  try {
+
+    await request.post(endpoints.passwordReset)
+      .send({
+        token,
+        password: pws.password
+      });
+    
+    ctx.session.alert = buildAlertDone('reset');
+
+    // Redirect to /password-reset to prevent user refresh.
+    return ctx.redirect(dirname(ctx.path));
+
+  } catch (e) {
+    // 400, 422
+    // 404 here means the token is invalid or expired. Handle it separatedly.
+
+  }
+}, async function(ctx) {
   ctx.body = await render('password/new-password.html', ctx.state);
 });
 
