@@ -1,22 +1,41 @@
+const prefix = '/user';
+
+const sitemap = {
+  signup: `${prefix}/signup`,
+  passwordReset: `${prefix}/password-reset`,
+  login: `${prefix}/login`,
+  logout: `${prefix}/logout`,
+  profile: `${prefix}/profile`,
+  email: `${prefix}/email`,
+  emailRequestVerification: `${prefix}/email/request-verification`,
+  emailNewsletter: `${prefix}/newsletter`,
+  account: `${prefix}/account`,
+  accountName: `${prefix}/account/name`,
+  accountPassword: `${prefix}/account/password`,
+  accountMobile: `${prefix}/account/mobile`,
+  membership: `${prefix}/membership`,
+  address: `${prefix}/address`
+};
+
 const navItems = [
   {
-    href: "/profile",
+    href: sitemap.profile,
     text: "我的资料"
   },
   {
-    href: "/email",
+    href: sitemap.email,
     text: "邮箱"
   },
   {
-    href: "/account",
+    href: sitemap.account,
     text: "账号安全"
   },
   {
-    href: "/membership",
+    href: sitemap.membership,
     text: "会员"
   },
   {
-    href: "/address",
+    href: sitemap.address,
     text: "地址"
   }
 ];
@@ -32,6 +51,8 @@ module.exports = function() {
         active: path.startsWith(item.href) ? true : false
       };
     });
+
+    ctx.state.sitemap = sitemap;
 
     return await next();
   }

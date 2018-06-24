@@ -26,7 +26,9 @@ const address = require('./server/address');
 
 const isProduction = process.env.NODE_ENV === 'production';
 const app = new Koa();
-const router = new Router();
+const router = new Router({
+  prefix: '/user'
+});
 
 app.proxy = true;
 /**
@@ -80,15 +82,6 @@ async function bootUp(app) {
   debug.info('booting %s', appName);
 
   const port = process.env.PORT || 3000;
-
-  // try {
-  //   /**
-  //    * @type {{access_token: string, created_at: string, expires_in: number, token_type: string}}
-  //    */
-  //   app.context.accessData = await fetchAccess();
-  // } catch (e) {
-  //   debug.error("Get access token error: %O", e)
-  // }
 
   // Create HTTP server
   const server = app.listen(port);

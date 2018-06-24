@@ -55,13 +55,13 @@
             checked>
           <label for="rememberMe">记住我</label>
 
-          <a class="float-right" href="/password-reset">忘记密码?</a>
+          <a class="float-right" href="{{sitemap.passwordReset}}">忘记密码?</a>
         </div>
 
         <button class="btn btn-block btn-primary" type="submit">登录</button>
 
       </form>
-      <p class="text-center pt-3">还没有FT中文网账号?<a href="/signup?source=login">创建</a></p>
+      <p class="text-center pt-3">还没有FT中文网账号?<a href="{{sitemap.signup}}">创建</a></p>
     {% else %}
       <h4>当前登录用户 {{user.name}}</h4>
     {% endif %}
