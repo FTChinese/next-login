@@ -44,12 +44,14 @@ router.post('/', async (ctx, next) => {
      */
     const user = resp.body;
 
-    ctx.session.user = {
-      id: user.id,
-      name: user.name,
-      avatar: user.avatar,
-      isVip: user.isVip,
-      verified: user.verified,
+    ctx.session ={
+      user: {
+        id: user.id,
+        name: user.name,
+        avatar: user.avatar,
+        isVip: user.isVip,
+        verified: user.verified,
+      }
     };
     ctx.cookies.set('logged_in', 'yes');
 

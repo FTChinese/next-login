@@ -2,12 +2,12 @@ const Router = require('koa-router');
 const _ = require('lodash');
 const {dirname} = require('path');
 const request = require('superagent');
-const schema = require('../schema');
+const schema = require('./schema');
 
-const render = require('../../utils/render');
-const debug = require('../../utils/debug')('user:password-reset');
-const {processJoiError, processApiError, buildInvalidField, buildAlertDone} = require('../../utils/errors');
-const endpoints = require('../../utils/endpoints');
+const render = require('../utils/render');
+const debug = require('../utils/debug')('user:password-reset');
+const {processJoiError, processApiError, buildInvalidField, buildAlertDone} = require('../utils/errors');
+const endpoints = require('../utils/endpoints');
 
 const router = new Router();
 
