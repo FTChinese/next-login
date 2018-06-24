@@ -82,11 +82,11 @@ app.use(bodyParser());
  * There is a koa middleware https://github.com/koajs/csrf but neither well written nor well mataintained.
  */
 
-router.use('/login', login);
+router.use('/login', checkLogin({redirect: false}), login);
 router.use('/logout', logout);
 router.use('/signup', signup);
 router.use('/plan', plan);
-router.use('/password-reset', passwordReset);
+router.use('/password-reset', checkLogin({redirect: false}), passwordReset);
 router.use('/profile', checkLogin(), nav(), profile);
 router.use('/email', checkLogin(), nav(), email);
 router.use('/account', checkLogin(), nav(), account);

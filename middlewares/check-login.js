@@ -1,18 +1,18 @@
-const {escape} = require('querystring')
 const debug = require('../utils/debug')('user:check-login');
 
 /**
  * checkLogin - This middleware will add userinfo to ctx.state
  *
- * @param  {type} ignorePaths=['/login'] Do not check if user logged in for those paths.
- * @return {Async Function}
+ * `redirect` is used to prevent infinite loop when used on `/login` path itself.
+ * @return {Function}
  */
-function checkLogin() {
+function checkLogin({redirect=true}={}) {
   return async (ctx, next) => {
-    debug.info('Accessing URL: %s', ctx.href);
-
+    
     // Do nothing for `/favicon.ico`
     if (ctx.path == '/favicon.ico') return;
+
+    debug.info('Redirect: %s', redirect);
 
     if (isLoggedIn(ctx)) {
       debug.info('Session data: %O', ctx.session);
@@ -27,10 +27,17 @@ function checkLogin() {
       return await next();
     }
 
+    // Do this? ctx.session = null;
+
     ctx.state.user = null;
 
-    debug.info('User not logged in. Redirecting to /login');
-    ctx.redirect(`/login?return_to=${escape(ctx.href)}`);
+    if (redirect) {
+      const redirectTo = `${env.basePath}/login`;
+
+      debug.info('User not logged in. Redirecting to %s', redirectTo);
+  
+      ctx.redirect(redirectTo);
+    }
   }
 }
 

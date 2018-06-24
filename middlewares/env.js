@@ -1,8 +1,11 @@
+const debug = require('../utils/debug')('user:env');
 const isProduction = process.env.NODE_ENV === 'production';
 const basePath = isProduction ? '/user' : '';
 
 module.exports = function() {
   return async (ctx, next) => {
+    debug.info('Using base path: %s', basePath);
+    
     ctx.state.env = {
       isProduction,
       /**

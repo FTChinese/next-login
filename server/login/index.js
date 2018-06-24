@@ -1,5 +1,5 @@
 const request = require('superagent');
-const {dirname} = require('path');
+const path = require('path');
 const Router = require('koa-router');
 const schema = require('../schema');
 
@@ -12,14 +12,7 @@ const {processJoiError, processApiError} = require('../../utils/errors');
 
 const router = new Router();
 
-// Redirect user away if already logged in
-router.use(async (ctx, next) => {
-  if (!ctx.session.isNew && ctx.session.user) {
-    return ctx.redirect(`${dirname(ctx.path)}/profile`)
-  }
-  return await next();
-});
-
+// Show login page
 router.get('/', async function (ctx) {
   ctx.body = await render('login.html', ctx.state);
 });
@@ -71,7 +64,11 @@ router.post('/', async function (ctx, next) {
     };
     ctx.cookies.set('logged_in', 'yes');
 
-    return ctx.redirect(`${dirname(ctx.path)}/profile`);
+    const redirectTo = path.resolve(ctx.path, '../profile');
+    
+    debug.info('Login success. Redirect to: %s', redirectTo);
+
+    return ctx.redirect(redirectTo);
 
   } catch (e) {
     // 400, 422, 404
