@@ -46,11 +46,12 @@ if (!isProduction) {
 
 // Configurations passed around
 app.use(env());
-
+app.use(nav());
 app.use(inlineMin());
 app.use(session(app));
 app.use(handleErrors());
 app.use(bodyParser());
+
 
 /**
  * @todo Add a middleware to handle Cross Site Request Forgery based on https://github.com/pillarjs/csrf.
@@ -64,11 +65,11 @@ router.use('/logout', logout);
 router.use('/signup', signup);
 router.use('/plan', plan);
 router.use('/password-reset', checkLogin({redirect: false}), passwordReset);
-router.use('/profile', checkLogin(), nav(), profile);
-router.use('/email', checkLogin(), nav(), email);
-router.use('/account', checkLogin(), nav(), account);
-router.use('/membership', checkLogin(), nav(), membership);
-router.use('/address', checkLogin(), nav(), address);
+router.use('/profile', checkLogin(), profile);
+router.use('/email', checkLogin(), email);
+router.use('/account', checkLogin(), account);
+router.use('/membership', checkLogin(), membership);
+router.use('/address', checkLogin(), address);
 
 app.use(router.routes());
 
