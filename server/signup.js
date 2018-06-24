@@ -34,6 +34,10 @@ router.post('/', async (ctx, next) => {
   const account = result.value;
   account.ip = ctx.ip;
 
+  /**
+   * @todo Limit request per IP
+   */
+
   // Request to API
   try {
     const resp = await request.post(endpoints.createAccount)
