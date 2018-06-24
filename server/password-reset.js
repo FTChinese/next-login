@@ -1,6 +1,6 @@
 const Router = require('koa-router');
 const _ = require('lodash');
-const {dirname} = require('path');
+const path = require('path');
 const request = require('superagent');
 const schema = require('./schema');
 
@@ -101,14 +101,14 @@ router.get('/:token', async (ctx) => {
     // 404 if the token is not found, the the user associated with the token is not found.
     ctx.session.errors = processApiError(e, 'password_token');
 
-    ctx.redirect(dirname(ctx.path));
+    ctx.redirect(path.resolve(ctx.path, '../'));
   }
 });
 
 // User submit new password
 router.post('/:token', async (ctx, next) => {
   const token = ctx.params.token;
-  const redirectTo = dirname(ctx.path);
+  const redirectTo = path.resolve(ctx.path, '../');
 
   const result = schema.reset.validate(ctx.request.body);
 

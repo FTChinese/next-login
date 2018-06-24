@@ -1,6 +1,6 @@
 const Router = require('koa-router');
 const request = require('superagent');
-const {dirname} = require('path');
+const path = require('path');
 const schema = require('./schema');
 
 const debug = require('../utils/debug')('user:email');
@@ -87,8 +87,8 @@ router.post('/', async (ctx) => {
 });
 
 // Change newsletter setting
-router.post('/newsletter', async (ctx, next) => {
-  const redirectTo = dirname(ctx.path);
+router.post('/newsletter', async (ctx) => {
+  const redirectTo = path.resolve(ctx.path, '../');
 
   const result = schema.newsletter.validate(ctx.request.body.letter);
 
@@ -119,7 +119,7 @@ router.post('/newsletter', async (ctx, next) => {
 
 // Resend verfication letter
 router.post('/request-verification', async (ctx) => {
-  const redirectTo = dirname(ctx.path);
+  const redirectTo = path.resolve(ctx.path, '../');
 
   try {
     await request.post(endpoints.requestVerification)
@@ -138,7 +138,7 @@ router.post('/request-verification', async (ctx) => {
 // Confirm verfication token
 router.get('/confirm-verification/:token', async (ctx) => {
   const token = ctx.params.token;
-  const redirectTo = dirname(dirname(ctx.path));
+  const redirectTo = path.resolve(ctx.path, '../../');
 
   try {
     const resp = await request.put(`${endpoints.verifyEmail}/${token}`)

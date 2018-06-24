@@ -59,7 +59,8 @@ router.post('/', async (ctx, next) => {
     };
     ctx.cookies.set('logged_in', 'yes');
 
-    return ctx.redirect(`/email`);
+    // Redirect to user's email page
+    return ctx.redirect(path.resolve(ctx.path, '/email'));
 
   } catch (e) {
     ctx.state.errors = processApiError(e);

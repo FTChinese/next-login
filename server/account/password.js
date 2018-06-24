@@ -1,6 +1,6 @@
 const Router = require('koa-router');
 const request = require('superagent');
-const {dirname} = require('path');
+const path = require('path');
 
 const schema = require('../schema');
 
@@ -12,7 +12,7 @@ const router = new Router();
 
 // Submit new password
 router.post('/', async (ctx, next) => {
-  const redirectTo = dirname(ctx.path);
+  const redirectTo = path.resolve(ctx.path, '../');
   // Validate
   const result = schema.changePassword.validate(ctx.request.body);
   if (result.error) {

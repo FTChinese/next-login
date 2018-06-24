@@ -1,6 +1,6 @@
 const Router = require('koa-router');
 const request = require('superagent');
-const {dirname} = require('path');
+const path = require('path');
 const schema = require('../schema');
 
 const debug = require('../../utils/debug')('user:name');
@@ -11,7 +11,7 @@ const router = new Router();
 
 router.post('/', async (ctx) => {
 
-  const redirectTo = dirname(ctx.path);
+  const redirectTo = path.resolve(ctx.path, '../');
 
   const result = schema.username.validate(ctx.request.body.account)
 
