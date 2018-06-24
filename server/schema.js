@@ -30,13 +30,19 @@ exports.email = Joi.object().keys({
 });
 
 exports.changeEmail = Joi.object().keys({
-  current: email,
-  new: email
+  oldEmail: email,
+  email
+});
+
+exports.newsletter = Joi.object().keys({
+  todayFocus: Joi.boolean().default(false),
+  weeklyChoice: Joi.boolean().default(false),
+  afternoonExpress: Joi.boolean().default(false),
 });
 
 exports.changePassword = Joi.object().keys({
   oldPassword: Joi.string().trim().required(),
-  newPassword: password,
+  password,
   confirmPassword: password
 });
 
@@ -46,12 +52,6 @@ exports.username = Joi.object().keys({
 
 exports.mobile = Joi.object().keys({
   mobile: Joi.string().trim().min(1).required()
-});
-
-exports.letter = Joi.object().keys({
-  todayFocus: Joi.boolean().default(false),
-  weeklyChoice: Joi.boolean().default(false),
-  afternoonExpress: Joi.boolean().default(false),
 });
 
 exports.address = Joi.object().keys({

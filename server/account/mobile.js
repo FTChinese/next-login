@@ -5,19 +5,18 @@ const schema = require('../schema');
 
 const debug = require('../../utils/debug')('user:profile');
 const endpoints = require('../../utils/endpoints');
-const {processJoiError, processApiError} = require('../../utils/errors');
+const {processJoiError, processApiError, buildAlertDone} = require('../../utils/errors');
 
 const router = new Router();
 
 router.post('/', async (ctx) => {
 
-  const redirectTo = `${dirname(ctx.path)}/account`;
+  const redirectTo = dirname(ctx.path);
 
   const result = schema.mobile.validate(ctx.request.body.account);
 
   if (result.error) {
-    const errors = processJoiError(result.error)
-    ctx.session.errors = errors;
+    ctx.session.errors = processJoiError(result.error)
 
     return ctx.redirect(redirectTo);
   }
@@ -33,17 +32,13 @@ router.post('/', async (ctx) => {
       .set('X-User-Id', ctx.session.user.id)
       .send(account);
 
-    ctx.session.alert = {
-      mobile: true
-    };
+    ctx.session.alert = buildAlertDone('mobile_saved');
 
     return ctx.redirect(redirectTo);
     
   } catch (e) {
 
-    const errors = processApiError(e)
-
-    ctx.session.errors = errors;
+    ctx.session.errors = processApiError(e);
 
     return ctx.redirect(redirectTo);
   }

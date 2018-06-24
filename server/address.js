@@ -5,7 +5,7 @@ const schema = require('./schema');
 const debug = require('../utils/debug')('user:address');
 const render = require('../utils/render');
 const endpoints = require('../utils/endpoints');
-const {processJoiError, processApiError} = require('../utils/errors');
+const {processJoiError, processApiError, buildAlertDone} = require('../utils/errors');
 
 const router = new Router();
 
@@ -23,7 +23,7 @@ router.get('/', async (ctx) => {
 
   ctx.state.address = address;
 
-  ctx.body = await render('profile/address.html', ctx.state);
+  ctx.body = await render('address.html', ctx.state);
 });
 
 // Update address
@@ -50,15 +50,12 @@ router.post('/', async (ctx, next) => {
       .set('X-User-Id', ctx.session.user.id)
       .send(address);
 
-    ctx.session.alert = {
-      saved: true
-    };
+    ctx.session.alert = buildAlertDone('address_saved')
 
     return ctx.redirect(ctx.path);
 
   } catch (e) {
-    const errors = processApiError(e)
-    ctx.session.errors = errors;
+    ctx.session.errors = processApiError(e)
 
     return ctx.redirect(ctx.path);
   }

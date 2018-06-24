@@ -5,28 +5,35 @@ const schema = require('./schema');
 
 const debug = require('../utils/debug')('user:email');
 const endpoints = require('../utils/endpoints');
-const {processJoiError, processApiError, isSuperAgentError} = require('../utils/errors');
+const {processJoiError, processApiError, isSuperAgentError, buildAlertSaved, buildAlertDone} = require('../utils/errors');
+const render = require('../utils/render');
 
 const router = new Router();
 
 // Show email setting page
 router.get('/', async (ctx, next) => {
-  const errors = ctx.session.errors;
-  const alert = ctx.session.alert;
 
   const resp = await request.get(endpoints.profile)
     .set('X-User-Id', ctx.session.user.id)
 
   const profile = resp.body;
-  ctx.state.email = {
-    current: profile.email,
-    new: profile.new
+
+  // Set email
+  ctx.state.account = {
+    email: profile.email,
+    oldEmail: profile.email
   };
-  
+  // Set newsletter
   ctx.state.letter = profile.newsletter;
 
-  ctx.state.errors = errors;
-  ctx.state.alert = alert;
+  // Check redirect message
+  if (ctx.session.errors) {
+    ctx.state.errors = ctx.session.errors;
+  }
+
+  if (ctx.session.alert) {
+    ctx.state.alert = ctx.session.alert;
+  }
   
   ctx.body = await render('email.html', ctx.state);
 
@@ -35,36 +42,38 @@ router.get('/', async (ctx, next) => {
 
 });
 
-// Chnage email
+// Submit new email
 router.post('/', async (ctx) => {
 
-  const redirectTo = `${dirname(ctx.path)}/account`;
-
-  const result = schema.email.validate(ctx.request.body.account);
+  const result = schema.changeEmail.validate(ctx.request.body.account);
   if (result.error) {
     const errors = processJoiError(result.error);
 
     ctx.session.errors = errors;
 
-    return ctx.redirect(redirectTo);
+    return ctx.redirect(ctx.path);
   }
 
   /**
-   * @type {{email: string}}
+   * @type {{oldEmail: string, email: string}}
    */
   const account = result.value;
+  // If email is not changed, do nothing.
+  if (account.oldEmail === account.email) {
+    debug.info('Email is not altered.');
+    return ctx.redirect(ctx.path);
+  }
 
   try {
     const resp = await request.patch(endpoints.email)
       .set('X-User-Id', ctx.session.user.id)
-      .send(account);
+      .send({email: account.email});
 
     // If resp.status === 204, the email is not altered
+    // If email is actually changed, updated user data will be sent back.
     if (200 === resp.status) {
       debug.info('Email changed')
-      ctx.session.alert = {
-        email: true
-      };
+      ctx.session.alert = buildAlertSaved('email');
     }
     
     return ctx.redirect(redirectTo);
@@ -79,55 +88,57 @@ router.post('/', async (ctx) => {
 
 // Change newsletter setting
 router.post('/newsletter', async (ctx, next) => {
+  const redirectTo = dirname(ctx.path);
 
-  const result = schema.letter.validate(ctx.request.body.letter);
+  const result = schema.newsletter.validate(ctx.request.body.letter);
 
   if (result.error) {
-    const errors = processJoiError(result.error);
-    ctx.session.errors = errors;
-    return ctx.redirect(ctx.path);
+    ctx.session.errors = processJoiError(result.error);
+    return ctx.redirect(redirectTo);
   }
+
+  const newsletter = result.value;
+  debug.info('Updating newsletter: %O', newsletter);
+
   try {
 
-    const resp = await request.patch(endpoints.newsletter)
+    await request.patch(endpoints.newsletter)
       .set('X-User-Id', ctx.session.user.id)
-      .send(letter);
+      .send(newsletter);
     
-    ctx.session.alert = {
-      saved: true
-    };
+    ctx.session.alert = buildAlertSaved('newsletter')
 
-    return ctx.redirect(ctx.path);
+    return ctx.redirect(redirectTo);
+
   } catch (e) {
-    const errors = processApiError(e)
-    ctx.session.errors = errors;
+    ctx.session.errors = processApiError(e)
 
-    return ctx.redirect(ctx.path);
+    return ctx.redirect(redirectTo);
   }
 });
 
 // Resend verfication letter
 router.post('/request-verification', async (ctx) => {
-  const redirectTo = `${dirname(dirname(ctx.path))}/account`;
+  const redirectTo = dirname(ctx.path);
 
   try {
     await request.post(endpoints.requestVerification)
       .set('X-User-Id', ctx.session.user.id);
 
-    ctx.session.alert = {
-      resent: true
-    };
+    ctx.session.alert = buildAlertDone('letter_sent');
 
     return ctx.redirect(redirectTo);
   } catch (e) {
-    debug.error(e);
-    throw e;
+    ctx.session.errors = processApiError(e);
+    
+    return ctx.redirect(redirectTo);
   }
 });
 
 // Confirm verfication token
 router.get('/confirm-verification/:token', async (ctx) => {
   const token = ctx.params.token;
+  const redirectTo = dirname(dirname(ctx.path));
 
   try {
     const resp = await request.put(`${endpoints.verifyEmail}/${token}`)
@@ -140,23 +151,14 @@ router.get('/confirm-verification/:token', async (ctx) => {
     debug.info("User info after verification: %O", user);
 
     ctx.session.user.verified = user.verified;
+    ctx.session.alert = buildAlertDone('email_verified');
 
-    ctx.redirect('/profile/account');
+    return ctx.redirect(redirectTo);
 
   } catch (e) {
-    if (!isSuperAgentError(e)) {
-      throw e;
-    }
+    ctx.session.errors = processApiError(e, 'email_token');
 
-    if (404 === e.status) {
-      debug.info('Verify email respond not found');
-      
-      ctx.session.alert = {
-        invalidLink: true
-      }
-    }
-
-    ctx.redirect('/profile/account');
+    return ctx.redirect(redirectTo);
   }
 });
 

@@ -4,12 +4,12 @@ const schema = require('./schema');
 
 const debug = require('../utils/debug')('user:profile');
 const endpoints = require('../utils/endpoints');
-const {processJoiError, processApiError} = require('../utils/errors');
+const {processJoiError, processApiError, buildAlertDone} = require('../utils/errors');
 const render = require('../utils/render');
 
 const router = new Router();
 
-// Show basic profile
+// Show profile page
 router.get('/', async (ctx) => {
 
   const resp = await request.get(endpoints.profile)
@@ -23,10 +23,21 @@ router.get('/', async (ctx) => {
   const profile = resp.body;
   ctx.state.profile = profile;
 
+  if (ctx.session.alert) {
+    ctx.state.alert = ctx.session.alert;
+  }
+  
+  if (ctx.session.errors) {
+    ctx.state.errors = ctx.session.errors;
+  }
+
   ctx.body = await render('profile/home.html', ctx.state);
+
+  delete ctx.session.alert;
+  delete ctx.session.errors;
 });
 
-// Update basic profile
+// Update profile
 router.post('/', async (ctx) => {
 
   const result = schema.profile.validate(ctx.request.body.profile, {abortEarly: false});
@@ -47,15 +58,11 @@ router.post('/', async (ctx) => {
       .set('X-User-Id', ctx.session.user.id)
       .send(profile);
 
-    ctx.session.alert = {
-      saved: true
-    };
+    ctx.session.alert = buildAlertDone('profile_saved');
 
     return ctx.redirect(ctx.path);
   } catch (e) {
-    const errors = processApiError(e);
-
-    ctx.session.errors = errors;
+    ctx.session.errors = processApiError(e);
 
     return ctx.redirect(ctx.path);
   }

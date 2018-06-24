@@ -1,58 +1,56 @@
 const Router = require('koa-router');
 const request = require('superagent');
+const {dirname} = require('path');
 
 const schema = require('../schema');
 
 const debug = require('../../utils/debug')('user:password');
 const endpoints = require('../../utils/endpoints');
-const {processJoiError, processApiError} = require('../../utils/errors');
+const {processJoiError, processApiError, buildAlertDone, buildInvalidField} = require('../../utils/errors');
 
 const router = new Router();
 
+// Submit new password
 router.post('/', async (ctx, next) => {
-
+  const redirectTo = dirname(ctx.path);
   // Validate
   const result = schema.changePassword.validate(ctx.request.body);
   if (result.error) {
-    const errors = processJoiError(result.error);
-    ctx.session.errors = errors;
+    ctx.session.errors = processJoiError(result.error);
 
-    return ctx.redirect(ctx.path);
+    return ctx.redirect(redirectTo);
   }
 
   /**
-   * @type {{oldPassword: string, newPassword: string, confirmPassword: string}}
+   * @type {{oldPassword: string, password: string, confirmPassword: string}}
    */
   const pass = result.value;
   // Ensure new password confirmed
-  if (pass.newPassword !== pass.confirmPassword) {
-    ctx.state.errors = {
-      confirmPassword: {
-        message: '两次输入的新密码必须相同'
-      }
-    };
+  if (pass.password !== pass.confirmPassword) {
+    ctx.state.errors = buildInvalidField('confirmPassword', 'mismatched');
 
     return await next();
   }
 
   try {
     await request.patch(endpoints.password)
+      .set('X-User-Id', ctx.session.user.id)
       .send({
         oldPassword: pass.oldPassword,
-        newPassword: pass.newPassword
+        newPassword: pass.password
       });
 
-    ctx.session.alert = {
-      saved: true
-    };
+    ctx.session.alert = buildAlertDone('password_saved');
 
-    return ctx.redirect(ctx.path);
+    return ctx.redirect(redirectTo);
 
   } catch (e) {
 
-    ctx.state.errors = processApiError(e, 'oldPassword');
+    ctx.session.errors = processApiError(e, 'oldPassword');
 
-    return ctx.redirect(ctx.path);
+    debug.info('Session data: %O', ctx.session);;
+
+    return ctx.redirect(redirectTo);
   }
 });
 

@@ -1,4 +1,3 @@
-const {dirname} = require('path');
 const Router = require('koa-router');
 const request = require('superagent');
 
@@ -12,24 +11,28 @@ const mobile = require('./mobile');
 
 const router = new Router();
 
-// Show account setting
+// Show account page
 router.get('/', async (ctx, next) => {
-  const errors = ctx.session.errors;
-  const alert = ctx.session.alert;
 
   const resp = await request.get(endpoints.profile)
   .set('X-User-Id', ctx.session.user.id)
 
   const profile = resp.body;
   ctx.state.account = profile;
-  ctx.state.errors = errors;
-  ctx.state.alert = alert;
+
+  // Show redirect session data
+  if (ctx.session.errors) {
+    ctx.state.errors = ctx.session.errors;
+  }
+  if (ctx.session.alert) {
+    ctx.state.alert = ctx.session.alert;
+  }
   
   ctx.body = await render('account.html', ctx.state);
 
+  // Remove session data
   delete ctx.session.errors;
   delete ctx.session.alert;
-
 });
 
 router.use('/password', password);

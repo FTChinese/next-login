@@ -3,15 +3,27 @@ const message = require('./message');
 
 const fields = Object.freeze({
   email: 'email',
-  token: 'token',
-  letter: 'letter',
+  emailToken: 'email_token',
   server: 'server',
-  reset: 'reset'
+  passwordToken: 'password_token',
+  passwordReset: 'password_reset',
+  oldPassword: 'oldPassword',
+  confirmPassword: 'confirmPassword',
 });
 
 const types = Object.freeze({
   notFound: 'not_found',
   forbidden: 'forbidden',
+  unauthorized: 'unauthorized',
+  mismatched: 'mismatched',
+});
+
+const alertActions = Object.freeze({
+  emailVerfied: 'email_verified',
+  emailSaved: 'email_saved',
+  newsletterSaved: 'newsletter_saved',
+  letterSent: 'letter_sent',
+  passwordChanged: 'password_changed'
 });
 
 /**
@@ -98,13 +110,20 @@ exports.processApiError = function(err, field='') {
   debug.error('API error response: %O', body);
 
   switch (err.status) {
-    case 403:
+    // Unauthorized
+    case 401: 
+      return buildInvalidField(fields.server, types.unauthorized, body.message);
+
+    // Forbidden
+    case 403: 
       return buildInvalidField(field, types.forbidden, body.message);
 
-    case 404:
+    // Not Found
+    case 404: 
       return buildInvalidField(field, types.notFound, body.message)
 
-    case 422:
+    // Unprocessable Entity.
+    case 422: 
       const error = body.error;
       return buildInvalidField(error.field, error.code, error.message)
 
@@ -138,9 +157,5 @@ exports.buildInvalidField = buildInvalidField;
 
 exports.buildAlertDone = function (field) {
   return {done: field};
-}
-
-exports.buildAlertSaved = function(field) {
-  return {saved: field};
 }
 

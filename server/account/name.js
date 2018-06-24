@@ -5,21 +5,18 @@ const schema = require('../schema');
 
 const debug = require('../../utils/debug')('user:name');
 const endpoints = require('../../utils/endpoints');
-const {processJoiError, processApiError} = require('../../utils/errors');
+const {processJoiError, processApiError, buildAlertDone} = require('../../utils/errors');
 
 const router = new Router();
 
 router.post('/', async (ctx) => {
 
-  const redirectTo = `${dirname(ctx.path)}/account`;
-
-  debug.info('Redirect to %s', redirectTo);
+  const redirectTo = dirname(ctx.path);
 
   const result = schema.username.validate(ctx.request.body.account)
 
   if (result.error) {
-    const errors = processJoiError(result.error)
-    ctx.session.errors = errors;
+    ctx.session.errors = processJoiError(result.error);
 
     return ctx.redirect(redirectTo);
   }
@@ -35,19 +32,16 @@ router.post('/', async (ctx) => {
       .set('X-User-Id', ctx.session.user.id)
       .send(account);
 
-    ctx.session.alert = {
-      name: true
-    };
+    ctx.session.alert = buildAlertDone('name_saved');
 
+    // Update session data
     ctx.session.user.name = account.name;
     
     return ctx.redirect(redirectTo);
 
   } catch (e) {
 
-    const errors = processApiError(e)
-
-    ctx.session.errors = errors;
+    ctx.session.errors = processApiError(e)
 
     return ctx.redirect(redirectTo);
   }

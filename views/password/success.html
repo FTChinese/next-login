@@ -6,11 +6,11 @@
     2. Tell user password is reset.
   #}
   
-  {% if alert.done == "letter" %}
+  {% if alert.done == "letter_sent" %}
     <div>检查您的邮件，点击邮件中的“重置密码”按钮修改您的密码。如果几分钟内没有看到邮件，请检查是否被放进了垃圾邮件列表。</div>
   {% endif %}
 
-  {% if alert.done == "reset" %}
+  {% if alert.done == "password_reset" %}
     <div class="text-center">密码已更新，请登录</div>
   {% endif %}
 

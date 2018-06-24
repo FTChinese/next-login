@@ -57,6 +57,11 @@
             </button>
         </div>
       {% endif %}
+
+      {% if user and (not user.verified) %}
+        <div class="alert alert-primary" role="alert">请验证您的登录邮箱</div>
+      {% endif %}
+
       {% block main %}{% endblock %}
     </div>
   </main>

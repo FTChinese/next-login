@@ -33,6 +33,7 @@ router.get('/', async (ctx) => {
     return;
   }
 
+  // Handle invalid token for password reset.
   if (ctx.session.errors) {
     ctx.state.errors = ctx.session.errors;
   }
@@ -62,7 +63,7 @@ router.post('/', async function (ctx, next) {
       .send({email});
 
     // Tell redirected page what message to show.
-    ctx.session.alert = buildAlertDone('letter');
+    ctx.session.alert = buildAlertDone('letter_sent');
 
     // Redirect to /password-reset
     return ctx.redirect(ctx.path);
@@ -87,7 +88,7 @@ router.get('/:token', async (ctx) => {
     const resp = await request.get(`${endpoints.verifyResetToken}/${token}`);
 
     /**
-     * User if found and show page to enter new password
+     * User is found and show page to enter new password
      * @type {User}
      */
     const user = resp.body;
@@ -96,15 +97,18 @@ router.get('/:token', async (ctx) => {
     return ctx.body = await render('password/new-password.html', ctx.state);
 
   } catch (e) {
-    ctx.session.errors = processApiError(e, 'token');
+    // 400
+    // 404 if the token is not found, the the user associated with the token is not found.
+    ctx.session.errors = processApiError(e, 'password_token');
 
     ctx.redirect(dirname(ctx.path));
   }
 });
 
-// Let user to change password at this url
+// User submit new password
 router.post('/:token', async (ctx, next) => {
   const token = ctx.params.token;
+  const redirectTo = dirname(ctx.path);
 
   const result = schema.reset.validate(ctx.request.body);
 
@@ -134,17 +138,17 @@ router.post('/:token', async (ctx, next) => {
         password: pws.password
       });
     
-    ctx.session.alert = buildAlertDone('reset');
+    ctx.session.alert = buildAlertDone('password_reset');
 
     // Redirect to /password-reset to prevent user refresh.
-    return ctx.redirect(dirname(ctx.path));
+    return ctx.redirect(redirectTo);
 
   } catch (e) {
     // 400, 422
     // 404 here means the token is invalid or expired. Handle it separatedly.
     if (404 === e.status) {
-      ctx.session.errors = buildInvalidField('reset', 'borbidden');
-      return ctx.redirect(dirname(ctx.path));
+      ctx.session.errors = buildInvalidField('password_reset', 'forbidden');
+      return ctx.redirect(redirectTo);
     }
 
     ctx.state.errors = processApiError(e);

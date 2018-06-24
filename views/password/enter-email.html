@@ -3,9 +3,9 @@
 {% block content %}
   <h4 class="text-center">找回密码</h4>
 
-  {% if errors.token %}
+  {% if errors.password_token %}
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-      <span>{{errors.token.message}}</span>
+      <span>{{errors.password_token.message}}</span>
       <button type="button" class="close" data-dismiss="alert" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
