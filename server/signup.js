@@ -12,7 +12,7 @@ const router = new Router();
 
 // Show signup page
 router.get('/', async (ctx) => {
-
+  debug.info('ctx.state: %O', ctx.state);
   ctx.body = await render('signup.html', ctx.state);
 });
 
