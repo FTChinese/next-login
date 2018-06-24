@@ -9,8 +9,6 @@ const debug = require('../../utils/debug')('user:password-reset');
 const {processJoiError, processApiError, buildInvalidField, buildAlertDone} = require('../../utils/errors');
 const endpoints = require('../../utils/endpoints');
 
-const message = require('../../utils/message');
-
 const router = new Router();
 
 // Ask user to enter email
