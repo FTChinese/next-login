@@ -44,31 +44,6 @@ if (!isProduction) {
 
 // Configurations passed around
 app.use(env());
-// app.use(async function (ctx, next) {
-//   debug.info('Middleware: check access token');
-//   if (ctx.accessData) {
-//     debug.info('Access data %O', ctx.accessData);
-//     const createdAt = ctx.accessData.created_at;
-//     const expiresIn = ctx.accessData.expires_in;
-//     const expiresAt = moment.utc(createdAt).add(expiresIn, 'seconds');
-
-//     // If the access token is already expired
-//     if (expiresAt.isBefore(moment.utc(), 'seconds')) {
-//       debug.info('Access data expired');
-//       delete app.context.accessData;
-//     }
-//   }
-//   await next();
-// });
-
-// app.use(async function(ctx, next) {
-//   if (!ctx.accessData) {
-//     debug.info('Access data is not found.');
-//     app.context.accessData = await fetchAccess();
-//   }
-
-//   await next();
-// });
 
 app.use(inlineMin());
 app.use(session(app));
