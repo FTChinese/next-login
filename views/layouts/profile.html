@@ -6,7 +6,7 @@
     <ul class="nav flex-column mt-4">
       {% for item in sideNav %}
         <li class="nav-item">
-          <a class="nav-link{% if item.active %} active{% endif %}" href="{{env.basePath}}{{item.href}}">{{item.text}}</a>
+          <a class="nav-link{% if item.active %} active{% endif %}" href="{{item.href}}">{{item.text}}</a>
         </li>
       {% endfor %}
     </ul>

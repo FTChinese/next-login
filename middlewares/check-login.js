@@ -32,7 +32,7 @@ function checkLogin({redirect=true}={}) {
     ctx.state.user = null;
 
     if (redirect) {
-      const redirectTo = `${env.basePath}/login`;
+      const redirectTo = `/login`;
 
       debug.info('User not logged in. Redirecting to %s', redirectTo);
   

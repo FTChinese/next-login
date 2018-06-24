@@ -33,14 +33,14 @@
           <div class="dropdown-menu dropdown-menu-right">
             <h6 class="dropdown-header">{{user.name}}</h6>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="{{env.basePath}}/profile">设置</a>
+            <a class="dropdown-item" href="/profile">设置</a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="{{env.basePath}}/logout">退出</a>
+            <a class="dropdown-item" href="/logout">退出</a>
           </div>
         </li>
         {% else %}
         <li class="nav-item">
-          <a href="{{env.basePath}}/login">登录</a> <a href="{{env.basePath}}/signup">注册</a>
+          <a href="/login">登录</a> <a href="/signup">注册</a>
         </li>
         {% endif %}
       </ul>
