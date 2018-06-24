@@ -6,7 +6,6 @@ const Router = require('koa-router');
 const logger = require('koa-logger');
 const bodyParser = require('koa-bodyparser');
 const session = require('koa-session');
-// const moment = require('moment');
 
 const checkLogin = require('./middlewares/check-login');
 const handleErrors = require('./middlewares/handle-errors');
