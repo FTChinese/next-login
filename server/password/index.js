@@ -104,6 +104,7 @@ router.get('/:token', async (ctx) => {
   }
 });
 
+// Let user to change password at this url
 router.post('/:token', async (ctx, next) => {
   const token = ctx.params.token;
 
@@ -143,7 +144,13 @@ router.post('/:token', async (ctx, next) => {
   } catch (e) {
     // 400, 422
     // 404 here means the token is invalid or expired. Handle it separatedly.
+    if (404 === e.status) {
+      ctx.session.errors = buildInvalidField('reset', 'borbidden');
+      return ctx.redirect(dirname(ctx.path));
+    }
 
+    ctx.state.errors = processApiError(e);
+    return await next();
   }
 }, async function(ctx) {
   ctx.body = await render('password/new-password.html', ctx.state);

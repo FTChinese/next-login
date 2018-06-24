@@ -4,7 +4,14 @@ const message = require('./message');
 const fields = Object.freeze({
   email: 'email',
   token: 'token',
-  letter: 'letter'
+  letter: 'letter',
+  server: 'server',
+  reset: 'reset'
+});
+
+const types = Object.freeze({
+  notFound: 'not_found',
+  forbidden: 'forbidden',
 });
 
 /**
@@ -66,115 +73,6 @@ exports.processJoiError = function(joiErr) {
 }
 
 /**
- * 
- * @param {APIErrorBody} body 
- * @param {string} field
- * @return {InvalidFields}
- */
-exports.apiNotFound = function (body, field) {
-
-  const ret = {};
-  const type = 'not_found'
-  const msgId = `${field}.${type}`
-
-  debug.info('API InvalidError: %O', {
-    field,
-    type,
-    msg: msgId
-  });
-
-  ret[field] = {
-    type,
-    message: message[msgId] || body.message
-  }
-
-  debug.info('API not found error: %O', ret);
-
-  return ret;
-}
-
-/**
- * @param {APIErrorBody} body 
- * @param {string} key 
- * @return {InvalidFields}
- */
-exports.apiForbidden = function (body, field) {
-  const ret = {};
-  const type = 'forbidden';
-  const msgId = `${field}.${type}`
-
-  debug.info('API InvalidError: %O', {
-    field,
-    type,
-    msg: msgId
-  });
-
-  ret[key] = {
-    type,
-    message: message[msgId] || body.message,
-  };
-
-  return ret;
-}
-/**
- * @param {APIErrorBody} body
- * @return {InvalidFields}
- */
-exports.apiUnprocessable = function (body) {
-
-  const error = body.error;
-  const ret = {};
-  const field = error.field;
-  const msgId = `${field}.${error.code}` 
-
-  debug.info('API InvalidError: %O', {
-    field,
-    type: error.code,
-    msg: msgId
-  });
-
-  ret[field] = {
-    type: error.code,
-    message: message[msgId] || error.message
-  };
-
-  return ret;
-}
-
-/**
- * @param {SuperAgentError} err 
- * @param {string} key
- * @returns {Object}
- */
-exports.processApiError = function(err, key='') {
-  if (!exports.isSuperAgentError(err)) {
-    throw err;
-  }
-
-  const body = err.response.body;
-
-  debug.error('API error response: %O', body);
-
-  switch (err.status) {
-    case 403:
-      return exports.apiForbidden(body, key);
-
-    case 404:
-      return exports.apiNotFound(body, key)
-
-    case 422:
-      return exports.apiUnprocessable(body)
-
-    default:
-      return {
-        server: {
-          message: message.server_error
-        }
-      };
-  }
-};
-
-/**
  * @param {SuperAgentError} e
  * @return {boolean}
  */
@@ -186,11 +84,40 @@ exports.isSuperAgentError = function (e) {
 };
 
 /**
- * 
+ * @param {SuperAgentError} err 
+ * @param {string} field
+ * @returns {InvalidFields}
+ */
+exports.processApiError = function(err, field='') {
+  if (!exports.isSuperAgentError(err)) {
+    throw err;
+  }
+
+  const body = err.response.body;
+
+  debug.error('API error response: %O', body);
+
+  switch (err.status) {
+    case 403:
+      return buildInvalidField(field, types.forbidden, body.message);
+
+    case 404:
+      return buildInvalidField(field, types.notFound, body.message)
+
+    case 422:
+      const error = body.error;
+      return buildInvalidField(error.field, error.code, error.message)
+
+    default:
+      return buildInvalidField(fields.server)
+  }
+};
+
+/**
  * @param {InvalidError} invalid 
  * @param {string} defaultMsg 
  */
-exports.buildInvalidField = function(field, type, defaultMsg='') {
+function buildInvalidField(field, type='error', defaultMsg='') {
   const invalid = {
     field,
     type,
@@ -206,6 +133,8 @@ exports.buildInvalidField = function(field, type, defaultMsg='') {
   };
   return;
 };
+
+exports.buildInvalidField = buildInvalidField;
 
 exports.buildAlertDone = function (field) {
   return {done: field};
