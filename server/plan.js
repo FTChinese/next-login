@@ -7,7 +7,7 @@ const endpoints = require('../utils/endpoints');
 const router = new Router();
 
 router.get('/', async (ctx) => {
-  ctx.body = await render('new-user/plan.html', ctx.state);
+  ctx.body = await render('signup/plan.html', ctx.state);
 });
 
 router.post('/', async (ctx) => {
