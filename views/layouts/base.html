@@ -13,7 +13,7 @@
 
   <title>{% block title %}用户中心{% endblock %} - FT中文网</title>
   {% if env.isProduction %}
-  <link href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.bootcss.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
   {% else %}
   <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.css">
   {% endif %}
@@ -33,14 +33,14 @@
           <div class="dropdown-menu dropdown-menu-right">
             <h6 class="dropdown-header">{{user.name}}</h6>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="/settings/profile">设置</a>
+            <a class="dropdown-item" href="{{env.basePath}}/profile">设置</a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="/logout">退出</a>
+            <a class="dropdown-item" href="{{env.basePath}}/logout">退出</a>
           </div>
         </li>
         {% else %}
         <li class="nav-item">
-          <a href="/login">登录</a> <a href="/signup">注册</a>
+          <a href="{{env.basePath}}/login">登录</a> <a href="{{env.basePath}}/signup">注册</a>
         </li>
         {% endif %}
       </ul>

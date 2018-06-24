@@ -91,7 +91,20 @@ a:hover {
 }
 
 .navbar-brand:hover, .dropdown-toggle:hover {
-    color: #4D4845
+    color: #4D4845;
+}
+
+.nav-link {
+  position: relative;
+}
+.nav-link.active:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background-color: #0a5e66;
 }
 
 .o-footer {

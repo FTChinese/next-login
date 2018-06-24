@@ -3,29 +3,12 @@
 {% block main %}
 <div class="row">
   <div class="col-sm-3">
-    <ul class="nav flex-column">
-      <li class="nav-item">
-        <a class="nav-link" href="/profile">我的资料</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/email">邮箱</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/account">账号安全</a>
-      </li>
-      <li></li>
-      <!-- <li class="nav-item">
-        <a class="nav-link" href="/profile/password">密码</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/profile/notification">消息和邮件</a>
-      </li> -->
-      <li class="nav-item">
-        <a class="nav-link" href="/membership">会员</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/address">地址</a>
-      </li>
+    <ul class="nav flex-column mt-4">
+      {% for item in sideNav %}
+        <li class="nav-item">
+          <a class="nav-link{% if item.active %} active{% endif %}" href="{{env.basePath}}{{item.href}}">{{item.text}}</a>
+        </li>
+      {% endfor %}
     </ul>
   </div>
 

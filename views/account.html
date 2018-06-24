@@ -32,7 +32,7 @@
   <section>
     <h5>更改密码</h5>
 
-    <form method="post" action="/account/password">
+    <form method="post" action="{{env.basePath}}/account/password">
       <div class="form-group">
         <label for="oldPassword">当前密码</label>
         <input type="password"
@@ -74,20 +74,20 @@
       </div>
       
       <button type="submit" class="btn btn-primary">保存密码</button>
-      <a href="/password-reset" target="_blank">忘记密码？</a>
+      <a href="{{env.basePath}}/password-reset" target="_blank">忘记密码？</a>
     </form>    
   </section>
 
   <section class="pt-2 mb-3">
     <h5>用户名</h5>
-    <form action="/account/name" method="post">
+    <form action="{{env.basePath}}/account/name" method="post">
 
       <div class="form-group">
         <input class="form-control"
-        id="name"
-        type="text"
-        name="account[name]"
-        value="{{account.name}}">
+          id="name"
+          type="text"
+          name="account[name]"
+          value="{{account.name}}">
 
         <small class="form-text text-muted">20字符以内</small>
 
@@ -102,14 +102,14 @@
 
   <section class="pt-2 mb-3">
     <h5>手机号码</h5>
-    <form action="/account/mobile" method="post">
+    <form action="{{env.basePath}}/account/mobile" method="post">
 
       <div class="form-group">
         <input class="form-control"
-        id="mobile"
-        type="text"
-        name="account[mobile]"
-        value="{{account.mobileNumber}}">
+          id="mobile"
+          type="text"
+          name="account[mobile]"
+          value="{{account.mobileNumber}}">
 
         {% if errors.mobile %}
           <div class="form-errortext">{{errors.mobile.message}}</div>

@@ -20,12 +20,12 @@
         <div class="form-group">
           <label for="email">邮箱</label>
           <input class="form-control"
-          id="email"
-          type="email"
-          name="credentials[email]"
-          value="{{credentials.email}}"
-          placeholder="电子邮箱"
-          required>
+            id="email"
+            type="email"
+            name="credentials[email]"
+            value="{{credentials.email}}"
+            placeholder="电子邮箱"
+            required>
 
           {% if errors.email %}
           <div class="form-errortext">{{errors.email.message}}</div>
@@ -35,11 +35,11 @@
         <div class="form-group">
           <label for="password">密码</label>
           <input class="form-control"
-          id="password"
-          type="password"
-          name="credentials[password]"
-          placeholder="密码"
-          required>
+            id="password"
+            type="password"
+            name="credentials[password]"
+            placeholder="密码"
+            required>
 
           {% if errors.password %}
           <div class="form-errortext">{{errors.password.message}}</div>
@@ -47,15 +47,15 @@
         </div>
         
         <div class="form-check clearfix">
-            <input class="form-check-input"
+          <input class="form-check-input"
             id="rememberMe"
             type="checkbox"
             name="rememberMe"
             value="true"
             checked>
-            <label for="rememberMe">记住我</label>
+          <label for="rememberMe">记住我</label>
 
-            <a class="float-right" href="/password-reset">忘记密码?</a>
+          <a class="float-right" href="{{env.basePath}}/password-reset">忘记密码?</a>
         </div>
 
         <button class="btn btn-block btn-primary" type="submit">登录</button>

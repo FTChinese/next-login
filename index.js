@@ -7,6 +7,8 @@ const logger = require('koa-logger');
 const bodyParser = require('koa-bodyparser');
 const session = require('koa-session');
 
+const env = require('./middlewares/env');
+const nav = require('./middlewares/nav');
 const checkLogin = require('./middlewares/check-login');
 const handleErrors = require('./middlewares/handle-errors');
 const inlineMin = require('./middlewares/inline-min');
@@ -22,32 +24,26 @@ const account = require('./server/account');
 const membership = require('./server/membership');
 const address = require('./server/address');
 
+const isProduction = process.env.NODE_ENV === 'production';
 const app = new Koa();
 const router = new Router();
 
 app.proxy = true;
+/**
+ * @todo Use dotenv.
+ */
 app.keys = ['SEKRIT1', 'SEKRIT2'];
 
 app.use(logger());
 
-if (process.env.NODE_ENV !== 'production') {
+if (!isProduction) {
   const static = require('koa-static');
   app.use(static(path.resolve(process.cwd(), 'node_modules')));
   app.use(static(path.resolve(process.cwd(), 'client')));
 }
 
-app.use(async function (ctx, next) {
-  ctx.state.env = {
-    isProduction: process.env.NODE_ENV === 'production',
-    year: new Date().getFullYear()
-  };
-  debug.info(ctx.state.env);
-  debug.info('Origin: %s', ctx.origin);
-  debug.info('Host: %s', ctx.host);
-  debug.info('Hostname: %s', ctx.hostname);
-  
-  await next();
-});
+// Configurations passed around
+app.use(env());
 // app.use(async function (ctx, next) {
 //   debug.info('Middleware: check access token');
 //   if (ctx.accessData) {
@@ -79,16 +75,23 @@ app.use(session(app));
 app.use(handleErrors());
 app.use(bodyParser());
 
+/**
+ * @todo Add a middleware to handle Cross Site Request Forgery based on https://github.com/pillarjs/csrf.
+ * 
+ * Refer to https://github.com/expressjs/csurf.
+ * There is a koa middleware https://github.com/koajs/csrf but neither well written nor well mataintained.
+ */
+
 router.use('/login', login);
 router.use('/logout', logout);
 router.use('/signup', signup);
 router.use('/plan', plan);
 router.use('/password-reset', passwordReset);
-router.use('/profile', checkLogin(), profile);
-router.use('/email', checkLogin(), email);
-router.use('/account', checkLogin(), account);
-router.use('/membership', checkLogin(), membership);
-router.use('/address', checkLogin(), address);
+router.use('/profile', checkLogin(), nav(), profile);
+router.use('/email', checkLogin(), nav(), email);
+router.use('/account', checkLogin(), nav(), account);
+router.use('/membership', checkLogin(), nav(), membership);
+router.use('/address', checkLogin(), nav(), address);
 
 app.use(router.routes());
 
