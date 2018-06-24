@@ -7,7 +7,7 @@ declare interface User {
     verified: boolean,
 }
 
-enum Gender {
+declare enum Gender {
     M,
     F
 }
