@@ -7,6 +7,8 @@ const logger = require('koa-logger');
 const bodyParser = require('koa-bodyparser');
 const session = require('koa-session');
 
+const boot = require('./utils/boot-app');
+
 const env = require('./middlewares/env');
 const nav = require('./middlewares/nav');
 const checkLogin = require('./middlewares/check-login');
@@ -73,32 +75,10 @@ router.use('/address', checkLogin(), address);
 
 app.use(router.routes());
 
-console.log(router.stack.map(layer => layer.path));
+debug.info(router.stack.map(layer => layer.path));
 
-/**
- * @param {Koa} app - a Koa instance
- */
-async function bootUp(app) {
-  const appName = 'next-user';
-  debug.info('booting %s', appName);
-
-  const port = process.env.PORT || 3000;
-
-  // Create HTTP server
-  const server = app.listen(port);
-
-  // Logging server error.
-  server.on('error', (error) => {
-    debug.error('Server error: %O', error);
-  });
-
-  // Listening event handler
-  server.on('listening', () => {
-    debug.info('%s running on %O', appName, server.address());
-  });
-}
-
-bootUp(app)
+boot(app)
   .catch(err => {
     debug.error('Bootup error: %O', err);
   });
+
