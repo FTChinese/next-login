@@ -150,7 +150,10 @@ function buildInvalidField(field, type='error', defaultMsg='') {
     type: invalid.type,
     message: message[invalid.msg] || defaultMsg
   };
-  return;
+
+  debug.info('Invalid field: %O', o);
+
+  return o;
 };
 
 exports.buildInvalidField = buildInvalidField;
