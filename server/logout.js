@@ -5,7 +5,9 @@ const router = new Router();
 
 router.get('/', async (ctx, next) => {
   ctx.session = null;
-  ctx.redirect('/login');
+  const redirectTo = ctx.state.sitemap.login;
+  debug.info('Logout. Redirect to: %s', redirectTo);
+  ctx.redirect(redirectTo);
   return;
 });
 
