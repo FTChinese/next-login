@@ -26,4 +26,5 @@ module.exports = {
     "password_reset.forbidden": `无法重置密码。${tokenInvalid}`,
     "server.error": "服务器开小差了，请稍后再试",
     "server.unauthorized": "访问被拒绝，无权进行此操作",
+    "signup.too_many_requests": "您创建账号过于频繁，请稍后再试",
 }

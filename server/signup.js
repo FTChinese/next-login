@@ -63,7 +63,8 @@ router.post('/', async (ctx, next) => {
     return ctx.redirect(path.resolve(ctx.path, '/email'));
 
   } catch (e) {
-    ctx.state.errors = processApiError(e);
+    // 400， 422， 429
+    ctx.state.errors = processApiError(e, "signup");
     ctx.state.account = {
       email: account.email
     };

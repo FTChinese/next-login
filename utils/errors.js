@@ -11,20 +11,22 @@ const fields = Object.freeze({
   confirmPassword: 'confirmPassword',
 });
 
+// Correspond to http response
 const types = Object.freeze({
   notFound: 'not_found',
   forbidden: 'forbidden',
   unauthorized: 'unauthorized',
   mismatched: 'mismatched',
+  tooManyRequests: 'too_many_requests',
 });
 
-const alertActions = Object.freeze({
-  emailVerfied: 'email_verified',
-  emailSaved: 'email_saved',
-  newsletterSaved: 'newsletter_saved',
-  letterSent: 'letter_sent',
-  passwordChanged: 'password_changed'
-});
+// const alertActions = Object.freeze({
+//   emailVerfied: 'email_verified',
+//   emailSaved: 'email_saved',
+//   newsletterSaved: 'newsletter_saved',
+//   letterSent: 'letter_sent',
+//   passwordChanged: 'password_changed'
+// });
 
 /**
  * @param {JoiErrDetail[]} details
@@ -127,6 +129,9 @@ exports.processApiError = function(err, field='') {
       const error = body.error;
       return buildInvalidField(error.field, error.code, error.message)
 
+    case 429:
+      return buildInvalidField(field, types.tooManyRequests, body.message)
+
     default:
       return buildInvalidField(fields.server)
   }
@@ -134,13 +139,12 @@ exports.processApiError = function(err, field='') {
 
 /**
  * @param {InvalidError} invalid 
- * @param {string} defaultMsg 
  */
 function buildInvalidField(field, type='error', defaultMsg='') {
   const invalid = {
     field,
     type,
-    msg: `${field}.${type}`
+    msg: `${field}.${type}` // key to search for human readable message
   };
 
   debug.info('Invalid information: %O', invalid);
@@ -158,6 +162,10 @@ function buildInvalidField(field, type='error', defaultMsg='') {
 
 exports.buildInvalidField = buildInvalidField;
 
+/**
+ * @description Used to show the result of user operation
+ * @param {string} field 
+ */
 exports.buildAlertDone = function (field) {
   return {done: field};
 }
