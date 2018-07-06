@@ -14,6 +14,16 @@ const router = new Router();
 
 // Show login page
 router.get('/', async function (ctx) {
+  // If user is trying to access this page when he is already logged in, redirect away
+  if (ctx.session.user) {
+    const redirectTo = path.resolve(ctx.path, '../profile');
+    
+    debug.info('Redirect logged in user to: %s', redirectTo);
+  
+    return ctx.redirect(redirectTo);
+  }
+  
+
   ctx.body = await render('login.html', ctx.state);
 });
 

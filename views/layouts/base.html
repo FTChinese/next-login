@@ -20,46 +20,10 @@
   <link inline rel="stylesheet" href="/main.css">
 </head>
 <body>
-  <header class="navbar navbar-expand-sm navbar-light o-header">
+  <header class="navbar navbar-expand o-header">
     <div class="container">
-
       <a class="navbar-brand" href="/">FT中文网</a>
-
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse justify-content-end" id="navbarNavDropdown">
-        <ul class="navbar-nav"> 
-          {% if user %}
-            <li class="nav-item dropdown d-none d-sm-inline">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">myFT</a>
-    
-              <div class="dropdown-menu dropdown-menu-right">
-                <h6 class="dropdown-header">{{user.name}}</h6>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="{{sitemap.profile}}">设置</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="{{sitemap.logout}}">退出</a>
-              </div>
-            </li>
-            <li class="nav-item d-sm-none">
-              <a class="nav-link" href="{{sitemap.profile}}">{{user.name}}</a>
-            </li>
-            <li class="nav-item d-sm-none">
-              <a class="nav-link" href="{{sitemap.logout}}">退出</a>
-            </li>
-          {% else %}
-            <li class="nav-item">
-              <a class="nav-link" href="{{sitemap.login}}">登录</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{sitemap.signup}}">注册</a>
-            </li>
-          {% endif %}
-        </ul>
-      </div>
-      
+      {% block headerNav %}{% endblock %}
     </div>
   </header>
 
@@ -72,10 +36,6 @@
               <span aria-hidden="true">&times;</span>
             </button>
         </div>
-      {% endif %}
-
-      {% if user and (not user.verified) %}
-        <div class="alert alert-primary" role="alert">请验证您的登录邮箱</div>
       {% endif %}
 
       {% block main %}{% endblock %}

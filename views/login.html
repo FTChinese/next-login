@@ -1,73 +1,66 @@
-{% extends "layouts/base.html" %}
+{% extends "layouts/center.html" %}
 
-{% block main %}
-<div class="row justify-content-center">
-  <div class="col-md-7 col-lg-5 col-xl-4">
-    <div class="mt-4">
-    {% if not user %}
-      <h4 class="text-center">登录FT中文网</h4>
+{% block content %}
 
-      {% if errors.credentials %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-          <span>{{errors.credentials.message}}</span>
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-      {% endif %}
+  <h4 class="text-center">登录FT中文网</h4>
 
-      <form method="post">
-        <div class="form-group">
-          <label for="email">邮箱</label>
-          <input class="form-control"
-            id="email"
-            type="email"
-            name="credentials[email]"
-            value="{{credentials.email}}"
-            placeholder="电子邮箱"
-            required>
-
-          {% if errors.email %}
-          <div class="form-errortext">{{errors.email.message}}</div>
-          {% endif %}
-        </div>
-
-        <div class="form-group">
-          <label for="password">密码</label>
-          <input class="form-control"
-            id="password"
-            type="password"
-            name="credentials[password]"
-            placeholder="密码"
-            required>
-
-          {% if errors.password %}
-          <div class="form-errortext">{{errors.password.message}}</div>
-          {% endif %}
-        </div>
-        
-        <div class="form-check clearfix">
-          <input class="form-check-input"
-            id="rememberMe"
-            type="checkbox"
-            name="rememberMe"
-            value="true"
-            checked>
-          <label for="rememberMe">记住我</label>
-
-          <a class="float-right" href="{{sitemap.passwordReset}}">忘记密码?</a>
-        </div>
-
-        <button class="btn btn-block btn-primary" type="submit">登录</button>
-
-      </form>
-      <p class="text-center pt-3">还没有FT中文网账号?<a href="{{sitemap.signup}}">创建</a></p>
-    {% else %}
-      <h4>当前登录用户 {{user.name}}</h4>
-    {% endif %}
+  {% if errors.credentials %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <span>{{errors.credentials.message}}</span>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
     </div>
-  </div>
-</div>
+  {% endif %}
+
+  <form method="post">
+    <div class="form-group">
+      <label for="email">邮箱</label>
+      <input class="form-control"
+        id="email"
+        type="email"
+        name="credentials[email]"
+        value="{{credentials.email}}"
+        placeholder="电子邮箱"
+        required>
+
+      {% if errors.email %}
+      <div class="form-errortext">{{errors.email.message}}</div>
+      {% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="password">密码</label>
+      <input class="form-control"
+        id="password"
+        type="password"
+        name="credentials[password]"
+        placeholder="密码"
+        required>
+
+      {% if errors.password %}
+      <div class="form-errortext">{{errors.password.message}}</div>
+      {% endif %}
+    </div>
+    
+    <div class="form-check clearfix">
+      <input class="form-check-input"
+        id="rememberMe"
+        type="checkbox"
+        name="rememberMe"
+        value="true"
+        checked>
+      <label for="rememberMe">记住我</label>
+
+      <a class="float-right" href="{{sitemap.passwordReset}}">忘记密码?</a>
+    </div>
+
+    <button class="btn btn-block btn-primary" type="submit">登录</button>
+
+  </form>
+  <p class="text-center pt-3">还没有FT中文网账号?<a href="{{sitemap.signup}}">创建</a></p>
+
+
 <!-- <div class="row justify-content-center">
   <div class="col-md-7 col-lg-5 col-xl-4">
     <div class="mt-4">
