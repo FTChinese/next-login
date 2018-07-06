@@ -1,6 +1,7 @@
 const debug = require('./debug')('user:errors');
 const message = require('./message');
 
+// fiels and types are concatenated by dot to form a key to search in message.
 const fields = Object.freeze({
   email: 'email',
   emailToken: 'email_token',
@@ -9,6 +10,7 @@ const fields = Object.freeze({
   passwordReset: 'password_reset',
   oldPassword: 'oldPassword',
   confirmPassword: 'confirmPassword',
+  signup: 'signup',
 });
 
 // Correspond to http response
