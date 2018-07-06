@@ -1,4 +1,4 @@
-const debug = require('debug')('login:server');
+const debug = require('../utils/debug')('login:server');
 const Router = require('koa-router');
 
 const router = new Router();
