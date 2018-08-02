@@ -4,7 +4,7 @@
       "test/**"
     ],
     "env": {
-      "NODE_ENV": "development",
+      "NODE_ENV": "production",
       "PORT": 4100,
       "DEBUG": "user*"
     },

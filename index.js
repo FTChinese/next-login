@@ -50,7 +50,7 @@ if (!isProduction) {
 // Configurations passed around
 app.use(env());
 app.use(nav());
-app.use(inlineMin());
+// app.use(inlineMin());
 app.use(setHeader());
 app.use(session(app));
 app.use(handleErrors());

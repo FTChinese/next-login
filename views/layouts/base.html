@@ -14,10 +14,12 @@
   <title>{% block title %}用户中心{% endblock %} - FT中文网</title>
   {% if env.isProduction %}
   <link href="https://cdn.bootcss.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
+  <style>{% include "main.css" %}</style>
   {% else %}
   <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.css">
+  <link rel="stylesheet" href="/main.css">
   {% endif %}
-  <link inline rel="stylesheet" href="/main.css">
+  
 </head>
 <body>
   <header class="navbar navbar-expand o-header">

@@ -1,5 +1,5 @@
 const path = require('path');
-const {inlineSource} = require('inline-source');
+// const {inlineSource} = require('inline-source');
 const minify = require('html-minifier').minify;
 
 module.exports = function (assetsPath='./client') {
@@ -20,10 +20,10 @@ module.exports = function (assetsPath='./client') {
 
     if (Buffer.isBuffer(body)) body = body.toString();
 
-    body = await inlineSource(body, {
-      compress: true,
-      rootpath: path.resolve(process.cwd(), assetsPath)
-    });
+    // body = await inlineSource(body, {
+    //   compress: true,
+    //   rootpath: path.resolve(process.cwd(), assetsPath)
+    // });
 
     ctx.body = minify(body, {
       collapseBooleanAttributes: true,

@@ -6,6 +6,11 @@
 
 To run the test you have to have those fields set in you environment variable (and a running SQL database with actually data populated). Refer to `sql-schema` repo on GitLab. 
 
+## Load test
+```
+vegeta attack -targets=targets.txt -rate=100 -duration=60s > results.bin
+vegeta report -inputs=results.bin -reporter=plot > plot.html
+```
 ## Sitemap
 
 ### Signup
