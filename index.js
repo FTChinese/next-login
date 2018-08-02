@@ -13,7 +13,6 @@ const env = require('./middlewares/env');
 const nav = require('./middlewares/nav');
 const checkLogin = require('./middlewares/check-login');
 const handleErrors = require('./middlewares/handle-errors');
-const inlineMin = require('./middlewares/inline-min');
 const setHeader = require('./middlewares/set-header');
 
 const signup = require('./server/signup');
@@ -50,7 +49,6 @@ if (!isProduction) {
 // Configurations passed around
 app.use(env());
 app.use(nav());
-// app.use(inlineMin());
 app.use(setHeader());
 app.use(session(app));
 app.use(handleErrors());
