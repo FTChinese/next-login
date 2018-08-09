@@ -1,4 +1,6 @@
 const isProduction = process.env.NODE_ENV === 'production';
+const debug = require('../utils/debug')('user:env');
+const UAParser = require('ua-parser-js');
 
 module.exports = function() {
   return async (ctx, next) => {
@@ -11,6 +13,13 @@ module.exports = function() {
        */
       year: new Date().getFullYear(),
     };
+
+    const parser = new UAParser(userAgent);
+    const result = parser.getResult();
+
+    debug.info('Browser: %O', result.browser);
+    debug.info('OS: %O', result.os);
+    debug.info('Device: %O', result.device);
 
     await next();
   }
