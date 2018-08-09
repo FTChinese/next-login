@@ -1,3 +1,4 @@
+const pkg = require('../../package.json');
 const request = require('superagent');
 const path = require('path');
 const Router = require('koa-router');
@@ -49,11 +50,15 @@ router.post('/', async function (ctx, next) {
    * @type {{email: string, password: string}}
    */
   const credentials = result.value;
-  credentials.ip = ctx.ip;
 
   // Send data to API
   try {
-    const resp = await request.post(endpoints.login)
+    const resp = await request
+      .set('X-Client-Type', 'web')
+      .set('X-Client-Version', pkg.version)
+      .set('X-User-Ip', ctx.ip)
+      .set('X-User-Agent', ctx.header['user-agent'])
+      .post(endpoints.login)
       .send(credentials);
 
     /**
