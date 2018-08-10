@@ -1,11 +1,3 @@
-## Table of Content
-
-* [Site Map](#sitemap)
-* [Wechat OAuth 2.0 access token](#wechat)
-* [Sending Emails](#emails)
-
-To run the test you have to have those fields set in you environment variable (and a running SQL database with actually data populated). Refer to `sql-schema` repo on GitLab. 
-
 ## Sitemap
 
 ### Signup
@@ -94,11 +86,3 @@ UNIQUE INDEX (unionid)
 ```
 
 But be careful wechat might change the lenght any time. So it might be better to store as varchar if you don't mind taking up larger disk space.
-
-## Emails
-
-* Initial signup. Requries user to verify the email address. The email should expire in a few days. A user could only use basic funtionalities of the site before email verified. For example, accept user memebership only after email is correct.
-* Purchased memebership. Tells user its rights and privileges, membership duration, etc..
-* Prior to membership expiration. Notify user to renew subscription, othwewise membership will be discontinued.
-* Password reset. If user forgot password, send reset password email which should expire in a short period, say, 3 hours.
-* Daily newsletter as we already did. Remember, Newsletter should only be sent after email is verified!
