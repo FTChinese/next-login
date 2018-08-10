@@ -53,8 +53,7 @@ router.post('/', async function (ctx, next) {
 
   // Send data to API
   try {
-    const resp = await request
-      .post(endpoints.login)
+    const resp = await request.post(endpoints.login)
       .set('X-Client-Type', 'web')
       .set('X-Client-Version', pkg.version)
       .set('X-User-Ip', ctx.ip)
