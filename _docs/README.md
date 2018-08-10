@@ -21,6 +21,7 @@ Install [graphviz](https://www.graphviz.org/) so that you could use the `dot` pr
 
 * `make` generate a PDF file by default.
 * `make html` generates a single page HTML file.
+* `make word` Geneate a docx file.
 * `make epub` generates an epub file
 * `make image` converts dot files to png.
 * `make clean` clears `_docs/build` directory.
