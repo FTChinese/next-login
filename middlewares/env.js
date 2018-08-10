@@ -14,7 +14,7 @@ module.exports = function() {
       year: new Date().getFullYear(),
     };
 
-    const parser = new UAParser(userAgent);
+    const parser = new UAParser(ctx.header['user-agent']);
     const result = parser.getResult();
 
     debug.info('Browser: %O', result.browser);
