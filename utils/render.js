@@ -7,7 +7,7 @@ nunjucks.configure(
     path.resolve(__dirname, '../client')
   ], 
   {
-    noCache: true,
+    noCache: process.env.NODE_ENV === 'development',
     watch: false
   }
 );

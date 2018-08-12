@@ -23,7 +23,6 @@ router.get('/', async function (ctx) {
   
     return ctx.redirect(redirectTo);
   }
-  
 
   ctx.body = await render('login.html', ctx.state);
 });

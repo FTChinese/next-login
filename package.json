@@ -4,11 +4,13 @@
   "description": "User setting system",
   "main": "index.js",
   "scripts": {
-    "start": "npm run serve",
+    "start": "nodemon index.js",
     "test": "ava",
     "postversion": "git push && git push --tags",
     "postinstall": "",
     "clean": "rm -rf dist/*",
+    "profile": "NODE_ENV=production PORT=4100 node --prof index.js",
+    "prod": "NODE_ENV=production PORT=4100 node index.js",
     "vegeta": "vegeta attack -targets=targets.txt -rate=100 -duration=60s > .tmp/results.bin",
     "report": "vegeta report -inputs=.tmp/results.bin -reporter=plot > .tmp/plot.html"
   },
