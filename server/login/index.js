@@ -27,6 +27,20 @@ router.get('/', async function (ctx) {
   ctx.body = await render('login.html', ctx.state);
 });
 
+/**
+ * @typedef {Object} Account
+ * @property {string} id
+ * @property {string} userName
+ * @property {string} avatar
+ * @property {boolean} isVip
+ * @property {boolean} isVerified
+ * @property {Object} membership
+ * @property {string} membership.tier
+ * @property {string} membership.billingCycle
+ * @property {string} membership.startAt
+ * @property {string} membership.expireAt 
+ */
+
 router.post('/', async function (ctx, next) {
   /**
    * @todo Keep session longer
@@ -60,31 +74,22 @@ router.post('/', async function (ctx, next) {
       .send(credentials);
 
     /**
-     * @typedef {Object} Account
-     * @param {string} id
-     * @param {string} userName
-     * @param {string} avatar
-     * @param {boolean} isVip
-     * @param {boolean} isVerified
-     * @param {Object} membership
-     * @param {string} membership.type
-     * @param {string} membership.billingCycle
-     * @param {string} membership.startAt
-     * @param {string} membership.expireAt
-     * 
-     * @type {Account}
+     * @type {Account} user
      */
-    const user = resp.body;
-    debug.info('Authentication result: %o', user);
+    const account = resp.body;
+    debug.info('Authentication result: %o', account);
 
     // Keep login state
     ctx.session = {
       user: {
-        id: user.id,
-        name: user.userName,
-        avatar: user.avatar,
-        isVip: user.isVip,
-        verified: user.verified,
+        id: account.id,
+        name: account.userName,
+        avatar: account.avatar,
+        isVip: account.isVip,
+        verified: account.isVerified,
+        mTier: account.membership.tier,
+        mStart: account.membership.startAt,
+        mExpire: account.membership.expireAt,
       }
     };
     ctx.cookies.set('logged_in', 'yes');
@@ -99,6 +104,7 @@ router.post('/', async function (ctx, next) {
     // 400, 422, 404
     ctx.state.errors = processApiError(e, 'credentials');
 
+    // stick form
     ctx.state.credentials = {
       email: credentials.email
     };
