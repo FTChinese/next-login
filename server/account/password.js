@@ -4,9 +4,9 @@ const path = require('path');
 
 const schema = require('../schema');
 
-const debug = require('../../utils/debug')('user:password');
-const endpoints = require('../../utils/endpoints');
-const {processJoiError, processApiError, buildAlertDone, buildInvalidField} = require('../../utils/errors');
+const debug = require('../../util/debug')('user:password');
+const endpoints = require('../../util/endpoints');
+const {processJoiError, processApiError, buildAlertDone, buildInvalidField} = require('../../util/errors');
 
 const router = new Router();
 

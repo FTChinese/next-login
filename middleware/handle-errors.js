@@ -1,5 +1,5 @@
-const render = require('../utils/render');
-const {isSuperAgentError} = require('../utils/errors');
+const render = require('../util/render');
+const {isSuperAgentError} = require('../util/errors');
 
 module.exports = function() {
   return async function handleErrors (ctx, next) {

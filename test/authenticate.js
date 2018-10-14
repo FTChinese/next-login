@@ -1,5 +1,5 @@
 const test = require('ava');
-const fetchAccess = require('../utils/fetch-access');
+const fetchAccess = require('../util/fetch-access');
 const request = require('superagent');
 
 test('authenticateUser', async t => {

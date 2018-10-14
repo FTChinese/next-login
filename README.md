@@ -10,6 +10,9 @@
 
 * GET `/plan`
 
+### Verify email
+* `GET /verify-email/:token`
+
 ### Reset password
 * GET `/password-reset` Ask user to enter email
 * POST `/password-reset` User entered email
@@ -33,7 +36,7 @@ The following requires authentication.
 * POST `/email` Update email
 * POST `/email/newletter`
 * POST `/email/request-verification` Resend verification letter
-* GET `/email/confirm-verification/:token` Verify email
+<!-- * GET `/email/confirm-verification/:token` Verify email -->
 * GET `/account`
 * POST `/account/password`
 * POST `/account/name`

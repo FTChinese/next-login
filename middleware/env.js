@@ -1,5 +1,5 @@
 const isProduction = process.env.NODE_ENV === 'production';
-const debug = require('../utils/debug')('user:env');
+const debug = require('../util/debug')('user:env');
 const UAParser = require('ua-parser-js');
 
 module.exports = function() {

@@ -1,4 +1,4 @@
-const debug = require('../utils/debug')('user:check-login');
+const debug = require('../util/debug')('user:check-login');
 
 /**
  * checkLogin - This middleware will add userinfo to ctx.state
@@ -41,7 +41,7 @@ function checkLogin({redirect=true}={}) {
       return ctx.redirect(redirectTo);
     }
 
-    // Remember to let the following middlewares to excute if users are not loggedin and you do not want to redirect away.
+    // Remember to let the following middleware to excute if users are not loggedin and you do not want to redirect away.
     return await next();
   }
 }

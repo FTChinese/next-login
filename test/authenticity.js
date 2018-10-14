@@ -1,5 +1,5 @@
 const test = require('ava');
-const randomString = require('../utils/random-string');
+const randomString = require('../util/random-string');
 
 test('authenticityCode', async t => {
   const code = await randomString();

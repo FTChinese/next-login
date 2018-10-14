@@ -3,10 +3,10 @@ const request = require('superagent');
 const path = require('path');
 const schema = require('./schema');
 
-const debug = require('../utils/debug')('user:email');
-const endpoints = require('../utils/endpoints');
-const {processJoiError, processApiError, isSuperAgentError, buildAlertSaved, buildAlertDone} = require('../utils/errors');
-const render = require('../utils/render');
+const debug = require('../util/debug')('user:email');
+const endpoints = require('../util/endpoints');
+const {processJoiError, processApiError, isSuperAgentError, buildAlertSaved, buildAlertDone} = require('../util/errors');
+const render = require('../util/render');
 
 const router = new Router();
 

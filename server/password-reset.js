@@ -4,10 +4,10 @@ const path = require('path');
 const request = require('superagent');
 const schema = require('./schema');
 
-const render = require('../utils/render');
-const debug = require('../utils/debug')('user:password-reset');
-const {processJoiError, processApiError, buildInvalidField, buildAlertDone} = require('../utils/errors');
-const endpoints = require('../utils/endpoints');
+const render = require('../util/render');
+const debug = require('../util/debug')('user:password-reset');
+const {processJoiError, processApiError, buildInvalidField, buildAlertDone} = require('../util/errors');
+const endpoints = require('../util/endpoints');
 
 const router = new Router();
 

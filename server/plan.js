@@ -1,8 +1,8 @@
 const request = require('superagent');
 const Router = require('koa-router');
-const render = require('../utils/render');
-const debug = require('../utils/debug')('user:plan');
-const endpoints = require('../utils/endpoints');
+const render = require('../util/render');
+const debug = require('../util/debug')('user:plan');
+const endpoints = require('../util/endpoints');
 
 const router = new Router();
 

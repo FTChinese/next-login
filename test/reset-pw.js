@@ -1,5 +1,5 @@
 const test = require('ava');
-const reset = require('../utils/reset-password');
+const reset = require('../util/reset-password');
 
 test('reset', async t => {
   const address = "neefrankie@outlook.com";

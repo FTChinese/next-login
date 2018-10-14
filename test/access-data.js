@@ -1,5 +1,5 @@
 const test = require('ava');
-const fetchAccess = require('../utils/fetch-access');
+const fetchAccess = require('../util/fetch-access');
 
 test('fetchAccessToken', async t => {
   const accessData = await fetchAccess();

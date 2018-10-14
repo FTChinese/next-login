@@ -4,10 +4,10 @@ const path = require('path');
 const Router = require('koa-router');
 const schema = require('../schema');
 
-const debug = require('../../utils/debug')('user:login');
-const render = require('../../utils/render');
-const endpoints = require('../../utils/endpoints');
-const {processJoiError, processApiError} = require('../../utils/errors');
+const debug = require('../../util/debug')('user:login');
+const render = require('../../util/render');
+const endpoints = require('../../util/endpoints');
+const {processJoiError, processApiError} = require('../../util/errors');
 
 // const wechat = require('./wechat');
 

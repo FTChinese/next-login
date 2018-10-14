@@ -1,7 +1,7 @@
 const test = require('ava');
 const Joi = require('joi');
 const schema = require('../server/schema');
-const {processJoiError} = require('../utils/errors');
+const {processJoiError} = require('../util/errors');
 
 const credentials = {
   email: 'foo',

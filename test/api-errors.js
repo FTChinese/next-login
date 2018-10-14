@@ -1,5 +1,5 @@
 const test = require('ava');
-const {gatherAPIErrors} = require('../utils/http-errors');
+const {gatherAPIErrors} = require('../util/http-errors');
 
 const errMsg = {
   message: 'Create user faild',

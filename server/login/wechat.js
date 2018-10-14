@@ -4,11 +4,11 @@
 const Router = require('koa-router');
 const request = require('superagent');
 const router = new Router();
-const debug = require('../../utils/debug')('user:wxlogin');
-const redis = require('../../utils/connect-redis')({keyPrefix: 'wxoauth:state:'});
-// const logger = require('../../utils/logger');
-const random = require('../../utils/random');
-const UrlBuilder = require('../../utils/url-builder.js');
+const debug = require('../../util/debug')('user:wxlogin');
+const redis = require('../../util/connect-redis')({keyPrefix: 'wxoauth:state:'});
+// const logger = require('../../util/logger');
+const random = require('../../util/random');
+const UrlBuilder = require('../../util/url-builder.js');
 
 const baseUrl = 'https://open.weixin.qq.com/connect/qrconnect';
 const appId = process.env.WX_WEB_APPID;

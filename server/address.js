@@ -2,10 +2,10 @@ const Router = require('koa-router');
 const request = require('superagent');
 const schema = require('./schema');
 
-const debug = require('../utils/debug')('user:address');
-const render = require('../utils/render');
-const endpoints = require('../utils/endpoints');
-const {processJoiError, processApiError, buildAlertDone} = require('../utils/errors');
+const debug = require('../util/debug')('user:address');
+const render = require('../util/render');
+const endpoints = require('../util/endpoints');
+const {processJoiError, processApiError, buildAlertDone} = require('../util/errors');
 
 const router = new Router();
 

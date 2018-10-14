@@ -3,7 +3,7 @@ const nunjucks = require('nunjucks');
 const util = require('util');
 nunjucks.configure(
   [
-    path.resolve(__dirname, '../views'),
+    path.resolve(__dirname, '../view'),
     path.resolve(__dirname, '../client')
   ], 
   {

@@ -1,9 +1,9 @@
 const Router = require('koa-router');
 const request = require('superagent');
 
-const debug = require('../../utils/debug')('user:account');
-const render = require('../../utils/render');
-const endpoints = require('../../utils/endpoints');
+const debug = require('../../util/debug')('user:account');
+const render = require('../../util/render');
+const endpoints = require('../../util/endpoints');
 
 const password = require('./password');
 const name = require('./name');

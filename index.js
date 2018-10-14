@@ -1,5 +1,5 @@
-const debug = require('./utils/debug')('user:index');
-// const log = require('./utils/logger');
+const debug = require('./util/debug')('user:index');
+// const log = require('./util/logger');
 const path = require('path');
 const Koa = require('koa');
 const Router = require('koa-router');
@@ -7,13 +7,13 @@ const logger = require('koa-logger');
 const bodyParser = require('koa-bodyparser');
 const session = require('koa-session');
 
-const boot = require('./utils/boot-app');
+const boot = require('./util/boot-app');
 
-const env = require('./middlewares/env');
-const nav = require('./middlewares/nav');
-const checkLogin = require('./middlewares/check-login');
-const handleErrors = require('./middlewares/handle-errors');
-const setHeader = require('./middlewares/set-header');
+const env = require('./middleware/env');
+const nav = require('./middleware/nav');
+const checkLogin = require('./middleware/check-login');
+const handleErrors = require('./middleware/handle-errors');
+const setHeader = require('./middleware/set-header');
 
 const signup = require('./server/signup');
 const plan = require('./server/plan');

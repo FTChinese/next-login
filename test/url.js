@@ -1,4 +1,4 @@
-const UrlBuilder = require('../utils/build-url');
+const UrlBuilder = require('../util/build-url');
 const test = require('ava');
 
 test('url', async t => {
