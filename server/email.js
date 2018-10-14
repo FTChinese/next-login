@@ -135,31 +135,4 @@ router.post('/request-verification', async (ctx) => {
   }
 });
 
-// Confirm verfication token
-router.get('/confirm-verification/:token', async (ctx) => {
-  const token = ctx.params.token;
-  const redirectTo = path.resolve(ctx.path, '../../');
-
-  try {
-    const resp = await request.put(`${endpoints.verifyEmail}/${token}`)
-      .set('X-User-Id', ctx.session.user.id);
-
-    /**
-     * @type {User}
-     */
-    const user = resp.body;
-    debug.info("User info after verification: %O", user);
-
-    ctx.session.user.verified = user.verified;
-    ctx.session.alert = buildAlertDone('email_verified');
-
-    return ctx.redirect(redirectTo);
-
-  } catch (e) {
-    ctx.session.errors = processApiError(e, 'email_token');
-
-    return ctx.redirect(redirectTo);
-  }
-});
-
 module.exports = router.routes();
