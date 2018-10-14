@@ -60,7 +60,19 @@ router.post('/', async function (ctx, next) {
       .send(credentials);
 
     /**
-     * @type {User}
+     * @typedef {Object} Account
+     * @param {string} id
+     * @param {string} userName
+     * @param {string} avatar
+     * @param {boolean} isVip
+     * @param {boolean} isVerified
+     * @param {Object} membership
+     * @param {string} membership.type
+     * @param {string} membership.billingCycle
+     * @param {string} membership.startAt
+     * @param {string} membership.expireAt
+     * 
+     * @type {Account}
      */
     const user = resp.body;
     debug.info('Authentication result: %o', user);
@@ -69,10 +81,10 @@ router.post('/', async function (ctx, next) {
     ctx.session = {
       user: {
         id: user.id,
-        name: user.name,
+        name: user.userName,
         avatar: user.avatar,
         isVip: user.isVip,
-        verified: user.verified
+        verified: user.verified,
       }
     };
     ctx.cookies.set('logged_in', 'yes');
