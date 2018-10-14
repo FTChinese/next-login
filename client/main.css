@@ -1,8 +1,9 @@
 body {
-    min-height: 100vh;
     font-family: "Helvetica Neue", "Lucida Grande", Verdana, "PingFang SC", "PingFang TC", "Hiragino Sans GB", "Heiti SC", "Heiti TC", "WenQuanYi Micro Hei", "Microsoft YaHei", "Microsoft JhengHei", STHeiti, sans-serif;
     background-color: #FFF1E5; }
-  
+.page-content {
+  min-height: 80vh;
+}  
 a, .text-teal {
     color: #0d7680
 }
