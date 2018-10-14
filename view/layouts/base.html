@@ -44,9 +44,56 @@
     </div>
   </main>
 
-  <footer class="o-footer">
+  <footer class="o-footer o-footer--theme-dark">
     <div class="container">
-      <p>© {{env.year}} ftchinese.com</p>
+      <div class="o-footer__row">
+        <!-- <ul class="o-footer__link-items">
+          
+          <li class="o-footer__link-item"><a class="o-footer__link" href="http://www.ftchinese.com/m/corp/aboutus.html" target="_blank">关于我们</a></li>
+          
+          <li class="o-footer__link-item"><a class="o-footer__link" href="https://ft.wd3.myworkdayjobs.com/FT_Chinese_External_Careers" target="_blank">加入我们</a></li>
+          
+          <li class="o-footer__link-item"><a class="o-footer__link" href="http://www.ftchinese.com/m/corp/faq.html" target="_blank">问题回馈</a></li>
+          
+          <li class="o-footer__link-item"><a class="o-footer__link" href="http://www.ftchinese.com/m/corp/contact.html" target="_blank">联系方式</a></li>
+          
+          <li class="o-footer__link-item"><a class="o-footer__link" href="http://www.ftchinese.com/m/corp/partner.html" target="_blank">合作伙伴</a></li>
+          
+          <li class="o-footer__link-item"><a class="o-footer__link" href="http://www.ftchinese.com/m/corp/service.html" target="_blank">服务条款</a></li>
+          
+          <li class="o-footer__link-item"><a class="o-footer__link" href="http://www.ftchinese.com/m/corp/sales.html" target="_blank">广告业务</a></li>
+          
+          <li class="o-footer__link-item"><a class="o-footer__link" href="http://www.ftchinese.com/m/corp/copyright.html" target="_blank">版权声明</a></li>
+          
+          <li class="o-footer__link-item"><a class="o-footer__link" href="http://www.ftchinese.com/m/marketing/ftc.html" target="_blank">最新动态</a></li>
+          
+        </ul> -->
+        <nav class="o-footer__matrix">
+
+          {% for group in env.footer %}
+          <div class="o-footer__matrix-group">
+  
+            <h6 class="o-footer__matrix-title">{{group.title}}</h6>
+            <div class="o-footer__matrix-content">
+  
+              {% for item in group.items %}
+              <a class="o-footer__matrix-link" href="{{item.href}}" target="_blank">{{item.text}}</a>
+              {% endfor %}	
+  
+            </div>
+  
+          </div>
+          {% endfor %}
+  
+        </nav>			
+      </div>
+
+      <div class="o-footer__copyright">
+        <small>
+          © FT中文网 {{env.year}}.
+          <abbr title="Financial Times" aria-label="F T">FT</abbr> and ‘Financial Times’ are trademarks of The Financial Times Ltd.
+        </small>
+      </div>
     </div>
   </footer>
 

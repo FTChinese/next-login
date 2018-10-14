@@ -118,12 +118,160 @@ a:hover {
 }
 
 .o-footer {
-    box-sizing: border-box;
-    height: 100px;
-    line-height: 100px;
-    /* padding-top: 50px; */
-    margin-top: 100px;
-    color: #99979c;
-    /* background-color: #2a2730; */
-}
+  margin-top: 40px;
+  border-top: 10px solid;
+  line-height: 20px; }
+  .o-footer a {
+    border-bottom: 0;
+    text-decoration: none; }
+
+.o-footer--theme-dark {
+  color: #ffffff;
+  background-color: #33302E;
+  border-color: #0A5E66; }
+  .o-footer--theme-dark a {
+    color: #B3A9A0; }
+    .o-footer--theme-dark a:hover, .o-footer--theme-dark a:focus {
+      color: #ffffff; }
+
+.o-footer--theme-light {
+  color: #33302E;
+  background-color: #F2E5DA;
+  border-color: #990F3D; }
+  .o-footer--theme-light a {
+    color: #4D4845; }
+    .o-footer--theme-light a:hover, .o-footer--theme-light a:focus {
+      color: #ffffff; }
+
+.o-footer__container {
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  min-width: 240px;
+  max-width: 1220px;
+  /*autoprefixer: off*/
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  max-width: 1220px;
+  padding-left: 10px;
+  padding-right: 10px; }
+  @media (min-width: 46.25em) {
+    .o-footer__container {
+      padding-left: 20px;
+      padding-right: 20px; } }
+  @media (min-width: 46.25em) {
+    .o-grid-snappy .o-footer__container, .o-footer__container--snappy {
+      max-width: 740px; } }
+  @media (min-width: 61.25em) {
+    .o-grid-snappy .o-footer__container, .o-footer__container--snappy {
+      max-width: 980px; } }
+  @media (min-width: 76.25em) {
+    .o-grid-snappy .o-footer__container, .o-footer__container--snappy {
+      max-width: 1220px; } }
+  @media \0screen {
+    .o-footer__container {
+      padding-left: 20px;
+      padding-right: 20px;
+      width: 980px; } }
+
+.o-footer__row {
+  margin-top: 20px; }
+
+.o-footer__copyright {
+  padding-top: 20px;
+  padding-bottom: 20px; }
+  .o-footer--theme-dark .o-footer__copyright {
+    color: #B3A9A0; }
+  .o-footer--theme-light .o-footer__copyright {
+    color: #4D4845; }
+  .o-footer__copyright a {
+    text-decoration: underline; }
+
+.o-footer__matrix {
+  clear: both;
+  flex-wrap: wrap;
+  display: flex;
+  margin-left: -10px;
+  zoom: 1; }
+  @media print {
+    .o-footer__matrix {
+      display: inherit; } }
+  @media (min-width: 46.25em) {
+    .o-footer__matrix {
+      margin-left: -20px; } }
+  @media \0screen {
+    .o-footer__matrix {
+      margin-left: -20px; } }
+  .o-footer__matrix:before, .o-footer__matrix:after {
+    content: '';
+    display: table;
+    display: flex; }
+  .o-footer__matrix:after {
+    clear: both; }
+
+.o-footer__matrix-group {
+  position: relative;
+  float: left;
+  flex: 1 1 0%;
+  /*autoprefixer: off*/
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding-left: 10px; }
+  @media \0screen {
+    .o-footer__matrix-group {
+      min-width: 0 !important; } }
+  @media (min-width: 46.25em) {
+    .o-footer__matrix-group {
+      padding-left: 20px; } }
+  @media \0screen {
+    .o-footer__matrix-group {
+      padding-left: 20px; } }
+
+.o-footer__matrix-group {
+  display: block;
+  flex-basis: 50%;
+  min-width: 50%;
+  max-width: 50%;
+  width: 50%; }
+  @media (min-width: 46.25em) {
+    .o-footer__matrix-group {
+      display: block;
+      flex-basis: 25%;
+      min-width: 25%;
+      max-width: 25%; } }
+  @media \0screen {
+    .o-footer__matrix-group {
+      display: block;
+      width: 25%; } }
+  @media (min-width: 61.25em) {
+    .o-footer__matrix-group {
+      display: block;
+      flex-basis: 16.66667%;
+      min-width: 16.66667%;
+      max-width: 16.66667%; } }
+  @media \0screen {
+    .o-footer__matrix-group {
+      display: block;
+      width: 16.66667%; } }
+
+.o-footer__matrix-title, .o-footer__matrix-link {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis; }
+
+.o-footer__matrix-title {
+  margin: 0;
+  line-height: inherit;
+  font-size: inherit;
+  font-weight: 600; }
+
+.o-footer__matrix-content {
+  margin-top: 10px;
+  margin-bottom: 10px; }
+
+.o-footer__matrix-link {
+  display: block;
+  padding: 4px 0; }
 
