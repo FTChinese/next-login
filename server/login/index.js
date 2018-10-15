@@ -10,6 +10,7 @@ const debug = require('../../util/debug')('user:login');
 const render = require('../../util/render');
 const endpoints = require('../../util/endpoints');
 const {processJoiError, processApiError} = require('../../util/errors');
+const {accountToSess} = require('../helper.js');
 
 // const wechat = require('./wechat');
 
@@ -67,25 +68,9 @@ router.post('/', async function (ctx, next) {
     const account = resp.body;
     debug.info('Authentication result: %o', account);
 
-    /**
-     * @type {UserSession}
-     */
-    const user = {
-      id: account.id,
-      name: account.userName,
-      avatar: account.avatar,
-      vip: account.isVip,
-      vrf: account.isVerified,
-      mbr: {
-        tier: account.membership.tier,
-        start: account.membership.startAt,
-        exp: account.membership.expireAt,
-      }
-    };
-
     // Keep login state
     ctx.session = {
-      user,
+      user: accountToSess(account),
     };
 
     ctx.cookies.set('logged_in', 'yes');

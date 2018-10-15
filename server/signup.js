@@ -1,4 +1,5 @@
 const path = require('path');
+const pkg = require('../package.json');
 const request = require('superagent');
 const Router = require('koa-router');
 
@@ -8,6 +9,7 @@ const render = require('../util/render');
 const {processJoiError, processApiError} = require('../util/errors');
 const debug = require('../util/debug')('user:signup');
 const endpoints = require('../util/endpoints');
+const {accountToSess} = require('./helper.js')
 
 const router = new Router();
 
@@ -35,33 +37,25 @@ router.post('/', async (ctx, next) => {
   const account = result.value;
   account.ip = ctx.ip;
 
-  /**
-   * @todo Limit request per IP
-   */
-
   // Request to API
   try {
     const resp = await request.post(endpoints.createAccount)
+      .set('X-Client-Type', 'web')
+      .set('X-Client-Version', pkg.version)
+      .set('X-User-Ip', ctx.ip)
+      .set('X-User-Agent', ctx.header['user-agent'])
       .send(account);
 
-    /**
-     * @type {User}
-     */
-    const user = resp.body;
-
-    ctx.session ={
-      user: {
-        id: user.id,
-        name: user.name,
-        avatar: user.avatar,
-        isVip: user.isVip,
-        verified: user.verified,
-      }
+    ctx.session = {
+      user: accountToSess(resp.body),
     };
+
     ctx.cookies.set('logged_in', 'yes');
 
+    const redirectTo = ctx.state.sitemap.email;
+
     // Redirect to user's email page
-    return ctx.redirect(path.resolve(ctx.path, '/email'));
+    return ctx.redirect(redirectTo);
 
   } catch (e) {
     // 400， 422， 429

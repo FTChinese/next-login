@@ -1,4 +1,5 @@
 const debug = require('../util/debug')('user:check-login');
+const {sessToAccount} = require('../server/helper.js')
 
 /**
  * checkLogin - This middleware will add userinfo to ctx.state
@@ -24,23 +25,7 @@ function checkLogin({redirect=true}={}) {
        */
       const user = ctx.session.user;
 
-      /**
-       * @type {Account}
-       */
-      const userAccount = {
-        id: user.id,
-        userName: user.name,
-        avatar: user.avatar,
-        isVip: user.vip,
-        isVerified: user.vrf,
-        membership: {
-          tier: user.mbr.tier,
-          startAt: user.mbr.start,
-          expireAt: user.mbr.exp,
-        }
-      };
-
-      ctx.state.userAccount = userAccount;
+      ctx.state.userAccount = sessToAccount(user);
 
       debug.info('ctx.state: %O', ctx.state.userAccount);
       return await next();
