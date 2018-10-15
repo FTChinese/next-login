@@ -1,15 +1,28 @@
-declare interface User {
-    id: string,
-    name: string,
-    email: string,
-    avatar: string,
-    isVip: boolean,
-    verified: boolean,
+declare interface Membership {
+    tier: "free" | "standard" | "premium";
+    startAt: string;
+    expireAt: string;
+}
+declare interface Account {
+    id: string;
+    userName: string;
+    avatar: string;
+    isVip: boolean;
+    isVerified: boolean;
+    membership: Membership;
 }
 
-declare enum Gender {
-    M,
-    F
+declare interface UserSession {
+    id: string;
+    name: string;
+    avatar: string;
+    vip: boolean;
+    vrf: boolean;
+    mbr: {
+        tier: "free" | "standard" | "premium";
+        start: string;
+        exp: string;
+    }
 }
 
 declare interface Address {
@@ -27,26 +40,20 @@ declare interface Newsletter {
 }
 
 declare interface Profile {
-    id: string,
-    name: string,
-    email: string,
-    avatarUrl: string,
-    gender: Gender, // Only `M` or `F`
-    familyName: string,
-    givenName: string,
-    phoneNumber: string,
-    mobileNumber: string,
-    birthdate: string,
-    address: Address,
-    createdAt: string, //2018-03-23T09:20:13Z
-    updatedAt: string, // 2018-03-24T06:54:03Z
-    lastLoginAt: string, // 2018-04-20T07:37:46Z
-    newsletter: Newsletter,
-    membership: {
-        type: string,
-        start: string,
-        end: string
-    }    
+    id: string;
+    userName: string;
+    email: string;
+    avatarUrl: string;
+    gender: "M" | "F";
+    familyName: string;
+    givenName: string;
+    phoneNumber: string;
+    mobileNumber: string;
+    birthdate: string;
+    address: Address;
+    createdAt: string; //2018-03-23T09:20:13Z
+    updatedAt: string; // 2018-03-24T06:54:03Z
+    newsletter: Newsletter;   
 }
 
 declare interface SuperAgentResponse {
