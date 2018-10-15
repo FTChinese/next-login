@@ -11,8 +11,10 @@ const router = new Router();
 
 // Show address
 router.get('/', async (ctx) => {
+  const userId = ctx.session.user.id;
+
   const resp = await request.get(endpoints.profile)
-    .set('X-User-Id', ctx.session.user.id);
+    .set('X-User-Id', userId);
 
   /**
    * @type {Profile}
@@ -41,13 +43,12 @@ router.post('/', async (ctx, next) => {
    */
   const address = result.value;
 
-  // Testing only currently.
-  return ctx.body = address;
-
   try {
 
+    const userId = ctx.session.user.id;
+
     await request.patch(endpoints.address)
-      .set('X-User-Id', ctx.session.user.id)
+      .set('X-User-Id', userId)
       .send(address);
 
     ctx.session.alert = buildAlertDone('address_saved')

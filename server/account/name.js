@@ -22,20 +22,22 @@ router.post('/', async (ctx) => {
   }
 
   /**
-   * @type {{name: string}}
+   * @type {{userName: string}}
    */
   const account = result.value;
 
   try {
 
+    const userId = ctx.session.user.id;
+
     await request.patch(endpoints.name)
-      .set('X-User-Id', ctx.session.user.id)
+      .set('X-User-Id', userId)
       .send(account);
 
     ctx.session.alert = buildAlertDone('name_saved');
 
     // Update session data
-    ctx.session.user.name = account.name;
+    ctx.session.user.name = account.userName;
     
     return ctx.redirect(redirectTo);
 

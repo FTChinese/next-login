@@ -14,8 +14,11 @@ const router = new Router();
 // Show account page
 router.get('/', async (ctx, next) => {
 
-  const resp = await request.get(endpoints.profile)
-  .set('X-User-Id', ctx.session.user.id)
+  const userId = ctx.session.user.id;
+
+  const resp = await request
+    .get(endpoints.profile)
+    .set('X-User-Id', userId);
 
   const profile = resp.body;
   ctx.state.account = profile;

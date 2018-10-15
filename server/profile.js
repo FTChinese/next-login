@@ -12,8 +12,10 @@ const router = new Router();
 // Show profile page
 router.get('/', async (ctx) => {
 
+  const userId = ctx.session.user.id;
+
   const resp = await request.get(endpoints.profile)
-    .set('X-User-Id', ctx.session.user.id);
+    .set('X-User-Id', userId);
 
   console.log('User profile: %o', resp.body);
 
@@ -54,8 +56,9 @@ router.post('/', async (ctx) => {
   const profile = result.value;
 
   try {
+    const userId = ctx.session.user.id;
     await request.patch(endpoints.profile)
-      .set('X-User-Id', ctx.session.user.id)
+      .set('X-User-Id', userId)
       .send(profile);
 
     ctx.session.alert = buildAlertDone('profile_saved');

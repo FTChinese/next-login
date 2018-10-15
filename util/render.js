@@ -8,7 +8,7 @@ nunjucks.configure(
   ], 
   {
     noCache: process.env.NODE_ENV === 'development',
-    watch: false
+    watch: process.env.NODE_ENV === 'development'
   }
 );
 

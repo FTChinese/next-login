@@ -19,22 +19,37 @@ function checkLogin({redirect=true}={}) {
     if (isLoggedIn(ctx)) {
       debug.info('Session data: %O', ctx.session);
 
-      ctx.state.user = {
-        name: ctx.session.user.name,
-        isVip: ctx.session.user.isVip,
-        verified: ctx.session.user.verified
+      /**
+       * @type {UserSession}
+       */
+      const user = ctx.session.user;
+
+      /**
+       * @type {Account}
+       */
+      const userAccount = {
+        id: user.id,
+        userName: user.name,
+        avatar: user.avatar,
+        isVip: user.vip,
+        isVerified: user.vrf,
+        membership: {
+          tier: user.mbr.tier,
+          startAt: user.mbr.start,
+          expireAt: user.mbr.exp,
+        }
       };
 
-      debug.info('user: %O', ctx.state.user);
+      ctx.state.userAccount = userAccount;
+
+      debug.info('ctx.state: %O', ctx.state.userAccount);
       return await next();
     }
-
-    // Do this? ctx.session = null;
 
     ctx.state.user = null;
 
     if (redirect) {
-      const redirectTo = `/login`;
+      const redirectTo = ctx.state.sitemap.login;
 
       debug.info('User not logged in. Redirecting to %s', redirectTo);
   

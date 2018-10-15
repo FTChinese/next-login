@@ -47,7 +47,7 @@ exports.changePassword = Joi.object().keys({
 });
 
 exports.username = Joi.object().keys({
-  name: Joi.string().trim().min(1).max(20).required()
+  userName: Joi.string().trim().min(1).max(20).required()
 });
 
 exports.mobile = Joi.object().keys({

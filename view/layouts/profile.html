@@ -9,7 +9,7 @@
       <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">myFT</a>
 
       <div class="dropdown-menu dropdown-menu-right">
-        <h6 class="dropdown-header">{{user.name}}</h6>
+        <h6 class="dropdown-header">{{userAccount.userName}}</h6>
         <div class="dropdown-divider"></div>
         <a class="dropdown-item" href="{{sitemap.profile}}">设置</a>
         <div class="dropdown-divider"></div>
@@ -29,8 +29,13 @@
 
 {% block main %}
 
-  {% if user and (not user.verified) %}
-    <div class="alert alert-primary" role="alert">请验证您的登录邮箱</div>
+  {% if userAccount and (not userAccount.isVerified) %}
+    <div class="alert alert-primary d-flex align-items-center" role="alert">
+      请验证您的登录邮箱。没有收到验证邮件？
+      <form action="{{sitemap.emailRequestVerification}}" method="post">
+        <button class="btn btn-link">重新发送</button>
+      </form>
+    </div>
   {% endif %}
 
   <div class="row">

@@ -8,6 +8,7 @@ module.exports = {
   resetLetter: `${passwordReset}/letter`,
   verifyResetToken: `${passwordReset}/tokens`,
   passwordReset,
+  account: `${user}/account`,
   profile: `${user}/profile`,
   email: `${user}/email`,
   verifyEmail: `${user}/verify`,

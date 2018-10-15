@@ -28,8 +28,10 @@ router.post('/', async (ctx) => {
 
   try {
 
+    const userId = ctx.session.user.id;
+
     await request.patch(endpoints.mobile)
-      .set('X-User-Id', ctx.session.user.id)
+      .set('X-User-Id', userId)
       .send(account);
 
     ctx.session.alert = buildAlertDone('mobile_saved');

@@ -1,3 +1,5 @@
+/// <reference path="account.js">
+
 const pkg = require('../../package.json');
 const request = require('superagent');
 const path = require('path');
@@ -26,20 +28,6 @@ router.get('/', async function (ctx) {
 
   ctx.body = await render('login.html', ctx.state);
 });
-
-/**
- * @typedef {Object} Account
- * @property {string} id
- * @property {string} userName
- * @property {string} avatar
- * @property {boolean} isVip
- * @property {boolean} isVerified
- * @property {Object} membership
- * @property {string} membership.tier
- * @property {string} membership.billingCycle
- * @property {string} membership.startAt
- * @property {string} membership.expireAt 
- */
 
 router.post('/', async function (ctx, next) {
   /**
@@ -74,24 +62,32 @@ router.post('/', async function (ctx, next) {
       .send(credentials);
 
     /**
-     * @type {Account} user
+     * @type {Account}
      */
     const account = resp.body;
     debug.info('Authentication result: %o', account);
 
-    // Keep login state
-    ctx.session = {
-      user: {
-        id: account.id,
-        name: account.userName,
-        avatar: account.avatar,
-        isVip: account.isVip,
-        verified: account.isVerified,
-        mTier: account.membership.tier,
-        mStart: account.membership.startAt,
-        mExpire: account.membership.expireAt,
+    /**
+     * @type {UserSession}
+     */
+    const user = {
+      id: account.id,
+      name: account.userName,
+      avatar: account.avatar,
+      vip: account.isVip,
+      vrf: account.isVerified,
+      mbr: {
+        tier: account.membership.tier,
+        start: account.membership.startAt,
+        exp: account.membership.expireAt,
       }
     };
+
+    // Keep login state
+    ctx.session = {
+      user,
+    };
+
     ctx.cookies.set('logged_in', 'yes');
 
     const redirectTo = path.resolve(ctx.path, '../profile');

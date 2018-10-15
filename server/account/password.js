@@ -33,8 +33,10 @@ router.post('/', async (ctx, next) => {
   }
 
   try {
+    const userId = ctx.session.user.id;
+
     await request.patch(endpoints.password)
-      .set('X-User-Id', ctx.session.user.id)
+      .set('X-User-Id', userId)
       .send({
         oldPassword: pass.oldPassword,
         newPassword: pass.password

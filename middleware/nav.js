@@ -8,7 +8,7 @@ const sitemap = {
   profile: `${prefix}/profile`,
   email: `${prefix}/email`,
   emailRequestVerification: `${prefix}/email/request-verification`,
-  emailNewsletter: `${prefix}/newsletter`,
+  emailNewsletter: `${prefix}/email/newsletter`,
   account: `${prefix}/account`,
   accountName: `${prefix}/account/name`,
   accountPassword: `${prefix}/account/password`,

@@ -5,7 +5,7 @@ const schema = require('./schema');
 
 const debug = require('../util/debug')('user:email');
 const endpoints = require('../util/endpoints');
-const {processJoiError, processApiError, isSuperAgentError, buildAlertSaved, buildAlertDone} = require('../util/errors');
+const {processJoiError, processApiError, isSuperAgentError, buildAlertDone} = require('../util/errors');
 const render = require('../util/render');
 
 const router = new Router();
@@ -13,8 +13,10 @@ const router = new Router();
 // Show email setting page
 router.get('/', async (ctx, next) => {
 
+  const userId = ctx.session.user.id;
+
   const resp = await request.get(endpoints.profile)
-    .set('X-User-Id', ctx.session.user.id)
+    .set('X-User-Id', userId);
 
   const profile = resp.body;
 
@@ -39,7 +41,6 @@ router.get('/', async (ctx, next) => {
 
   delete ctx.session.errors;
   delete ctx.session.alert;
-
 });
 
 // Submit new email
@@ -58,6 +59,7 @@ router.post('/', async (ctx) => {
    * @type {{oldEmail: string, email: string}}
    */
   const account = result.value;
+
   // If email is not changed, do nothing.
   if (account.oldEmail === account.email) {
     debug.info('Email is not altered.');
@@ -65,15 +67,17 @@ router.post('/', async (ctx) => {
   }
 
   try {
+    const userId = ctx.session.user.id;
+
     const resp = await request.patch(endpoints.email)
-      .set('X-User-Id', ctx.session.user.id)
+      .set('X-User-Id', userId)
       .send({email: account.email});
 
     // If resp.status === 204, the email is not altered
     // If email is actually changed, updated user data will be sent back.
     if (200 === resp.status) {
       debug.info('Email changed')
-      ctx.session.alert = buildAlertSaved('email');
+      ctx.session.alert = buildAlertDone('email');
     }
     
     return ctx.redirect(redirectTo);
@@ -102,11 +106,13 @@ router.post('/newsletter', async (ctx) => {
 
   try {
 
+    const userId = ctx.session.user.id;
+
     await request.patch(endpoints.newsletter)
-      .set('X-User-Id', ctx.session.user.id)
+      .set('X-User-Id', userId)
       .send(newsletter);
     
-    ctx.session.alert = buildAlertSaved('newsletter')
+    ctx.session.alert = buildAlertDone('newsletter');
 
     return ctx.redirect(redirectTo);
 
@@ -119,13 +125,19 @@ router.post('/newsletter', async (ctx) => {
 
 // Resend verfication letter
 router.post('/request-verification', async (ctx) => {
+  debug.info("Request verification");
+
   const redirectTo = path.resolve(ctx.path, '../');
 
   try {
+    const userId = ctx.session.user.id;
+
     await request.post(endpoints.requestVerification)
-      .set('X-User-Id', ctx.session.user.id);
+      .set('X-User-Id', userId);
 
     ctx.session.alert = buildAlertDone('letter_sent');
+
+    debug.info("Redirect to %s", redirectTo);
 
     return ctx.redirect(redirectTo);
   } catch (e) {

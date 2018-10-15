@@ -86,13 +86,13 @@
         <input class="form-control"
           id="name"
           type="text"
-          name="account[name]"
-          value="{{account.name}}">
+          name="account[userName]"
+          value="{{account.userName}}">
 
         <small class="form-text text-muted">20字符以内</small>
 
-        {% if errors.name %}
-          <div class="form-errortext">{{errors.name.message}}</div>
+        {% if errors.userName %}
+          <div class="form-errortext">{{errors.userName.message}}</div>
         {% endif %}
       </div>
       
