@@ -88,7 +88,6 @@ declare interface APIErrorBody {
     error?: {
         field: string,
         code: string, // Possbile value: missing | missing_field | invalid | already_exists
-        message: string
     }
 }
 

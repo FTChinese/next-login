@@ -26,6 +26,7 @@ const email = require('./server/email');
 const account = require('./server/account');
 const membership = require('./server/membership');
 const address = require('./server/address');
+const version = require('./server/version');
 
 const isProduction = process.env.NODE_ENV === 'production';
 const app = new Koa();
@@ -74,6 +75,7 @@ router.use('/email', checkSession(), email);
 router.use('/account', checkSession(), account);
 router.use('/membership', checkSession(), membership);
 router.use('/address', checkSession(), address);
+router.use('__version', version);
 
 app.use(router.routes());
 

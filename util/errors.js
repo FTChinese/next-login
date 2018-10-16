@@ -109,6 +109,15 @@ exports.processApiError = function(err, field='') {
     throw err;
   }
 
+  /**
+   * @typedef {Object} ClientError
+   * @property {string} message
+   * @property {object} error
+   * @property {string} error.field
+   * @property {string} error.code
+   * 
+   * @type {ClientError} body
+   */
   const body = err.response.body;
 
   debug.error('API error response: %O', body);
@@ -129,7 +138,7 @@ exports.processApiError = function(err, field='') {
     // Unprocessable Entity.
     case 422: 
       const error = body.error;
-      return buildInvalidField(error.field, error.code, error.message)
+      return buildInvalidField(error.field, error.code, body.message)
 
     case 429:
       return buildInvalidField(field, types.tooManyRequests, body.message)
