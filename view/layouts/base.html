@@ -14,7 +14,7 @@
   <title>{% block title %}用户中心{% endblock %} - FT中文网</title>
   
   {% if env.isProduction %}
-  <link href="https://cdn.bootcss.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
   <style>{% include "main.css" %}</style>
   {% else %}
   <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.css">
@@ -48,27 +48,6 @@
   <footer class="o-footer o-footer--theme-dark">
     <div class="container">
       <div class="o-footer__row">
-        <!-- <ul class="o-footer__link-items">
-          
-          <li class="o-footer__link-item"><a class="o-footer__link" href="http://www.ftchinese.com/m/corp/aboutus.html" target="_blank">关于我们</a></li>
-          
-          <li class="o-footer__link-item"><a class="o-footer__link" href="https://ft.wd3.myworkdayjobs.com/FT_Chinese_External_Careers" target="_blank">加入我们</a></li>
-          
-          <li class="o-footer__link-item"><a class="o-footer__link" href="http://www.ftchinese.com/m/corp/faq.html" target="_blank">问题回馈</a></li>
-          
-          <li class="o-footer__link-item"><a class="o-footer__link" href="http://www.ftchinese.com/m/corp/contact.html" target="_blank">联系方式</a></li>
-          
-          <li class="o-footer__link-item"><a class="o-footer__link" href="http://www.ftchinese.com/m/corp/partner.html" target="_blank">合作伙伴</a></li>
-          
-          <li class="o-footer__link-item"><a class="o-footer__link" href="http://www.ftchinese.com/m/corp/service.html" target="_blank">服务条款</a></li>
-          
-          <li class="o-footer__link-item"><a class="o-footer__link" href="http://www.ftchinese.com/m/corp/sales.html" target="_blank">广告业务</a></li>
-          
-          <li class="o-footer__link-item"><a class="o-footer__link" href="http://www.ftchinese.com/m/corp/copyright.html" target="_blank">版权声明</a></li>
-          
-          <li class="o-footer__link-item"><a class="o-footer__link" href="http://www.ftchinese.com/m/marketing/ftc.html" target="_blank">最新动态</a></li>
-          
-        </ul> -->
         <nav class="o-footer__matrix">
 
           {% for group in env.footer %}
@@ -99,7 +78,7 @@
   </footer>
 
   {% if env.isProduction %}
-  <script src="https://cdn.bootcss.com/bootstrap.native/2.0.21/bootstrap-native-v4.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/2.0.23/bootstrap-native.min.js"></script>
   {% else %}
   <script src="/bootstrap.native/dist/bootstrap-native-v4.js"></script>
   {% endif %}
