@@ -38,8 +38,8 @@ router.post('/', async (ctx, next) => {
     await request.patch(endpoints.password)
       .set('X-User-Id', userId)
       .send({
-        oldPassword: pass.oldPassword,
-        newPassword: pass.password
+        "old": pass.oldPassword,
+        "new": pass.password
       });
 
     ctx.session.alert = buildAlertDone('password_saved');

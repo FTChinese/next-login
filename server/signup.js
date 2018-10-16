@@ -16,6 +16,15 @@ const router = new Router();
 // Show signup page
 router.get('/', async (ctx) => {
   debug.info('ctx.state: %O', ctx.state);
+
+  if (ctx.session.user) {
+    const redirectTo = ctx.state.sitemap.profile;
+    
+    debug.info('Logged in user is trying to signup. Redirect to: %s', redirectTo);
+  
+    return ctx.redirect(redirectTo);
+  }
+
   ctx.body = await render('signup.html', ctx.state);
 });
 

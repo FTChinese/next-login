@@ -24,6 +24,7 @@ module.exports = {
     // "password.missing_field": "密码不能为空",
     "password_token.not_found": tokenInvalid,
     "password_reset.forbidden": `无法重置密码。${tokenInvalid}`,
+    "email_token.not_found": "您似乎使用了无效的邮箱验证链接，请前往用户中心按照提示重新发送验证邮件",
     "server.error": "服务器开小差了，请稍后再试",
     "server.unauthorized": "访问被拒绝，无权进行此操作",
     "signup.too_many_requests": "您创建账号过于频繁，请稍后再试",
