@@ -9,7 +9,7 @@ const {sessToAccount} = require('../server/helper.js')
  * Suppose you want to access `/profile` without login. This middleware will redirect you want to `/login`. And then when you are accessing `/login`, this middleware will again first check if you're loggedin. Certainly your are not. It again redirect you to `/login`, check login state again and redirect you to `/login`, indefinitely.
  * @return {Function}
  */
-function checkLogin({redirect=true}={}) {
+function checkSession({redirect=true}={}) {
   return async (ctx, next) => {
     
     // Do nothing for `/favicon.ico`
@@ -54,4 +54,4 @@ function isLoggedIn(ctx) {
   return true;
 }
 
-module.exports = checkLogin;
+module.exports = checkSession;

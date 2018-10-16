@@ -11,7 +11,7 @@ const boot = require('./util/boot-app');
 
 const env = require('./middleware/env');
 const nav = require('./middleware/nav');
-const checkLogin = require('./middleware/check-login');
+const checkSession = require('./middleware/check-session');
 const handleErrors = require('./middleware/handle-errors');
 const setHeader = require('./middleware/set-header');
 
@@ -63,17 +63,17 @@ app.use(bodyParser());
  * There is a koa middleware https://github.com/koajs/csrf but neither well written nor well mataintained.
  */
 
-router.use('/login', checkLogin({redirect: false}), login);
+router.use('/login', checkSession({redirect: false}), login);
 router.use('/logout', logout);
 router.use('/signup', signup);
 router.use('/plan', plan);
-router.use('/verify-email', checkLogin({redirect: false}), verifyEmail);
-router.use('/password-reset', checkLogin({redirect: false}), passwordReset);
-router.use('/profile', checkLogin(), profile);
-router.use('/email', checkLogin(), email);
-router.use('/account', checkLogin(), account);
-router.use('/membership', checkLogin(), membership);
-router.use('/address', checkLogin(), address);
+router.use('/verify-email', checkSession({redirect: false}), verifyEmail);
+router.use('/password-reset', checkSession({redirect: false}), passwordReset);
+router.use('/profile', checkSession(), profile);
+router.use('/email', checkSession(), email);
+router.use('/account', checkSession(), account);
+router.use('/membership', checkSession(), membership);
+router.use('/address', checkSession(), address);
 
 app.use(router.routes());
 
