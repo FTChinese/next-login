@@ -82,7 +82,7 @@ router.post('/', async function (ctx, next) {
     return ctx.redirect(redirectTo);
 
   } catch (e) {
-    // 400, 422, 404
+    // 400, 422, 404, 403
     ctx.state.errors = processApiError(e, 'credentials');
 
     // stick form
