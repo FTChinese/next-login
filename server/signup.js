@@ -39,7 +39,7 @@ router.post('/', async (ctx, next) => {
 
   // Request to API
   try {
-    const resp = await request.post(endpoints.createAccount)
+    const resp = await request.post(endpoints.signup)
       .set('X-Client-Type', 'web')
       .set('X-Client-Version', pkg.version)
       .set('X-User-Ip', ctx.ip)

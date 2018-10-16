@@ -11,13 +11,13 @@
 * GET `/plan`
 
 ### Verify email
-* `GET /verify-email/:token`
+* `GET /verify/email/:token`
 
 ### Reset password
-* GET `/password-reset` Ask user to enter email
-* POST `/password-reset` User entered email
-* GET `/password-reset/:token` User clicked reset link.
-* POST `/password-reset/:token`  User submitted new password
+* `GET /password-reset` Ask user to enter email
+* `POST /password-reset` User entered email
+* `GET /password-reset/:token` User clicked reset link.
+* `POST /password-reset/:token`  User submitted new password
 
 ### Login
 * GET `/login`

@@ -59,7 +59,7 @@ router.post('/', async function (ctx, next) {
 
   try {    
     // Ask API to sent email.
-    await request.post(endpoints.resetLetter)
+    await request.post(endpoints.sendPasswordResetLetter)
       .send({email});
 
     // Tell redirected page what message to show.
@@ -85,7 +85,7 @@ router.get('/:token', async (ctx) => {
   const token = ctx.params.token;
 
   try {
-    const resp = await request.get(`${endpoints.verifyResetToken}/${token}`);
+    const resp = await request.get(`${endpoints.verifyPasswordResetToken}/${token}`);
 
     /**
      * User is found and show page to enter new password
@@ -132,7 +132,7 @@ router.post('/:token', async (ctx, next) => {
 
   try {
 
-    await request.post(endpoints.passwordReset)
+    await request.post(endpoints.resetPassword)
       .send({
         token,
         password: pws.password
