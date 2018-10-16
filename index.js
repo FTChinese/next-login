@@ -75,7 +75,7 @@ router.use('/email', checkSession(), email);
 router.use('/account', checkSession(), account);
 router.use('/membership', checkSession(), membership);
 router.use('/address', checkSession(), address);
-router.use('__version', version);
+router.use('/__version', version);
 
 app.use(router.routes());
 
