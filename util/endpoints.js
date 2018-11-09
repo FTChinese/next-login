@@ -1,14 +1,14 @@
 const baseUrl = "http://localhost:8000";
-const passwordReset = `${baseUrl}/users/password-reset`;
 const user = `${baseUrl}/user`
 const users = `${baseUrl}/users`
+const passwordReset = `${users}/password-reset`;
 
 module.exports = {
   signup: `${users}/new`,
   verifyEmail: `${users}/verify/email`, // append toke to the end
-  sendPasswordResetLetter: `${users}/letter`,
-  verifyPasswordResetToken: `${users}/password-reset/tokens`, // append token to the end.
-  resetPassword: `${users}/password-reset`,
+  sendPasswordResetLetter: `${passwordReset}/letter`,
+  verifyPasswordResetToken: `${passwordReset}/tokens`, // append token to the end.
+  resetPassword: password,
   login: `${users}/auth`,
   account: `${user}/account`,
   profile: `${user}/profile`,
