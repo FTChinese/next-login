@@ -8,7 +8,7 @@ module.exports = {
   verifyEmail: `${users}/verify/email`, // append toke to the end
   sendPasswordResetLetter: `${passwordReset}/letter`,
   verifyPasswordResetToken: `${passwordReset}/tokens`, // append token to the end.
-  resetPassword: password,
+  resetPassword: passwordReset,
   login: `${users}/auth`,
   account: `${user}/account`,
   profile: `${user}/profile`,
