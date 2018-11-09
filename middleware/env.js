@@ -1,6 +1,7 @@
 const isProduction = process.env.NODE_ENV === 'production';
 const debug = require('../util/debug')('user:env');
 const UAParser = require('ua-parser-js');
+const pkg = require("../package.json");
 
 const matrix = [
 	{
@@ -126,7 +127,8 @@ module.exports = function() {
        * This problems might merge on the first day of each year: At 00:00 of 1 January, China already entered a new year while this page is still showing last year due to UTC lagging 8 hours behind.
        */
       year: new Date().getFullYear(),
-      footer: matrix,
+			footer: matrix,
+			version: pkg.version,
     };
 
     const parser = new UAParser(ctx.header['user-agent']);

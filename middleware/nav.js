@@ -48,7 +48,7 @@ module.exports = function() {
       return {
         href: item.href,
         text: item.text,
-        active: path.startsWith(item.href) ? true : false
+        active: path === item.href,
       };
     });
 

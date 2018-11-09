@@ -25,9 +25,10 @@
 <body>
   <header class="navbar navbar-expand o-header">
     <div class="container">
-      <a class="navbar-brand" href="/">FT中文网</a>
+      <a class="navbar-brand" href="http://www.ftchinese.com" target="__blank">FT中文网</a>
       {% block headerNav %}{% endblock %}
     </div>
+
   </header>
 
   <main class="page-content" role="main">
@@ -73,6 +74,9 @@
           © FT中文网 {{env.year}}.
           <abbr title="Financial Times" aria-label="F T">FT</abbr> and ‘Financial Times’ are trademarks of The Financial Times Ltd.
         </small>
+      </div>
+      <div class="text-muted">
+        <small>测试版 v{{env.version}}</small>
       </div>
     </div>
   </footer>
