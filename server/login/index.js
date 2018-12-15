@@ -6,7 +6,7 @@ const path = require('path');
 const Router = require('koa-router');
 const schema = require('../schema');
 
-const debug = require('../../util/debug')('user:login');
+const debug = require('debug')('user:login');
 const render = require('../../util/render');
 const endpoints = require('../../util/endpoints');
 const {processJoiError, processApiError} = require('../../util/errors');
@@ -22,7 +22,7 @@ router.get('/', async function (ctx) {
   if (ctx.session.user) {
     const redirectTo = ctx.state.sitemap.profile;
     
-    debug.info('A logged in user is trying to login again. Redirect to: %s', redirectTo);
+    debug('A logged in user is trying to login again. Redirect to: %s', redirectTo);
   
     return ctx.redirect(redirectTo);
   }
