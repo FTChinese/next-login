@@ -1,3 +1,7 @@
+declare interface Credentials {
+    email: string;
+    password: string;
+}
 declare interface Membership {
     tier: "free" | "standard" | "premium";
     startAt: string;
