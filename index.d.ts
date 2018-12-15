@@ -119,17 +119,17 @@ declare interface Alert {
     saved: string,
 }
 
-declare interface JoiErr {
+declare interface ValidationError {
     isJoi: boolean, // always true
     name: string, // always 'ValidationError'
-    details: JoiErrDetail[],
+    details: ValidationErrorItem[],
 }
 
-declare interface JoiErrDetail {
+declare interface ValidationErrorItem {
     message: string, // '"email" must be a valid email'
     path: string[], // path to schema keys. null if you schema does not have any named properties.
     type: string, // string.email, any.required, string.min, string.max
-    context: {
+    context?: {
         key: string, // Last element in path
         label: string,
         value?: string,
