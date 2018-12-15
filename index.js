@@ -52,7 +52,9 @@ if (!isProduction) {
 app.use(env());
 app.use(nav());
 app.use(setHeader());
-app.use(session(app));
+app.use(session({
+  renew: true,
+}, app));
 app.use(handleErrors());
 app.use(bodyParser());
 
