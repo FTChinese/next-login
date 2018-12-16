@@ -1,6 +1,6 @@
 const test = require('ava');
 const Joi = require('joi');
-const schema = require('../server/schema');
+const schema = require('../validate/schema');
 const {processJoiError} = require('../util/errors');
 
 const credentials = {
@@ -15,9 +15,42 @@ const profile = {
   gender: 'female'
 };
 
+/**
+ * isJoi: true,
+  name: 'ValidationError',
+  details: [ 
+    { message: '"email" must be a valid email',
+       path: [ 'email'],
+       type: 'string.email',
+       context: { value: 'foo', key: 'email', label: 'email' } 
+    },
+    { 
+      message: '"password" length must be at least 8 characters long',
+      path: [ 'password' ],
+      type: 'string.min',
+      context: { 
+        limit: 8,
+        value: '1234567',
+        encoding: undefined,
+        key: 'password',
+        label: 'password' 
+      } 
+    },
+  _object: { 
+    email: 'foo', 
+    password: '1234567' 
+  },
+  annotate: { 
+    [Function]
+     [length]: 1,
+     [name]: '',
+     [prototype]: { [constructor]: [Circular] } 
+    } 
+  }
+ */
 test('credentials', async t => {
   try {
-    const result = await Joi.validate(credentials, schema.credentials, {
+    const result = await Joi.validate(credentials, schema.account, {
       abortEarly: false
     });
 
