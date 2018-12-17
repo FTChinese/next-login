@@ -1,8 +1,8 @@
 const test = require('ava');
 const Joi = require('joi');
-const schema = require('../validate/schema');
+const schema = require('../server/schema');
 const {processJoiError} = require('../util/errors');
-
+const {validateLogin} = require("../util/validate")
 const credentials = {
   email: 'foo',
   password: '1234567'
@@ -58,6 +58,15 @@ test('credentials', async t => {
   } catch (e) {
     console.log("Error: %o", e);
   }
+
+  t.pass();
+});
+
+test("login", async t => {
+  const {result, errors} = await validateLogin(credentials);
+
+  console.log(result);
+  console.log(errors);
 
   t.pass();
 });
