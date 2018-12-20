@@ -1,21 +1,4 @@
-const prefix = '/user';
-
-const sitemap = {
-  signup: `${prefix}/signup`,
-  passwordReset: `${prefix}/password-reset`,
-  login: `${prefix}/login`,
-  logout: `${prefix}/logout`,
-  profile: `${prefix}/profile`,
-  email: `${prefix}/email`,
-  emailRequestVerification: `${prefix}/email/request-verification`,
-  emailNewsletter: `${prefix}/email/newsletter`,
-  account: `${prefix}/account`,
-  accountName: `${prefix}/account/name`,
-  accountPassword: `${prefix}/account/password`,
-  accountMobile: `${prefix}/account/mobile`,
-  membership: `${prefix}/membership`,
-  address: `${prefix}/address`
-};
+const sitemap = require("../lib/sitemap");
 
 const navItems = [
   {
