@@ -7,12 +7,21 @@ declare interface Membership {
     startAt: string;
     expireAt: string;
 }
+
+declare interface Wechat {
+    unionId: string;
+    openId: string;
+    nickName: string;
+    avatarUrl: string;
+}
 declare interface Account {
     id: string;
-    userName: string;
-    avatar: string;
+    email: string;
+    userName?: string;
+    avatar?: string;
     isVip: boolean;
     isVerified: boolean;
+    wechat?: Wechat;
     membership: Membership;
 }
 
