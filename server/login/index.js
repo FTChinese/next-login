@@ -1,5 +1,3 @@
-/// <reference path="account.js">
-
 const pkg = require('../../package.json');
 const request = require('superagent');
 const path = require('path');
