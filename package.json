@@ -44,6 +44,7 @@
     "moment": "^2.23.0",
     "nunjucks": "^3.1.6",
     "superagent": "^4.0.0",
+    "typed-rest-client": "^1.0.11",
     "ua-parser-js": "^0.7.19",
     "validator": "^10.9.0"
   },
