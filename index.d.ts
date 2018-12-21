@@ -69,34 +69,8 @@ declare interface Profile {
     newsletter: Newsletter;   
 }
 
-declare interface SuperAgentResponse {
-    header: Object,
-    links: Object,
-    status: number,
-    statusType: number,
-    info: boolean,
-    ok: boolean,
-    redirect: boolean,
-    clientError: boolean,
-    serverError: boolean,
-    error: Error,
-    accepted: boolean,
-    noContent: boolean,
-    badRequest: boolean,
-    unauthorized: boolean,
-    noAcceptable: boolean,
-    forbidden: boolean,
-    notFound: boolean,
-    text: string,
-    body: Object,
-}
-
-declare interface SuperAgentError {
-    status: number,
-    response: SuperAgentResponse, // body will be APIError
-}
-
-declare interface APIErrorBody {
+// Data structure for API error response.
+declare interface APIError {
     message: string,
     error?: {
         field: string,
@@ -104,49 +78,15 @@ declare interface APIErrorBody {
     }
 }
 
-declare interface InvalidError {
-    // a string by joining JoiErr's path field using underscore. For exaple, if `path: ["email"]`, the key will be `email`; if `path: ["user", "name"]`, the key will be `user_name`.
-    field: string,
-    // JoiErrDetail's type field
-    type: string,
-    // A message id to search for localized text.
-    msg: string 
-}
-
-// An object of unkonwn keys with know value structure.
-// The key is the value of InvalidError.field, or APIErrorBody.error.field
-declare interface InvalidFields {
-    [key: string]: {
-        type: string, // InvalidError.type, or APIErrorBody.error.code
-        message: string, // User-friedly error message
-    }
+declare interface ErrorForUI {
+    server?: string;
+    credentials?: string;
+    email?: string;
+    password?: string;
 }
 
 // Possbile data passed in redirect.
 declare interface Alert {
     done: string,
     saved: string,
-}
-
-declare interface ValidationError {
-    isJoi: boolean, // always true
-    name: string, // always 'ValidationError'
-    details: ValidationErrorItem[],
-}
-
-declare interface ValidationErrorItem {
-    message: string, // '"email" must be a valid email'
-    path: string[], // path to schema keys. null if you schema does not have any named properties.
-    type: string, // string.email, any.required, string.min, string.max
-    context?: {
-        key: string, // Last element in path
-        label: string,
-        value?: string,
-        limit?: number // If type is string.min or string.max
-    }
-}
-
-declare interface JoiResult {
-    error?: JoiErr,
-    value: Object,
 }

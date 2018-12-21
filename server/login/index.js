@@ -1,16 +1,14 @@
 const pkg = require('../../package.json');
 const request = require('superagent');
-const path = require('path');
 const Router = require('koa-router');
-
-
 const debug = require('debug')('user:login');
+
 const render = require('../../util/render');
 const endpoints = require('../../util/endpoints');
 const { LoginValidator } = require("../../lib/validate")
-const simtemap = require("../../lib/validate");
-const {processJoiError, processApiError, isAPIError: isAPIError } = require('../../util/errors');
-const {accountToSess} = require('../helper.js');
+const simtemap = require("../../lib/sitemap");
+const { isAPIError, buildApiError } = require("../../lib/api-response");
+const { toJWT } = require("../../lib/session");
 
 // const wechat = require('./wechat');
 
@@ -20,11 +18,7 @@ const router = new Router();
 router.get('/', async function (ctx) {
   // If user is trying to access this page when he is already logged in, redirect away
   if (ctx.session.user) {
-    const redirectTo = ctx.state.sitemap.profile;
-    
-    debug('A logged in user is trying to login again. Redirect to: %s', redirectTo);
-  
-    return ctx.redirect(redirectTo);
+    return ctx.redirect(sitemap.profile);
   }
 
   ctx.body = await render('login.html', ctx.state);
@@ -42,6 +36,9 @@ router.post('/', async function (ctx, next) {
   const credentials = ctx.request.body.credentials;
 
   const {result, errors} = new LoginValidator(credentials)
+    .validate(credentials);
+
+  debug("Validation result: %O, error: %O", result, errors);
 
   if (errors) {
     ctx.state.errors = errors;
@@ -63,11 +60,11 @@ router.post('/', async function (ctx, next) {
      * @type {Account}
      */
     const account = resp.body;
-    debug.info('Authentication result: %o', account);
+    debug('Authentication result: %o', account);
 
     // Keep login state
     ctx.session = {
-      user: accountToSess(account),
+      user: toJWT(account),
     };
 
     ctx.cookies.set('logged_in', 'yes');
@@ -76,19 +73,32 @@ router.post('/', async function (ctx, next) {
 
   } catch (e) {
     if (!isAPIError(e)) {
-      throw e;
+      ctx.state.errors = {
+        server: e.message
+      };
+      // stick form
+      ctx.state.credentials = credentials;
+
+      return await next();
     }
 
-    const body = err.response.body;
+    /**
+     * @type {{message: string, error: Object}}
+     */
+    const body = e.response.body;
 
-    // 400, 422, 404, 403
+    // 404, 403
     switch (e.status) {
-      case 400:
-        break;
       case 404:
       case 403:
+        ctx.state.errors = {
+          credentials: "邮箱或密码错误"
+        };
         break;
-      case 422:
+      
+      // 400, 422, 
+      default:
+        ctx.state.errors = buildApiError(body);
         break;
     }
 

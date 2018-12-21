@@ -1,6 +1,5 @@
 const isProduction = process.env.NODE_ENV === 'production';
-const debug = require('../util/debug')('user:env');
-const UAParser = require('ua-parser-js');
+const debug = require("debug")('user:env');
 const pkg = require("../package.json");
 
 const matrix = [
@@ -130,13 +129,6 @@ module.exports = function() {
 			footer: matrix,
 			version: pkg.version,
     };
-
-    const parser = new UAParser(ctx.header['user-agent']);
-    const result = parser.getResult();
-
-    debug.info('Browser: %O', result.browser);
-    debug.info('OS: %O', result.os);
-    debug.info('Device: %O', result.device);
 
     await next();
   }

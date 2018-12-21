@@ -6,7 +6,7 @@
 
   {% if errors.credentials %}
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-      <span>{{errors.credentials.message}}</span>
+      <span>{{errors.credentials}}</span>
       <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
@@ -25,7 +25,7 @@
         required>
 
       {% if errors.email %}
-      <div class="form-errortext">{{errors.email.message}}</div>
+        <div class="form-errortext">{{errors.email}}</div>
       {% endif %}
     </div>
 
@@ -39,7 +39,7 @@
         required>
 
       {% if errors.password %}
-      <div class="form-errortext">{{errors.password.message}}</div>
+      <div class="form-errortext">{{errors.password}}</div>
       {% endif %}
     </div>
     
@@ -60,16 +60,10 @@
   </form>
   <p class="text-center pt-3">还没有FT中文网账号?<a href="{{sitemap.signup}}">创建</a></p>
 
-
-<!-- <div class="row justify-content-center">
-  <div class="col-md-7 col-lg-5 col-xl-4">
-    <div class="mt-4">
-      <h5>其他登录方式</h5>
-      <ul>
-        <li><a href="/login/wechat">微信</a></li>
-        <li><a href="">微博</a></li>
-      </ul>
-    </div>
+  <div class="mt-4">
+    <h5>其他登录方式</h5>
+    <ul>
+      <li><a href="/login/wechat">微信</a></li>
+    </ul>
   </div>
-</div> -->
 {% endblock %}

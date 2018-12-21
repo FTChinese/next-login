@@ -1,13 +1,22 @@
-const Router = require('koa-router');
 const _ = require('lodash');
 const path = require('path');
 const request = require('superagent');
-const schema = require('./schema');
+const Router = require('koa-router');
+const debug = require("debug")('user:password-reset');
 
 const render = require('../util/render');
-const debug = require('../util/debug')('user:password-reset');
-const {processJoiError, processApiError, buildInvalidField, buildAlertDone} = require('../util/errors');
 const endpoints = require('../util/endpoints');
+const { validateEmail } = require("../lib/validate");
+const { errMessage } = require("../lib/api-response");
+
+const sitemap = require("../lib/sitemap");
+
+const { isAPIError, buildApiError } = require("../lib/api-response");
+
+const schema = require('./schema');
+
+const {processJoiError, processApiError, buildInvalidField, buildAlertDone} = require('../util/errors');
+
 
 const router = new Router();
 
@@ -45,22 +54,22 @@ router.get('/', async (ctx) => {
 
 // Collect user entered email, check if email is valid, and send letter.
 router.post('/', async function (ctx, next) {
+  const email = ctx.request.body.email;
+  const { result, errors } = validateEmail(email);
 
-  const result = schema.email.validate(ctx.request.body);
-  if (result.error) {
-    ctx.state.errors = processJoiError(result.error)
-    
-    ctx.state.email = result.value.email;
+  debug("Validation result: %O, error: %O", result, errors);
+
+  if (errors) {
+    ctx.state.errors = errors;
+    ctx.state.email = email;
 
     return await next();
   }
 
-  const email = result.value.email;
-
   try {    
     // Ask API to sent email.
     await request.post(endpoints.sendPasswordResetLetter)
-      .send({email});
+      .send(result);
 
     // Tell redirected page what message to show.
     ctx.session.alert = buildAlertDone('letter_sent');
@@ -69,8 +78,33 @@ router.post('/', async function (ctx, next) {
     return ctx.redirect(ctx.path);
 
   } catch (e) {
+    if (!isAPIError(e)) {
+      ctx.state.errors = {
+        server: e.message,
+      };
+
+      ctx.state.email = email;
+
+      return await next();
+    }
+
+    /**
+     * @type {APIError}
+     */
+    const body = e.response.body;
     // 400, 422, 404
-    ctx.state.errors = processApiError(e, 'email');
+    switch (e.status) {
+      case 404:
+        ctx.state.errors = {
+          email: errMessage.email_not_found,
+        };
+        break;
+
+      default:
+        ctx.state.errors = buildApiError(body);
+        break;
+    }
+
     ctx.state.email = email;
 
     return await next();
@@ -108,7 +142,6 @@ router.get('/:token', async (ctx) => {
 // User submit new password
 router.post('/:token', async (ctx, next) => {
   const token = ctx.params.token;
-  const redirectTo = path.resolve(ctx.path, '../');
 
   const result = schema.reset.validate(ctx.request.body);
 

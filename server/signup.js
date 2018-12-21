@@ -1,28 +1,23 @@
-const path = require('path');
 const pkg = require('../package.json');
 const request = require('superagent');
 const Router = require('koa-router');
-
-const schema = require('./schema');
+const debug = require("debug")('user:signup');
 
 const render = require('../util/render');
-const {processJoiError, processApiError} = require('../util/errors');
-const debug = require('../util/debug')('user:signup');
 const endpoints = require('../util/endpoints');
-const {accountToSess} = require('./helper.js')
+const { SignupValidator } = require("../lib/validate");
+
+const sitemap = require("../lib/sitemap");
+const { isAPIError, buildApiError } = require("../lib/api-response");
+const { toJWT } = require("../lib/session");
 
 const router = new Router();
 
 // Show signup page
 router.get('/', async (ctx) => {
-  debug.info('ctx.state: %O', ctx.state);
 
   if (ctx.session.user) {
-    const redirectTo = ctx.state.sitemap.profile;
-    
-    debug.info('Logged in user is trying to signup. Redirect to: %s', redirectTo);
-  
-    return ctx.redirect(redirectTo);
+    return ctx.redirect(sitemap.profile);
   }
 
   ctx.body = await render('signup.html', ctx.state);
@@ -30,21 +25,21 @@ router.get('/', async (ctx) => {
 
 // User submitted account to be created.
 router.post('/', async (ctx, next) => {
-  const result = schema.account.validate(ctx.request.body.account, { abortEarly: false });
+  /**
+   * @type {{email: string, password: string}}
+   */
+  const account = ctx.request.body.account;
+  const { result, errors } = new SignupValidator(account)
+    .validate();
 
-  if (result.error) {
-    ctx.state.errors = processJoiError(result.error);
-    ctx.state.account = {
-      email: result.value.email
-    }
+  debug("Validation result: %O, error: %O", result, errors);
+
+  if (errors) {
+    ctx.state.errors = errors;
+    ctx.state.account = account;
 
     return await next();
   }
-  /**
-   * @type {{email: string, password: string, ip: string}} user
-   */
-  const account = result.value;
-  account.ip = ctx.ip;
 
   // Request to API
   try {
@@ -53,25 +48,45 @@ router.post('/', async (ctx, next) => {
       .set('X-Client-Version', pkg.version)
       .set('X-User-Ip', ctx.ip)
       .set('X-User-Agent', ctx.header['user-agent'])
-      .send(account);
+      .send(result);
 
     ctx.session = {
-      user: accountToSess(resp.body),
+      user: toJWT(resp.body),
     };
 
     ctx.cookies.set('logged_in', 'yes');
 
-    const redirectTo = ctx.state.sitemap.email;
-
     // Redirect to user's email page
-    return ctx.redirect(redirectTo);
+    return ctx.redirect(sitemap.profile);
 
   } catch (e) {
+    if (!isAPIError(e)) {
+      ctx.state.errors = {
+        server: e.message
+      };
+      ctx.state.account = account;
+
+      return await next();
+    }
+
+    /**
+     * @type {APIError}
+     */
+    const body = e.response.body;
     // 400， 422， 429
-    ctx.state.errors = processApiError(e, "signup");
-    ctx.state.account = {
-      email: account.email
-    };
+    switch (e.status) {
+      case 429:
+        ctx.state.errors = {
+          server: "您创建账号过于频繁，请稍后再试"
+        };
+        break;
+
+      default:
+        ctx.state.errors = buildApiError(body);
+        break;
+    }
+
+    ctx.state.account = account;
 
     return await next();
   }
