@@ -89,11 +89,13 @@ exports.processJoiError = function(joiErr) {
 }
 
 /**
- * @param {SuperAgentError} e
+ * @param {Object} err
+ * @param {status} [err.number]
+ * @param {Object} [err.response]
  * @return {boolean}
  */
-exports.isSuperAgentError = function (e) {
-  if (e.response && e.response.body && e.status) {
+exports.isAPIError = function (err) {
+  if (err.status && err.response) {
     return true;
   }
   return false;
@@ -105,7 +107,7 @@ exports.isSuperAgentError = function (e) {
  * @returns {InvalidFields}
  */
 exports.processApiError = function(err, field='') {
-  if (!exports.isSuperAgentError(err)) {
+  if (!exports.isAPIError(err)) {
     throw err;
   }
 

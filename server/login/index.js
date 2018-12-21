@@ -2,12 +2,14 @@ const pkg = require('../../package.json');
 const request = require('superagent');
 const path = require('path');
 const Router = require('koa-router');
-const schema = require('../schema');
+
 
 const debug = require('debug')('user:login');
 const render = require('../../util/render');
 const endpoints = require('../../util/endpoints');
-const {processJoiError, processApiError} = require('../../util/errors');
+const { LoginValidator } = require("../../lib/validate")
+const simtemap = require("../../lib/validate");
+const {processJoiError, processApiError, isAPIError: isAPIError } = require('../../util/errors');
 const {accountToSess} = require('../helper.js');
 
 // const wechat = require('./wechat');
@@ -34,22 +36,19 @@ router.post('/', async function (ctx, next) {
    */
   let remeberMe = ctx.request.body.remeberMe;
 
-  // Validate input
-  const result = schema.login.validate(ctx.request.body.credentials, { abortEarly: false });
-
-  if (result.error) {
-    ctx.state.errors = processJoiError(result.error);
-    ctx.state.credentials = {
-      email: result.value.email
-    };
-
-    return await next();
-  }
-
   /**
    * @type {{email: string, password: string}}
    */
-  const credentials = result.value;
+  const credentials = ctx.request.body.credentials;
+
+  const {result, errors} = new LoginValidator(credentials)
+
+  if (errors) {
+    ctx.state.errors = errors;
+    ctx.state.credentials = credentials;
+
+    return await next();
+  }
 
   // Send data to API
   try {
@@ -58,7 +57,7 @@ router.post('/', async function (ctx, next) {
       .set('X-Client-Version', pkg.version)
       .set('X-User-Ip', ctx.ip)
       .set('X-User-Agent', ctx.header['user-agent'])
-      .send(credentials);
+      .send(result);
 
     /**
      * @type {Account}
@@ -73,20 +72,28 @@ router.post('/', async function (ctx, next) {
 
     ctx.cookies.set('logged_in', 'yes');
 
-    const redirectTo = path.resolve(ctx.path, '../profile');
-    
-    debug.info('Login success. Redirect to: %s', redirectTo);
-
-    return ctx.redirect(redirectTo);
+    return ctx.redirect(sitemap.profile);
 
   } catch (e) {
+    if (!isAPIError(e)) {
+      throw e;
+    }
+
+    const body = err.response.body;
+
     // 400, 422, 404, 403
-    ctx.state.errors = processApiError(e, 'credentials');
+    switch (e.status) {
+      case 400:
+        break;
+      case 404:
+      case 403:
+        break;
+      case 422:
+        break;
+    }
 
     // stick form
-    ctx.state.credentials = {
-      email: credentials.email
-    };
+    ctx.state.credentials = credentials
 
     return await next();
   }
