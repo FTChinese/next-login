@@ -1,21 +1,15 @@
 const _ = require('lodash');
-const path = require('path');
 const request = require('superagent');
 const Router = require('koa-router');
 const debug = require("debug")('user:password-reset');
 
 const render = require('../util/render');
-const endpoints = require('../util/endpoints');
-const { validateEmail } = require("../lib/validate");
-const { errMessage } = require("../lib/api-response");
+const { nextApi } = require("../lib/endpoints");
+const { customHeader } = require("../lib/request")
 
+const { validateEmail, PasswordResetValidator } = require("../lib/validate");
 const sitemap = require("../lib/sitemap");
-
-const { isAPIError, buildApiError } = require("../lib/api-response");
-
-const schema = require('./schema');
-
-const {processJoiError, processApiError, buildInvalidField, buildAlertDone} = require('../util/errors');
+const { isAPIError, buildApiError, errMessage } = require("../lib/response");
 
 
 const router = new Router();
@@ -34,7 +28,7 @@ router.get('/', async (ctx) => {
   /**
    * This part is enabled only after email is sent or password is reset.
    */
-  if (!_.isEmpty(alert)) {
+  if (alert) {
     ctx.state.alert = alert;
     ctx.body = await render('password/success.html', ctx.state);
 
@@ -44,7 +38,7 @@ router.get('/', async (ctx) => {
 
   // Handle invalid token for password reset.
   if (ctx.session.errors) {
-    ctx.state.errors = ctx.session.errors;
+    ctx.state.errors = errMessage[ctx.sessions.errors.key];
   }
   
   ctx.body = await render('password/enter-email.html', ctx.state);
@@ -68,11 +62,14 @@ router.post('/', async function (ctx, next) {
 
   try {    
     // Ask API to sent email.
-    await request.post(endpoints.sendPasswordResetLetter)
+    await request.post(nextApi.sendPasswordResetLetter)
+      .set(customHeader(ctx.ip, ctx.header["user-agent"]))
       .send(result);
 
     // Tell redirected page what message to show.
-    ctx.session.alert = buildAlertDone('letter_sent');
+    ctx.session.alert = {
+      "done": "letter_sent"
+    };
 
     // Redirect to /password-reset
     return ctx.redirect(ctx.path);
@@ -119,46 +116,56 @@ router.get('/:token', async (ctx) => {
   const token = ctx.params.token;
 
   try {
-    const resp = await request.get(`${endpoints.verifyPasswordResetToken}/${token}`);
+    const resp = await request.get(`${nextApi.verifyPasswordResetToken}/${token}`);
 
     /**
      * User is found and show page to enter new password
-     * @type {User}
+     * @type {{email: string}}
      */
-    const user = resp.body;
-    ctx.state.email = user.email;
+    const body = resp.body;
+    ctx.state.email = body.email;
 
     return ctx.body = await render('password/new-password.html', ctx.state);
 
   } catch (e) {
-    // 400
-    // 404 if the token is not found, the the user associated with the token is not found.
-    ctx.session.errors = processApiError(e, 'password_token');
+    if (!isAPIError(e)) {
+      ctx.state.errors = {
+        server: e.message,
+      };
 
-    ctx.redirect(path.resolve(ctx.path, '../'));
+      return await next();
+    }
+
+    const body = e.response.body;
+
+    // 400
+    // 404 if the token is not found, or the the user associated with the token is not found.
+    switch (e.status) {
+      case 404:
+        ctx.state.errors = {
+          token: errMessage.password_token_invalid,
+        };
+        break;
+
+      default:
+        ctx.state.errors = buildApiError(body)
+        break;
+    }
+    
+    return await next();
   }
+}, async (ctx) => {
+  ctx.body = await render("password/enter-email.html", ctx.state);
 });
 
 // User submit new password
 router.post('/:token', async (ctx, next) => {
   const token = ctx.params.token;
 
-  const result = schema.reset.validate(ctx.request.body);
+  const { result, errors } = new PasswordResetValidator(ctx.request.body);
 
-  if (result.error) {
-    ctx.state.errors = processJoiError(result.error);
-
-    return await next();
-  }
-  
-  /**
-   * @type {{password: string, confirmPassword: string}}
-   */
-  const pws = result.value
-
-  // Check if the password equals confirmed one
-  if (pws.password !== pws.confirmPassword) {
-    ctx.state.errors = buildInvalidField('confirmPassword', 'mismatched');
+  if (error) {
+    ctx.state.errors = errors
 
     return await next();
   }
@@ -168,23 +175,42 @@ router.post('/:token', async (ctx, next) => {
     await request.post(endpoints.resetPassword)
       .send({
         token,
-        password: pws.password
+        password: result.password
       });
     
-    ctx.session.alert = buildAlertDone('password_reset');
+    ctx.session.alert = {
+      done: "password_reset"
+    };
 
     // Redirect to /password-reset to prevent user refresh.
-    return ctx.redirect(redirectTo);
+    return ctx.redirect(sitemap.passwordReset);
 
   } catch (e) {
+    if (!isAPIError(e)) {
+      ctx.state.errors = {
+        server: e.message
+      };
+
+      return await next();
+    }
+    /**
+     * @type {APIError}
+     */
+    const body = e.response.body;
     // 400, 422
     // 404 here means the token is invalid or expired. Handle it separatedly.
-    if (404 === e.status) {
-      ctx.session.errors = buildInvalidField('password_reset', 'forbidden');
-      return ctx.redirect(redirectTo);
+    switch (e.status) {
+      case 404:
+        ctx.session.errors = {
+          key: "password_token_invalid"
+        };
+        ctx.redirect(sitemap.passwordReset);
+        break;
+
+      default:
+        ctx.state.errors = buildApiError(body);
     }
 
-    ctx.state.errors = processApiError(e);
     return await next();
   }
 }, async function(ctx) {
