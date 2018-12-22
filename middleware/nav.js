@@ -20,6 +20,18 @@ const navItems = [
   {
     href: sitemap.address,
     text: "地址"
+  },
+  {
+    href: sitemap.notification,
+    text: "通知推送"
+  },
+  {
+    href: sitemap.starred,
+    text: "收藏的文章"
+  },
+  {
+    href: sitemap.preference,
+    text: "我的偏好"
   }
 ];
 
