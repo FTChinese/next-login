@@ -1,5 +1,6 @@
 const debug = require('../util/debug')('user:check-login');
-const {sessToAccount} = require('../server/helper.js')
+const { toAccount } = require("../lib/session");
+const sitemap = require("../lib/sitemap");
 
 /**
  * checkLogin - This middleware will add userinfo to ctx.state
@@ -25,20 +26,16 @@ function checkSession({redirect=true}={}) {
        */
       const user = ctx.session.user;
 
-      ctx.state.userAccount = sessToAccount(user);
+      ctx.state.userAccount = toAccount(user);
 
-      debug.info('ctx.state: %O', ctx.state.userAccount);
       return await next();
     }
 
     ctx.state.user = null;
 
     if (redirect) {
-      const redirectTo = ctx.state.sitemap.login;
-
-      debug.info('User not logged in. Redirecting to %s', redirectTo);
   
-      return ctx.redirect(redirectTo);
+      return ctx.redirect(sitemap.login);
     }
 
     // Remember to let the following middleware to excute if users are not loggedin and you do not want to redirect away.
