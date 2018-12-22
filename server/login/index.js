@@ -1,13 +1,13 @@
-const pkg = require('../../package.json');
 const request = require('superagent');
 const Router = require('koa-router');
 const debug = require('debug')('user:login');
 
 const render = require('../../util/render');
-const endpoints = require('../../util/endpoints');
+const { nextApi } = require("../../lib/endpoints")
 const { LoginValidator } = require("../../lib/validate")
-const simtemap = require("../../lib/sitemap");
-const { isAPIError, buildApiError } = require("../../lib/api-response");
+const sitemap = require("../../lib/sitemap");
+const { isAPIError, buildApiError } = require("../../lib/response");
+const { customHeader } = require("../../lib/request");
 const { toJWT } = require("../../lib/session");
 
 // const wechat = require('./wechat');
@@ -49,11 +49,8 @@ router.post('/', async function (ctx, next) {
 
   // Send data to API
   try {
-    const resp = await request.post(endpoints.login)
-      .set('X-Client-Type', 'web')
-      .set('X-Client-Version', pkg.version)
-      .set('X-User-Ip', ctx.ip)
-      .set('X-User-Agent', ctx.header['user-agent'])
+    const resp = await request.post(nextApi.login)
+      .set(customHeader(ctx.ip, ctx.header["user-agent"]))
       .send(result);
 
     /**
@@ -73,6 +70,7 @@ router.post('/', async function (ctx, next) {
 
   } catch (e) {
     if (!isAPIError(e)) {
+      debug("%O", e);
       ctx.state.errors = {
         server: e.message
       };
