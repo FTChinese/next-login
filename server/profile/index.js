@@ -3,13 +3,11 @@ const Router = require('koa-router');
 const debug = require("debug")('user:profile');
 const render = require('../util/render');
 const { nextApi } = require("../../lib/endpoints")
-const sitemap = require("../../lib/sitemap");
 const { isAPIError, buildApiError } = require("../../lib/response");
+const { ProfileValidator } = require("../../lib/validate");
 
-
-const endpoints = require('../util/endpoints');
-const {processJoiError, processApiError, buildAlertDone} = require('../util/errors');
-
+const userName = require("./user-name");
+const mobileNumber = require("./user-name");
 
 const router = new Router();
 
@@ -18,7 +16,7 @@ router.get('/', async (ctx) => {
 
   const userId = ctx.session.user.id;
 
-  const resp = await request.get(endpoints.profile)
+  const resp = await request.get(nextApi.profile)
     .set('X-User-Id', userId);
 
   /**
@@ -42,35 +40,77 @@ router.get('/', async (ctx) => {
 });
 
 // Update profile
-router.post('/', async (ctx) => {
+router.post('/', async (ctx, next) => {
 
-  const result = schema.profile.validate(ctx.request.body.profile, {abortEarly: false});
+  const profile = ctx.request.body.profile;
+  const { result, errors } = new ProfileValidator(profile)
+    .familyName()
+    .givenName()
+    .gender()
+    .birthdate()
+    .end();
 
-  if (result.error) {
+  if (errors) {
     ctx.session.errors = processJoiError(result.error);
-    
-    return ctx.redirect(ctx.path);
-  }
 
-  /**
-   * @type {{familyName: string, givenName: string, gender: string, birthdate: string}}
-   */
-  const profile = result.value;
+    ctx.state.errors = errors;
+    ctx.state.profile = profile;
+    return await next();
+  }
 
   try {
     const userId = ctx.session.user.id;
-    await request.patch(endpoints.profile)
+    await request.patch(nextApi.profile)
       .set('X-User-Id', userId)
-      .send(profile);
+      .send(result);
 
-    ctx.session.alert = buildAlertDone('profile_saved');
+    ctx.session.alert = {
+      done: "profile_saved"
+    };
 
     return ctx.redirect(ctx.path);
   } catch (e) {
-    ctx.session.errors = processApiError(e);
 
-    return ctx.redirect(ctx.path);
+    if (!isAPIError(e)) {
+      debug("%O", e);
+      ctx.state.errors = {
+        server: e.message,
+      };
+
+      ctx.state.profile = profile;
+
+      return await next();
+    }
+
+    /**
+     * @type {{message: string, error: Object}}
+     */
+    const body = e.response.body;
+
+    ctx.session.errors = buildApiError(body);
+
+    return await next();
   }
+}, async (ctx) => {
+
+  const userId = ctx.session.user.id;
+
+  const resp = await request.get(nextApi.profile)
+    .set('X-User-Id', userId);
+
+  /**
+   * @type {Profile}
+   */
+  const profile = resp.body;
+  ctx.state.profile = Object.assign(
+    profile,
+    ctx.state.profile,
+  );
+
+  ctx.body = await render('profile/home.html', ctx.state);
 });
+
+router.use("/name", userName);
+router.use("/mobile", mobileNumber)
 
 module.exports = router.routes();

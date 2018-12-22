@@ -6,8 +6,6 @@ const render = require('../../util/render');
 const endpoints = require('../../util/endpoints');
 
 const password = require('./password');
-const name = require('./name');
-const mobile = require('./mobile');
 
 const router = new Router();
 
@@ -39,7 +37,5 @@ router.get('/', async (ctx, next) => {
 });
 
 router.use('/password', password);
-router.use('/name', name);
-router.use('/mobile', mobile);
 
 module.exports = router.routes();

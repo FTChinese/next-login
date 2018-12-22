@@ -1,0 +1,52 @@
+const Router = require('koa-router');
+const request = require('superagent');
+const path = require('path');
+const schema = require('../schema');
+
+const debug = require('../../util/debug')('user:name');
+const endpoints = require('../../util/endpoints');
+const {processJoiError, processApiError, buildAlertDone} = require('../../util/errors');
+
+const router = new Router();
+
+router.post('/', async (ctx) => {
+
+  const redirectTo = path.resolve(ctx.path, '../');
+
+  const result = schema.username.validate(ctx.request.body.account)
+
+  if (result.error) {
+    ctx.session.errors = processJoiError(result.error);
+
+    return ctx.redirect(redirectTo);
+  }
+
+  /**
+   * @type {{userName: string}}
+   */
+  const account = result.value;
+
+  try {
+
+    const userId = ctx.session.user.id;
+
+    await request.patch(endpoints.name)
+      .set('X-User-Id', userId)
+      .send(account);
+
+    ctx.session.alert = buildAlertDone('name_saved');
+
+    // Update session data
+    ctx.session.user.name = account.userName;
+    
+    return ctx.redirect(redirectTo);
+
+  } catch (e) {
+
+    ctx.session.errors = processApiError(e)
+
+    return ctx.redirect(redirectTo);
+  }
+});
+
+module.exports = router.routes();
