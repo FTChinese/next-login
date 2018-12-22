@@ -8,7 +8,7 @@ const endpoints = require('../util/endpoints');
 const { SignupValidator } = require("../lib/validate");
 
 const sitemap = require("../lib/sitemap");
-const { isAPIError, buildApiError } = require("../lib/api-response");
+const { isAPIError, buildApiError } = require("../lib/response");
 const { toJWT } = require("../lib/session");
 
 const router = new Router();
