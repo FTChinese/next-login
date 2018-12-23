@@ -1,13 +1,13 @@
 const request = require('superagent');
 const Router = require('koa-router');
 const debug = require("debug")('user:profile');
-const render = require('../util/render');
+const render = require('../../util/render');
 const { nextApi } = require("../../lib/endpoints")
 const { isAPIError, buildApiError } = require("../../lib/response");
 const { ProfileValidator } = require("../../lib/validate");
 
 const userName = require("./user-name");
-const mobileNumber = require("./moble-number");
+const mobileNumber = require("./mobile-number");
 
 const router = new Router();
 
