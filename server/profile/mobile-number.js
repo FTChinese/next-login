@@ -1,30 +1,29 @@
 const request = require('superagent');
 const Router = require('koa-router');
-const path = require('path');
-const schema = require('../schema');
+const debug = require("debug")('user:profile');
 
-const debug = require('../../util/debug')('user:profile');
-const endpoints = require('../../util/endpoints');
-const {processJoiError, processApiError, buildAlertDone} = require('../../util/errors');
+const { nextApi } = require("../../lib/endpoints")
+const sitemap = require("../../lib/sitemap");
+const { isAPIError, buildApiError } = require("../../lib/response");
+const { ProfileValidator } = require("../../lib/validate");
 
 const router = new Router();
 
 router.post('/', async (ctx) => {
 
-  const redirectTo = path.resolve(ctx.path, '../');
-
-  const result = schema.mobile.validate(ctx.request.body.account);
-
-  if (result.error) {
-    ctx.session.errors = processJoiError(result.error)
-
-    return ctx.redirect(redirectTo);
-  }
-
   /**
    * @type {{mobile: string}}
    */
-  const account = result.value;
+  const profile = ctx.request.body.profile;
+  const { result, errors } = new ProfileValidator(profile);
+
+
+  if (errors) {
+    ctx.session.errors = errors;
+    ctx.session.profile = profile;
+
+    return ctx.redirect(sitemap.profile);
+  }
 
   try {
 
@@ -32,17 +31,34 @@ router.post('/', async (ctx) => {
 
     await request.patch(endpoints.mobile)
       .set('X-User-Id', userId)
-      .send(account);
+      .send(result);
 
-    ctx.session.alert = buildAlertDone('mobile_saved');
+    ctx.session.alert = {
+      done: "mobile_saved"
+    };
 
-    return ctx.redirect(redirectTo);
+    return ctx.redirect(sitemap.profile);
     
   } catch (e) {
+    ctx.session.profile = profile;
 
-    ctx.session.errors = processApiError(e);
+    if (!isAPIError(e)) {
+      debug("%O", e);
+      ctx.session.errors = {
+        server: e.message,
+      };
 
-    return ctx.redirect(redirectTo);
+      return ctx.redirect(sitemap.profile);
+    }
+    
+    /**
+     * @type {{message: string, error: Object}}
+     */
+    const body = e.response.body;
+
+    ctx.session.errors = buildApiError(body);
+
+    return ctx.redirect(sitemap.profile);
   }
 });
 

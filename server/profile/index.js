@@ -23,7 +23,9 @@ router.get('/', async (ctx) => {
    * @type {Profile}
    */
   const profile = resp.body;
-  ctx.state.profile = profile;
+  ctx.state.profile = ctx.session.profile
+    ? Object.assign(profile, ctx.session.profile)
+    : profile;
 
   if (ctx.session.alert) {
     ctx.state.alert = ctx.session.alert;
@@ -71,13 +73,13 @@ router.post('/', async (ctx, next) => {
     return ctx.redirect(ctx.path);
   } catch (e) {
 
+    ctx.state.profile = profile;
+
     if (!isAPIError(e)) {
       debug("%O", e);
       ctx.state.errors = {
         server: e.message,
       };
-
-      ctx.state.profile = profile;
 
       return await next();
     }
@@ -87,7 +89,7 @@ router.post('/', async (ctx, next) => {
      */
     const body = e.response.body;
 
-    ctx.session.errors = buildApiError(body);
+    ctx.state.errors = buildApiError(body);
 
     return await next();
   }

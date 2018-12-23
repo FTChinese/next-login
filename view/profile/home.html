@@ -2,9 +2,9 @@
 
 {% block content %}
 
-{% if alert.done == "saved" %}
+{% if alert %}
   <div class="alert alert-success alert-dismissible fade show" role="alert">
-    <span>保存成功</span>
+    <span>{{ alert }}</span>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
@@ -13,7 +13,7 @@
 
 <section class="pb-3 mb-3 border-bottom">
   <h5>用户名</h5>
-  <form action="{{sitemap.accountName}}" method="post">
+  <form action="{{sitemap.userName}}" method="post">
 
     <div class="form-group">
       <input class="form-control"
@@ -35,7 +35,7 @@
 
 <section class="pb-3 mb-3 border-bottom">
   <h5>手机号码</h5>
-  <form action="{{sitemap.accountMobile}}" method="post">
+  <form action="{{sitemap.mobile}}" method="post">
 
     <div class="form-group">
       <input class="form-control"
