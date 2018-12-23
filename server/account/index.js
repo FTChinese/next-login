@@ -1,11 +1,12 @@
-const Router = require('koa-router');
 const request = require('superagent');
-
-const debug = require('../../util/debug')('user:account');
+const Router = require('koa-router');
+const debug = require("debug")('user:account');
 const render = require('../../util/render');
-const endpoints = require('../../util/endpoints');
+const { nextApi } = require("../../lib/endpoints")
+const { isAPIError, buildApiError } = require("../../lib/response");
 
-const password = require('./password');
+const passwordRouter = require('./password');
+const emailRouter = require("./email")
 
 const router = new Router();
 
@@ -15,11 +16,14 @@ router.get('/', async (ctx, next) => {
   const userId = ctx.session.user.id;
 
   const resp = await request
-    .get(endpoints.profile)
+    .get(nextApi.account)
     .set('X-User-Id', userId);
 
-  const profile = resp.body;
-  ctx.state.account = profile;
+    /**
+     * @type {{id: string, userName: string, email: string}}
+     */
+  const account = resp.body;
+  ctx.state.account = account;
 
   // Show redirect session data
   if (ctx.session.errors) {
@@ -29,13 +33,14 @@ router.get('/', async (ctx, next) => {
     ctx.state.alert = ctx.session.alert;
   }
   
-  ctx.body = await render('account.html', ctx.state);
+  ctx.body = await render("account.html", ctx.state);
 
   // Remove session data
   delete ctx.session.errors;
   delete ctx.session.alert;
 });
 
-router.use('/password', password);
+router.use("/email", emailRouter);
+router.use('/password', passwordRouter);
 
 module.exports = router.routes();
