@@ -1,8 +1,9 @@
-const Router = require('koa-router');
 const request = require('superagent');
-const endpoints = require('../util/endpoints');
-const {processApiError, buildAlertDone} = require('../util/errors');
-const debug = require('../util/debug')('user:verification');
+const Router = require('koa-router');
+const debug = require("debug")('user:verification');
+const { nextApi } = require("../lib/endpoints");
+const { buildApiError } = require("../lib/response");
+
 const render = require('../util/render');
 
 const router = new Router();
@@ -13,7 +14,7 @@ router.get('/email/:token', async (ctx) => {
 
   try {
     const resp = await request
-      .put(`${endpoints.verifyEmail}/${token}`);
+      .put(`${nextApi.verifyEmail}/${token}`);
 
     // Update verification status if session exists
     if (ctx.session.user) {
@@ -21,12 +22,29 @@ router.get('/email/:token', async (ctx) => {
       ctx.session.user.vrf = true;
     }
 
-    ctx.state.alert = buildAlertDone('email_verified');
+    ctx.state.alert = {
+      done: "email_verified"
+    };
 
     ctx.body = await render('email-verified.html', ctx.state);
 
   } catch (e) {
-    ctx.state.errors = processApiError(e, 'email_token');
+    /**
+     * @type {{message: string, error: Object}}
+     */
+    const body = e.response.body;
+
+    switch (e.status) {
+      case 404:
+        ctx.state.errors = {
+
+        }
+        break;
+      default:
+        ctx.state.errors = buildApiError(body);
+        break;
+    }
+
     ctx.body = await render('email-verified');
   }
 });
