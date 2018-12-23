@@ -31,9 +31,9 @@
 
   <section class="pb-3 mb-3 border-bottom">
     <h5>登录邮箱</h5>
-    <form method="post">
+    <form method="post" action="{{sitemap.email}}">
       <div>
-        <input type="hidden" type="email" name="account[oldEmail]" value="{{account.oldEmail}}">
+        <input type="hidden" type="email" name="account[currentEmail]" value="{{account.currentEmail}}">
       </div>
       <div class="form-group">
         <input class="form-control"
@@ -55,7 +55,7 @@
   <section class="pb-3 mb-3">
     <h5>更改密码</h5>
 
-    <form method="post" action="{{sitemap.accountPassword}}">
+    <form method="post" action="{{sitemap.password}}">
       <div class="form-group">
         <label for="oldPassword">当前密码</label>
         <input type="password"
@@ -65,7 +65,7 @@
           required>
     
         {% if errors.oldPassword %}
-          <div class="form-errortext">{{errors.oldPassword.message}}</div>
+          <div class="form-errortext">{{errors.oldPassword}}</div>
         {% endif %}
       </div>
     
