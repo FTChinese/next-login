@@ -1,4 +1,4 @@
-const debug = require('../util/debug')('user:check-login');
+const debug = require("debug")('user:check-login');
 const { toAccount } = require("../lib/session");
 const sitemap = require("../lib/sitemap");
 
