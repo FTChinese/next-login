@@ -7,7 +7,7 @@ const { isAPIError, buildApiError } = require("../../lib/response");
 const { ProfileValidator } = require("../../lib/validate");
 
 const userName = require("./user-name");
-const mobileNumber = require("./user-name");
+const mobileNumber = require("./moble-number");
 
 const router = new Router();
 
