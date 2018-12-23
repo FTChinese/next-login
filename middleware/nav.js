@@ -6,10 +6,6 @@ const navItems = [
     text: "我的资料"
   },
   {
-    href: sitemap.email,
-    text: "邮箱"
-  },
-  {
     href: sitemap.account,
     text: "账号安全"
   },
