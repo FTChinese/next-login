@@ -12,24 +12,20 @@ const router = new Router();
 // Submit new email
 router.post('/', async (ctx) => {
 
-  const result = schema.changeEmail.validate(ctx.request.body.account);
-  if (result.error) {
-    const errors = processJoiError(result.error);
+  /**
+   * @type {{currentEmail: string, email: string}}
+   */
+  const account = ctx.request.body.account;
 
+  const { result, errors } = new AccountValidtor(account)
+    .validateEmail()
+    .validateEmailUpdate();
+
+  if (errors) {
     ctx.session.errors = errors;
+    ctx.session.account = account;
 
     return ctx.redirect(sitemap.account);
-  }
-
-  /**
-   * @type {{oldEmail: string, email: string}}
-   */
-  const account = result.value;
-
-  // If email is not changed, do nothing.
-  if (account.oldEmail === account.email) {
-    debug.info('Email is not altered.');
-    return ctx.redirect(ctx.path);
   }
 
   try {
@@ -37,21 +33,32 @@ router.post('/', async (ctx) => {
 
     const resp = await request.patch(nextApi.email)
       .set('X-User-Id', userId)
-      .send({email: account.email});
-
-    // If resp.status === 204, the email is not altered
-    // If email is actually changed, updated user data will be sent back.
-    if (200 === resp.status) {
-      ctx.session.alert = {
-        done: "email",
-      };
-    }
+      .send({email: result.email});
     
+    ctx.session.alert = {
+      done: "email",
+    };
+
     return ctx.redirect(sitemap.account);
   } catch (e) {
 
-    const errors = processApiError(e);
-    ctx.session.errors = errors;
+    if (!isAPIError(e)) {
+      debug("%O", e);
+      ctx.session.errors = {
+        server: e.message
+      };
+
+      ctx.session.account = account;
+
+      return ctx.redirect(sitemap.account);
+    }
+    
+    /**
+     * @type {{message: string, error: Object}}
+     */
+    const body = e.response.body;
+
+    ctx.session.errors = buildApiError(body);
 
     return ctx.redirect(sitemap.account);
   }

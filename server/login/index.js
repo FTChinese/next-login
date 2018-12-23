@@ -3,7 +3,7 @@ const Router = require('koa-router');
 const debug = require('debug')('user:login');
 
 const render = require('../../util/render');
-const { nextApi } = require("../../lib/endpoints")
+const { nextApi } = require("../../lib/endpoints");
 const { LoginValidator } = require("../../lib/validate")
 const sitemap = require("../../lib/sitemap");
 const { isAPIError, buildApiError } = require("../../lib/response");

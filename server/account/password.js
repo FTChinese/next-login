@@ -1,35 +1,27 @@
-const Router = require('koa-router');
 const request = require('superagent');
-const path = require('path');
+const Router = require('koa-router');
+const debug = require("debug")('user:password');
 
-const schema = require('../schema');
-
-const debug = require('../../util/debug')('user:password');
-const endpoints = require('../../util/endpoints');
-const {processJoiError, processApiError, buildAlertDone, buildInvalidField} = require('../../util/errors');
+const { nextApi } = require("../../lib/endpoints")
+const sitemap = require("../../lib/sitemap");
+const { isAPIError, buildApiError } = require("../../lib/response");
+const { AccountValidtor } = require("../../lib/validate");
 
 const router = new Router();
 
 // Submit new password
 router.post('/', async (ctx, next) => {
-  const redirectTo = path.resolve(ctx.path, '../');
-  // Validate
-  const result = schema.changePassword.validate(ctx.request.body);
-  if (result.error) {
-    ctx.session.errors = processJoiError(result.error);
+  const account = ctx.body.request;
 
-    return ctx.redirect(redirectTo);
-  }
+  const { result, errors } = new AccountValidtor(account)
+    .validatePassword()
+    .confirmPassword()
+    .validateEmailUpdate();
 
-  /**
-   * @type {{oldPassword: string, password: string, confirmPassword: string}}
-   */
-  const pass = result.value;
-  // Ensure new password confirmed
-  if (pass.password !== pass.confirmPassword) {
-    ctx.state.errors = buildInvalidField('confirmPassword', 'mismatched');
+  if (errors) {
+    ctx.session.errors = errors;
 
-    return await next();
+    return ctx.redirect(sitemap.account);
   }
 
   try {
@@ -37,22 +29,35 @@ router.post('/', async (ctx, next) => {
 
     await request.patch(endpoints.password)
       .set('X-User-Id', userId)
-      .send({
-        "old": pass.oldPassword,
-        "new": pass.password
-      });
+      .send(result);
 
-    ctx.session.alert = buildAlertDone('password_saved');
+    ctx.session.alert = {
+      done: "password_saved"
+    };
 
-    return ctx.redirect(redirectTo);
+    return ctx.redirect(sitemap.account);
 
   } catch (e) {
 
-    ctx.session.errors = processApiError(e, 'oldPassword');
+    if (!isAPIError(e)) {
+      debug("%O", e);
+      ctx.session.errors = {
+        server: e.message
+      };
 
-    debug.info('Session data: %O', ctx.session);;
+      ctx.session.account = account;
 
-    return ctx.redirect(redirectTo);
+      return ctx.redirect(sitemap.account);
+    }
+    
+    /**
+     * @type {{message: string, error: Object}}
+     */
+    const body = e.response.body;
+
+    ctx.session.errors = buildApiError(body);
+
+    return ctx.redirect(sitemap.account);
   }
 });
 
