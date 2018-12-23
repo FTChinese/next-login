@@ -16,16 +16,19 @@ const handleErrors = require('./middleware/handle-errors');
 const setHeader = require('./middleware/set-header');
 
 const signup = require('./server/signup');
-const plan = require('./server/plan');
+// const plan = require('./server/plan');
 const login = require('./server/login');
 const logout = require('./server/logout');
 const verify = require('./server/verification');
 const passwordReset = require('./server/password-reset');
+
 const profile = require('./server/profile');
-const email = require('./server/email');
 const account = require('./server/account');
-const membership = require('./server/membership');
+
+// const membership = require('./server/membership');
 const address = require('./server/address');
+const notification = require("./server/notification");
+
 const version = require('./server/version');
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -69,14 +72,14 @@ app.use(bodyParser());
 router.use('/login', checkSession({redirect: false}), login);
 router.use('/logout', logout);
 router.use('/signup', signup);
-router.use('/plan', plan);
+// router.use('/plan', plan);
 router.use('/verify', checkSession({redirect: false}), verify);
 router.use('/password-reset', checkSession({redirect: false}), passwordReset);
 router.use('/profile', checkSession(), profile);
-router.use('/email', checkSession(), email);
 router.use('/account', checkSession(), account);
-router.use('/membership', checkSession(), membership);
+// router.use('/membership', checkSession(), membership);
 router.use('/address', checkSession(), address);
+router.use('/notification', checkSession(), notification);
 router.use('/__version', version);
 
 app.use(router.routes());
