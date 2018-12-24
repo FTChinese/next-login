@@ -2,10 +2,9 @@ const request = require('superagent');
 const Router = require('koa-router');
 const debug = require("debug")('user:account');
 const render = require('../../util/render');
+const sitemap = require("../../lib/sitemap");
 const { nextApi } = require("../../lib/endpoints")
 const { isAPIError, buildApiError } = require("../../lib/response");
-
-const newsletter = require("./newsletter");
 
 const router = new Router();
 
@@ -14,16 +13,11 @@ router.get('/', async (ctx, next) => {
 
   const userId = ctx.session.user.id;
 
-  const resp = await request.get(endpoints.profile)
+  const resp = await request.get(nextApi.profile)
     .set('X-User-Id', userId);
 
   const profile = resp.body;
 
-  // Set email
-  ctx.state.account = {
-    email: profile.email,
-    oldEmail: profile.email
-  };
   // Set newsletter
   ctx.state.letter = profile.newsletter;
 
@@ -42,6 +36,36 @@ router.get('/', async (ctx, next) => {
   delete ctx.session.alert;
 });
 
-router.use("/newsletter", newsletter);
+// Change newsletter setting
+router.post('/newsletter', async (ctx) => {
+
+  const result = schema.newsletter.validate(ctx.request.body.letter);
+
+  if (result.error) {
+    ctx.session.errors = processJoiError(result.error);
+    return ctx.redirect(sitemap.notification);
+  }
+
+  const newsletter = result.value;
+  debug.info('Updating newsletter: %O', newsletter);
+
+  try {
+
+    const userId = ctx.session.user.id;
+
+    await request.patch(endpoints.newsletter)
+      .set('X-User-Id', userId)
+      .send(newsletter);
+    
+    ctx.session.alert = buildAlertDone('newsletter');
+
+    return ctx.redirect(sitemap.notification);
+
+  } catch (e) {
+    ctx.session.errors = processApiError(e)
+
+    return ctx.redirect(redirectTo);
+  }
+});
 
 module.exports = router.routes();
