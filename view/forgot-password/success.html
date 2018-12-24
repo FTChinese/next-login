@@ -1,0 +1,18 @@
+{% extends "layouts/center.html" %}
+
+{% block content %}
+  {# This template serves two purposes: 
+    1. Tell user password reset email is sent;
+    2. Tell user password is reset.
+  #}
+<div class="mt-4">
+  {% if alert.done == "letter_sent" %}
+    <div>请检查您的邮件，点击邮件中的“重置密码”按钮修改您的密码。如果几分钟内没有看到邮件，请检查是否被放进了垃圾邮件列表。</div>
+    <a class="btn btn-primary btn-block" href="{{sitemap.login}}">返回</a>
+  {% endif %}
+
+  {% if alert.done == "password_reset" %}
+    <div class="text-center">密码已更新，请 <a href="{{sitemap.login}}">登录</a></div>
+  {% endif %}
+</div>
+{% endblock %}

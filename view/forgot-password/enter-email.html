@@ -1,0 +1,38 @@
+{% extends "layouts/center.html" %}
+
+{% block content %}
+<div class="mt-4">
+  <h4 class="text-center">找回密码</h4>
+
+  {% if errors.token %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <span>{{errors.token}}</span>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+  {% endif %}
+
+  <form method="post">
+    <div class="form-group">
+      <label for="email">请输入您的电子邮箱，我们会向该邮箱发送邮件，帮您重置密码</label>
+      <input class="form-control"
+        id="email"
+        type="email"
+        name="email"
+        value="{{email}}"
+        placeholder="登录FT中文网所用的邮箱"
+        required>
+
+      {% if errors.email %}
+        <div class="form-errortext">{{errors.email}}</div>
+      {% endif %}
+
+    </div>
+
+    <button class="btn btn-block btn-primary" type="submit">发送邮件</button>
+
+  </form>      
+</div>
+  
+{% endblock %}
