@@ -10,7 +10,7 @@ const navItems = [
     text: "账号安全"
   },
   {
-    href: sitemap.membership,
+    href: sitemap.subs,
     text: "会员"
   },
   {
