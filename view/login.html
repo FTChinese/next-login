@@ -1,7 +1,7 @@
 {% extends "layouts/center.html" %}
 
 {% block content %}
-
+<div class="mt-4">
   <h4 class="text-center">登录FT中文网</h4>
 
   {% if errors.credentials %}
@@ -56,14 +56,14 @@
     </div>
 
     <button class="btn btn-block btn-primary" type="submit">登录</button>
-
   </form>
   <p class="text-center pt-3">还没有FT中文网账号?<a href="{{sitemap.signup}}">创建</a></p>
-
-  <div class="mt-4">
-    <h5>其他登录方式</h5>
-    <ul>
-      <li><a href="/login/wechat">微信</a></li>
-    </ul>
-  </div>
+</div>
+  
+<div class="mt-4">
+  <h4>其他登录方式</h4>
+  <ul>
+    <li><a href="/login/wechat">微信</a></li>
+  </ul>
+</div>
 {% endblock %}
