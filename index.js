@@ -1,4 +1,4 @@
-const debug = require('./util/debug')('user:index');
+const debug = require("debug")('user:index');
 // const log = require('./util/logger');
 const path = require('path');
 const Koa = require('koa');
@@ -84,7 +84,7 @@ router.use('/__version', version);
 
 app.use(router.routes());
 
-debug.info(router.stack.map(layer => layer.path));
+debug(router.stack.map(layer => layer.path));
 
 boot(app)
   .catch(err => {
