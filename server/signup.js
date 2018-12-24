@@ -4,11 +4,11 @@ const Router = require('koa-router');
 const debug = require("debug")('user:signup');
 
 const render = require('../util/render');
-const endpoints = require('../util/endpoints');
 const { SignupValidator } = require("../lib/validate");
 
 const sitemap = require("../lib/sitemap");
 const { isAPIError, buildApiError } = require("../lib/response");
+const { customHeader } = require("../lib/request");
 const { toJWT } = require("../lib/session");
 
 const router = new Router();
