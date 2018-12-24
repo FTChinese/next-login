@@ -20,7 +20,7 @@ const signup = require('./server/signup');
 const login = require('./server/login');
 const logout = require('./server/logout');
 const verify = require('./server/verification');
-const passwordReset = require('./server/password-reset');
+const forgotPassword = require('./server/forgot-password');
 
 const profile = require('./server/profile');
 const account = require('./server/account');
@@ -74,7 +74,7 @@ router.use('/logout', logout);
 router.use('/signup', signup);
 // router.use('/plan', plan);
 router.use('/verify', checkSession({redirect: false}), verify);
-router.use('/password-reset', checkSession({redirect: false}), passwordReset);
+router.use('/password-reset', checkSession({redirect: false}), forgotPassword);
 router.use('/profile', checkSession(), profile);
 router.use('/account', checkSession(), account);
 router.use('/subscription', checkSession(), subscription);
