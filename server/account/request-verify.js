@@ -2,32 +2,32 @@ const request = require('superagent');
 const Router = require('koa-router');
 const debug = require('debug')('user:email');
 
-const { nextApi } = require("../../lib/endpoints")
+const sitemap = require("../../lib/sitemap");
+const { nextApi } = require("../../lib/endpoints");
 const { isAPIError, buildApiError } = require("../../lib/response");
+const { customHeader } = require("../../lib/request");
 
 const router = new Router();
 
 // Resend verfication letter
-router.post('/request-verification', async (ctx) => {
-  debug.info("Request verification");
-
-  const redirectTo = path.resolve(ctx.path, '../');
+router.post("/", async (ctx) => {
 
   try {
     const userId = ctx.session.user.id;
 
-    await request.post(endpoints.requestVerification)
+    await request.post(nextApi.requestVerification)
+      .set(customHeader(ctx.ip, ctx.header["user-agent"]))
       .set('X-User-Id', userId);
 
-    ctx.session.alert = buildAlertDone('letter_sent');
+    ctx.session.alert = {
+      done: "letter_sent"
+    };
 
-    debug.info("Redirect to %s", redirectTo);
-
-    return ctx.redirect(redirectTo);
+    return ctx.redirect(sitemap.account);
   } catch (e) {
-    ctx.session.errors = processApiError(e);
     
-    return ctx.redirect(redirectTo);
+    
+    return ctx.redirect(sitemap.account);
   }
 });
 
