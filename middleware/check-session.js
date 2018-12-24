@@ -16,10 +16,10 @@ function checkSession({redirect=true}={}) {
     // Do nothing for `/favicon.ico`
     if (ctx.path == '/favicon.ico') return;
 
-    debug.info('Redirect: %s', redirect);
+    debug('Redirect: %s', redirect);
 
     if (isLoggedIn(ctx)) {
-      debug.info('Session data: %O', ctx.session);
+      debug('Session data: %O', ctx.session);
 
       /**
        * @type {UserSession}
