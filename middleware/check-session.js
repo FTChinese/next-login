@@ -26,7 +26,7 @@ function checkSession({redirect=true}={}) {
        */
       const user = ctx.session.user;
 
-      ctx.state.userAccount = toAccount(user);
+      ctx.state.user = toAccount(user);
 
       return await next();
     }
