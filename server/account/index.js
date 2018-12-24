@@ -5,7 +5,8 @@ const render = require('../../util/render');
 const { nextApi } = require("../../lib/endpoints")
 
 const passwordRouter = require('./password');
-const emailRouter = require("./email")
+const emailRouter = require("./email");
+const requestVerification = require("./request-verify");
 
 const router = new Router();
 
@@ -44,5 +45,6 @@ router.get('/', async (ctx, next) => {
 
 router.use("/email", emailRouter);
 router.use('/password', passwordRouter);
+router.use("/request-verification", requestVerification);
 
 module.exports = router.routes();
