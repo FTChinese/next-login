@@ -22,7 +22,10 @@ router.get('/', async (ctx, next) => {
      * @type {{id: string, userName: string, email: string}}
      */
   const account = resp.body;
-  ctx.state.account = account;
+  account.currentEmail = account.email;
+  ctx.state.account = ctx.session.account
+    ? Object.assign(account, ctx.session.account)
+    : account;
 
   // Show redirect session data
   if (ctx.session.errors) {
