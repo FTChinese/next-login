@@ -79,7 +79,7 @@
         {% if user and (not user.isVerified) %}
           <div class="alert alert-primary d-flex align-items-center" role="alert">
             请验证您的登录邮箱。没有收到验证邮件？
-            <form action="{{sitemap.emailRequestVerification}}" method="post">
+            <form action="{{sitemap.requestVerification}}" method="post">
               <button class="btn btn-link">重新发送</button>
             </form>
           </div>
@@ -88,7 +88,7 @@
         <div class="row">
           <div class="col-sm-3">
             <div class="collapse d-sm-block" id="sidebarNav">
-              <nav class="nav flex-column mt-4">
+              <nav class="nav flex-column">
                 {% for item in sideNav %}
                   <a class="nav-link{% if item.active %} active{% endif %}" href="{{item.href}}">{{item.text}}</a>
                 {% endfor %}
