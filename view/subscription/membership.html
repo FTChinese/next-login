@@ -2,7 +2,15 @@
 
 {% block content %}
 
-<p>会员类型：{{membership.tier}}</p>
-<p>会员期限：{{membership.startAt}} - {{membership.expireAt}}</p>
+<button class="btn-primary">续订</button>
 
+<dl>
+  <dt>会员类型</dt>
+  <dd>{{membership.tier}}</dd>
+
+  <dt>会员期限</dt>
+  <dd>{{membership.expireDate}}</dd>
+</dl>
+
+<a href="">订单历史</a>
 {% endblock %}

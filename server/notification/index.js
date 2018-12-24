@@ -30,7 +30,7 @@ router.get('/', async (ctx, next) => {
     ctx.state.alert = ctx.session.alert;
   }
   
-  ctx.body = await render('email.html', ctx.state);
+  ctx.body = await render('notification.html', ctx.state);
 
   delete ctx.session.errors;
   delete ctx.session.alert;
