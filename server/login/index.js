@@ -4,7 +4,7 @@ const debug = require('debug')('user:login');
 
 const render = require('../../util/render');
 const { nextApi } = require("../../lib/endpoints");
-const { LoginValidator } = require("../../lib/validate")
+const { AccountValidtor } = require("../../lib/validate")
 const sitemap = require("../../lib/sitemap");
 const { isAPIError, buildApiError } = require("../../lib/response");
 const { customHeader } = require("../../lib/request");
@@ -35,8 +35,10 @@ router.post('/', async function (ctx, next) {
    */
   const credentials = ctx.request.body.credentials;
 
-  const {result, errors} = new LoginValidator(credentials)
-    .validate(credentials);
+  const {result, errors} = new AccountValidtor(credentials)
+    .validateEmail(true)
+    .validatePassword(true)
+    .end();
 
   debug("Validation result: %O, error: %O", result, errors);
 

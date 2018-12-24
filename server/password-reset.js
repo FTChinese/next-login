@@ -7,7 +7,7 @@ const render = require('../util/render');
 const { nextApi } = require("../lib/endpoints");
 const { customHeader } = require("../lib/request")
 
-const { validateEmail, PasswordResetValidator } = require("../lib/validate");
+const { AccountValidtor } = require("../lib/validate");
 const sitemap = require("../lib/sitemap");
 const { isAPIError, buildApiError, errMessage } = require("../lib/response");
 
@@ -48,8 +48,13 @@ router.get('/', async (ctx) => {
 
 // Collect user entered email, check if email is valid, and send letter.
 router.post('/', async function (ctx, next) {
-  const email = ctx.request.body.email;
-  const { result, errors } = validateEmail(email);
+  /**
+   * @type {{email: string}}
+   */
+  const account = ctx.request.body;
+  const { result, errors } = new AccountValidtor(account)
+    .validateEmail()
+    .end();
 
   debug("Validation result: %O, error: %O", result, errors);
 
@@ -162,7 +167,14 @@ router.get('/:token', async (ctx) => {
 router.post('/:token', async (ctx, next) => {
   const token = ctx.params.token;
 
-  const { result, errors } = new PasswordResetValidator(ctx.request.body);
+  /**
+   * @type {{password: string, confirmPassword: string}}
+   */
+  const account = ctx.request.body;
+  const { result, errors } = new AccountValidtor(account)
+    .validatePassword()
+    .confirmPassword()
+    .end();
 
   if (error) {
     ctx.state.errors = errors
@@ -172,7 +184,7 @@ router.post('/:token', async (ctx, next) => {
 
   try {
 
-    await request.post(endpoints.resetPassword)
+    await request.post(nextApi.resetPassword)
       .send({
         token,
         password: result.password

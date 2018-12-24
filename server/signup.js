@@ -1,10 +1,9 @@
-const pkg = require('../package.json');
 const request = require('superagent');
 const Router = require('koa-router');
 const debug = require("debug")('user:signup');
 
 const render = require('../util/render');
-const { SignupValidator } = require("../lib/validate");
+const { AccountValidtor } = require("../lib/validate");
 
 const sitemap = require("../lib/sitemap");
 const { isAPIError, buildApiError } = require("../lib/response");
@@ -29,8 +28,10 @@ router.post('/', async (ctx, next) => {
    * @type {{email: string, password: string}}
    */
   const account = ctx.request.body.account;
-  const { result, errors } = new SignupValidator(account)
-    .validate();
+  const { result, errors } = new AccountValidtor(account)
+    .validateEmail()
+    .validatePassword()
+    .end();
 
   debug("Validation result: %O, error: %O", result, errors);
 
@@ -44,10 +45,7 @@ router.post('/', async (ctx, next) => {
   // Request to API
   try {
     const resp = await request.post(endpoints.signup)
-      .set('X-Client-Type', 'web')
-      .set('X-Client-Version', pkg.version)
-      .set('X-User-Ip', ctx.ip)
-      .set('X-User-Agent', ctx.header['user-agent'])
+      .set(customHeader(ctx.ip, ctx.header['user-agent']))
       .send(result);
 
     ctx.session = {
