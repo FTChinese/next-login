@@ -6,7 +6,7 @@
 
 <dl>
   <dt>会员类型</dt>
-  <dd>{{membership.tier}}</dd>
+  <dd>{{ membership.tier | localize }}/{{membership.cycle | localize }}</dd>
 
   <dt>会员期限</dt>
   <dd>{{membership.expireDate}}</dd>
