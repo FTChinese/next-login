@@ -2,30 +2,12 @@
 
 {% block content %}
 
-  {% if alert.done == "password_saved" %}
+  {% if alert %}
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-      <span>密码修改成功</span>
+      <span>{{ alert.key | showAlert }}</span>
       <button type="button" class="close" data-dismiss="alert" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
-    </div>
-  {% endif %}
-
-  {% if alert.done == "name_saved" %}
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-      <span>用户名已更新</span>
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-  {% endif %}
-
-  {% if alert.done == "mobile_saved" %}
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-      <span>手机号码已更新</span>
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
     </div>
   {% endif %}
 
