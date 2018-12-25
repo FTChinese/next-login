@@ -44,6 +44,36 @@ The following requires authentication.
 * GET `/membership`
 * GET `/address`
 
+## Error Message
+
+Error message on UI is mostly used to show validation errors, and API error response. Since API errors are not created for reading by humans, client should convert them into human readable text.
+
+To show errors on UI, pass an `errors` object to template. For validations errors, the `errors` object should contain fields named after the errored field's `name` attributes. For example, in the Singup page, the name attribute for email is `account[email]`, the error field for this input box should be `email` if this input field is invalid.
+
+In cases where an error occurred not related to any form validation, an error message should be shown on a top banner. The `errors` object passed to template should contain a `message` field describing the reason of the error. This could be used as a generic error container.
+
+Described in TypeScript:
+```ts
+interface ErrorMessage {
+    message?: string;
+    [index: string]: string;
+}
+```
+
+If a form's GET and POST urls are the same one, you can attach the `errors` field to `ctx.state` and convert API error response into an `errors` object using the `buildApiError` function.
+
+In case a form's GET and POST urls are different, you should redirect back to the GET url after POST is processed to keep URLs idempotent (See [Idempotence](https://en.wikipedia.org/wiki/Idempotence)). When redirecting, attache the `errors` object to `ctx.session`. For API error response, you can attach the response body directly to `ctx.session` and delay converting the response to `errors` object after redirected, and use the `apiErr` field instead of `errors` field:
+
+```ts
+interface Session {
+    errors?: ErrorMessage;
+    apiErr?: {
+        message: string;
+        field: string;
+        code: string;
+    }
+}
+```
 ## Wechat
 
 We use hex encoding of random bytes as state code, just for easy recognition since wechat uses base64url encoding.
