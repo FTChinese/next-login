@@ -4,7 +4,7 @@
 
 {% if alert %}
   <div class="alert alert-success alert-dismissible fade show" role="alert">
-    <span>{{ alert }}</span>
+    <span>{{ alert.key | showAlert }}</span>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
@@ -105,15 +105,15 @@
     </div>
 
     <div class="form-group">
-      <label for="birthdate">生日</label>
+      <label for="birthday">生日</label>
       <input class="form-control"
-      id="birthdate"
+      id="birthday"
       type="date"
-      name="profile[birthdate]"
-      value="{{profile.birthdate}}">
+      name="profile[birthday]"
+      value="{{profile.birthday}}">
 
-      {% if errors.birthdate %}
-        <div class="form-errortext">{{errors.birthdate}}</div>
+      {% if errors.birthday %}
+        <div class="form-errortext">{{errors.birthday}}</div>
       {% endif %}
     </div>
 
