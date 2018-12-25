@@ -3,6 +3,7 @@ const nunjucks = require('nunjucks');
 const util = require('util');
 const numeral = require("numeral");
 const { localized } = require("../lib/membership");
+const { alertMsg } = require("../lib/alert");
 
 const env = nunjucks.configure(
   [
@@ -25,6 +26,14 @@ env.addFilter("toCurrency", function(num) {
 env.addFilter("localize", function(key) {
   if (localized.hasOwnProperty(key)) {
     return localized[key];
+  }
+
+  return key;
+});
+
+env.addFilter("showAlert", function(key) {
+  if (alertMsg.hasOwnProperty(key)) {
+    return alertMsg[key];
   }
 
   return key;
