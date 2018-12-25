@@ -1,0 +1,23 @@
+{% extends "layouts/center.html" %}
+
+{% block content %}
+<div class="mt-4">
+  <h4 class="text-center">邮箱验证</h4>
+
+  {% if warning %}
+    <div class="alert alert-danger" role="alert">
+      <span>{{warning}}</span>
+    </div>
+  {% else %}
+    <div class="text-center">
+      邮箱已验证！
+      {% if user %}
+        <a href="{{sitemap.login}}">返回</a>
+      {% else %}
+        <a href="{{sitemap.account}}">登录</a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
