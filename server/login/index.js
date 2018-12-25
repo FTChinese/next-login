@@ -6,7 +6,7 @@ const render = require('../../util/render');
 const { nextApi } = require("../../lib/endpoints");
 const { AccountValidtor } = require("../../lib/validate")
 const sitemap = require("../../lib/sitemap");
-const { isAPIError, buildApiError } = require("../../lib/response");
+const { errMessage, isAPIError, buildApiError, buildErrMsg } = require("../../lib/response");
 const { customHeader } = require("../../lib/request");
 const { toJWT } = require("../../lib/session");
 
@@ -35,6 +35,9 @@ router.post('/', async function (ctx, next) {
    */
   const credentials = ctx.request.body.credentials;
 
+  /**
+   * @type {{email: string, password: string} || null} 
+   */
   const {result, errors} = new AccountValidtor(credentials)
     .validateEmail(true)
     .validatePassword(true)
@@ -71,13 +74,12 @@ router.post('/', async function (ctx, next) {
     return ctx.redirect(sitemap.profile);
 
   } catch (e) {
+    // stick form
+    ctx.state.credentials = credentials
+
     if (!isAPIError(e)) {
       debug("%O", e);
-      ctx.state.errors = {
-        server: e.message
-      };
-      // stick form
-      ctx.state.credentials = credentials;
+      ctx.state.errors = buildErrMsg(e);
 
       return await next();
     }
@@ -86,24 +88,23 @@ router.post('/', async function (ctx, next) {
      * @type {{message: string, error: Object}}
      */
     const body = e.response.body;
-
+    debug("API error response: %O", body);
+    
     // 404, 403
     switch (e.status) {
       case 404:
       case 403:
         ctx.state.errors = {
-          credentials: "邮箱或密码错误"
+          credentials: errMessage.credenails_invalid,
         };
         break;
       
-      // 400, 422, 
+      // 400: { server: "Problems parsing JSON" }
+      // 422: { email: email_missing_field || email_invalid, password: password_missing_field || password_invalid }
       default:
         ctx.state.errors = buildApiError(body);
         break;
     }
-
-    // stick form
-    ctx.state.credentials = credentials
 
     return await next();
   }

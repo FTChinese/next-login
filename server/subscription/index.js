@@ -22,9 +22,9 @@ router.get('/', async (ctx, next) => {
    */
   const account = resp.body;
 
-  const membership = new Membership(account.membership);
+  const membership = new Membership(account.membership).normalize();
 
-  ctx.state.membership = membership.localize();
+  ctx.state.membership = membership;
 
   ctx.body = await render('subscription/membership.html', ctx.state);
 });

@@ -20,9 +20,8 @@ router.get('/', async (ctx) => {
    * @type {Profile}
    */
   const profile = resp.body;
-  const address = profile.address;
 
-  ctx.state.address = address;
+  ctx.state.address = profile.address;
 
   ctx.body = await render('address.html', ctx.state);
 });
@@ -50,10 +49,10 @@ router.post('/', async (ctx, next) => {
 
     await request.patch(nextApi.address)
       .set('X-User-Id', userId)
-      .send(address);
+      .send(result);
 
     ctx.session.alert = {
-      done: "address_saved"
+      key: "saved"
     };
 
     return ctx.redirect(sitemap.address);
@@ -64,7 +63,7 @@ router.post('/', async (ctx, next) => {
     if (!isAPIError(e)) {
       debug("%O", e);
       ctx.state.errors = {
-        server: e.message
+        message: e.message
       };
 
       return await next();
@@ -79,6 +78,20 @@ router.post('/', async (ctx, next) => {
 
     return await next();
   }
+}, async(ctx, next) => {
+  const userId = ctx.session.user.id;
+
+  const resp = await request.get(nextApi.profile)
+    .set('X-User-Id', userId);
+
+  /**
+   * @type {Profile}
+   */
+  const profile = resp.body;
+
+  ctx.state.address = Object.assign(profile.address, ctx.state.address);
+
+  ctx.body = await render('address.html', ctx.state);
 });
 
 module.exports = router.routes();

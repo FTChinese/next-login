@@ -4,19 +4,23 @@ const debug = require("debug")('user:password');
 
 const { nextApi } = require("../../lib/endpoints")
 const sitemap = require("../../lib/sitemap");
-const { isAPIError, buildApiError } = require("../../lib/response");
+const { isAPIError, buildApiError, errMessage } = require("../../lib/response");
 const { AccountValidtor } = require("../../lib/validate");
 
 const router = new Router();
 
 // Submit new password
 router.post('/', async (ctx, next) => {
-  const account = ctx.body.request;
+  const account = ctx.request.body;
 
+  /**
+   * @type {{password: string, oldPassword: string} | null}
+   */
   const { result, errors } = new AccountValidtor(account)
     .validatePassword()
     .confirmPassword()
-    .validateEmailUpdate();
+    .validateOldPassword()
+    .end();
 
   if (errors) {
     ctx.session.errors = errors;
@@ -27,12 +31,15 @@ router.post('/', async (ctx, next) => {
   try {
     const userId = ctx.session.user.id;
 
-    await request.patch(endpoints.password)
+    await request.patch(nextApi.password)
       .set('X-User-Id', userId)
-      .send(result);
+      .send({
+        oldPassword: result.oldPassword,
+        newPassword: result.password,
+      });
 
     ctx.session.alert = {
-      done: "password_saved"
+      key: "password_saved"
     };
 
     return ctx.redirect(sitemap.account);
@@ -42,21 +49,30 @@ router.post('/', async (ctx, next) => {
     if (!isAPIError(e)) {
       debug("%O", e);
       ctx.session.errors = {
-        server: e.message
+        message: e.message
       };
-
-      ctx.session.account = account;
 
       return ctx.redirect(sitemap.account);
     }
     
-    /**
-     * @type {{message: string, error: Object}}
-     */
-    const body = e.response.body;
+    switch (e.status) {
+      /**
+       * 403 error could only be converted to human readable message here.
+       */
+      case 403:
+        ctx.session.errors = {
+          oldPassword: errMessage.password_forbidden,
+        };
+        break;
 
-    ctx.session.errors = buildApiError(body);
-
+      default:
+        /**
+         * @type {{message: string, error: Object}}
+         */
+        ctx.session.apiErr = e.response.body;
+        break;
+    }
+    
     return ctx.redirect(sitemap.account);
   }
 });

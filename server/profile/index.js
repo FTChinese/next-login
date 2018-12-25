@@ -27,6 +27,14 @@ router.get('/', async (ctx) => {
     ? Object.assign(profile, ctx.session.profile)
     : profile;
 
+  /**
+   * Handle messages passed by redirection.
+   * ctx.session might have those fields:
+   * alert: {key: "saved"} // indicates new value is save without error.
+   * errors: {message?: string, [index: string]: string} // validation error
+   * apiErr: {message: string, error?: {field: userName, code: "missing_field | invalid | already_exists"}} // returned by api.
+   * `errors` and `apiErr` won't present at the same time.
+   */
   if (ctx.session.alert) {
     ctx.state.alert = ctx.session.alert;
   }
@@ -35,10 +43,16 @@ router.get('/', async (ctx) => {
     ctx.state.errors = ctx.session.errors;
   }
 
+  if (ctx.session.apiErr) {
+    ctx.state.errors = buildApiError(ctx.session.apiErr);
+  }
+
   ctx.body = await render('profile/home.html', ctx.state);
 
+  delete ctx.session.profile;
   delete ctx.session.alert;
   delete ctx.session.errors;
+  delete ctx.session.apiErr;
 });
 
 // Update profile
@@ -49,14 +63,13 @@ router.post('/', async (ctx, next) => {
     .familyName()
     .givenName()
     .gender()
-    .birthdate()
+    .birthday()
     .end();
 
   if (errors) {
-    ctx.session.errors = processJoiError(result.error);
-
     ctx.state.errors = errors;
     ctx.state.profile = profile;
+
     return await next();
   }
 
@@ -67,7 +80,7 @@ router.post('/', async (ctx, next) => {
       .send(result);
 
     ctx.session.alert = {
-      done: "profile_saved"
+      key: "saved"
     };
 
     return ctx.redirect(ctx.path);
@@ -78,7 +91,7 @@ router.post('/', async (ctx, next) => {
     if (!isAPIError(e)) {
       debug("%O", e);
       ctx.state.errors = {
-        server: e.message,
+        message: e.message,
       };
 
       return await next();

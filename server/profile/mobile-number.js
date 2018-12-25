@@ -15,7 +15,9 @@ router.post('/', async (ctx) => {
    * @type {{mobile: string}}
    */
   const profile = ctx.request.body.profile;
-  const { result, errors } = new ProfileValidator(profile);
+  const { result, errors } = new ProfileValidator(profile)
+    .mobile()
+    .end();
 
 
   if (errors) {
@@ -29,12 +31,13 @@ router.post('/', async (ctx) => {
 
     const userId = ctx.session.user.id;
 
-    await request.patch(endpoints.mobile)
+    await request.patch(nextApi.mobile)
       .set('X-User-Id', userId)
       .send(result);
 
+    // Tell UI data is saved.
     ctx.session.alert = {
-      done: "mobile_saved"
+      key: "saved"
     };
 
     return ctx.redirect(sitemap.profile);
@@ -45,7 +48,7 @@ router.post('/', async (ctx) => {
     if (!isAPIError(e)) {
       debug("%O", e);
       ctx.session.errors = {
-        server: e.message,
+        message: e.message,
       };
 
       return ctx.redirect(sitemap.profile);
@@ -54,9 +57,7 @@ router.post('/', async (ctx) => {
     /**
      * @type {{message: string, error: Object}}
      */
-    const body = e.response.body;
-
-    ctx.session.errors = buildApiError(body);
+    ctx.session.apiErr = e.response.body;
 
     return ctx.redirect(sitemap.profile);
   }

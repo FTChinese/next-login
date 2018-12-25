@@ -4,8 +4,8 @@ const debug = require("debug")('user:name');
 
 const { nextApi } = require("../../lib/endpoints")
 const sitemap = require("../../lib/sitemap");
-const { isAPIError, buildApiError } = require("../../lib/response");
-const { ProfileValidator } = require("../../lib/validate");
+const { isAPIError } = require("../../lib/response");
+const { AccountValidtor } = require("../../lib/validate");
 
 const router = new Router();
 
@@ -15,8 +15,8 @@ router.post('/', async (ctx) => {
    * @type {{userName: string}}
    */
   const profile = ctx.request.body.profile;
-  const { result, errors } = new ProfileValidator(profile)
-    .userName()
+  const { result, errors } = new AccountValidtor(profile)
+    .validateName()
     .end();
   
 
@@ -36,7 +36,7 @@ router.post('/', async (ctx) => {
       .send(result);
 
     ctx.session.alert = {
-      done: "name_saved"
+      key: "saved"
     };
 
     // Update session data
@@ -50,18 +50,19 @@ router.post('/', async (ctx) => {
     if (!isAPIError(e)) {
       debug("%O", e);
       ctx.session.errors = {
-        server: e.message,
+        message: e.message,
       };
 
       return ctx.redirect(sitemap.profile);
     }
 
     /**
-     * @type {{message: string, error: Object}}
+     * 400: {server: "Problems parsing JSON"}
+     * 422: {userName: userName_missing_field}
+     * {userName: userName_invalid}
+     * {userName: userName_already_exists}
      */
-    const body = e.response.body;
-
-    ctx.session.errors = buildApiError(body);
+    ctx.session.apiErr = e.response.body;
 
     return ctx.redirect(sitemap.profile);
   }

@@ -3,10 +3,10 @@ const Router = require('koa-router');
 const debug = require("debug")('user:signup');
 
 const render = require('../util/render');
+const { nextApi } = require("../lib/endpoints");
 const { AccountValidtor } = require("../lib/validate");
-
 const sitemap = require("../lib/sitemap");
-const { isAPIError, buildApiError } = require("../lib/response");
+const { errMessage, isAPIError, buildApiError, buildErrMsg } = require("../lib/response");
 const { customHeader } = require("../lib/request");
 const { toJWT } = require("../lib/session");
 
@@ -44,7 +44,7 @@ router.post('/', async (ctx, next) => {
 
   // Request to API
   try {
-    const resp = await request.post(endpoints.signup)
+    const resp = await request.post(nextApi.signup)
       .set(customHeader(ctx.ip, ctx.header['user-agent']))
       .send(result);
 
@@ -58,12 +58,11 @@ router.post('/', async (ctx, next) => {
     return ctx.redirect(sitemap.profile);
 
   } catch (e) {
-    if (!isAPIError(e)) {
-      ctx.state.errors = {
-        server: e.message
-      };
-      ctx.state.account = account;
+    ctx.state.account = account;
 
+    if (!isAPIError(e)) {
+      ctx.state.errors = buildErrMsg(e);
+      
       return await next();
     }
 
@@ -75,16 +74,20 @@ router.post('/', async (ctx, next) => {
     switch (e.status) {
       case 429:
         ctx.state.errors = {
-          server: "您创建账号过于频繁，请稍后再试"
+          message: errMessage.too_many_requests,
         };
         break;
 
+      // 422: {email: email_missing_field}
+      // {email: email_invalid}
+      // {email: email_already_exists}
+      // {password: password_missing_field}
+      // {password: password_invalid}
+      // 400: {server: "Problems parsing JSON"}
       default:
         ctx.state.errors = buildApiError(body);
         break;
     }
-
-    ctx.state.account = account;
 
     return await next();
   }

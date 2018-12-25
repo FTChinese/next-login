@@ -8,22 +8,19 @@ const { customHeader } = require("../lib/request")
 
 const { AccountValidtor } = require("../lib/validate");
 const sitemap = require("../lib/sitemap");
-const { isAPIError, buildApiError, errMessage } = require("../lib/response");
+const { isAPIError, buildApiError, buildErrMsg, errMessage } = require("../lib/response");
 
 const router = new Router();
 
 // Ask user to enter email
 router.get('/', async (ctx) => {
-  /**
-   * @type {{done: "letter_sent" | "password_reset"}}
-   */
-  const alert = ctx.session.alert;
 
   /**
    * When password reset letter is sent, or password is reset.
+   * @type {{key: "letter_sent | password_reset"}}
    */
-  if (alert) {
-    ctx.state.alert = alert;
+  if (ctx.session.alert) {
+    ctx.state.alert = ctx.session.alert;
     ctx.body = await render('forgot-password/success.html', ctx.state);
 
     delete ctx.session.alert;
@@ -73,7 +70,7 @@ router.post('/', async function (ctx, next) {
 
     // Tell redirected page what message to show.
     ctx.session.alert = {
-      "done": "letter_sent"
+      "key": "letter_sent"
     };
 
     // Redirect to /password-reset
@@ -83,9 +80,7 @@ router.post('/', async function (ctx, next) {
     ctx.state.email = account.email;
 
     if (!isAPIError(e)) {
-      ctx.state.errors = {
-        server: e.message,
-      };
+      ctx.state.errors = buildErrMsg(e);
 
       return await next();
     }
@@ -141,9 +136,7 @@ router.get('/:token', async (ctx) => {
   } catch (e) {
     // If any error occurred, redirect back to /user/password-reset.
     if (!isAPIError(e)) {
-      ctx.session.errors = {
-        server: e.message,
-      };
+      ctx.session.errors = buildApiError;
 
       return ctx.redirect(sitemap.passwordReset);
     }
@@ -201,7 +194,7 @@ router.post('/:token', async (ctx, next) => {
       });
     
     ctx.session.alert = {
-      done: "password_reset"
+      key: "password_reset"
     };
 
     // Redirect to /password-reset to prevent user refresh.
@@ -209,9 +202,7 @@ router.post('/:token', async (ctx, next) => {
 
   } catch (e) {
     if (!isAPIError(e)) {
-      ctx.state.errors = {
-        server: e.message
-      };
+      ctx.state.errors = buildErrMsg(e);
 
       return await next();
     }

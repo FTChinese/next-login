@@ -4,7 +4,7 @@ const debug = require("debug")('user:name');
 
 const { nextApi } = require("../../lib/endpoints")
 const sitemap = require("../../lib/sitemap");
-const { isAPIError, buildApiError } = require("../../lib/response");
+const { isAPIError } = require("../../lib/response");
 const { AccountValidtor } = require("../../lib/validate");
 
 const router = new Router();
@@ -17,13 +17,19 @@ router.post('/', async (ctx) => {
    */
   const account = ctx.request.body.account;
 
+  /**
+   * @type {{email: string} | null}
+   */
   const { result, errors } = new AccountValidtor(account)
     .validateEmail()
-    .validateEmailUpdate();
+    .validateEmailUpdate()
+    .end();
 
   if (errors) {
     ctx.session.errors = errors;
-    ctx.session.account = account;
+    ctx.session.account = {
+      email: account.email,
+    };
 
     return ctx.redirect(sitemap.account);
   }
@@ -31,24 +37,26 @@ router.post('/', async (ctx) => {
   try {
     const userId = ctx.session.user.id;
 
-    const resp = await request.patch(nextApi.email)
+    await request.patch(nextApi.email)
       .set('X-User-Id', userId)
-      .send({email: result.email});
+      .send(result);
     
     ctx.session.alert = {
-      done: "email",
+      key: "email_changed",
     };
 
     return ctx.redirect(sitemap.account);
   } catch (e) {
 
+    ctx.session.account = {
+      email: account.email,
+    };
+
     if (!isAPIError(e)) {
       debug("%O", e);
       ctx.session.errors = {
-        server: e.message
+        message: e.message,
       };
-
-      ctx.session.account = account;
 
       return ctx.redirect(sitemap.account);
     }
@@ -56,9 +64,7 @@ router.post('/', async (ctx) => {
     /**
      * @type {{message: string, error: Object}}
      */
-    const body = e.response.body;
-
-    ctx.session.errors = buildApiError(body);
+    ctx.session.apiErr = e.response.body;
 
     return ctx.redirect(sitemap.account);
   }
