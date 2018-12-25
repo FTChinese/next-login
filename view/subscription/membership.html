@@ -1,16 +1,24 @@
 {% extends "layouts/base.html" %} 
 
 {% block content %}
+  {% if membership %}
+    <div class="pb-3 mb-3 mt-3 border-bottom text-right">
+      <a href="{{ sitemap.renewal }}" class="btn btn-primary">续订</a>
+    </div>
 
-<button class="btn-primary">续订</button>
+    <dl>
+      <dt>会员类型</dt>
+      <dd>{{ membership.tier | localize }}/{{membership.cycle | localize }}</dd>
 
-<dl>
-  <dt>会员类型</dt>
-  <dd>{{ membership.tier | localize }}/{{membership.cycle | localize }}</dd>
+      <dt>会员期限</dt>
+      <dd>{{membership.expireDate}}</dd>
+    </dl>
 
-  <dt>会员期限</dt>
-  <dd>{{membership.expireDate}}</dd>
-</dl>
+    <div class="text-right">
+      <a href="">订单历史</a>
+    </div>
+  {% else %}
+    <h4>订阅FT中文网会员</h4>
+  {% endif %}
 
-<a href="">订单历史</a>
 {% endblock %}
