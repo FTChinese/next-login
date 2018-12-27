@@ -4,7 +4,7 @@ const debug = require('debug')('user:login');
 
 const render = require('../../util/render');
 const { nextApi } = require("../../lib/endpoints");
-const { AccountValidtor } = require("../../lib/validate")
+const { AccountValidtor } = require("../../lib/validate");
 const sitemap = require("../../lib/sitemap");
 const { errMessage, isAPIError, buildApiError, buildErrMsg } = require("../../lib/response");
 const { customHeader } = require("../../lib/request");
