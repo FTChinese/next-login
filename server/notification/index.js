@@ -13,13 +13,16 @@ router.get('/', async (ctx, next) => {
 
   const userId = ctx.session.user.id;
 
-  const resp = await request.get(nextApi.profile)
+  const resp = await request.get(nextApi.newsletter)
     .set('X-User-Id', userId);
 
-  const profile = resp.body;
+  /**
+   * @type {{todayFocus: boolean, weeklyChoice: boolean, afternoonExpress: boolean}}
+   */
+  const newsletter = resp.body;
 
   // Set newsletter
-  ctx.state.letter = profile.newsletter;
+  ctx.state.letter = newsletter;
 
   // Check redirect message
   if (ctx.session.errors) {
