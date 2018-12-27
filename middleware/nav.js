@@ -25,10 +25,10 @@ const navItems = [
     href: sitemap.starred,
     text: "收藏的文章"
   },
-  {
-    href: sitemap.preference,
-    text: "我的偏好"
-  }
+  // {
+  //   href: sitemap.preference,
+  //   text: "我的偏好"
+  // }
 ];
 
 module.exports = function() {
