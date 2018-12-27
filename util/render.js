@@ -1,9 +1,11 @@
 const path = require('path');
+const debug = require("debug")("user:render");
 const nunjucks = require('nunjucks');
 const util = require('util');
 const numeral = require("numeral");
 const { localized } = require("../lib/membership");
 const { alertMsg } = require("../lib/alert");
+const { cstFormatter } = require("../lib/date-time")
 
 const env = nunjucks.configure(
   [
@@ -37,6 +39,16 @@ env.addFilter("showAlert", function(key) {
   }
 
   return key;
+});
+
+env.addFilter("toCST", function(str) {
+  try {
+    return cstFormatter.fromISO8601(str);
+  } catch (e) {
+    debug(e);
+    return str
+  }
+  
 });
 
 module.exports = util.promisify(nunjucks.render);
