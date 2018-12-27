@@ -1,0 +1,32 @@
+{% extends "layouts/base.html" %} 
+
+{% block content %}
+<div>
+  {% for article in articles %}
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title"><a href="http://www.ftchinese.com/story/{{article.id}}" target="__blank">{{article.title}}</a></h5>
+        <p>{{article.standfirst}}</p>
+        <div>
+            更新于 <time datetime="{{article.updatedAt}}">{{ article.updatedAt | toCST }}</time>
+        </div>
+      </div>
+      <div class="card-footer d-flex justify-content-between">
+         <span>收藏于 <time datetime="{{article.starredAt}}">{{ article.starredAt | toCST }}</time></span>
+         <form action="{{sitemap.starred}}/{{article.id}}" method="post">
+           <button class="btn btn-outline-primary py-0">删除</button>
+         </form>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="pagination">
+  {% if page.prev !== 0 %}
+    <a href="?page={{page.prev}}">上一页</a>
+  {% endif %}
+  {% if page.next !== 0 %}
+    <a href="?page={{page.next}}">下一页</a>
+  {% endif %}
+</div>
+{% endblock %}
