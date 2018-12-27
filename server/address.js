@@ -13,15 +13,15 @@ const router = new Router();
 router.get('/', async (ctx) => {
   const userId = ctx.session.user.id;
 
-  const resp = await request.get(nextApi.profile)
+  const resp = await request.get(nextApi.address)
     .set('X-User-Id', userId);
 
   /**
-   * @type {Profile}
+   * @type {{country: string, province: string, city: string, district: string, street: string, postcode: string}}
    */
-  const profile = resp.body;
+  const address = resp.body;
 
-  ctx.state.address = profile.address;
+  ctx.state.address = address;
 
   ctx.body = await render('address.html', ctx.state);
 });
