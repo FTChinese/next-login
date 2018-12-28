@@ -4,7 +4,7 @@ const debug = require("debug")('user:name');
 
 const { nextApi } = require("../../lib/endpoints")
 const sitemap = require("../../lib/sitemap");
-const { isAPIError } = require("../../lib/response");
+const { isAPIError, buildErrMsg } = require("../../lib/response");
 const { AccountValidtor } = require("../../lib/validate");
 
 const router = new Router();
@@ -49,9 +49,7 @@ router.post('/', async (ctx) => {
 
     if (!isAPIError(e)) {
       debug("%O", e);
-      ctx.session.errors = {
-        message: e.message,
-      };
+      ctx.session.errors = buildErrMsg(e);
 
       return ctx.redirect(sitemap.profile);
     }

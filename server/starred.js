@@ -5,7 +5,7 @@ const debug = require('debug')('user:starred');
 const render = require('../util/render');
 const { nextApi } = require("../lib/endpoints");
 const sitemap = require("../lib/sitemap");
-const { errMessage, isAPIError, buildApiError, buildErrMsg } = require("../lib/response");
+const { isAPIError, buildApiError, buildErrMsg } = require("../lib/response");
 
 const router = new Router();
 
@@ -37,6 +37,31 @@ router.get("/", async (ctx, next) => {
   };
 
   ctx.body = await render("starred.html", ctx.state);
+});
+
+router.post("/:id/delete", async (ctx, next) => {
+  const id = ctx.params.id;
+  debug("Delete article %s", id);
+
+  try {
+    const userId = ctx.session.user.id;
+    await request.delete(`${nextApi.starred}/${id}`)
+      .set("X-User-Id", userId);
+    
+    return ctx.redirect(sitemap.starred);
+  } catch (e) {
+    if (!isAPIError(e)) {
+      /**
+       * @type {{message: string}}
+       */
+      ctx.session.errors = buildErrMsg(e);
+
+      return ctx.redirect(sitemap.starred);
+    }
+
+    ctx.session.errors = buildApiError(e.response.body);
+    ctx.redirect(sitemap.starred);
+  }
 });
 
 module.exports = router.routes();

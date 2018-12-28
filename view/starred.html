@@ -13,7 +13,7 @@
       </div>
       <div class="card-footer d-flex justify-content-between">
          <span>收藏于 <time datetime="{{article.starredAt}}">{{ article.starredAt | toCST }}</time></span>
-         <form action="{{sitemap.starred}}/{{article.id}}" method="post">
+         <form action="{{sitemap.starred}}/{{article.id}}/delete" method="post">
            <button class="btn btn-outline-primary py-0">删除</button>
          </form>
       </div>
