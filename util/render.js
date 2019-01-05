@@ -5,7 +5,7 @@ const util = require('util');
 const numeral = require("numeral");
 const { localized } = require("../lib/membership");
 const { alertMsg } = require("../lib/alert");
-const { cstFormatter } = require("../lib/date-time")
+const { DateTime } = require("luxon");
 
 const env = nunjucks.configure(
   [
@@ -43,12 +43,11 @@ env.addFilter("showAlert", function(key) {
 
 env.addFilter("toCST", function(str) {
   try {
-    return cstFormatter.fromISO8601(str);
+    return DateTime.fromISO(str).setZone("Asia/Shanghai").toFormat("yyyy年LL月dd日 HH:mm:ss")
   } catch (e) {
     debug(e);
     return str
   }
-  
 });
 
 module.exports = util.promisify(nunjucks.render);
