@@ -3,7 +3,11 @@ body {
     background-color: #FFF1E5; }
 .page-content {
   min-height: 80vh;
-}  
+} 
+table caption {
+  caption-side: top;
+  text-align: right;
+} 
 a, .text-teal {
     color: #0d7680
 }

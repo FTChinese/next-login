@@ -7,6 +7,7 @@ const { nextApi } = require("../../lib/endpoints");
 const sitemap = require("../../lib/sitemap");
 const { isAPIError, buildApiError } = require("../../lib/response");
 const { Membership } = require("../../lib/membership");
+const { setUserId, setUserOrUnionId } = require("../../lib/request");
 
 const router = new Router();
 
@@ -15,7 +16,7 @@ router.get('/', async (ctx, next) => {
 
   const resp = await request
     .get(nextApi.account)
-    .set('X-User-Id', userId)
+    .set(setUserId(userId));
 
   /**
    * @type {{membership: Object}}
@@ -29,5 +30,19 @@ router.get('/', async (ctx, next) => {
   ctx.body = await render('subscription/membership.html', ctx.state);
 });
 
+router.get("/orders", async (ctx, enxt) => {
+  const userId = ctx.session.user.id;
+  const unionId = ctx.session.user.unionId;
+
+  const resp = await request.get(nextApi.order)
+    .set(setUserOrUnionId(userId, unionId))
+  
+  const orders = resp.body;
+
+  ctx.state.orders = orders;
+
+  // ctx.body = orders;
+  ctx.body = await render("subscription/orders.html", ctx.state)
+});
 
 module.exports = router.routes();

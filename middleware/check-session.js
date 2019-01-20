@@ -1,5 +1,5 @@
 const debug = require("debug")('user:check-login');
-const { toAccount } = require("../lib/session");
+
 const sitemap = require("../lib/sitemap");
 
 /**
@@ -24,9 +24,7 @@ function checkSession({redirect=true}={}) {
       /**
        * @type {UserSession}
        */
-      const user = ctx.session.user;
-
-      ctx.state.user = toAccount(user);
+      ctx.state.user = ctx.session.user;
 
       return await next();
     }

@@ -6,6 +6,7 @@ const { nextApi } = require("../lib/endpoints");
 const { AddressValidator } = require("../lib/validate");
 const sitemap = require("../lib/sitemap");
 const { isAPIError, buildApiError } = require("../lib/response");
+const { setUserId } = require("../lib/request")
 
 const router = new Router();
 
@@ -14,7 +15,7 @@ router.get('/', async (ctx) => {
   const userId = ctx.session.user.id;
 
   const resp = await request.get(nextApi.address)
-    .set('X-User-Id', userId);
+    .set(setUserId(userId));
 
   /**
    * @type {{country: string, province: string, city: string, district: string, street: string, postcode: string}}

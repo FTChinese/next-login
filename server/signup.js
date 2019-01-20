@@ -7,8 +7,7 @@ const { nextApi } = require("../lib/endpoints");
 const { AccountValidtor } = require("../lib/validate");
 const sitemap = require("../lib/sitemap");
 const { errMessage, isAPIError, buildApiError, buildErrMsg } = require("../lib/response");
-const { customHeader } = require("../lib/request");
-const { toJWT } = require("../lib/session");
+const { customHeader, setUserId } = require("../lib/request");
 
 const router = new Router();
 
@@ -44,12 +43,20 @@ router.post('/', async (ctx, next) => {
 
   // Request to API
   try {
+    /**
+     * @type {{id: string}}
+     */
     const resp = await request.post(nextApi.signup)
       .set(customHeader(ctx.ip, ctx.header['user-agent']))
       .send(result);
 
+    const userId = resp.id
+
+    const acntResp = await request.get(nextApi.account)
+      .set(setUserId(userId))
+
     ctx.session = {
-      user: toJWT(resp.body),
+      user: acntResp.body,
     };
 
     ctx.cookies.set('logged_in', 'yes');

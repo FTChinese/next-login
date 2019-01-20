@@ -7,7 +7,6 @@ module.exports = function() {
   // Catch all errors from downstream
       await next();
     } catch (e) {
-      debug("%O", e);
 
       ctx.state.error = {
         status: e.status || 500,

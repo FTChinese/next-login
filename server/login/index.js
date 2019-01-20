@@ -8,7 +8,6 @@ const { AccountValidtor } = require("../../lib/validate");
 const sitemap = require("../../lib/sitemap");
 const { errMessage, isAPIError, buildApiError, buildErrMsg } = require("../../lib/response");
 const { customHeader } = require("../../lib/request");
-const { toJWT } = require("../../lib/session");
 
 // const wechat = require('./wechat');
 
@@ -66,7 +65,7 @@ router.post('/', async function (ctx, next) {
 
     // Keep login state
     ctx.session = {
-      user: toJWT(account),
+      user: account,
     };
 
     ctx.cookies.set('logged_in', 'yes');
