@@ -31,7 +31,7 @@ router.get('/', async (ctx) => {
   if (ctx.session.errors) {
     ctx.state.errors = ctx.session.errors;
   }
-  
+
   ctx.body = await render('forgot-password/enter-email.html', ctx.state);
 
   // Delete errors from session.
@@ -57,12 +57,12 @@ router.post('/', async function (ctx, next) {
 
   if (errors) {
     ctx.state.errors = errors;
-    ctx.state.email = email;
+    ctx.state.email = account.email;
 
     return await next();
   }
 
-  try {    
+  try {
     // Ask API to sent email.
     await request.post(nextApi.sendPasswordResetLetter)
       .set(customHeader(ctx.ip, ctx.header["user-agent"]))
@@ -136,7 +136,7 @@ router.get('/:token', async (ctx) => {
   } catch (e) {
     // If any error occurred, redirect back to /user/password-reset.
     if (!isAPIError(e)) {
-      ctx.session.errors = buildApiError;
+      ctx.session.errors = buildErrMsg(e);
 
       return ctx.redirect(sitemap.passwordReset);
     }
@@ -147,18 +147,18 @@ router.get('/:token', async (ctx) => {
     // 404 if the token is not found, expired, or the the user associated with the token is not found.
     switch (e.status) {
       case 404:
-        ctx.state.errors = {
+        ctx.session.errors = {
           token: errMessage.password_token_invalid,
         };
         break;
-      
+
       // 400 if request URL does not contain a token
       // { server: "Invalid request URI" }
       default:
-        ctx.state.errors = buildApiError(body)
+        ctx.session.errors = buildApiError(body)
         break;
     }
-    
+
     return ctx.redirect(sitemap.passwordReset);
   }
 });
@@ -192,7 +192,7 @@ router.post('/:token', async (ctx, next) => {
         token,
         password: result.password
       });
-    
+
     ctx.session.alert = {
       key: "password_reset"
     };
@@ -216,15 +216,15 @@ router.post('/:token', async (ctx, next) => {
       // 404 Not Found indicates the password reset token is not found or is invalid.
       // Redirect user to /user/password_reset
       case 404:
-        ctx.state.errors = {
+        ctx.session.errors = {
           token: errMessage.password_token_invalid,
         };
         ctx.redirect(sitemap.passwordReset);
         break;
 
       // 400: { server: "Problems parsing JSON" }
-      // 422: { password: password_missing_field} 
-      // || {password: password_invalid} 
+      // 422: { password: password_missing_field}
+      // || {password: password_invalid}
       // || {token: token_missing_field}
       default:
         ctx.state.errors = buildApiError(body);
