@@ -16,7 +16,6 @@ const handleErrors = require('./middleware/handle-errors');
 const setHeader = require('./middleware/set-header');
 
 const signup = require('./server/signup');
-// const plan = require('./server/plan');
 const login = require('./server/login');
 const logout = require('./server/logout');
 const verify = require('./server/verification');
