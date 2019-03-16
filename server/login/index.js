@@ -3,11 +3,22 @@ const Router = require('koa-router');
 const debug = require('debug')('user:login');
 
 const render = require('../../util/render');
-const { nextApi } = require("../../lib/endpoints");
-const { AccountValidtor } = require("../../lib/validate");
+const {
+  nextApi
+} = require("../../lib/endpoints");
+const {
+  AccountValidtor
+} = require("../../lib/validate");
 const sitemap = require("../../lib/sitemap");
-const { errMessage, isAPIError, buildApiError, buildErrMsg } = require("../../lib/response");
-const { customHeader } = require("../../lib/request");
+const {
+  errMessage,
+  isAPIError,
+  buildApiError,
+  buildErrMsg
+} = require("../../lib/response");
+const {
+  setClientHeader
+} = require("../../lib/request");
 
 // const wechat = require('./wechat');
 
@@ -37,7 +48,10 @@ router.post('/', async function (ctx, next) {
   /**
    * @type {{email: string, password: string} || null} 
    */
-  const {result, errors} = new AccountValidtor(credentials)
+  const {
+    result,
+    errors
+  } = new AccountValidtor(credentials)
     .validateEmail(true)
     .validatePassword(true)
     .end();
@@ -54,7 +68,7 @@ router.post('/', async function (ctx, next) {
   // Send data to API
   try {
     const resp = await request.post(nextApi.login)
-      .set(customHeader(ctx.ip, ctx.header["user-agent"]))
+      .set(setClientHeader(ctx.ip, ctx.header["user-agent"]))
       .send(result);
 
     /**
@@ -88,22 +102,24 @@ router.post('/', async function (ctx, next) {
      */
     const body = e.response.body;
     debug("API error response: %O", body);
-    
+
     // 404, 403
     switch (e.status) {
       case 404:
       case 403:
         ctx.state.errors = {
-          credentials: errMessage.credenails_invalid,
+          credentials: errMessage.credentials_invalid,
         };
         break;
-      
-      // 400: { server: "Problems parsing JSON" }
-      // 422: { email: email_missing_field || email_invalid, password: password_missing_field || password_invalid }
+
+        // 400: { server: "Problems parsing JSON" }
+        // 422: { email: email_missing_field || email_invalid, password: password_missing_field || password_invalid }
       default:
         ctx.state.errors = buildApiError(body);
         break;
     }
+
+    debug("Errors: %O", ctx.state.errors);
 
     return await next();
   }
