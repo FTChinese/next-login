@@ -21,12 +21,5 @@
   {% endfor %}
 </div>
 
-<div class="pagination">
-  {% if page.prev !== 0 %}
-    <a href="?page={{page.prev}}">上一页</a>
-  {% endif %}
-  {% if page.next !== 0 %}
-    <a href="?page={{page.next}}">下一页</a>
-  {% endif %}
-</div>
+{% include "partials/paging.html" %}
 {% endblock %}
