@@ -2,14 +2,26 @@ const request = require('superagent');
 const Router = require('koa-router');
 const debug = require('debug')('user:email');
 
-const sitemap = require("../../lib/sitemap");
-const { nextApi } = require("../../lib/endpoints");
-const { isAPIError, buildApiError } = require("../../lib/response");
-const { customHeader } = require("../../lib/request");
+const {
+  sitemap
+} = require("../../model/sitemap");
+const {
+  nextApi
+} = require("../../model/endpoints");
+const {
+  isAPIError,
+  buildApiError
+} = require("../../lib/response");
+const {
+  customHeader
+} = require("../../lib/request");
 
 const router = new Router();
 
-// Resend verfication letter
+/**
+ * @description Resend verfication letter
+ * /user/account/request-verification
+ */
 router.post("/", async (ctx) => {
 
   try {
@@ -25,8 +37,8 @@ router.post("/", async (ctx) => {
 
     return ctx.redirect(sitemap.account);
   } catch (e) {
-    
-    
+
+
     return ctx.redirect(sitemap.account);
   }
 });

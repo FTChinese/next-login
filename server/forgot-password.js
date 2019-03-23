@@ -3,12 +3,25 @@ const Router = require('koa-router');
 const debug = require("debug")('user:password-reset');
 
 const render = require('../util/render');
-const { nextApi } = require("../lib/endpoints");
-const { customHeader } = require("../lib/request")
+const {
+  nextApi
+} = require("../model/endpoints");
+const {
+  customHeader
+} = require("../lib/request")
 
-const { AccountValidtor } = require("../lib/validate");
-const sitemap = require("../lib/sitemap");
-const { isAPIError, buildApiError, buildErrMsg, errMessage } = require("../lib/response");
+const {
+  AccountValidtor
+} = require("../lib/validate");
+const {
+  sitemap
+} = require("../model/sitemap");
+const {
+  isAPIError,
+  buildApiError,
+  buildErrMsg,
+  errMessage
+} = require("../lib/response");
 
 const router = new Router();
 
@@ -49,7 +62,10 @@ router.post('/', async function (ctx, next) {
    * @param {(null | {email: string})} result
    * @param {(null | {email: string})} errors
    */
-  const { result, errors } = new AccountValidtor(account)
+  const {
+    result,
+    errors
+  } = new AccountValidtor(account)
     .validateEmail()
     .end();
 
@@ -97,10 +113,10 @@ router.post('/', async function (ctx, next) {
         };
         break;
 
-      // 400 for JOSN parsing failure; 422 if `email` is missing.
-      // { server: "any server error" }
-      // or
-      // { email: email_missing_field }
+        // 400 for JOSN parsing failure; 422 if `email` is missing.
+        // { server: "any server error" }
+        // or
+        // { email: email_missing_field }
       default:
         ctx.state.errors = buildApiError(body);
         break;
@@ -152,8 +168,8 @@ router.get('/:token', async (ctx) => {
         };
         break;
 
-      // 400 if request URL does not contain a token
-      // { server: "Invalid request URI" }
+        // 400 if request URL does not contain a token
+        // { server: "Invalid request URI" }
       default:
         ctx.session.errors = buildApiError(body)
         break;
@@ -174,7 +190,10 @@ router.post('/:token', async (ctx, next) => {
    * @type {{password: string, confirmPassword: string}}
    */
   const account = ctx.request.body;
-  const { result, errors } = new AccountValidtor(account)
+  const {
+    result,
+    errors
+  } = new AccountValidtor(account)
     .validatePassword()
     .confirmPassword()
     .end();
@@ -222,17 +241,17 @@ router.post('/:token', async (ctx, next) => {
         ctx.redirect(sitemap.passwordReset);
         break;
 
-      // 400: { server: "Problems parsing JSON" }
-      // 422: { password: password_missing_field}
-      // || {password: password_invalid}
-      // || {token: token_missing_field}
+        // 400: { server: "Problems parsing JSON" }
+        // 422: { password: password_missing_field}
+        // || {password: password_invalid}
+        // || {token: token_missing_field}
       default:
         ctx.state.errors = buildApiError(body);
     }
 
     return await next();
   }
-}, async function(ctx) {
+}, async function (ctx) {
   ctx.body = await render('forgot-password/new-password.html', ctx.state);
 });
 

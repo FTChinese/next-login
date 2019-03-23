@@ -4,21 +4,28 @@ const debug = require('debug')('user:login');
 
 const render = require('../../util/render');
 const {
-  nextApi
-} = require("../../lib/endpoints");
-const {
   AccountValidtor
 } = require("../../lib/validate");
-const sitemap = require("../../lib/sitemap");
+
 const {
   errMessage,
   isAPIError,
   buildApiError,
   buildErrMsg
 } = require("../../lib/response");
+
 const {
-  setClientHeader
+  setClientHeader,
+  KEY_USER_ID,
 } = require("../../lib/request");
+
+const {
+  nextApi
+} = require("../../model/endpoints");
+
+const {
+  sitemap
+} = require("../../model/sitemap");
 
 // const wechat = require('./wechat');
 
@@ -67,15 +74,23 @@ router.post('/', async function (ctx, next) {
 
   // Send data to API
   try {
-    const resp = await request.post(nextApi.login)
+    const authResp = await request.post(nextApi.login)
       .set(setClientHeader(ctx.ip, ctx.header["user-agent"]))
       .send(result);
 
     /**
-     * @type {Account}
+     * @type {{id: string}}
      */
+    const user = authResp.body;
+    debug('Login result: %o', user);
+
+    const resp = await request.get(nextApi.account)
+      .set(KEY_USER_ID, user.id)
+    
+      /**
+       * @type {Account}
+       */
     const account = resp.body;
-    debug('Authentication result: %o', account);
 
     // Keep login state
     ctx.session = {
@@ -112,8 +127,10 @@ router.post('/', async function (ctx, next) {
         };
         break;
 
-        // 400: { server: "Problems parsing JSON" }
-        // 422: { email: email_missing_field || email_invalid, password: password_missing_field || password_invalid }
+      // 400: { server: "Problems parsing JSON" }
+      // 422: 
+      // email: email_missing_field || email_invalid
+      // password: password_missing_field || password_invalid
       default:
         ctx.state.errors = buildApiError(body);
         break;
@@ -126,10 +143,5 @@ router.post('/', async function (ctx, next) {
 }, async (ctx) => {
   ctx.body = await render('login.html', ctx.state);
 });
-
-// Lauch Authorization Request
-// router.get('/wechat', wechat.authRequest);
-// Get Access Token Response
-// router.post('/wechat/access', wechat.accessResponse);
 
 module.exports = router.routes();

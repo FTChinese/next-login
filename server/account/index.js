@@ -2,8 +2,16 @@ const request = require('superagent');
 const Router = require('koa-router');
 
 const render = require('../../util/render');
-const { nextApi } = require("../../lib/endpoints")
-const { buildApiError } = require("../../lib/response");
+const {
+  nextApi
+} = require("../../model/endpoints")
+const {
+  buildApiError
+} = require("../../lib/response");
+const {
+  Account,
+  FtcUser,
+} = require("../../model/account");
 
 const passwordRouter = require('./password');
 const emailRouter = require("./email");
@@ -11,23 +19,20 @@ const requestVerification = require("./request-verify");
 
 const router = new Router();
 
-// Show account page
+/**
+ * @description Show account page
+ * /user/account
+ */
 router.get('/', async (ctx, next) => {
 
-  const userId = ctx.session.user.id;
+  const acntInst = new Account(ctx.session.user);
+  ;
 
-  const resp = await request
-    .get(nextApi.account)
-    .set('X-User-Id', userId);
-
-  /**
-   * @type {{id: string, userName: string, email: string}}
-   */
-  const account = resp.body;
-  account.currentEmail = account.email;
-  ctx.state.account = ctx.session.account
-    ? Object.assign(account, ctx.session.account)
-    : account;
+  const acntData = await acntInst.fetchAccount();
+  ctx.state.account = acntData;
+  ctx.state.account.currentEmail = acntData.email;
+  
+  ctx.session.user = acntData;
 
   /**
    * @type {{key: "email_changed | password_saved"}}
@@ -35,7 +40,7 @@ router.get('/', async (ctx, next) => {
   if (ctx.session.alert) {
     ctx.state.alert = ctx.session.alert;
   }
-  
+
   /**
    * @type {{message: string}}
    */

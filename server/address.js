@@ -2,40 +2,57 @@ const request = require('superagent');
 const Router = require('koa-router');
 const debug = require("debug")('user:address');
 const render = require('../util/render');
-const { nextApi } = require("../lib/endpoints");
-const { AddressValidator } = require("../lib/validate");
-const sitemap = require("../lib/sitemap");
-const { isAPIError, buildApiError } = require("../lib/response");
-const { setUserId } = require("../lib/request")
+const {
+  nextApi
+} = require("../model/endpoints");
+const {
+  AddressValidator
+} = require("../lib/validate");
+const {
+  sitemap
+} = require("../model/sitemap");
+const {
+  isAPIError,
+  buildApiError
+} = require("../lib/response");
+const {
+  FtcUser,
+} = require("../model/account");
 
 const router = new Router();
 
 // Show address
 router.get('/', async (ctx) => {
-  const userId = ctx.session.user.id;
-
-  const resp = await request.get(nextApi.address)
-    .set(setUserId(userId));
 
   /**
-   * @type {{country: string, province: string, city: string, district: string, street: string, postcode: string}}
+   * @type {IAddress}
    */
-  const address = resp.body;
+  const address = await new FtcUser(ctx.session.user.id)
+    .fetchAddress();
 
   ctx.state.address = address;
 
+  if (ctx.session.alert) {
+    ctx.state.alert = ctx.session.alert;
+  }
+
   ctx.body = await render('address.html', ctx.state);
+
+  delete ctx.session.alert;
 });
 
 // Update address
 router.post('/', async (ctx, next) => {
 
   /**
-   * @type {{province: string, city: string, district: string, postcode: string}}
+   * @type {IAddress}
    */
   const address = ctx.request.body.address;
-  
-  const { result, errors } = new AddressValidator(address).validate();
+
+  const {
+    result,
+    errors
+  } = new AddressValidator(address).validate();
 
   if (errors) {
     ctx.state.errors = errors;
@@ -45,12 +62,8 @@ router.post('/', async (ctx, next) => {
   }
 
   try {
-
-    const userId = ctx.session.user.id;
-
-    await request.patch(nextApi.address)
-      .set('X-User-Id', userId)
-      .send(result);
+    await new FtcUser(ctx.session.user.id)
+      .updateAddress(result)
 
     ctx.session.alert = {
       key: "saved"
@@ -77,22 +90,8 @@ router.post('/', async (ctx, next) => {
 
     ctx.state.errors = buildApiError(body);
 
-    return await next();
+    ctx.body = await render('address.html', ctx.state);
   }
-}, async(ctx, next) => {
-  const userId = ctx.session.user.id;
-
-  const resp = await request.get(nextApi.profile)
-    .set('X-User-Id', userId);
-
-  /**
-   * @type {Profile}
-   */
-  const profile = resp.body;
-
-  ctx.state.address = Object.assign(profile.address, ctx.state.address);
-
-  ctx.body = await render('address.html', ctx.state);
 });
 
 module.exports = router.routes();

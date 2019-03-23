@@ -3,9 +3,9 @@ const debug = require("debug")("user:render");
 const nunjucks = require('nunjucks');
 const util = require('util');
 const numeral = require("numeral");
-const { localized } = require("../lib/membership");
 const { alertMsg } = require("../lib/alert");
 const { DateTime } = require("luxon");
+const localized = require("../model/localized");
 
 const env = nunjucks.configure(
   [

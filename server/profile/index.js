@@ -2,9 +2,16 @@ const request = require('superagent');
 const Router = require('koa-router');
 const debug = require("debug")('user:profile');
 const render = require('../../util/render');
-const { nextApi } = require("../../lib/endpoints")
-const { isAPIError, buildApiError } = require("../../lib/response");
-const { ProfileValidator } = require("../../lib/validate");
+const {
+  nextApi
+} = require("../../model/endpoints")
+const {
+  isAPIError,
+  buildApiError
+} = require("../../lib/response");
+const {
+  ProfileValidator
+} = require("../../lib/validate");
 
 const userName = require("./user-name");
 const mobileNumber = require("./mobile-number");
@@ -23,9 +30,9 @@ router.get('/', async (ctx) => {
    * @type {Profile}
    */
   const profile = resp.body;
-  ctx.state.profile = ctx.session.profile
-    ? Object.assign(profile, ctx.session.profile)
-    : profile;
+  ctx.state.profile = ctx.session.profile ?
+    Object.assign(profile, ctx.session.profile) :
+    profile;
 
   /**
    * Handle messages passed by redirection.
@@ -38,7 +45,7 @@ router.get('/', async (ctx) => {
   if (ctx.session.alert) {
     ctx.state.alert = ctx.session.alert;
   }
-  
+
   if (ctx.session.errors) {
     ctx.state.errors = ctx.session.errors;
   }
@@ -59,7 +66,10 @@ router.get('/', async (ctx) => {
 router.post('/', async (ctx, next) => {
 
   const profile = ctx.request.body.profile;
-  const { result, errors } = new ProfileValidator(profile)
+  const {
+    result,
+    errors
+  } = new ProfileValidator(profile)
     .familyName()
     .givenName()
     .gender()

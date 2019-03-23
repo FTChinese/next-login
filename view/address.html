@@ -13,6 +13,20 @@
 
   <div class="mt-3">
     <form method="post">
+      <div class="form-group">
+        <label for="country">国家</label>
+        <input class="form-control"
+        id="country"
+        type="text" 
+        name="address[country]" 
+        value="{{address.country}}"
+        required>
+  
+        {% if errors.country %}
+          <div class="form-errortext">{{errors.country}}</div>
+        {% endif %}
+      </div>
+
       <div class="form-row">
         <div class="form-group col-md-4">
           <label for="province">省/直辖市</label>

@@ -2,21 +2,37 @@ const request = require('superagent');
 const Router = require('koa-router');
 const debug = require("debug")('user:password');
 
-const { nextApi } = require("../../lib/endpoints")
-const sitemap = require("../../lib/sitemap");
-const { isAPIError, buildApiError, errMessage } = require("../../lib/response");
-const { AccountValidtor } = require("../../lib/validate");
+const {
+  nextApi
+} = require("../../model/endpoints")
+const {
+  sitemap
+} = require("../../model/sitemap");
+const {
+  isAPIError,
+  buildApiError,
+  errMessage
+} = require("../../lib/response");
+const {
+  AccountValidtor
+} = require("../../lib/validate");
 
 const router = new Router();
 
-// Submit new password
+/**
+ * @description Submit new password
+ * /user/account/password
+ */
 router.post('/', async (ctx, next) => {
   const account = ctx.request.body;
 
   /**
    * @type {{password: string, oldPassword: string} | null}
    */
-  const { result, errors } = new AccountValidtor(account)
+  const {
+    result,
+    errors
+  } = new AccountValidtor(account)
     .validatePassword()
     .confirmPassword()
     .validateOldPassword()
@@ -54,7 +70,7 @@ router.post('/', async (ctx, next) => {
 
       return ctx.redirect(sitemap.account);
     }
-    
+
     switch (e.status) {
       /**
        * 403 error could only be converted to human readable message here.
@@ -72,7 +88,7 @@ router.post('/', async (ctx, next) => {
         ctx.session.apiErr = e.response.body;
         break;
     }
-    
+
     return ctx.redirect(sitemap.account);
   }
 });

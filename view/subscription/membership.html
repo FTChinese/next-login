@@ -1,17 +1,25 @@
 {% extends "layouts/base.html" %} 
 
 {% block content %}
-  {% if membership %}
+  {% if account.isVip %}
+    <dl>
+      <dt>会员类型</dt>
+      <dd>VIP</dd>
+
+      <dt>会员期限</dt>
+      <dd>无限期</dd>
+    </dl>
+  {% elif account.isMember %}
     <div class="pb-3 mb-3 mt-3 border-bottom text-right">
       <a href="{{ sitemap.renewal }}" class="btn btn-primary">续订</a>
     </div>
 
     <dl>
       <dt>会员类型</dt>
-      <dd>{{ membership.tier | localize }}/{{membership.cycle | localize }}</dd>
+      <dd>{{ account.member.localizeTierCycle }}</dd>
 
       <dt>会员期限</dt>
-      <dd>{{membership.expireDate}}</dd>
+      <dd>{{ account.member.expireDate }}</dd>
     </dl>
 
     <div class="text-right">

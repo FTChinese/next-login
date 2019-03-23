@@ -2,14 +2,28 @@ const request = require('superagent');
 const Router = require('koa-router');
 const debug = require("debug")('user:name');
 
-const { nextApi } = require("../../lib/endpoints")
-const sitemap = require("../../lib/sitemap");
-const { isAPIError } = require("../../lib/response");
-const { AccountValidtor } = require("../../lib/validate");
+const {
+  nextApi
+} = require("../../model/endpoints")
+const {
+  sitemap
+} = require("../../model/sitemap");
+const {
+  isAPIError
+} = require("../../lib/response");
+const {
+  AccountValidtor
+} = require("../../lib/validate");
+const {
+  FtcUser,
+} = require("../../model/account");
 
 const router = new Router();
 
-// Submit new email
+/**
+ * @description Submit new email
+ * /user/account/email
+ */
 router.post('/', async (ctx) => {
 
   /**
@@ -20,7 +34,10 @@ router.post('/', async (ctx) => {
   /**
    * @type {{email: string} | null}
    */
-  const { result, errors } = new AccountValidtor(account)
+  const {
+    result,
+    errors
+  } = new AccountValidtor(account)
     .validateEmail()
     .validateEmailUpdate()
     .end();
@@ -40,7 +57,7 @@ router.post('/', async (ctx) => {
     await request.patch(nextApi.email)
       .set('X-User-Id', userId)
       .send(result);
-    
+
     ctx.session.alert = {
       key: "email_changed",
     };
@@ -60,7 +77,7 @@ router.post('/', async (ctx) => {
 
       return ctx.redirect(sitemap.account);
     }
-    
+
     /**
      * @type {{message: string, error: Object}}
      */

@@ -2,9 +2,16 @@ const request = require('superagent');
 const Router = require('koa-router');
 const debug = require("debug")('user:account');
 const render = require('../../util/render');
-const sitemap = require("../../lib/sitemap");
-const { nextApi } = require("../../lib/endpoints")
-const { isAPIError, buildApiError } = require("../../lib/response");
+const {
+  sitemap
+} = require("../../model/sitemap");
+const {
+  nextApi
+} = require("../../model/endpoints")
+const {
+  isAPIError,
+  buildApiError
+} = require("../../lib/response");
 
 const router = new Router();
 
@@ -32,7 +39,7 @@ router.get('/', async (ctx, next) => {
   if (ctx.session.alert) {
     ctx.state.alert = ctx.session.alert;
   }
-  
+
   ctx.body = await render('notification.html', ctx.state);
 
   delete ctx.session.errors;
@@ -59,7 +66,7 @@ router.post('/newsletter', async (ctx) => {
     await request.patch(endpoints.newsletter)
       .set('X-User-Id', userId)
       .send(newsletter);
-    
+
     ctx.session.alert = buildAlertDone('newsletter');
 
     return ctx.redirect(sitemap.notification);

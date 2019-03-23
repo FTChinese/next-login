@@ -9,11 +9,13 @@ const session = require('koa-session');
 
 const boot = require('./util/boot-app');
 
-const env = require('./middleware/env');
-const nav = require('./middleware/nav');
-const checkSession = require('./middleware/check-session');
-const handleErrors = require('./middleware/handle-errors');
-const setHeader = require('./middleware/set-header');
+const {
+  env,
+  nav,
+  checkSession,
+  handleErrors,
+  noCache,
+} = require("./server/middleware");
 
 const signup = require('./server/signup');
 const login = require('./server/login');
@@ -54,7 +56,7 @@ if (!isProduction) {
 // Configurations passed around
 app.use(env());
 app.use(nav());
-app.use(setHeader());
+app.use(noCache());
 app.use(session({
   renew: true,
 }, app));

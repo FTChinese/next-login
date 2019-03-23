@@ -3,9 +3,17 @@ const Router = require('koa-router');
 const debug = require("debug")('user:verification');
 
 const render = require('../../util/render');
-const { nextApi } = require("../../lib/endpoints");
-const sitemap = require("../../lib/sitemap");
-const { isAPIError, buildApiError, errMessage } = require("../../lib/response");
+const {
+  nextApi
+} = require("../../model/endpoints");
+const {
+  sitemap
+} = require("../../model/sitemap");
+const {
+  isAPIError,
+  buildApiError,
+  errMessage
+} = require("../../lib/response");
 
 const router = new Router();
 
@@ -43,8 +51,8 @@ router.get('/:token', async (ctx) => {
       case 404:
         ctx.state.warning = errMessage.email_token_not_found;
         break;
-      
-      // 400
+
+        // 400
       default:
         ctx.state.warning = body.message
         break;

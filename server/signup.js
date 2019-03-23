@@ -3,11 +3,25 @@ const Router = require('koa-router');
 const debug = require("debug")('user:signup');
 
 const render = require('../util/render');
-const { nextApi } = require("../lib/endpoints");
-const { AccountValidtor } = require("../lib/validate");
-const sitemap = require("../lib/sitemap");
-const { errMessage, isAPIError, buildApiError, buildErrMsg } = require("../lib/response");
-const { customHeader, setUserId } = require("../lib/request");
+const {
+  nextApi
+} = require("../model/endpoints");
+const {
+  AccountValidtor
+} = require("../lib/validate");
+const {
+  sitemap
+} = require("../model/sitemap");
+const {
+  errMessage,
+  isAPIError,
+  buildApiError,
+  buildErrMsg
+} = require("../lib/response");
+const {
+  customHeader,
+  setUserId
+} = require("../lib/request");
 
 const router = new Router();
 
@@ -27,7 +41,10 @@ router.post('/', async (ctx, next) => {
    * @type {{email: string, password: string}}
    */
   const account = ctx.request.body.account;
-  const { result, errors } = new AccountValidtor(account)
+  const {
+    result,
+    errors
+  } = new AccountValidtor(account)
     .validateEmail()
     .validatePassword()
     .end();
@@ -69,7 +86,7 @@ router.post('/', async (ctx, next) => {
 
     if (!isAPIError(e)) {
       ctx.state.errors = buildErrMsg(e);
-      
+
       return await next();
     }
 
@@ -85,12 +102,12 @@ router.post('/', async (ctx, next) => {
         };
         break;
 
-      // 422: {email: email_missing_field}
-      // {email: email_invalid}
-      // {email: email_already_exists}
-      // {password: password_missing_field}
-      // {password: password_invalid}
-      // 400: {server: "Problems parsing JSON"}
+        // 422: {email: email_missing_field}
+        // {email: email_invalid}
+        // {email: email_already_exists}
+        // {password: password_missing_field}
+        // {password: password_invalid}
+        // 400: {server: "Problems parsing JSON"}
       default:
         ctx.state.errors = buildApiError(body);
         break;
@@ -98,7 +115,7 @@ router.post('/', async (ctx, next) => {
 
     return await next();
   }
-}, async(ctx) => {
+}, async (ctx) => {
   ctx.body = await render('signup.html', ctx.state);
 });
 

@@ -2,10 +2,17 @@ const request = require('superagent');
 const Router = require('koa-router');
 const debug = require("debug")('user:profile');
 
-const { nextApi } = require("../../lib/endpoints")
-const sitemap = require("../../lib/sitemap");
-const { isAPIError, buildApiError } = require("../../lib/response");
-const { ProfileValidator } = require("../../lib/validate");
+const {
+  nextApi
+} = require("../../model/endpoints")
+const sitemap = require("../../model/sitemap");
+const {
+  isAPIError,
+  buildApiError
+} = require("../../lib/response");
+const {
+  ProfileValidator
+} = require("../../lib/validate");
 
 const router = new Router();
 
@@ -15,7 +22,10 @@ router.post('/', async (ctx) => {
    * @type {{mobile: string}}
    */
   const profile = ctx.request.body.profile;
-  const { result, errors } = new ProfileValidator(profile)
+  const {
+    result,
+    errors
+  } = new ProfileValidator(profile)
     .mobile()
     .end();
 
@@ -41,7 +51,7 @@ router.post('/', async (ctx) => {
     };
 
     return ctx.redirect(sitemap.profile);
-    
+
   } catch (e) {
     ctx.session.profile = profile;
 
@@ -53,7 +63,7 @@ router.post('/', async (ctx) => {
 
       return ctx.redirect(sitemap.profile);
     }
-    
+
     /**
      * @type {{message: string, error: Object}}
      */

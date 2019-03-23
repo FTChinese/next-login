@@ -5,8 +5,10 @@ const debug = require('debug')('user:starred');
 const render = require('../util/render');
 const {
   nextApi
-} = require("../lib/endpoints");
-const sitemap = require("../lib/sitemap");
+} = require("../model/endpoints");
+const {
+  sitemap
+} = require("../model/sitemap");
 const {
   KEY_USER_ID,
 } = require("../lib/request");
@@ -15,7 +17,9 @@ const {
   buildApiError,
   buildErrMsg
 } = require("../lib/response");
-const { paging } = require("./middleware");
+const {
+  paging
+} = require("./middleware");
 
 const router = new Router();
 
