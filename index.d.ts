@@ -1,58 +1,48 @@
-declare interface Credentials {
+declare interface ICredentials {
     email: string;
     password: string;
 }
-declare interface Membership {
-    tier: "free" | "standard" | "premium";
-    startAt: string;
-    expireAt: string;
+
+declare interface IMembership {
+    tier?: "standard" | "premium";
+    cycle?: "year" | "month";
+    expireDate?: string;
 }
 
-declare interface Wechat {
-    unionId: string;
-    openId: string;
-    nickName: string;
-    avatarUrl: string;
+declare interface IWechat {
+    nickname?: string;
+    avatarUrl?: string;
 }
-declare interface Account {
+
+declare interface IAccount {
     id: string;
-    email: string;
+    unionId?: string;
     userName?: string;
+    email: string;
+    isVerified: boolean;
     avatar?: string;
     isVip: boolean;
-    isVerified: boolean;
-    wechat?: Wechat;
-    membership: Membership;
+    loginMethod: "email" | "wechat";
+    wechat: IWechat;
+    membership: IMembership;
 }
 
-declare interface UserSession {
-    id: string;
-    name: string;
-    avatar: string;
-    vip: boolean;
-    vrf: boolean;
-    mbr: {
-        tier: "free" | "standard" | "premium";
-        start: string;
-        exp: string;
-    }
+declare interface IAddress {
+    country?: string;
+    province?: string;
+    city?: string;
+    district?: string;
+    street?: string;
+    postcode?: string;
 }
 
-declare interface Address {
-    province: string,
-    city: string,
-    district: string,
-    street: string,
-    zipCode: string,
-}
-
-declare interface Newsletter {
+declare interface INewsletter {
     todayFocus: boolean,
     weeklyChoice: boolean,
     afternoonExpress: boolean
 }
 
-declare interface Profile {
+declare interface IProfile {
     id: string;
     userName: string;
     email: string;
@@ -63,10 +53,21 @@ declare interface Profile {
     phoneNumber: string;
     mobileNumber: string;
     birthdate: string;
-    address: Address;
+    address: IAddress;
     createdAt: string; //2018-03-23T09:20:13Z
     updatedAt: string; // 2018-03-24T06:54:03Z
-    newsletter: Newsletter;   
+    newsletter: INewsletter;   
+}
+
+declare interface IOrder {
+    orderId: string;
+    tier: "standard" | "premium";
+    cycle: "year" | "month";
+    netPrice: number;
+    payMethod: "wechat" | "alipay" | "stripe";
+    createdAt: string;
+    startDate: string;
+    endDate: string;
 }
 
 // Data structure for API error response.
