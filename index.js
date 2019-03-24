@@ -27,7 +27,6 @@ const profile = require('./server/profile');
 const account = require('./server/account');
 
 const subscription = require('./server/subscription');
-const address = require('./server/address');
 const notification = require("./server/notification");
 const starred = require("./server/starred");
 
@@ -80,7 +79,6 @@ router.use('/password-reset', checkSession({redirect: false}), forgotPassword);
 router.use('/profile', checkSession(), profile);
 router.use('/account', checkSession(), account);
 router.use('/subscription', checkSession(), subscription);
-router.use('/address', checkSession(), address);
 router.use('/notification', checkSession(), notification);
 router.use("/starred", checkSession(), starred);
 router.use('/__version', version);
