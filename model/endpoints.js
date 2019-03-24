@@ -7,7 +7,7 @@ exports.nextApi = {
   signup: `${users}/signup`,
   login: `${users}/login`,
   verifyEmail: `${users}/verify/email`, // append toke to the end
-  sendPasswordResetLetter: `${passwordReset}/letter`,
+  passwordResetLetter: `${passwordReset}/letter`,
   verifyPasswordResetToken: `${passwordReset}/tokens`, // append token to the end.
   resetPassword: passwordReset,
 
