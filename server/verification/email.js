@@ -50,7 +50,9 @@ router.get('/:token', async (ctx) => {
 
     switch (e.status) {
       case 404:
-        ctx.state.errors = errMessage.email_token_not_found;
+        ctx.state.errors = {
+          message: errMessage.email_token_not_found
+        };
         break;
 
         // 400
