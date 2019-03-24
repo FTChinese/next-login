@@ -6,15 +6,16 @@ const sitemap = exports.sitemap = {
   login:          `${prefix}/login`,
   logout:         `${prefix}/logout`,
   profile:         `${prefix}/profile`,
-  userName:       `${prefix}/profile/name`,
+  displayName:    `${prefix}/profile/display-name`,
   mobile:         `${prefix}/profile/mobile`,
+  personal:       `${prefix}/profile/info`,
+  address:        `${prefix}/profile/address`,
   account:        `${prefix}/account`,
   email:          `${prefix}/account/email`,
   password:       `${prefix}/account/password`,
   requestVerification: `${prefix}/account/request-verification`,
   subs:           `${prefix}/subscription`,
   renewal:        `${prefix}/subscription/renew`,
-  address:        `${prefix}/address`,
   notification:    `${prefix}/notification`,
   newsletter:     `${prefix}/newsletter`,
   starred:        `${prefix}/starred`,
@@ -33,10 +34,6 @@ exports.sidebarNav = [
   {
     href: sitemap.subs,
     text: "会员"
-  },
-  {
-    href: sitemap.address,
-    text: "地址"
   },
   // {
   //   href: sitemap.notification,
