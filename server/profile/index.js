@@ -12,27 +12,43 @@ const {
 const {
   ProfileValidator
 } = require("../../lib/validate");
+const {
+  FtcUser,
+} = require("../../model/account");
 
-const userName = require("./user-name");
+const displayName = require("./display-name");
 const mobileNumber = require("./mobile-number");
+const personalInfo = require("./personal");
+const address = require("./address");
 
 const router = new Router();
 
-// Show profile page
+/**
+ * @description Show profile page
+ * /user/profile
+ */
 router.get('/', async (ctx) => {
 
   const userId = ctx.session.user.id;
 
-  const resp = await request.get(nextApi.profile)
-    .set('X-User-Id', userId);
+  // const resp = await request.get(nextApi.profile)
+  //   .set('X-User-Id', userId);
+
+  const user = new FtcUser(userId);
 
   /**
    * @type {Profile}
    */
-  const profile = resp.body;
-  ctx.state.profile = ctx.session.profile ?
-    Object.assign(profile, ctx.session.profile) :
-    profile;
+  const [profile, address] = await Promise.all([
+      user.fetchProfile(),
+      user.fetchAddress()
+  ]);
+
+  ctx.state.profile = profile;
+  ctx.state.address = address;
+  // ctx.state.profile = ctx.session.profile ?
+  //   Object.assign(profile, ctx.session.profile) :
+  //   profile;
 
   /**
    * Handle messages passed by redirection.
@@ -54,88 +70,14 @@ router.get('/', async (ctx) => {
     ctx.state.errors = buildApiError(ctx.session.apiErr);
   }
 
-  ctx.body = await render('profile/home.html', ctx.state);
+  ctx.body = await render('profile/profile.html', ctx.state);
 
-  delete ctx.session.profile;
   delete ctx.session.alert;
-  delete ctx.session.errors;
-  delete ctx.session.apiErr;
 });
 
-// Update profile
-router.post('/', async (ctx, next) => {
-
-  const profile = ctx.request.body.profile;
-  const {
-    result,
-    errors
-  } = new ProfileValidator(profile)
-    .familyName()
-    .givenName()
-    .gender()
-    .birthday()
-    .end();
-
-  if (errors) {
-    ctx.state.errors = errors;
-    ctx.state.profile = profile;
-
-    return await next();
-  }
-
-  try {
-    const userId = ctx.session.user.id;
-    await request.patch(nextApi.profile)
-      .set('X-User-Id', userId)
-      .send(result);
-
-    ctx.session.alert = {
-      key: "saved"
-    };
-
-    return ctx.redirect(ctx.path);
-  } catch (e) {
-
-    ctx.state.profile = profile;
-
-    if (!isAPIError(e)) {
-      debug("%O", e);
-      ctx.state.errors = {
-        message: e.message,
-      };
-
-      return await next();
-    }
-
-    /**
-     * @type {{message: string, error: Object}}
-     */
-    const body = e.response.body;
-
-    ctx.state.errors = buildApiError(body);
-
-    return await next();
-  }
-}, async (ctx) => {
-
-  const userId = ctx.session.user.id;
-
-  const resp = await request.get(nextApi.profile)
-    .set('X-User-Id', userId);
-
-  /**
-   * @type {Profile}
-   */
-  const profile = resp.body;
-  ctx.state.profile = Object.assign(
-    profile,
-    ctx.state.profile,
-  );
-
-  ctx.body = await render('profile/home.html', ctx.state);
-});
-
-router.use("/name", userName);
-router.use("/mobile", mobileNumber)
+router.use("/display-name", displayName);
+router.use("/mobile", mobileNumber);
+router.use("/info", personalInfo);
+router.use("/address", address);
 
 module.exports = router.routes();
