@@ -144,3 +144,16 @@ exports.noCache = function() {
     ctx.set('Pragma', 'no-cache');
   }
 };
+
+exports.clientApp = function() {
+  return async function(ctx, next) {
+    ctx.state.clientApp = {
+      "X-Client-Type": "web",
+      "X-Client-Version": pkg.version,
+      "X-User-Ip": ctx.ip,
+      "X-User-Agent": ctx.header["user-agent"],
+    };
+    
+    await next();
+  }
+}
