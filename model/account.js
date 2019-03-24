@@ -5,33 +5,31 @@ const {
 } = require("luxon");
 
 const {
-  KEY_USER_ID,
-  KEY_UNION_ID,
-} = require("../lib/request");
-const {
   nextApi
 } = require("./endpoints");
 const localized = require("./localized");
 
+const KEY_USER_ID = "X-User-Id";
+const KEY_UNION_ID = "X-Union-Id";
+
+/**
+ * @description This is used for perform account related actions.
+ * A user might login with email or with wechat,
+ * thus the user have two identities.
+ * You have to retrieve account data based on
+ * how the user logged in: via email or wechat.
+ * If user logged in via email, retrieve data from `/user/account`;
+ * if user logged in via wechat, retrieve data from `/wx/account/`.
+ * Always use the same endpoint once user is
+ * logged in.
+ * Mixing them might result unexpected behavior.
+ */
 class Account {
   /**
    * @param {IAccount} account 
    */
   constructor(account) {
-    this.data = account;
-    this.member = new Membership(account.membership);
-  }
-
-  get isVip() {
-    return this.data.isVip;
-  }
-
-  get isMember() {
-    return this.member.isMember;
-  }
-
-  get accountData() {
-    return this.data;
+    this._data = account;
   }
 
   /**
@@ -40,35 +38,27 @@ class Account {
    * @returns {Promise<IAccount>}
    */
   async fetchAccount() {
-    switch (this.data.loginMethod) {
+    switch (this._data.loginMethod) {
       case "email": {
         const resp = await request
             .get(nextApi.account)
-            .set(KEY_USER_ID, this.data.id);
+            .set(KEY_USER_ID, this._data.id);
 
         /**
          * @type {IAccount}
          */
-        const acnt = resp.body;
-        this.data = acnt;
-        this.member = new Membership(acnt.membership);
-
-        return acnt;
+        return resp.body;
       };
 
       case "wechat": {
         const resp = await request
           .get(nextApi.wxAccount)
-          .set(KEY_UNION_ID, this.data.unionId);
+          .set(KEY_UNION_ID, this._data.unionId);
 
         /**
          * @type {IAccount}
          */
-        const acnt = resp.body;
-        this.data = acnt;
-        this.member = new Membership(account.membership);
-
-        return acnt;
+        return resp.body;
       };
 
       default:
@@ -82,12 +72,12 @@ class Account {
   async fetchOrders() {
     const req = request.get(nextApi.orders);
 
-    if (this.data.id) {
-      req.set(KEY_USER_ID, this.data.id);
+    if (this._data.id) {
+      req.set(KEY_USER_ID, this._data.id);
     }
 
-    if (this.data.unionId) {
-      req.set(KEY_UNION_ID, this.data.unionId);
+    if (this._data.unionId) {
+      req.set(KEY_UNION_ID, this._data.unionId);
     }
 
     const resp = await req;
@@ -136,16 +126,108 @@ class Membership {
   }
 }
 
+/**
+ * @description FtcUser wraps an FTC account's user id.
+ * This is used to retrieve FTC account-only data.
+ */
 class FtcUser {
+  /**
+   * @param {string} id 
+   */
   constructor(id) {
     this.userId = id;
+  }
+
+  /**
+   * @returns {Promise<IProfile>}
+   */
+  async fetchProfile() {
+    const resp = await request
+      .get(nextApi.profile)
+      .set(KEY_USER_ID, this.userId);
+
+    return resp.body;
+  }
+
+  /**
+   * @param {Object} data
+   * @param {string} data.userName
+   * @returns {Promise<void>}
+   */
+  updateDisplayName(data) {
+    return request
+      .patch(nextApi.name)
+      .set(KEY_USER_ID, this.userId)
+      .send(data);
+  }
+
+  /**
+   * 
+   * @param {Object} data 
+   * @param {string} data.mobile
+   * @return {Promise<void>}
+   */
+  updateMobile(data) {
+    return request
+      .patch(nextApi.mobile)
+      .set(KEY_USER_ID, this.userId)
+      .send(data);
+  }
+
+  /**
+   * @param {Object} data 
+   * @param {string} data.familyName
+   * @param {string} data.givenName
+   * @param {string} data.gender
+   * @param {string} data.birthday
+   * @returns {Promise<void>}
+   */
+  updatePersonalInfo(data) {
+    return request
+      .patch(nextApi.profile)
+      .set(KEY_USER_ID, this.userId)
+      .send(data);
+  }
+
+  /**
+   * @param {Object} data
+   * @param {string} data.email
+   * @returns {Promise<void>}
+   */
+  updateEmail(data) {
+    return request.patch(nextApi.email)
+      .set(KEY_USER_ID, this.userId)
+      .send(data);
+  }
+
+  /**
+   * @param {Object} data 
+   * @param {string} data.oldPassword
+   * @param {string} data.newPassword
+   * @returns {Promise<void>}
+   */
+  updatePassword(data) {
+    return request.patch(nextApi.password)
+      .set(KEY_USER_ID, this.userId)
+      .send(data);
+  }
+
+  /**
+   * @param {Object} clientApp 
+   */
+  requestVerificationLetter(clientApp) {
+    return request
+      .post(nextApi.requestVerification)
+      .set(clientApp)
+      .set(KEY_USER_ID, this.userId)
   }
 
   /**
    * @returns {Promise<IAddress>}
    */
   async fetchAddress() {
-    const resp = await request.get(nextApi.address)
+    const resp = await request
+      .get(nextApi.address)
       .set(KEY_USER_ID, this.userId);
 
     return resp.body;
@@ -159,8 +241,92 @@ class FtcUser {
       .set(KEY_USER_ID, this.userId)
       .send(address);
   }
+
+  /**
+   * @param {Object} paging
+   * @param {number} paging.page
+   * @param {number} paging.per_page
+   */
+  async starredArticles(paging) {
+    const resp = await request
+      .get(nextApi.starred)
+      .query(paging)
+      .set(KEY_USER_ID, this.userId);
+
+    return resp.body;
+  }
+
+  unstarArticle(id) {
+    return request
+      .delete(`${nextApi.starred}/${id}`)
+      .set(KEY_USER_ID, this.userId);
+  }
+}
+
+/**
+ * 
+ * @param {Object} credentials 
+ * @param {string} credentials.email
+ * @param {string} credentials.password
+ * @param {Object} clientApp
+ * @returns {Promise<IAccount>}
+ */
+async function emailLogin(credentials, clientApp) {
+  const authResp = await request
+    .post(nextApi.login)
+    .set(clientApp)
+    .send(credentials);
+
+  /**
+   * @type {{id: string}}
+   */
+  const user = authResp.body;
+  const resp = await request
+    .get(nextApi.account)
+    .set(KEY_USER_ID, user.id);
+
+  return resp.body;
+}
+
+/**
+ * 
+ * @param {Object} credentials 
+ * @param {string} credentials.email
+ * @param {string} credentials.password
+ * @param {Object} clientApp 
+ * @returns {Promise<IAccount>}
+ */
+async function signUp(credentials, clientApp) {
+  const idResp = await request.post(nextApi.signup)
+    .set(clientApp)
+    .send(credentials)
+
+  /**
+   * @type {{id: string}}
+   */
+  const user = idResp.body;
+  const resp = await request
+    .get(nextApi.account)
+    .set(KEY_USER_ID, user.id);
+
+  return resp.body;
+}
+
+/**
+ * 
+ * @param {Object} account 
+ * @param {string} account.email
+ */
+function sendPasswordResetLetter(account, clientApp) {
+  return request
+    .post(nextApi.passwordResetLetter)
+    .set(clientApp)
+    .send(account);
 }
 
 exports.Account = Account;
 exports.Membership = Membership;
 exports.FtcUser = FtcUser;
+exports.emailLogin = emailLogin;
+exports.signUp = signUp;
+exports.sendPasswordResetLetter = sendPasswordResetLetter;
