@@ -6,9 +6,13 @@ const passwordReset = `${users}/password-reset`;
 exports.nextApi = {
   signup: `${users}/signup`,
   login: `${users}/login`,
-  verifyEmail: `${users}/verify/email`, // append toke to the end
+  verifyEmail: function(token) {
+    return `${users}/verify/email/${token}`;
+  },
   passwordResetLetter: `${passwordReset}/letter`,
-  verifyPasswordResetToken: `${passwordReset}/tokens`, // append token to the end.
+  passwordResetToken: function(token) {
+    return `${passwordReset}/tokens/${token}`;
+  },
   resetPassword: passwordReset,
 
   account: `${user}/account`,
