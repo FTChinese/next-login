@@ -19,7 +19,7 @@ const {
 } = require("./middleware");
 const {
   FtcUser,
-} = require("../model/account");
+} = require("../model/request");
 
 const router = new Router();
 

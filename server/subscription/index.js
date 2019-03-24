@@ -4,7 +4,7 @@ const render = require('../../util/render');
 
 const {
   Account,
-} = require("../../model/account");
+} = require("../../model/request");
 
 const router = new Router();
 

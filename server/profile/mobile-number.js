@@ -15,7 +15,7 @@ const {
 } = require("../../lib/validate");
 const {
   FtcUser,
-} = require("../../model/account");
+} = require("../../model/request");
 
 const router = new Router();
 

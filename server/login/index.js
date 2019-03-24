@@ -19,7 +19,7 @@ const {
 
 const {
   emailLogin,
-} = require("../../model/account");
+} = require("../../model/request");
 
 const {
   clientApp,

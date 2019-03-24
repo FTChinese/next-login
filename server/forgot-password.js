@@ -25,7 +25,7 @@ const {
 } = require("./middleware");
 const {
   sendPasswordResetLetter,
-} = require("../model/account");
+} = require("../model/request");
 
 const router = new Router();
 

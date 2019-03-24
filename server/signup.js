@@ -19,7 +19,7 @@ const {
 } = require("./middleware");
 const {
   signUp,
-} = require("../model/account");
+} = require("../model/request");
 
 const router = new Router();
 

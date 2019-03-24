@@ -14,7 +14,7 @@ const {
 } = require("../../lib/validate");
 const {
   FtcUser,
-} = require("../../model/account");
+} = require("../../model/request");
 
 const displayName = require("./display-name");
 const mobileNumber = require("./mobile-number");

@@ -10,7 +10,7 @@ const {
 } = require("../../lib/response");
 const {
   FtcUser,
-} = require("../../model/account");
+} = require("../../model/request");
 const {
   clientApp,
 } = require("../middleware");

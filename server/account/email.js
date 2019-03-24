@@ -15,7 +15,7 @@ const {
 const {
   Account,
   FtcUser,
-} = require("../../model/account");
+} = require("../../model/request");
 
 const router = new Router();
 
