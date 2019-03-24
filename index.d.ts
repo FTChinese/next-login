@@ -44,19 +44,17 @@ declare interface INewsletter {
 
 declare interface IProfile {
     id: string;
-    userName: string;
     email: string;
-    avatarUrl: string;
-    gender: "M" | "F";
-    familyName: string;
-    givenName: string;
-    phoneNumber: string;
-    mobileNumber: string;
-    birthdate: string;
-    address: IAddress;
-    createdAt: string; //2018-03-23T09:20:13Z
-    updatedAt: string; // 2018-03-24T06:54:03Z
-    newsletter: INewsletter;   
+    userName?: string;
+    mobile?: string;
+    avatarUrl?: string;
+    gender?: "M" | "F";
+    familyName?: string;
+    givenName?: string;
+    birthday?: string;
+    telephone?: string;
+    createdAt?: string; //2018-03-23T09:20:13Z
+    updatedAt?: string; // 2018-03-24T06:54:03Z 
 }
 
 declare interface IOrder {
