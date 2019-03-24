@@ -288,45 +288,118 @@ async function emailLogin(credentials, clientApp) {
   return resp.body;
 }
 
-/**
- * 
- * @param {Object} credentials 
- * @param {string} credentials.email
- * @param {string} credentials.password
- * @param {Object} clientApp 
- * @returns {Promise<IAccount>}
- */
-async function signUp(credentials, clientApp) {
-  const idResp = await request.post(nextApi.signup)
-    .set(clientApp)
-    .send(credentials)
+class Credentials {
+  /**
+   * @param {string} email 
+   * @param {string} password 
+   */
+  constructor(email, password) {
+    this.email = email;
+    this.password = password;
+  }
 
   /**
-   * @type {{id: string}}
+   * @param {Object} clientApp
+   * @returns {Promise<IAccount>}
    */
-  const user = idResp.body;
-  const resp = await request
-    .get(nextApi.account)
-    .set(KEY_USER_ID, user.id);
-
-  return resp.body;
-}
-
-/**
- * 
- * @param {Object} account 
- * @param {string} account.email
- */
-function sendPasswordResetLetter(account, clientApp) {
-  return request
-    .post(nextApi.passwordResetLetter)
+  async login(clientApp) {
+    const authResp = await request
+    .post(nextApi.login)
     .set(clientApp)
-    .send(account);
+    .send({
+      email: this.email,
+      password: this.password,
+    });
+
+    /**
+     * @type {{id: string}}
+     */
+    const user = authResp.body;
+    const resp = await request
+      .get(nextApi.account)
+      .set(KEY_USER_ID, user.id);
+
+    return resp.body;
+  }
+
+  /**
+   * @param {Object} clientApp 
+   * @returns {Promise<IAccount>}
+   */
+  async signUp(clientApp) {
+    const idResp = await request.post(nextApi.signup)
+    .set(clientApp)
+    .send({
+      email: this.email,
+      password: this.password,
+    });
+
+    /**
+     * @type {{id: string}}
+     */
+    const user = idResp.body;
+    const resp = await request
+      .get(nextApi.account)
+      .set(KEY_USER_ID, user.id);
+
+    return resp.body;
+  }
 }
 
+class ForgotPassword {
+  /**
+   * 
+   * @param {string} email
+   * @returns {Promise<void>}
+   */
+  static sendResetLetter(email, clientApp) {
+    return request
+      .post(nextApi.passwordResetLetter)
+      .set(clientApp)
+      .send({ email });
+  }
+
+  /**
+   * @param {string} token 
+   * @returns {Promise<string>}
+   */
+  static async verifyToken(token) {
+    const resp = await request
+      .get(nextApi.passwordResetToken(token));
+
+    /**
+     * @type {{email: string}}
+     */
+    const body = resp.body;
+    return body.email;
+  }
+
+  static reset(token, password) {
+    return request
+      .post(nextApi.resetPassword)
+      .send({
+        token,
+        password,
+      });
+  }
+}
+
+class Verification {
+  constructor(token) {
+    this.token = token;
+  }
+
+  /**
+   * @returns {Promise<void>}
+   */
+  email() {
+    return request
+      .put(nextApi.verifyEmail(this.token));
+  }
+}
 exports.Account = Account;
 exports.Membership = Membership;
 exports.FtcUser = FtcUser;
-exports.emailLogin = emailLogin;
-exports.signUp = signUp;
-exports.sendPasswordResetLetter = sendPasswordResetLetter;
+exports.Credentials = Credentials;
+exports.ForgotPassword = ForgotPassword;
+exports.Verification = Verification;
