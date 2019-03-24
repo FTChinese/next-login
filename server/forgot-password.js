@@ -6,9 +6,6 @@ const render = require('../util/render');
 const {
   nextApi
 } = require("../model/endpoints");
-const {
-  customHeader
-} = require("../lib/request")
 
 const {
   AccountValidtor
@@ -23,9 +20,19 @@ const {
   errMessage
 } = require("../lib/response");
 
+const {
+  clientApp,
+} = require("./middleware");
+const {
+  sendPasswordResetLetter,
+} = require("../model/account");
+
 const router = new Router();
 
-// Ask user to enter email
+/**
+ * @description Ask user to enter email
+ * /user/password-reset
+ */
 router.get('/', async (ctx) => {
 
   /**
@@ -51,85 +58,99 @@ router.get('/', async (ctx) => {
   delete ctx.session.errors;
 });
 
-// Collect user entered email, check if email is valid, and send letter.
-// After letter is sent, redirect back to the GET page with a message.
-router.post('/', async function (ctx, next) {
-  /**
-   * @type {{email: string}}
-   */
-  const account = ctx.request.body;
-  /**
-   * @param {(null | {email: string})} result
-   * @param {(null | {email: string})} errors
-   */
-  const {
-    result,
-    errors
-  } = new AccountValidtor(account)
-    .validateEmail()
-    .end();
+// 
+// 
+/**
+ * @description Collect user entered email, check if email is valid, and send letter.
+ * After letter is sent, redirect back to the GET page with a message.
+ * /user/password-reset
+ */
+router.post('/', 
 
-  debug("Validation result: %O, error: %O", result, errors);
+  clientApp(),
 
-  if (errors) {
-    ctx.state.errors = errors;
-    ctx.state.email = account.email;
+  async function (ctx, next) {
+    /**
+     * @type {{email: string}}
+     */
+    const account = ctx.request.body;
+    /**
+     * @param {(null | {email: string})} result
+     * @param {(null | {email: string})} errors
+     */
+    const {
+      result,
+      errors
+    } = new AccountValidtor(account)
+      .validateEmail()
+      .end();
 
-    return await next();
-  }
+    debug("Validation result: %O, error: %O", result, errors);
 
-  try {
-    // Ask API to sent email.
-    await request.post(nextApi.sendPasswordResetLetter)
-      .set(customHeader(ctx.ip, ctx.header["user-agent"]))
-      .send(result);
-
-    // Tell redirected page what message to show.
-    ctx.session.alert = {
-      "key": "letter_sent"
-    };
-
-    // Redirect to /password-reset
-    return ctx.redirect(ctx.path);
-
-  } catch (e) {
-    ctx.state.email = account.email;
-
-    if (!isAPIError(e)) {
-      ctx.state.errors = buildErrMsg(e);
+    if (errors) {
+      ctx.state.errors = errors;
+      ctx.state.email = account.email;
 
       return await next();
     }
 
-    /**
-     * @type {APIError}
-     */
-    const body = e.response.body;
-    switch (e.status) {
-      // If the email used to receive password reset token is not found
-      case 404:
-        ctx.state.errors = {
-          email: errMessage.email_not_found,
-        };
-        break;
+    try {
+      await sendPasswordResetLetter(result, ctx.state.clientApp);
 
-        // 400 for JOSN parsing failure; 422 if `email` is missing.
-        // { server: "any server error" }
-        // or
-        // { email: email_missing_field }
-      default:
-        ctx.state.errors = buildApiError(body);
-        break;
+      // Tell redirected page what message to show.
+      ctx.session.alert = {
+        "key": "letter_sent"
+      };
+
+      // Redirect to /password-reset
+      return ctx.redirect(ctx.path);
+
+    } catch (e) {
+      ctx.state.email = account.email;
+
+      if (!isAPIError(e)) {
+        ctx.state.errors = buildErrMsg(e);
+
+        return await next();
+      }
+
+      /**
+       * @type {APIError}
+       */
+      const body = e.response.body;
+      switch (e.status) {
+        // If the email used to receive password reset token is not found
+        case 404:
+          ctx.state.errors = {
+            email: errMessage.email_not_found,
+          };
+          break;
+
+          // 400 for JOSN parsing failure; 422 if `email` is missing.
+          // { server: "any server error" }
+          // or
+          // { email: email_missing_field }
+        default:
+          ctx.state.errors = buildApiError(body);
+          break;
+      }
+
+      return await next();
     }
-
-    return await next();
+  }, 
+  
+  async (ctx) => {
+    ctx.body = await render('forgot-password/enter-email.html', ctx.state);
   }
-}, async (ctx) => {
-  ctx.body = await render('forgot-password/enter-email.html', ctx.state);
-});
+);
 
-// Verify password reset token and show reset password page.
-// API response has only two results: 200 or 404
+// 
+// 
+/**
+ * @description Verify password reset token and show reset password page.
+ * API response has only two results: 200 or 404
+ * /user/password-reset/:token
+ */
 router.get('/:token', async (ctx) => {
   // Get `token` from URL parameter.
   const token = ctx.params.token;
