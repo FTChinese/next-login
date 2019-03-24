@@ -1,18 +1,6 @@
-const request = require('superagent');
 const Router = require('koa-router');
 const debug = require('debug')('user:membership');
-
 const render = require('../../util/render');
-const {
-  nextApi
-} = require("../../model/endpoints");
-const {
-  sitemap
-} = require("../../model/sitemap");
-const {
-  isAPIError,
-  buildApiError
-} = require("../../lib/response");
 
 const {
   Account,
@@ -20,16 +8,29 @@ const {
 
 const router = new Router();
 
+/**
+ * @description Show membership
+ * /user/subscription
+ */
 router.get('/', async (ctx, next) => {
-  const account = new Account(ctx.session.user);
+  const accountWrapper = new Account(ctx.session.user);
+  const account = await accountWrapper.fetchAccount();
 
-  await account.fetchAccount()
+  debug("Account: %O", account);
 
   ctx.state.account = account;
 
   ctx.body = await render('subscription/membership.html', ctx.state);
+
+  if (account && account.hasOwnProperty("id")) {
+    ctx.session.user = account;
+  }
 });
 
+/**
+ * @description Show orders
+ * /user/subscription/orders
+ */
 router.get("/orders", async (ctx, enxt) => {
 
   const account = new Account(ctx.session.user);
