@@ -77,7 +77,10 @@ router.post('/',
       /**
        * @type {Account}
        */
-      const account = emailLogin(result, ctx.state.clientApp);
+      const account = await emailLogin(
+        result, 
+        ctx.state.clientApp
+      );
 
       // Keep login state
       ctx.session = {
