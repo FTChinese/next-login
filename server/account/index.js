@@ -2,9 +2,6 @@ const Router = require('koa-router');
 
 const render = require('../../util/render');
 const {
-  nextApi
-} = require("../../model/endpoints")
-const {
   buildApiError
 } = require("../../lib/response");
 const {
@@ -33,7 +30,7 @@ router.get('/', async (ctx, next) => {
   ctx.session.user = account;
 
   /**
-   * @type {{key: "email_changed" | "password_saved"}}
+   * @type {{key: "letter_sent"}}
    */
   if (ctx.session.alert) {
     ctx.state.alert = ctx.session.alert;

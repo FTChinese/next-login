@@ -33,7 +33,7 @@ router.post("/",
         .requestVerificationLetter(ctx.state.clientApp);
 
       ctx.session.alert = {
-        done: "letter_sent"
+        key: "letter_sent"
       };
 
       return ctx.redirect(sitemap.account);

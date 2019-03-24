@@ -25,6 +25,7 @@ const {
 } = require("./middleware");
 const {
   sendPasswordResetLetter,
+  ForgotPassword
 } = require("../model/request");
 
 const router = new Router();
@@ -58,8 +59,6 @@ router.get('/', async (ctx) => {
   delete ctx.session.errors;
 });
 
-// 
-// 
 /**
  * @description Collect user entered email, check if email is valid, and send letter.
  * After letter is sent, redirect back to the GET page with a message.
@@ -73,7 +72,10 @@ router.post('/',
     /**
      * @type {{email: string}}
      */
-    const account = ctx.request.body;
+    const email = ctx.request.body.email;
+
+    debug("Password reset email: %s", email);
+
     /**
      * @param {(null | {email: string})} result
      * @param {(null | {email: string})} errors
@@ -81,7 +83,7 @@ router.post('/',
     const {
       result,
       errors
-    } = new AccountValidtor(account)
+    } = new AccountValidtor({ email })
       .validateEmail()
       .end();
 
@@ -89,13 +91,17 @@ router.post('/',
 
     if (errors) {
       ctx.state.errors = errors;
-      ctx.state.email = account.email;
+      ctx.state.email = email;
 
       return await next();
     }
 
     try {
-      await sendPasswordResetLetter(result, ctx.state.clientApp);
+
+      await ForgotPassword.sendResetLetter(
+        result.email,
+        ctx.state.clientApp,
+      )
 
       // Tell redirected page what message to show.
       ctx.session.alert = {
@@ -106,7 +112,7 @@ router.post('/',
       return ctx.redirect(ctx.path);
 
     } catch (e) {
-      ctx.state.email = account.email;
+      ctx.state.email = email;
 
       if (!isAPIError(e)) {
         ctx.state.errors = buildErrMsg(e);
@@ -118,6 +124,8 @@ router.post('/',
        * @type {APIError}
        */
       const body = e.response.body;
+      debug("%O", body);
+
       switch (e.status) {
         // If the email used to receive password reset token is not found
         case 404:
@@ -144,8 +152,6 @@ router.post('/',
   }
 );
 
-// 
-// 
 /**
  * @description Verify password reset token and show reset password page.
  * API response has only two results: 200 or 404
@@ -156,16 +162,8 @@ router.get('/:token', async (ctx) => {
   const token = ctx.params.token;
 
   try {
-    // Query API if this token exists and is valid.
-    const resp = await request.get(`${nextApi.verifyPasswordResetToken}/${token}`);
 
-    /**
-     * Token exists and is valid, the email associated with this token is returned from API.
-     * Show the email on UI so that know for which account he is resetting password.
-     * @type {{email: string}}
-     */
-    const body = resp.body;
-    ctx.state.email = body.email;
+    ctx.state.email = await ForgotPassword.verifyToken(token);
 
     // Show form to allow user to enter new password.
     return ctx.body = await render('forgot-password/new-password.html', ctx.state);
@@ -227,11 +225,7 @@ router.post('/:token', async (ctx, next) => {
 
   try {
 
-    await request.post(nextApi.resetPassword)
-      .send({
-        token,
-        password: result.password
-      });
+    await ForgotPassword.reset(token, result.password);
 
     ctx.session.alert = {
       key: "password_reset"

@@ -3,9 +3,14 @@ const debug = require("debug")("user:render");
 const nunjucks = require('nunjucks');
 const util = require('util');
 const numeral = require("numeral");
-const { alertMsg } = require("../lib/alert");
 const { DateTime } = require("luxon");
 const localized = require("../model/localized");
+const alertMsg = {
+  "saved": "保存成功！",
+  "password_saved": "密码修改成功",
+  "email_changed": "邮箱已更新，验证邮件已经发送到您的新邮箱，请及时验证",
+  "letter_sent": "验证邮件已发送"
+};
 
 const env = nunjucks.configure(
   [

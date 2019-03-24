@@ -3,20 +3,18 @@
 {% block content %}
 <div class="mt-4">
   <h4 class="text-center">邮箱验证</h4>
-
-  {% if warning %}
-    <div class="alert alert-danger" role="alert">
-      <span>{{warning}}</span>
-    </div>
-  {% else %}
+  
+  {% if success %}
     <div class="text-center">
       邮箱已验证！
       {% if user %}
-        <a href="{{sitemap.login}}">返回</a>
+        <a href="{{ sitemap.account }}">返回</a>
       {% else %}
-        <a href="{{sitemap.account}}">登录</a>
+        <a href="{{sitemap.login }}">登录</a>
       {% endif %}
     </div>
+  {% else %}
+    <div>邮箱验证失败！</div>
   {% endif %}
 
 </div>

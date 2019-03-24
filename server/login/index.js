@@ -18,7 +18,7 @@ const {
 } = require("../../model/sitemap");
 
 const {
-  emailLogin,
+  Credentials,
 } = require("../../model/request");
 
 const {
@@ -77,10 +77,11 @@ router.post('/',
       /**
        * @type {Account}
        */
-      const account = await emailLogin(
-        result, 
-        ctx.state.clientApp
-      );
+      const account = await new Credentials(
+          result.email, 
+          result.password
+        )
+        .login(ctx.state.clientApp);
 
       // Keep login state
       ctx.session = {

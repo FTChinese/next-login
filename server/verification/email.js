@@ -14,23 +14,31 @@ const {
   buildApiError,
   errMessage
 } = require("../../lib/response");
+const {
+  Verification,
+} = require("../../model/request");
 
 const router = new Router();
 
-// Confirm verfication token
+/**
+ * @description Verify email
+ * /user/verify/email/:token
+ */
 router.get('/:token', async (ctx) => {
   const token = ctx.params.token;
+  debug("Email token: %s", token);
 
   try {
-    await request
-      .put(`${nextApi.verifyEmail}/${token}`);
+
+    await new Verification(token).email()
 
     // Update verification status if session exists
     if (ctx.session.user) {
       debug('Update session data after email verified');
-      ctx.session.user.vrf = true;
+      ctx.session.user.isVerified = true;
     }
 
+    ctx.state.success = true;
     ctx.body = await render('verification/email.html', ctx.state);
 
   } catch (e) {
@@ -49,12 +57,12 @@ router.get('/:token', async (ctx) => {
 
     switch (e.status) {
       case 404:
-        ctx.state.warning = errMessage.email_token_not_found;
+        ctx.state.errors = errMessage.email_token_not_found;
         break;
 
         // 400
       default:
-        ctx.state.warning = body.message
+        ctx.state.errors = buildApiError(body);
         break;
     }
 
