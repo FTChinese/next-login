@@ -1,14 +1,7 @@
-const request = require('superagent');
 const Router = require('koa-router');
 const debug = require("debug")('user:verification');
 
 const render = require('../../util/render');
-const {
-  nextApi
-} = require("../../model/endpoints");
-const {
-  sitemap
-} = require("../../model/sitemap");
 const {
   isAPIError,
   buildApiError,

@@ -4,18 +4,30 @@
 <div class="mt-4">
   <h4 class="text-center">邮箱验证</h4>
   
-  {% if success %}
+  {% if errors.message %}
+    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+      <span>{{errors.message}}</span>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+  {% endif %}
+
     <div class="text-center">
+      {% if success %}
       邮箱已验证！
+      {% else %}
+      邮箱验证失败！
+      {% endif %}
+    </div>
+  
+    <div class="text-center">
       {% if user %}
         <a href="{{ sitemap.account }}">返回</a>
       {% else %}
         <a href="{{sitemap.login }}">登录</a>
       {% endif %}
     </div>
-  {% else %}
-    <div>邮箱验证失败！</div>
-  {% endif %}
 
 </div>
 {% endblock %}
