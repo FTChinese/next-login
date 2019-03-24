@@ -10,9 +10,6 @@ const {
   sitemap
 } = require("../model/sitemap");
 const {
-  KEY_USER_ID,
-} = require("../lib/request");
-const {
   isAPIError,
   buildApiError,
   buildErrMsg
@@ -20,19 +17,18 @@ const {
 const {
   paging
 } = require("./middleware");
+const {
+  FtcUser,
+} = require("../model/account");
 
 const router = new Router();
 
 // Show the list of starred articles.
 // /starred?page=<number>
 router.get("/", paging(10), async (ctx, next) => {
-
-  const userId = ctx.session.user.id;
-  const resp = await request.get(nextApi.starred)
-    .query(ctx.state.paging)
-    .set(KEY_USER_ID, userId);
-
-  const articles = resp.body;
+  
+  const articles = await new FtcUser(ctx.session.user.id)
+    .starredArticles(ctx.state.paging);
 
   ctx.state.articles = articles;
   ctx.state.paging.listSize = articles.length;
@@ -42,12 +38,10 @@ router.get("/", paging(10), async (ctx, next) => {
 
 router.post("/:id/delete", async (ctx, next) => {
   const id = ctx.params.id;
-  debug("Delete article %s", id);
 
   try {
-    const userId = ctx.session.user.id;
-    await request.delete(`${nextApi.starred}/${id}`)
-      .set("X-User-Id", userId);
+    await new FtcUser(ctx.session.user.id)
+      .unstarArticle(id)
 
     return ctx.redirect(sitemap.starred);
   } catch (e) {

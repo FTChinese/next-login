@@ -7,77 +7,70 @@ const {
 const {
   isAPIError,
   buildErrMsg,
-  buildApiError,
+  buildApiError
 } = require("../../lib/response");
 const {
-  AccountValidtor
+  ProfileValidator
 } = require("../../lib/validate");
 const {
-  Account,
   FtcUser,
 } = require("../../model/account");
 
 const router = new Router();
 
 /**
- * @description Show email update page.
- * /user/account/email
+ * @description Show page to update display name
+ * /user/profile/display-name
  */
 router.get("/", async (ctx) => {
-  const accounWrapper = new Account(ctx.session.user);
+  const userId = ctx.session.user.id;
 
-  const account = await accounWrapper.fetchAccount();
+  const user = new FtcUser(userId);
 
-  ctx.state.account = account;
+  const profile = await user.fetchProfile();
 
-  ctx.body = await render("account/email.html", ctx.state);
+  ctx.state.profile = profile;
+  ctx.body = await render("profile/display-name.html", ctx.state);
 });
 
 /**
- * @description Submit new email
- * /user/account/email
+ * @description Update display name
+ * /user/profile/display-name
  */
 router.post('/', async (ctx, next) => {
 
   /**
-   * @type {{email: string}}
+   * @todo Change to ProfileValidator
+   * @type {{userName: string}}
    */
-  const account = ctx.request.body.account;
-
-  /**
-   * @type {{email: string}}
-   */
+  const profile = ctx.request.body.profile;
   const {
     result,
     errors
-  } = new AccountValidtor({
-      email: account.email,
-      currentEmail: ctx.session.user.email,
-    })
-    .validateEmail()
-    .validateEmailUpdate()
+  } = new ProfileValidator(profile)
+    .displayName()
     .end();
+
 
   if (errors) {
     ctx.state.errors = errors;
-    ctx.state.account = account;
+    ctx.state.profile = profile;
 
     return await next();
   }
 
   try {
     await new FtcUser(ctx.session.user.id)
-      .updateEmail(result);
+      .updateDisplayName(result);
 
-    // Pass data upon redirect.
     ctx.session.alert = {
-      key: "email_changed",
+      key: "saved"
     };
 
-    return ctx.redirect(sitemap.account);
-  } catch (e) {
+    return ctx.redirect(sitemap.profile);
 
-    ctx.state.account = account
+  } catch (e) {
+    ctx.state.profile = profile;
 
     if (!isAPIError(e)) {
       debug("%O", e);
@@ -94,7 +87,7 @@ router.post('/', async (ctx, next) => {
     return await next();
   }
 }, async (ctx) => {
-  ctx.body = await render("account/email.html", ctx.state);
+  ctx.body = await render("profile/display-name.html", ctx.state);
 });
 
 module.exports = router.routes();

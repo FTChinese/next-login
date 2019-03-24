@@ -1,4 +1,3 @@
-const request = require('superagent');
 const Router = require('koa-router');
 const debug = require('debug')('user:login');
 
@@ -15,17 +14,16 @@ const {
 } = require("../../lib/response");
 
 const {
-  setClientHeader,
-  KEY_USER_ID,
-} = require("../../lib/request");
-
-const {
-  nextApi
-} = require("../../model/endpoints");
-
-const {
   sitemap
 } = require("../../model/sitemap");
+
+const {
+  emailLogin,
+} = require("../../model/account");
+
+const {
+  clientApp,
+} = require("../middleware");
 
 // const wechat = require('./wechat');
 
@@ -41,107 +39,98 @@ router.get('/', async function (ctx) {
   ctx.body = await render('login.html', ctx.state);
 });
 
-router.post('/', async function (ctx, next) {
-  /**
-   * @todo Keep session longer
-   */
-  let remeberMe = ctx.request.body.remeberMe;
+router.post('/',
 
-  /**
-   * @type {{email: string, password: string}}
-   */
-  const credentials = ctx.request.body.credentials;
-
-  /**
-   * @type {{email: string, password: string} || null} 
-   */
-  const {
-    result,
-    errors
-  } = new AccountValidtor(credentials)
-    .validateEmail(true)
-    .validatePassword(true)
-    .end();
-
-  debug("Validation result: %O, error: %O", result, errors);
-
-  if (errors) {
-    ctx.state.errors = errors;
-    ctx.state.credentials = credentials;
-
-    return await next();
-  }
-
-  // Send data to API
-  try {
-    const authResp = await request.post(nextApi.login)
-      .set(setClientHeader(ctx.ip, ctx.header["user-agent"]))
-      .send(result);
+  clientApp(), 
+  
+  async function (ctx, next) {
+    /**
+     * @todo Keep session longer
+     */
+    let remeberMe = ctx.request.body.remeberMe;
 
     /**
-     * @type {{id: string}}
+     * @type {ICredentials}
      */
-    const user = authResp.body;
-    debug('Login result: %o', user);
+    const credentials = ctx.request.body.credentials;
 
-    const resp = await request.get(nextApi.account)
-      .set(KEY_USER_ID, user.id)
-    
-      /**
-       * @type {Account}
-       */
-    const account = resp.body;
+    /**
+     * @type {{email: string, password: string}} 
+     */
+    const {
+      result,
+      errors
+    } = new AccountValidtor(credentials)
+      .validateEmail(true)
+      .validatePassword(true)
+      .end();
 
-    // Keep login state
-    ctx.session = {
-      user: account,
-    };
-
-    ctx.cookies.set('logged_in', 'yes');
-
-    return ctx.redirect(sitemap.profile);
-
-  } catch (e) {
-    // stick form
-    ctx.state.credentials = credentials
-
-    if (!isAPIError(e)) {
-      debug("%O", e);
-      ctx.state.errors = buildErrMsg(e);
+    if (errors) {
+      ctx.state.errors = errors;
+      ctx.state.credentials = credentials;
 
       return await next();
     }
 
-    /**
-     * @type {{message: string, error: Object}}
-     */
-    const body = e.response.body;
-    debug("API error response: %O", body);
+    // Send data to API
+    try {
+      /**
+       * @type {Account}
+       */
+      const account = emailLogin(result, ctx.state.clientApp);
 
-    // 404, 403
-    switch (e.status) {
-      case 404:
-      case 403:
-        ctx.state.errors = {
-          credentials: errMessage.credentials_invalid,
-        };
-        break;
+      // Keep login state
+      ctx.session = {
+        user: account,
+      };
 
-      // 400: { server: "Problems parsing JSON" }
-      // 422: 
-      // email: email_missing_field || email_invalid
-      // password: password_missing_field || password_invalid
-      default:
-        ctx.state.errors = buildApiError(body);
-        break;
+      ctx.cookies.set('logged_in', 'yes');
+
+      return ctx.redirect(sitemap.profile);
+
+    } catch (e) {
+      // stick form
+      ctx.state.credentials = credentials
+
+      if (!isAPIError(e)) {
+        debug("%O", e);
+        ctx.state.errors = buildErrMsg(e);
+
+        return await next();
+      }
+
+      /**
+       * @type {{message: string, error: Object}}
+       */
+      const body = e.response.body;
+      debug("API error response: %O", body);
+
+      // 404, 403
+      switch (e.status) {
+        case 404:
+        case 403:
+          ctx.state.errors = {
+            credentials: errMessage.credentials_invalid,
+          };
+          break;
+
+        // 400: { server: "Problems parsing JSON" }
+        // 422: 
+        // email: email_missing_field || email_invalid
+        // password: password_missing_field || password_invalid
+        default:
+          ctx.state.errors = buildApiError(body);
+          break;
+      }
+
+      debug("Errors: %O", ctx.state.errors);
+
+      return await next();
     }
-
-    debug("Errors: %O", ctx.state.errors);
-
-    return await next();
+  }, 
+  async (ctx) => {
+    ctx.body = await render('login.html', ctx.state);
   }
-}, async (ctx) => {
-  ctx.body = await render('login.html', ctx.state);
-});
+);
 
 module.exports = router.routes();

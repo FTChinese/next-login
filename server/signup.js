@@ -1,11 +1,7 @@
-const request = require('superagent');
 const Router = require('koa-router');
 const debug = require("debug")('user:signup');
 
 const render = require('../util/render');
-const {
-  nextApi
-} = require("../model/endpoints");
 const {
   AccountValidtor
 } = require("../lib/validate");
@@ -19,9 +15,11 @@ const {
   buildErrMsg
 } = require("../lib/response");
 const {
-  customHeader,
-  setUserId
-} = require("../lib/request");
+  clientApp,
+} = require("./middleware");
+const {
+  signUp,
+} = require("../model/account");
 
 const router = new Router();
 
@@ -36,87 +34,82 @@ router.get('/', async (ctx) => {
 });
 
 // User submitted account to be created.
-router.post('/', async (ctx, next) => {
-  /**
-   * @type {{email: string, password: string}}
-   */
-  const account = ctx.request.body.account;
-  const {
-    result,
-    errors
-  } = new AccountValidtor(account)
-    .validateEmail()
-    .validatePassword()
-    .end();
+router.post('/', 
+  clientApp(),
 
-  debug("Validation result: %O, error: %O", result, errors);
-
-  if (errors) {
-    ctx.state.errors = errors;
-    ctx.state.account = account;
-
-    return await next();
-  }
-
-  // Request to API
-  try {
+  async (ctx, next) => {
     /**
-     * @type {{id: string}}
+     * @type {{email: string, password: string}}
      */
-    const resp = await request.post(nextApi.signup)
-      .set(customHeader(ctx.ip, ctx.header['user-agent']))
-      .send(result);
+    const account = ctx.request.body.account;
+    const {
+      result,
+      errors
+    } = new AccountValidtor(account)
+      .validateEmail()
+      .validatePassword()
+      .end();
 
-    const userId = resp.id
+    debug("Validation result: %O, error: %O", result, errors);
 
-    const acntResp = await request.get(nextApi.account)
-      .set(setUserId(userId))
-
-    ctx.session = {
-      user: acntResp.body,
-    };
-
-    ctx.cookies.set('logged_in', 'yes');
-
-    // Redirect to user's email page
-    return ctx.redirect(sitemap.profile);
-
-  } catch (e) {
-    ctx.state.account = account;
-
-    if (!isAPIError(e)) {
-      ctx.state.errors = buildErrMsg(e);
+    if (errors) {
+      ctx.state.errors = errors;
+      ctx.state.account = account;
 
       return await next();
     }
 
-    /**
-     * @type {APIError}
-     */
-    const body = e.response.body;
-    // 400， 422， 429
-    switch (e.status) {
-      case 429:
-        ctx.state.errors = {
-          message: errMessage.too_many_requests,
-        };
-        break;
+    // Request to API
+    try {
+      const account = await signUp(result, ctx.state.clientApp);
 
-        // 422: {email: email_missing_field}
-        // {email: email_invalid}
-        // {email: email_already_exists}
-        // {password: password_missing_field}
-        // {password: password_invalid}
-        // 400: {server: "Problems parsing JSON"}
-      default:
-        ctx.state.errors = buildApiError(body);
-        break;
+      ctx.session = {
+        user: account,
+      };
+
+      ctx.cookies.set('logged_in', 'yes');
+
+      // Redirect to user's email page
+      return ctx.redirect(sitemap.profile);
+
+    } catch (e) {
+      ctx.state.account = account;
+
+      if (!isAPIError(e)) {
+        ctx.state.errors = buildErrMsg(e);
+
+        return await next();
+      }
+
+      /**
+       * @type {APIError}
+       */
+      const body = e.response.body;
+      // 400， 422， 429
+      switch (e.status) {
+        case 429:
+          ctx.state.errors = {
+            message: errMessage.too_many_requests,
+          };
+          break;
+
+          // 422: {email: email_missing_field}
+          // {email: email_invalid}
+          // {email: email_already_exists}
+          // {password: password_missing_field}
+          // {password: password_invalid}
+          // 400: {server: "Problems parsing JSON"}
+        default:
+          ctx.state.errors = buildApiError(body);
+          break;
+      }
+
+      return await next();
     }
-
-    return await next();
+  }, 
+  async (ctx) => {
+    ctx.body = await render('signup.html', ctx.state);
   }
-}, async (ctx) => {
-  ctx.body = await render('signup.html', ctx.state);
-});
+);
 
 module.exports = router.routes();

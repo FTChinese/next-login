@@ -1,7 +1,7 @@
 const request = require('superagent');
 const Router = require('koa-router');
 const debug = require("debug")('user:password');
-
+const render = require('../../util/render');
 const {
   nextApi
 } = require("../../model/endpoints")
@@ -10,14 +10,26 @@ const {
 } = require("../../model/sitemap");
 const {
   isAPIError,
+  buildErrMsg,
   buildApiError,
   errMessage
 } = require("../../lib/response");
 const {
   AccountValidtor
 } = require("../../lib/validate");
+const {
+  FtcUser,
+} = require("../../model/account");
 
 const router = new Router();
+
+/**
+ * @description Show change password page
+ * /user/account/password
+ */
+router.get("/", async (ctx, next) => {
+  ctx.body = await render("account/password.html", ctx.state);
+});
 
 /**
  * @description Submit new password
@@ -27,7 +39,7 @@ router.post('/', async (ctx, next) => {
   const account = ctx.request.body;
 
   /**
-   * @type {{password: string, oldPassword: string} | null}
+   * @type {{oldPassword: string, password: string, confirmPassword: string}}
    */
   const {
     result,
@@ -39,17 +51,15 @@ router.post('/', async (ctx, next) => {
     .end();
 
   if (errors) {
-    ctx.session.errors = errors;
+    ctx.state.errors = errors;
 
-    return ctx.redirect(sitemap.account);
+    return await next();
   }
 
   try {
-    const userId = ctx.session.user.id;
-
-    await request.patch(nextApi.password)
-      .set('X-User-Id', userId)
-      .send({
+    
+    await new FtcUser(ctx.session.user.id)
+      .updatePassword({
         oldPassword: result.oldPassword,
         newPassword: result.password,
       });
@@ -64,11 +74,9 @@ router.post('/', async (ctx, next) => {
 
     if (!isAPIError(e)) {
       debug("%O", e);
-      ctx.session.errors = {
-        message: e.message
-      };
+      ctx.state.errors = buildErrMsg
 
-      return ctx.redirect(sitemap.account);
+      return await next();
     }
 
     switch (e.status) {
@@ -76,21 +84,20 @@ router.post('/', async (ctx, next) => {
        * 403 error could only be converted to human readable message here.
        */
       case 403:
-        ctx.session.errors = {
+        ctx.state.errors = {
           oldPassword: errMessage.password_forbidden,
         };
         break;
 
       default:
-        /**
-         * @type {{message: string, error: Object}}
-         */
-        ctx.session.apiErr = e.response.body;
+        ctx.state.errors = buildApiError(e.response.body);
         break;
     }
 
-    return ctx.redirect(sitemap.account);
+    return await next();
   }
+}, async (ctx) => {
+  ctx.body = await render("account/password.html", ctx.state);
 });
 
 module.exports = router.routes();
