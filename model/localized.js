@@ -6,4 +6,6 @@ module.exports =  {
   "premium": "高端会员",
   "tenpay": "微信支付",
   "alipay": "支付宝",
+  "M": "男",
+  "F": "女",
 };
