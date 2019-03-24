@@ -1,4 +1,3 @@
-const request = require('superagent');
 const Router = require('koa-router');
 
 const render = require('../../util/render');
@@ -25,47 +24,24 @@ const router = new Router();
  */
 router.get('/', async (ctx, next) => {
 
-  const acntInst = new Account(ctx.session.user);
+  const accountWrapper = new Account(ctx.session.user);
   ;
 
-  const acntData = await acntInst.fetchAccount();
-  ctx.state.account = acntData;
-  ctx.state.account.currentEmail = acntData.email;
+  const account = await accountWrapper.fetchAccount();
+  ctx.state.account = account;
   
-  ctx.session.user = acntData;
+  ctx.session.user = account;
 
   /**
-   * @type {{key: "email_changed | password_saved"}}
+   * @type {{key: "email_changed" | "password_saved"}}
    */
   if (ctx.session.alert) {
     ctx.state.alert = ctx.session.alert;
   }
 
-  /**
-   * @type {{message: string}}
-   */
-  if (ctx.session.errors) {
-    ctx.state.errors = ctx.session.errors;
-  }
+  ctx.body = await render("account/account.html", ctx.state);
 
-  /**
-   * @type {{ message: string, error: { field: "email", code: "missing_field | invalid | already_exists" } }} for email
-   * @type {{ message: string, error: { field: "password", code: "missing_field | invalid" } }} for password
-   */
-  if (ctx.session.apiErr) {
-    /**
-     * @type {{ email?: string, password?: string}}
-     */
-    ctx.state.errors = buildApiError(ctx.session.apiErr);
-  }
-
-  ctx.body = await render("account.html", ctx.state);
-
-  // Remove session data
-  delete ctx.session.account;
   delete ctx.session.alert;
-  delete ctx.session.errors;
-  delete ctx.session.apiErr;
 });
 
 router.use("/email", emailRouter);
