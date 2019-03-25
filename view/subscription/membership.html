@@ -35,7 +35,55 @@
         <a href="{{ sitemap.subs }}/orders">订单历史</a>
       </div>
     {% else %}
-      <h4>订阅FT中文网会员</h4>
+      <h2>订阅FT中文网会员</h2>
+        <div class="container">
+          <div class="row">
+              <div class="col-12 pt-3 pb-3">
+                  <h4 class="text-center">请选择您的订阅方式</h4>
+              </div>
+          </div>
+          <div class="row justify-content-around o-card-group">
+              {% for product in products %}
+              <div class="col-lg-6 mb-3">
+                  <div class="card">
+                      <div class="card-body">
+                          <h3 class="card-title text-center mb-3 pb-3">{{product.heading}}</h3>
+                          <ul>
+                              {% for item in product.benefits %}
+                              <li>{{ item }}</li>
+                              {% endfor %}
+                          </ul>
+                          {% if product.smallPrint %}
+                          <small>{{product.smallPrint}}</small>
+                          {% endif %}
+                      </div>
+      
+                      <div class="card-footer">
+                          {% for plan in product.pricing %}
+                          <div class="text-center mb-2">
+                              <a {% if plan.cycle=="month" %}
+                                class="btn btn-outline-primary" 
+                              {% else %} 
+                                class="btn btn-primary text-white"
+                              {% endif %}
+                                href="{{sitemap.payment(plan.tier, plan.cycle)}}"
+                                target="_blank">
+                                  {% if plan.listPrice != plan.netPrice %}
+                                  <s>{{product.currency | localize}}{{ plan.listPrice | toCurrency }}/{{ plan.cycle |
+                                      localize }}</s>
+                                  {% endif %}
+                                  {{product.currency | localize}}{{ plan.listPrice | toCurrency }}/{{ plan.cycle | localize
+                                  }}
+                              </a>
+                          </div>
+                          {% endfor %}
+                      </div>
+                  </div>
+              </div>
+              {% endfor %}
+          </div>
+      </div>
+
     {% endif %}
   </div>
 

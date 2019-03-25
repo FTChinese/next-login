@@ -84,6 +84,14 @@ class Account {
 
     return resp.body;
   }
+
+  async wxPlaceOrder(tier, cycle) {
+
+  }
+
+  async aliPlayOrder(tier, cycle) {
+    
+  }
 }
 
 class Membership {

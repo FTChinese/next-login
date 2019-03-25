@@ -121,7 +121,32 @@ a:hover {
   height: 100%;
   background-color: #0a5e66;
 }
-
+.o-card-group .card {
+  height: 100%;
+  background-color: transparent;
+  border-radius: 0;
+}
+.o-card-group .card-title {
+  border-bottom: 1px solid #26747a;
+}
+.o-card-group .card ul {
+  padding-left: 0;
+}
+.o-card-group .card li {
+  list-style-position: outside;
+  list-style-type: none;
+  padding-left: 1.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  background-size: 1.5em;
+  background-image: url(https://www.ft.com/__origami/service/image/v2/images/raw/fticon-v1:tick?tint=26747a&format=svg&source=ftchinese);
+  background-repeat: no-repeat;
+  background-position: left top;
+}
+.o-card-group .card-footer {
+  background-color:transparent;
+  border-top: 0;
+}
 .o-footer {
   margin-top: 40px;
   border-top: 10px solid;

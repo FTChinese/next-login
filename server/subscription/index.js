@@ -5,6 +5,12 @@ const render = require('../../util/render');
 const {
   Account,
 } = require("../../model/request");
+/**
+ * @type {IPaywall}
+ */
+const defaultPaywall = require("../../model/paywall-default.json");
+
+const payRouter = require("./pay");
 
 const router = new Router();
 
@@ -19,6 +25,7 @@ router.get('/', async (ctx, next) => {
   debug("Account: %O", account);
 
   ctx.state.account = account;
+  ctx.state.products = defaultPaywall.products;
 
   ctx.body = await render('subscription/membership.html', ctx.state);
 
@@ -41,5 +48,7 @@ router.get("/orders", async (ctx, enxt) => {
 
   ctx.body = await render("subscription/orders.html", ctx.state)
 });
+
+router.use("/pay", payRouter);
 
 module.exports = router.routes();

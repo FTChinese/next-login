@@ -1,0 +1,23 @@
+{
+  "premium_year": {
+      "tier": "premium",
+      "cycle": "year",
+      "listPrice": 1998,
+      "netPrice": 1998,
+      "description": "FT中文网 - 高端会员"
+  },
+  "standard_month": {
+      "tier": "standard",
+      "cycle": "month",
+      "listPrice": 28,
+      "netPrice": 28,
+      "description": "FT中文网 - 月度标准会员"
+  },
+  "standard_year": {
+      "tier": "standard",
+      "cycle": "year",
+      "listPrice": 258,
+      "netPrice": 258,
+      "description": "FT中文网 - 年度标准会员"
+  }
+}
