@@ -132,4 +132,15 @@ declare interface IPromo {
     createdAt: string;
 }
 
+declare interface IWxPayQR {
+    codeUrl: string;
+}
+
+declare interface IAliWebPay {
+    ftcOrderId: string;
+    listPrice: string;
+    netPrice: string;
+    payUrl: string;
+}
+
 
