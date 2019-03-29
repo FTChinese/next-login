@@ -15,6 +15,7 @@ const sitemap = exports.sitemap = {
   password:       `${prefix}/account/password`,
   requestVerification: `${prefix}/account/request-verification`,
   subs:           `${prefix}/subscription`,
+  subsTest:       `${prefix}/subscription/test`,
   renewal:        `${prefix}/subscription/renew`,
   payment: function(tier, cycle) {
     return `${prefix}/subscription/pay/${tier}/${cycle}`;
