@@ -5,7 +5,8 @@ const {
 } = require("luxon");
 
 const {
-  nextApi
+  nextApi,
+  subsApi,
 } = require("./endpoints");
 const localized = require("./localized");
 
@@ -85,12 +86,50 @@ class Account {
     return resp.body;
   }
 
+  /**
+   * 
+   * @param {string} tier 
+   * @param {string} cycle 
+   * @returns {Promise<IWxPayQR>}
+   */
   async wxPlaceOrder(tier, cycle) {
+    const req = request
+      .post(subsApi.wxUnifiedOrder(tier, cycle));
 
+    if (this._data.id) {
+      req.set(KEY_USER_ID, this._data.id);
+    }
+
+    if (this._data.unionId) {
+      req.set(KEY_UNION_ID, this._data.unionId);
+    }
+
+    const resp = await req;
+
+    return resp.body;
   }
 
-  async aliPlayOrder(tier, cycle) {
-    
+  /**
+   * 
+   * @param {string} tier 
+   * @param {string} cycle 
+   * @returns {Promise<IAliWebPay>}
+   */
+  async aliPlaceOrder(tier, cycle) {
+    const req = request
+      .post(subsApi.aliWebOrder(tier, cycle));
+
+    if (this._data.id) {
+      req.set(KEY_USER_ID, this._data.id);
+    }
+
+    if (this._data.unionId) {
+      req.set(KEY_UNION_ID, this._data.unionId);
+    }
+
+    const resp = await req;
+
+    return resp.body;
   }
 }
 
