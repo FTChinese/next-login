@@ -1,4 +1,5 @@
 const Router = require('koa-router');
+const QRCode = require("qrcode");
 const debug = require('debug')('user:pay');
 const render = require('../../util/render');
 
@@ -54,30 +55,43 @@ router.post("/:tier/:cycle",
     const cycle = params.cycle;
 
     const payMethod = ctx.request.body.payMethod;
+    const plan = findPlan(tier, cycle);
 
-    if (!findPlan(tier, cycle)) {
+    if (!plan) {
       ctx.status = 404;
       return;
     }
 
     const account = new Account(ctx.session.user);
 
-    if (!["alipay", "wechat"].includes(payMethod)) {
-      ctx.status = 404;
-      return;
-    }
-    switch (payMethod) {
-      case "alipay":
-        await account.aliPlayOrder(tier, cycle);
-
-        break;
-      case "wechat":
-        await account.wxPlaceOrder(tier, cycle);
-        
-        break;
-      default:
-        ctx.state = 404;
-        return;
+    try {
+      switch (payMethod) {
+        // Use user-agent to decide launch desktop web pay or mobile web pay
+        case "alipay":
+          const aliOrder = await account.aliPlaceOrder(tier, cycle);
+          ctx.redirect(aliOrder.payUrl);
+          
+          break;
+        case "wechat":
+          /**
+           * @type {{codeUrl: string}}
+           */
+          const wxPrepay = await account.wxPlaceOrder(tier, cycle);
+  
+          const dataUrl = await QRCode.toDataURL(wxPrepay.codeUrl);
+  
+          ctx.state.plan = plan;
+          ctx.state.qrData = dataUrl;
+          ctx.body = await render("subscription/wxpay-qr.html", ctx.state);
+          // QRCode.toFile
+          
+          break;
+        default:
+          ctx.state = 404;
+          return;
+      }
+    } catch (e) {
+      throw e;
     }
   }
 );
