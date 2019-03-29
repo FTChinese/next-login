@@ -2,6 +2,7 @@ const baseUrl = "http://localhost:8000";
 const user = `${baseUrl}/user`
 const users = `${baseUrl}/users`
 const passwordReset = `${users}/password-reset`;
+const subsBaseUrl = "http://localhost:8200";
 
 exports.nextApi = {
   signup: `${users}/signup`,
@@ -30,5 +31,11 @@ exports.nextApi = {
 };
 
 exports.subsApi = {
+  wxUnifiedOrder: function(tier, cycle) {
+    return `${subsBaseUrl}/wxpay/web/${tier}/${cycle}`;
+  },
 
+  aliWebOrder: function(tier, cycle) {
+    return `${subsBaseUrl}/alipay/web/${tier}/${cycle}`;
+  },
 };
