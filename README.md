@@ -119,3 +119,22 @@ UNIQUE INDEX (unionid)
 ```
 
 But be careful wechat might change the lenght any time. So it might be better to store as varchar if you don't mind taking up larger disk space.
+
+## Alipay
+
+Alipay studip design: Its so-called api only accepts HTML form!
+
+Its SDK build an HTML form and automatically submit it and  then redirect to Alipay website.
+
+```html
+<form action="https://openapi.alipay.com/gateway.do?method=alipay.trade.page.pay&app_id=2018053060263354&charset=utf-8&version=1.0&sign_type=RSA2&timestamp=2019-03-28%2011%3A41%3A38&notify_url=http%3A%2F%2Fwww.ftacademy.cn%2Fapi%2Fsandbox%2Fcallback%2Falipay&sign=kHoLkQHZMQ1TC4LNcptrjx73G05QMZihGuw9iic3Me7CUCIQNsdkGBISiordNtodO2yJRGLbeKYoG5w7ELyiZFshj%2FjY1d4vfCYpFtpGa2DMYs1vP4aO425SLpBKG4OYsDVYTpXY%2FRUzvAcB83HILbXvTtVCsx6cPzskkYmRRplV7W6KOCm5XbNixKB76QuJooRHkqgPxpo%2F%2BchjcSEfb96twutnE1pzPu%2FjpkeU3ES3ARt2j%2FjXhj9Z3%2FmfistAnMzqNfRMDQfKrtLpTX%2BEk%2BgeqIQZur3ah0wCAuGWNVqkIgGN9ef9682RYrzVlMKcFBlW3ewfDoF5LLEP4Ae5IA%3D%3D" method="post" name="alipaySDKSubmit1553744498693" id="alipaySDKSubmit1553744498693">
+    <input type="hidden" name="alipay_sdk" value="alipay-sdk-nodejs-3.0.4" />
+    <input 
+        type="hidden" 
+        name="biz_content" 
+        value="{&quot;out_trade_no&quot;:&quot;FT5d616b25d44352464b258a1849d2a3730f12a51a3b04df548cb82d62b2ab3dae&quot;,&quot;product_code&quot;:&quot;FAST_INSTANT_TRADE_PAY&quot;,&quot;total_amount&quot;:&quot;0.0.1&quot;,&quot;subject&quot;:&quot;会员测试&quot;}" />   
+</form>      
+<script>
+    document.forms["alipaySDKSubmit1553744498693"].submit();
+</script>
+```
