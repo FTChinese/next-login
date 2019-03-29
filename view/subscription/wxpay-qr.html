@@ -1,0 +1,33 @@
+{% extends "layouts/base.html" %} 
+
+{% block content %}
+  <div class="row justify-content-center mt-3">
+    <div class="col-sm-6">
+
+      <div class="card mb-5">
+        <div class="card-header">订阅FT会员</div>
+        <div class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between">
+            <span>会员类型:</span>
+            <span>{{ plan.tier | localize }}/{{ plan.cycle | localize }}</span>
+          </li>
+  
+          <li class="list-group-item d-flex justify-content-between">
+            <span>支付金额:</span>
+            <span>¥{{ plan.netPrice | toCurrency }}</span>
+          </li>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <h4>请打开微信扫码</h4>
+        <img src="{{qrData}}" alt="">
+        <div class="mt-1">
+            <small>微信 -> 发现 -> 扫一扫</small>
+        </div>
+        <a href="{{ sitemap.subsTest }}">支付完成？返回</a>
+      </div>
+      
+    </div>
+  </div>
+{% endblock %}
