@@ -26,5 +26,18 @@ module.exports = {
       error_file: path.resolve(process.env.HOME, 'logs/login-err.log'),
       out_file: path.resolve(process.env.HOME, 'logs/login-out.log')
     }
-  ]
+  ],
+  deploy: {
+    "next-user": {
+      user: "node",
+      host: "nodeserver",
+      ref: "origin/master",
+      repo: "https://github.com/FTChinese/next-user.git",
+      path: "/home/node/next/next-user",
+      "pre-setup": "echo 'pre step'",
+      "post-setup": "ls -la",
+      "pre-deploy-local": "echo 'Begin to deploy'",
+      "post-deploy": "npm install --production && pm2 startOrRestart ecosystem.config.js --env production"
+    }
+  }
 }
