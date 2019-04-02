@@ -8,6 +8,10 @@ const {
   sidebarNav,
   sitemap,
 } = require("../model/sitemap");
+const {
+  isAPIError,
+} = require("../lib/response");
+
 const render = require("../util/render");
 
 /**
@@ -129,8 +133,13 @@ exports.handleErrors = function() {
       
       ctx.state.error = {
         status: e.status || 500,
-        message: e.message || 'Internal Server Error',
         stack: e.stack
+      }
+      
+      if (isAPIError(e)) {
+        ctx.state.error.message = e.response.body.message
+      } else {
+        ctx.state.error.message = e.message || 'Internal Server Error'
       }
 
       ctx.status = ctx.state.error.status;
