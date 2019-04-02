@@ -1,5 +1,4 @@
 const debug = require("debug")('user:index');
-// const log = require('./util/logger');
 const path = require('path');
 const Koa = require('koa');
 const Router = require('koa-router');
@@ -31,6 +30,7 @@ const notification = require("./server/notification");
 const starred = require("./server/starred");
 
 const version = require('./server/version');
+const testRouter = require("./server/test");
 
 const isProduction = process.env.NODE_ENV === 'production';
 const app = new Koa();
@@ -82,6 +82,7 @@ router.use('/subscription', checkSession(), subscription);
 router.use('/notification', checkSession(), notification);
 router.use("/starred", checkSession(), starred);
 router.use('/__version', version);
+router.use("/test", testRouter);
 
 app.use(router.routes());
 
