@@ -132,8 +132,12 @@ declare interface IPromo {
     createdAt: string;
 }
 
-declare interface IWxPayQR {
+declare interface IWxQRPay {
     codeUrl: string;
+}
+
+declare interface IWxMobilePay {
+    mWebUrl: string;
 }
 
 declare interface IAliWebPay {
