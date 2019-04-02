@@ -2,6 +2,7 @@ const Router = require('koa-router');
 const QRCode = require("qrcode");
 const debug = require('debug')('user:pay');
 const render = require('../../util/render');
+const MobileDetect = require("mobile-detect");
 
 const {
   findPlan,
@@ -62,30 +63,45 @@ router.post("/:tier/:cycle",
       return;
     }
 
-    const account = new Account(ctx.session.user);
+    // Detect device type.
+    const md = new MobileDetect(ctx.header["user-agent"]);
+    const isMobile = !!md.mobile();
+
+    debug("Client app: %O", ctx.state.clientApp);
+
+    const account = new Account(ctx.session.user, ctx.state.clientApp);
 
     try {
       switch (payMethod) {
         // Use user-agent to decide launch desktop web pay or mobile web pay
         case "alipay":
-          const aliOrder = await account.aliPlaceOrder(tier, cycle);
-          ctx.redirect(aliOrder.payUrl);
-          
+          // If user is using mobile browser on phone
+          if (isMobile) {
+            const aliOrder = await account.aliMobileOrder(tier, cycle);
+            ctx.redirect(aliOrder.payUrl);
+          } else {
+            // Otherwise treat user on desktop
+            const aliOrder = await account.aliDesktopOrder(tier, cycle);
+            ctx.redirect(aliOrder.payUrl);
+          }
           break;
+
         case "wechat":
+        // NOTE: we cannot use wechat's MWEB and JSAPI payment due to the fact those two
+        // methods could only be used by ftacademy.com
+        // accoding to wechat's rule.
           /**
            * @type {{codeUrl: string}}
            */
-          const wxPrepay = await account.wxPlaceOrder(tier, cycle);
+          const wxPrepay = await account.wxDesktopOrder(tier, cycle);
   
           const dataUrl = await QRCode.toDataURL(wxPrepay.codeUrl);
   
           ctx.state.plan = plan;
           ctx.state.qrData = dataUrl;
           ctx.body = await render("subscription/wxpay-qr.html", ctx.state);
-          // QRCode.toFile
-          
           break;
+
         default:
           ctx.state = 404;
           return;
