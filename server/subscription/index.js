@@ -3,6 +3,9 @@ const debug = require('debug')('user:membership');
 const render = require('../../util/render');
 
 const {
+  findPlan,
+} = require("../../model/paywall");
+const {
   Account,
 } = require("../../model/request");
 /**
@@ -33,6 +36,7 @@ router.get('/', async (ctx, next) => {
 
   ctx.body = await render('subscription/membership.html', ctx.state);
 
+  // Update session data.
   if (account && account.hasOwnProperty("id")) {
     ctx.session.user = account;
   }
@@ -49,6 +53,40 @@ router.get("/test", async (ctx, next) => {
 
   ctx.body = await render('subscription/membership-test.html', ctx.state);
 
+  if (account && account.hasOwnProperty("id")) {
+    ctx.session.user = account;
+  }
+});
+
+/**
+ * @description Renew membership
+ * /user/subscription/renew
+ */
+router.get("/renew", async (ctx, next) => {
+  const accountWrapper = new Account(ctx.session.user);
+
+  const account = await accountWrapper.fetchAccount();
+
+  const member = account.membership;
+
+  // If user is not a member yet, do not show this page.
+  if (!member.tier || !member.cycle) {
+    ctx.status = 404;
+    return;
+  }
+
+  const plan = findPlan(member.tier, member.cycle);
+
+  if (!plan) {
+    ctx.status = 404;
+    return;
+  }
+
+  ctx.state.plan = plan;
+
+  ctx.body = await render("subscription/pay.html", ctx.state);
+
+  // Update session data.
   if (account && account.hasOwnProperty("id")) {
     ctx.session.user = account;
   }
