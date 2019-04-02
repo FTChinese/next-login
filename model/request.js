@@ -29,8 +29,9 @@ class Account {
   /**
    * @param {IAccount} account 
    */
-  constructor(account) {
+  constructor(account, client = null) {
     this._data = account;
+    this._client = client;
   }
 
   /**
@@ -87,14 +88,13 @@ class Account {
   }
 
   /**
-   * 
    * @param {string} tier 
    * @param {string} cycle 
-   * @returns {Promise<IWxPayQR>}
+   * @returns {Promise<IWxQRPay>}
    */
-  async wxPlaceOrder(tier, cycle) {
+  async wxDesktopOrder(tier, cycle) {
     const req = request
-      .post(subsApi.wxUnifiedOrder(tier, cycle));
+      .post(subsApi.wxDesktopOrder(tier, cycle));
 
     if (this._data.id) {
       req.set(KEY_USER_ID, this._data.id);
@@ -102,6 +102,36 @@ class Account {
 
     if (this._data.unionId) {
       req.set(KEY_UNION_ID, this._data.unionId);
+    }
+
+    if (this._client) {
+      req.set(this._client);
+    }
+
+    const resp = await req;
+
+    return resp.body;
+  }
+
+  /**
+   * @param {string} tier 
+   * @param {string} cycle 
+   * @returns {Promise<IWxMobilePay>}
+   */
+  async wxMobileOrder(tier, cycle) {
+    const req = request
+      .post(subsApi.wxMobileOrder(tier, cycle));
+
+    if (this._data.id) {
+      req.set(KEY_USER_ID, this._data.id);
+    }
+
+    if (this._data.unionId) {
+      req.set(KEY_UNION_ID, this._data.unionId);
+    }
+
+    if (this._client) {
+      req.set(this._client);
     }
 
     const resp = await req;
@@ -115,9 +145,9 @@ class Account {
    * @param {string} cycle 
    * @returns {Promise<IAliWebPay>}
    */
-  async aliPlaceOrder(tier, cycle) {
+  async aliDesktopOrder(tier, cycle) {
     const req = request
-      .post(subsApi.aliWebOrder(tier, cycle));
+      .post(subsApi.aliDesktopOrder(tier, cycle));
 
     if (this._data.id) {
       req.set(KEY_USER_ID, this._data.id);
@@ -127,6 +157,37 @@ class Account {
       req.set(KEY_UNION_ID, this._data.unionId);
     }
 
+    if (this._client) {
+      req.set(this._client);
+    }
+
+    const resp = await req;
+
+    return resp.body;
+  }
+
+  /**
+   * 
+   * @param {string} tier - standard | premium
+   * @param {string} cycle - year | month
+   * @returns {Promise<IAliWebPay>}
+   */
+  async aliMobileOrder(tier, cycle) {
+    const req = request
+      .post(subsApi.aliMobileOrder(tier, cycle));
+
+    if (this._data.id) {
+      req.set(KEY_USER_ID, this._data.id);
+    }
+
+    if (this._data.unionId) {
+      req.set(KEY_UNION_ID, this._data.unionId);
+    }
+
+    if (this._client) {
+      req.set(this._client);
+    }
+    
     const resp = await req;
 
     return resp.body;
