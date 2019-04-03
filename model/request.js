@@ -1,14 +1,10 @@
 const request = require("superagent");
 const debug = require("debug")("user:account");
-const {
-  DateTime
-} = require("luxon");
 
 const {
   nextApi,
   subsApi,
 } = require("./endpoints");
-const localized = require("./localized");
 
 const KEY_USER_ID = "X-User-Id";
 const KEY_UNION_ID = "X-Union-Id";
@@ -194,45 +190,7 @@ class Account {
   }
 }
 
-class Membership {
-  /**
-   * @param {IMembership} member
-   */
-  constructor(member) {
-    this.member = member;
-  }
 
-  /**
-   * Test if the user is a subscribed member.
-   * @returns {boolean}
-   */
-  get isMember() {
-    debug("%O", this.member);
-
-    return this.member.tier 
-      && this.member.cycle 
-      && this.member.expireDate;
-  }
-
-  /**
-   * Test if a membership is expired.
-   * @returns {boolean}
-   */
-  get isExpired() {
-    const expTime = DateTime.fromISO(member.expireDate, {
-      zone: "utc"
-    });
-    return expTime < DateTime.utc();
-  }
-
-  get localizeTierCycle() {
-    return `${localized[this.member.tier]}/${localized[this.member.cycle]}`
-  }
-
-  get expireDate() {
-    return this.member.expireDate;
-  }
-}
 
 /**
  * @description FtcUser wraps an FTC account's user id.
@@ -506,7 +464,6 @@ class Verification {
   }
 }
 exports.Account = Account;
-exports.Membership = Membership;
 exports.FtcUser = FtcUser;
 exports.Credentials = Credentials;
 exports.ForgotPassword = ForgotPassword;
