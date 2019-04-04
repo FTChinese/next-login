@@ -1,5 +1,5 @@
 const Router = require('koa-router');
-const debug = require('debug')('user:membership');
+const debug = require('debug')('user:subscription');
 const render = require('../../util/render');
 
 const {
@@ -56,8 +56,6 @@ router.get("/test", async (ctx, next) => {
   ctx.state.account = account;
   ctx.state.member = new Membership(account.membership);
 
-  console.log(ctx.state.member);
-  
   ctx.state.products = defaultPaywall.products;
 
   ctx.body = await render('subscription/membership-test.html', ctx.state);
