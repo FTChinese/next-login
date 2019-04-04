@@ -13,19 +13,24 @@
         <span>无限期</span>
       </div>
 
-    {% elif account.membership.tier %}
+    {% elif member.isMember() %}
 
       <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
         <span>会员类型</span>
-        <span>{{ account.membership.tier | localize }}/{{ account.membership.cycle | localize }}</span>
+        <span>{{ member.tier | localize }}/{{ member.cycle | localize }}</span>
       </div>
 
       <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
         <span>会员期限</span>
-        <span>{{ account.membership.expireDate }}</span>
+        <span>{{ member.expireDate }}</span>
       </div>
 
       <div class="mb-3 text-right">
+        {% if member.remainingDays() < 0 %}
+          <span class="text-danger">会员已经过期，请续订</span>
+        {% elif (member.remainingDays() > 0 and member.remainingDays() <= 7) %}
+          <span class="text-danger">会员即将过期，剩余{{ member.remainingDays() }}天，请续订</span>
+        {% endif %}
         <a href="{{ sitemap.renewal }}" class="btn btn-primary">续订</a>
       </div>
       

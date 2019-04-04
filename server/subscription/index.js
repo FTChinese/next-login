@@ -8,6 +8,7 @@ const {
 const {
   Account,
 } = require("../../model/request");
+const Membership = require("../../model/member");
 /**
  * @type {IPaywall}
  */
@@ -32,6 +33,10 @@ router.get('/', async (ctx, next) => {
   debug("Account: %O", account);
 
   ctx.state.account = account;
+  ctx.state.member = new Membership(account.membership);
+
+  console.log(ctx.state.member);
+
   ctx.state.products = defaultPaywall.products;
 
   ctx.body = await render('subscription/membership.html', ctx.state);
@@ -49,6 +54,10 @@ router.get("/test", async (ctx, next) => {
   debug("Account: %O", account);
 
   ctx.state.account = account;
+  ctx.state.member = new Membership(account.membership);
+
+  console.log(ctx.state.member);
+  
   ctx.state.products = defaultPaywall.products;
 
   ctx.body = await render('subscription/membership-test.html', ctx.state);
