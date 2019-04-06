@@ -18,6 +18,7 @@ const {
 
 const signup = require('./server/signup');
 const login = require('./server/login');
+const authorize = require("./server/authorize");
 const logout = require('./server/logout');
 const verify = require('./server/verification');
 const forgotPassword = require('./server/forgot-password');
@@ -71,6 +72,7 @@ app.use(bodyParser());
  */
 
 router.use('/login', checkSession({redirect: false}), login);
+router.use("/authorize", authorize);
 router.use('/logout', logout);
 router.use('/signup', signup);
 // router.use('/plan', plan);
@@ -92,4 +94,3 @@ boot(app)
   .catch(err => {
     debug.error('Bootup error: %O', err);
   });
-
