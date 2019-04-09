@@ -19,16 +19,17 @@ module.exports = {
       },
       env_production : {
         NODE_ENV: "production",
+        URL_PREFIX: "/user",
         PORT: 4100,
         DEBUG: "user*"
       },
       max_restart: 10,
-      error_file: path.resolve(process.env.HOME, 'logs/login-err.log'),
-      out_file: path.resolve(process.env.HOME, 'logs/login-out.log')
+      error_file: path.resolve(process.env.HOME, 'logs/next-user-err.log'),
+      out_file: path.resolve(process.env.HOME, 'logs/next-user-out.log')
     }
   ],
   deploy: {
-    "next-user": {
+    "production": {
       user: "node",
       host: "nodeserver",
       ref: "origin/master",
