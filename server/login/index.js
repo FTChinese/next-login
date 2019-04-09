@@ -1,4 +1,7 @@
 const Router = require('koa-router');
+const {
+  URLSearchParams,
+} = require("url");
 const debug = require('debug')('user:login');
 
 const render = require('../../util/render');
@@ -90,7 +93,15 @@ router.post('/',
 
       ctx.cookies.set('logged_in', 'yes');
 
-      return ctx.redirect(sitemap.profile);
+      const query = ctx.request.query;
+
+      if (query.response_type && query.client_id) {
+        const params = new URLSearchParams(query)
+        const redirectTo = `${sitemap.authorize}?${params.toString()}`
+        return ctx.redirect(redirectTo);
+      } else {
+        return ctx.redirect(sitemap.profile);
+      }
 
     } catch (e) {
       // stick form
