@@ -9,7 +9,7 @@ const {
 } = require("../../lib/response");
 const {
   Verification,
-} = require("../../model/request");
+} = require("../../lib/request");
 
 const router = new Router();
 
