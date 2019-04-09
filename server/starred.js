@@ -5,10 +5,10 @@ const debug = require('debug')('user:starred');
 const render = require('../util/render');
 const {
   nextApi
-} = require("../model/endpoints");
+} = require("../lib/endpoints");
 const {
   sitemap
-} = require("../model/sitemap");
+} = require("../lib/sitemap");
 const {
   isAPIError,
   buildApiError,
@@ -19,7 +19,7 @@ const {
 } = require("./middleware");
 const {
   FtcUser,
-} = require("../model/request");
+} = require("../lib/request");
 
 const router = new Router();
 

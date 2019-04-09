@@ -7,7 +7,7 @@ const {
 } = require("../lib/validate");
 const {
   sitemap
-} = require("../model/sitemap");
+} = require("../lib/sitemap");
 const {
   errMessage,
   isAPIError,
@@ -19,7 +19,7 @@ const {
 } = require("./middleware");
 const {
   Credentials,
-} = require("../model/request");
+} = require("../lib/request");
 
 const router = new Router();
 

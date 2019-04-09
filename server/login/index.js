@@ -15,11 +15,11 @@ const {
 
 const {
   sitemap
-} = require("../../model/sitemap");
+} = require("../../lib/sitemap");
 
 const {
   Credentials,
-} = require("../../model/request");
+} = require("../../lib/request");
 
 const {
   clientApp,

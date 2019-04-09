@@ -1,7 +1,7 @@
 const Router = require('koa-router');
 const {
   sitemap
-} = require("../model/sitemap");
+} = require("../lib/sitemap");
 
 const router = new Router();
 

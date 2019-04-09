@@ -7,7 +7,7 @@ const {
 const {
   Account,
   FtcUser,
-} = require("../../model/request");
+} = require("../../lib/request");
 
 const passwordRouter = require('./password');
 const emailRouter = require("./email");

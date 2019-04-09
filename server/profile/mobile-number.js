@@ -4,7 +4,7 @@ const render = require('../../util/render');
 
 const {
   sitemap
-} = require("../../model/sitemap");
+} = require("../../lib/sitemap");
 const {
   isAPIError,
   buildErrMsg,
@@ -15,7 +15,7 @@ const {
 } = require("../../lib/validate");
 const {
   FtcUser,
-} = require("../../model/request");
+} = require("../../lib/request");
 
 const router = new Router();
 

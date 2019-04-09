@@ -4,10 +4,10 @@ const debug = require("debug")('user:account');
 const render = require('../../util/render');
 const {
   sitemap
-} = require("../../model/sitemap");
+} = require("../../lib/sitemap");
 const {
   nextApi
-} = require("../../model/endpoints")
+} = require("../../lib/endpoints")
 const {
   isAPIError,
   buildApiError

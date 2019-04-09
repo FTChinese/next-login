@@ -3,7 +3,7 @@ const debug = require("debug")('user:name');
 const render = require('../../util/render');
 const {
   sitemap
-} = require("../../model/sitemap");
+} = require("../../lib/sitemap");
 const {
   isAPIError,
   buildErrMsg,
@@ -15,7 +15,7 @@ const {
 const {
   Account,
   FtcUser,
-} = require("../../model/request");
+} = require("../../lib/request");
 
 const router = new Router();
 

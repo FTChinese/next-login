@@ -4,7 +4,7 @@ const debug = require("debug")('user:profile');
 const render = require('../../util/render');
 const {
   nextApi
-} = require("../../model/endpoints")
+} = require("../../lib/endpoints")
 const {
   isAPIError,
   buildApiError
@@ -14,7 +14,7 @@ const {
 } = require("../../lib/validate");
 const {
   FtcUser,
-} = require("../../model/request");
+} = require("../../lib/request");
 
 const displayName = require("./display-name");
 const mobileNumber = require("./mobile-number");

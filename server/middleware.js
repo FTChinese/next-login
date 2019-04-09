@@ -1,5 +1,7 @@
 const debug = require("debug")("user:middleware");
-const isProduction = process.env.NODE_ENV === 'production';
+const {
+  isProduction,
+} = require("../lib/config");
 const pkg = require("../package.json");
 const {
   matrix,
@@ -7,7 +9,7 @@ const {
 const {
   sidebarNav,
   sitemap,
-} = require("../model/sitemap");
+} = require("../lib/sitemap");
 const {
   isAPIError,
 } = require("../lib/response");

@@ -5,14 +5,14 @@ const debug = require("debug")('user:password-reset');
 const render = require('../util/render');
 const {
   nextApi
-} = require("../model/endpoints");
+} = require("../lib/endpoints");
 
 const {
   AccountValidtor
 } = require("../lib/validate");
 const {
   sitemap
-} = require("../model/sitemap");
+} = require("../lib/sitemap");
 const {
   isAPIError,
   buildApiError,
@@ -26,7 +26,7 @@ const {
 const {
   sendPasswordResetLetter,
   ForgotPassword
-} = require("../model/request");
+} = require("../lib/request");
 
 const router = new Router();
 

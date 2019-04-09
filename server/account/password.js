@@ -4,10 +4,10 @@ const debug = require("debug")('user:password');
 const render = require('../../util/render');
 const {
   nextApi
-} = require("../../model/endpoints")
+} = require("../../lib/endpoints")
 const {
   sitemap
-} = require("../../model/sitemap");
+} = require("../../lib/sitemap");
 const {
   isAPIError,
   buildErrMsg,
@@ -19,7 +19,7 @@ const {
 } = require("../../lib/validate");
 const {
   FtcUser,
-} = require("../../model/request");
+} = require("../../lib/request");
 
 const router = new Router();
 

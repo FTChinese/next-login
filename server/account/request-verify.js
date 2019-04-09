@@ -3,14 +3,14 @@ const debug = require('debug')('user:email');
 
 const {
   sitemap
-} = require("../../model/sitemap");
+} = require("../../lib/sitemap");
 const {
   isAPIError,
   buildApiError
 } = require("../../lib/response");
 const {
   FtcUser,
-} = require("../../model/request");
+} = require("../../lib/request");
 const {
   clientApp,
 } = require("../middleware");

@@ -7,7 +7,7 @@ const {
 } = require("../../model/paywall");
 const {
   Account,
-} = require("../../model/request");
+} = require("../../lib/request");
 const Membership = require("../../model/member");
 /**
  * @type {IPaywall}
@@ -18,7 +18,7 @@ const payRouter = require("./pay");
 
 const {
   sitemap,
-} = require("../../model/sitemap");
+} = require("../../lib/sitemap");
 
 const router = new Router();
 
