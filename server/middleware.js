@@ -107,7 +107,6 @@ exports.checkSession = function checkSession({redirect=true}={}) {
     ctx.state.user = null;
 
     if (redirect) {
-  
       return ctx.redirect(sitemap.login);
     }
 
@@ -123,6 +122,8 @@ function isLoggedIn(ctx) {
 
   return true;
 }
+
+exports.isLoggedIn = isLoggedIn;
 
 exports.handleErrors = function() {
   return async function handleErrors (ctx, next) {
