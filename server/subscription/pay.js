@@ -12,7 +12,7 @@ const {
 } = require("../middleware");
 const {
   Account,
-} = require("../../model/request");
+} = require("../../lib/request");
 const router = new Router();
 
 /**
