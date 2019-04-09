@@ -1,3 +1,11 @@
+const {
+  viper,
+  urlPrefix,
+} = require("./lib/config");
+const config = viper.setConfigPath(process.env.HOME)
+  .setConfigName("config/api.toml")
+  .readInConfig()
+  .getConfig();
 const debug = require("debug")('user:index');
 const path = require('path');
 const Koa = require('koa');
@@ -36,14 +44,12 @@ const testRouter = require("./server/test");
 const isProduction = process.env.NODE_ENV === 'production';
 const app = new Koa();
 const router = new Router({
-  prefix: '/user'
+  prefix: urlPrefix,
 });
 
 app.proxy = true;
-/**
- * @todo Use dotenv.
- */
-app.keys = ['SEKRIT1', 'SEKRIT2'];
+
+app.keys = [config.koa_session.next_user];
 
 app.use(logger());
 
