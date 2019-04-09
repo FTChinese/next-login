@@ -147,4 +147,11 @@ declare interface IAliWebPay {
     payUrl: string;
 }
 
+declare interface IOAuthReq {
+    response_type: string;
+    client_id: string;
+    redirect_uri: string;
+    state: string;
+}
+
 
