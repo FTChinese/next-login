@@ -1,11 +1,7 @@
-const request = require('superagent');
 const Router = require('koa-router');
 const debug = require("debug")('user:password-reset');
 
 const render = require('../util/render');
-const {
-  nextApi
-} = require("../lib/endpoints");
 
 const {
   AccountValidtor
@@ -24,7 +20,6 @@ const {
   clientApp,
 } = require("./middleware");
 const {
-  sendPasswordResetLetter,
   ForgotPassword
 } = require("../lib/request");
 
@@ -124,7 +119,7 @@ router.post('/',
        * @type {APIError}
        */
       const body = e.response.body;
-      debug("%O", body);
+      debug("Error status %d, body: %O", e.status, body);
 
       switch (e.status) {
         // If the email used to receive password reset token is not found
