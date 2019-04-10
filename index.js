@@ -65,6 +65,7 @@ app.use(nav());
 app.use(noCache());
 app.use(session({
   renew: true,
+  key: "_ftc:next"
 }, app));
 app.use(handleErrors());
 app.use(bodyParser());
