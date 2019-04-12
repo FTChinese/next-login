@@ -13,9 +13,9 @@ const {
   AccountValidtor
 } = require("../../lib/validate");
 const {
-  Account,
   FtcUser,
 } = require("../../lib/request");
+const Account = require("../../lib/account");
 
 const router = new Router();
 
@@ -24,11 +24,19 @@ const router = new Router();
  * /user/account/email
  */
 router.get("/", async (ctx) => {
-  const accounWrapper = new Account(ctx.session.user);
 
-  const account = await accounWrapper.fetchAccount();
+  /**
+   * @type {Account}
+   */
+  const account = ctx.state.user;
 
-  ctx.state.account = account;
+  if (account.isWxOnly()) {
+    ctx.status = 404;
+  }
+
+  const acntData = await account.refreshAccount();
+
+  ctx.state.account = acntData;
 
   ctx.body = await render("account/email.html", ctx.state);
 });
