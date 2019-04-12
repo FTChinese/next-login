@@ -20,14 +20,19 @@ const {
 const {
   FtcUser,
 } = require("../lib/request");
+const Account = require("../lib/account");
 
 const router = new Router();
 
 // Show the list of starred articles.
 // /starred?page=<number>
 router.get("/", paging(10), async (ctx, next) => {
-  
-  const articles = await new FtcUser(ctx.session.user.id)
+  /**
+   * @type {Account}
+   */
+  const account = ctx.state.user;
+
+  const articles = await account
     .starredArticles(ctx.state.paging);
 
   ctx.state.articles = articles;
@@ -38,9 +43,13 @@ router.get("/", paging(10), async (ctx, next) => {
 
 router.post("/:id/delete", async (ctx, next) => {
   const id = ctx.params.id;
+  /**
+   * @type {Account}
+   */
+  const account = ctx.state.user;
 
   try {
-    await new FtcUser(ctx.session.user.id)
+    await account
       .unstarArticle(id)
 
     return ctx.redirect(sitemap.starred);
