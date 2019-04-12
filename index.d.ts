@@ -154,4 +154,15 @@ declare interface IOAuthReq {
     state: string;
 }
 
+declare interface IWxApp {
+    app_id: string;
+    secret: string;
+    redirect_uri: string;
+}
+
+declare interface IWxSession {
+    id: string;
+    unionId: string;
+    createdAt: string;
+}
 
