@@ -10,9 +10,7 @@ const {
 const {
   clientApp,
 } = require("../middleware");
-const {
-  Account,
-} = require("../../lib/request");
+const Account = require("../../lib/account");
 const router = new Router();
 
 /**
@@ -69,7 +67,11 @@ router.post("/:tier/:cycle",
 
     debug("Client app: %O", ctx.state.clientApp);
 
-    const account = new Account(ctx.session.user, ctx.state.clientApp);
+    /**
+     * @type {Account}
+     */
+    const account = ctx.state.user;
+    account.setClientApp(ctx.state.clientApp);
 
     try {
       switch (payMethod) {
@@ -78,10 +80,12 @@ router.post("/:tier/:cycle",
           // If user is using mobile browser on phone
           if (isMobile) {
             const aliOrder = await account.aliMobileOrder(tier, cycle);
+
             ctx.redirect(aliOrder.payUrl);
           } else {
             // Otherwise treat user on desktop
             const aliOrder = await account.aliDesktopOrder(tier, cycle);
+
             ctx.redirect(aliOrder.payUrl);
           }
           break;

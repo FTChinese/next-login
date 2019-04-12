@@ -5,9 +5,7 @@ const render = require('../../util/render');
 const {
   findPlan,
 } = require("../../model/paywall");
-const {
-  Account,
-} = require("../../lib/request");
+const Account = require("../../lib/account");
 const Membership = require("../../model/member");
 /**
  * @type {IPaywall}
@@ -27,12 +25,15 @@ const router = new Router();
  * /user/subscription
  */
 router.get('/', async (ctx, next) => {
-  const accountWrapper = new Account(ctx.session.user);
-  const account = await accountWrapper.fetchAccount();
+  /**
+   * @type {Account}
+   */
+  const account = ctx.state.user;
+  const accountData = await account.refreshAccount();
 
-  debug("Account: %O", account);
+  debug("Account: %O", accountData);
 
-  ctx.state.account = account;
+  ctx.state.account = accountData;
   ctx.state.member = new Membership(account.membership);
 
   console.log(ctx.state.member);
@@ -42,8 +43,8 @@ router.get('/', async (ctx, next) => {
   ctx.body = await render('subscription/membership.html', ctx.state);
 
   // Update session data.
-  if (account && account.hasOwnProperty("id")) {
-    ctx.session.user = account;
+  if (accountData && accountData.id) {
+    ctx.session.user = accountData;
   }
 });
 
