@@ -13,6 +13,7 @@ const {
 const {
   isAPIError,
 } = require("../lib/response");
+const Account = require("../lib/account");
 
 const render = require("../util/render");
 
@@ -85,7 +86,10 @@ exports.nav = function() {
  * Suppose you want to access `/profile` without login. This middleware will redirect you want to `/login`. And then when you are accessing `/login`, this middleware will again first check if you're loggedin. Certainly your are not. It again redirect you to `/login`, check login state again and redirect you to `/login`, indefinitely.
  * @return {Function}
  */
-exports.checkSession = function checkSession({redirect=true}={}) {
+exports.checkSession = function checkSession({
+    redirect=true,
+    denyWxOnlyAccess=false,
+  }={}) {
   return async (ctx, next) => {
     
     // Do nothing for `/favicon.ico`
@@ -94,12 +98,14 @@ exports.checkSession = function checkSession({redirect=true}={}) {
     debug('Redirect: %s', redirect);
 
     if (isLoggedIn(ctx)) {
-      debug('Session data: %O', ctx.session);
-
+      
       /**
-       * @type {UserSession}
+       * @type {IAccount}
        */
-      ctx.state.user = ctx.session.user;
+      const acntData = ctx.session.user;
+      debug("User logged in: %O", acntData);
+
+      ctx.state.user = new Account(acntData);
 
       return await next();
     }
@@ -122,6 +128,22 @@ function isLoggedIn(ctx) {
 
   return true;
 }
+
+/**
+ * @description If user is logged in via wechat and it's not bound to an FTC account, deny them from accessing endpoints that modify user account since those operations are meaningless.
+ */
+exports.denyWxOnlyAccess = function() {
+  return async (ctx, next) => {
+    const account = ctx.state.user;
+
+    if (account.isWxOnly()) {
+      ctx.status = 404;
+      return;
+    }
+
+    return await next();
+  };
+};
 
 exports.isLoggedIn = isLoggedIn;
 
