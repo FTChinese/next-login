@@ -100,7 +100,7 @@ router.post('/', async (ctx, next) => {
     return await next();
   }
 }, async (ctx) => {
-  ctx.body = await render("account/email.html", ctx.state);
+  ctx.body = await render("account/update-email.html", ctx.state);
 });
 
 module.exports = router.routes();
