@@ -18,15 +18,13 @@ const {
 const {
   sitemap
 } = require("../lib/sitemap");
-const {
-  Credentials,
-} = require("../lib/request");
+const Credentials = require("../lib/credentials");
 const {
   generateState,
 } = require("../lib/random");
 const {
+  WxUser,
   wxOAuth,
-  mockWxSession,
 } = require("../lib/wxlogin");
 
 const {
@@ -83,10 +81,7 @@ router.post('/',
       /**
        * @type {Account}
        */
-      const account = await new Credentials(
-          result.email, 
-          result.password
-        )
+      const account = await new Credentials(result)
         .login(ctx.state.clientApp);
 
       // Keep login state
@@ -164,13 +159,18 @@ router.get("/wechat", async(ctx, next) => {
   ctx.redirect(redirectTo);
 });
 
+/**
+ * @description This is just a test.
+ * The harded-coded wechat union id is a fake.
+ */
 router.get("/wechat/test", 
   
   clientApp(),
 
-  async(ctx, next) => {
+  async(ctx) => {
     try {
-      const account = await mockWxSession.fetchAccount(ctx.state.clientApp);
+      const account = await WxUser("tvSxA7L6cgl8nwkrScm_yRzZoVTy")
+        .fetchAccount(ctx.state.clientApp);
 
       ctx.session.user = account;
       ctx.redirect(sitemap.profile);
@@ -224,7 +224,10 @@ router.get("/callback",
       return;
     }
 
-    const account = await wxOAuth.login(query.code, ctx.state.clientApp);
+    const sessData = await wxOAuth.getSession(code, clientApp)
+
+    const wxSess = new WxUser(sessData.unionId);
+    const account = await wxSess.fetchAccount()
 
     ctx.session.user = account;
 
