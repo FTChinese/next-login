@@ -17,9 +17,7 @@ const {
 const {
   AccountValidtor
 } = require("../../lib/validate");
-const {
-  FtcUser,
-} = require("../../lib/request");
+const FtcUser = require("../../lib/ftc-user");
 
 const router = new Router();
 

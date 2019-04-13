@@ -12,9 +12,7 @@ const {
   buildErrMsg,
   buildApiError
 } = require("../../lib/response");
-const {
-  FtcUser,
-} = require("../../lib/request");
+const FtcUser = require("../../lib/ftc-user");
 
 const router = new Router();
 

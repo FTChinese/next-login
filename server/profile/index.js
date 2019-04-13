@@ -1,9 +1,7 @@
 const Router = require('koa-router');
 const debug = require("debug")('user:profile');
 const render = require('../../util/render');
-const {
-  FtcUser,
-} = require("../../lib/request");
+const FtcUser = require("../../lib/ftc-user");
 const Account = require("../../lib/account");
 
 const displayName = require("./display-name");
