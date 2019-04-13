@@ -10,6 +10,8 @@ const Account = require("../../lib/account");
 const passwordRouter = require('./password');
 const emailRouter = require("./email");
 const requestVerification = require("./request-verify");
+const bindAccounts = require("./bind");
+
 const {
   denyWxOnlyAccess,
 } = require("../middleware");
@@ -49,5 +51,6 @@ router.get('/', async (ctx, next) => {
 router.use("/email", denyWxOnlyAccess(), emailRouter);
 router.use('/password', denyWxOnlyAccess(), passwordRouter);
 router.use("/request-verification", denyWxOnlyAccess(), requestVerification);
+router.use("/bind", bindAccounts);
 
 module.exports = router.routes();
