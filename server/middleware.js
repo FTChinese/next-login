@@ -95,6 +95,8 @@ exports.checkSession = function checkSession({
     // Do nothing for `/favicon.ico`
     if (ctx.path == '/favicon.ico') return;
 
+    debug("Current session: %O", ctx.session);
+
     debug('Redirect: %s', redirect);
 
     if (isLoggedIn(ctx)) {
@@ -103,7 +105,7 @@ exports.checkSession = function checkSession({
        * @type {IAccount}
        */
       const acntData = ctx.session.user;
-      debug("User logged in: %O", acntData);
+      
 
       ctx.state.user = new Account(acntData);
 
