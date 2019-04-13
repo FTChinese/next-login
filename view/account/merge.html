@@ -1,0 +1,55 @@
+{% extends "layouts/base.html" %} 
+
+{% block content %}
+  <h2 class="mt-3 mb-5">绑定FT中文网账号</h2>
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+
+      <h5 class="text-center mb-3">合并如下账号</h5>
+      <div class="card mb-5">
+        <div class="card-header">FT中文网账号</div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            {{ ftcAccount.email }}
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span>会员类型</span>
+            <span>{{ ftcAccount.member.buildMemberType() }}</span>
+          </li>
+  
+          <li class="list-group-item d-flex justify-content-between">
+            <span>会员期限</span>
+            <span>{{ftcAccount.member.expireDate}}</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-header">微信账号</div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between">
+            {{ wxAccount.wechat.nickname }}
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span>会员类型</span>
+            <span>{{ wxAccount.member.buildMemberType() }}</span>
+          </li>
+  
+          <li class="list-group-item d-flex justify-content-between">
+            <span>会员期限</span>
+            <span>{{wxAccount.membership.expireDate}}</span>
+          </li>
+        </ul>
+      </div>
+
+      {% if denyMerge %}
+        <p class="text-danger">{{ denyMerge }}</p>
+      {% else %}
+      <form method="post" action="{{ sitemap.bindMerge }}">
+        <input type="hidden" name="userId" value="{{ftcAccount.id}}">
+        <button class="btn btn-block btn-primary" type="submit">开始</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
