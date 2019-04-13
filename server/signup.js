@@ -17,9 +17,7 @@ const {
 const {
   clientApp,
 } = require("./middleware");
-const {
-  Credentials,
-} = require("../lib/request");
+const Credentials = require("../lib/credentials");
 
 const router = new Router();
 
@@ -61,10 +59,7 @@ router.post('/',
 
     // Request to API
     try {
-      const account = await new Credentials(
-          result.email, 
-          result.password
-        )
+      const account = await new Credentials(result)
         .signUp(ctx.state.clientApp);
 
       ctx.session = {
