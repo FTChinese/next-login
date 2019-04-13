@@ -8,4 +8,5 @@ module.exports =  {
   "alipay": "支付宝",
   "M": "男",
   "F": "女",
+  "zeroMember": "尚未成为会员",
 };
