@@ -6,7 +6,7 @@ const {
   findPlan,
 } = require("../../model/paywall");
 const Account = require("../../lib/account");
-const Membership = require("../../model/member");
+const Membership = require("../../lib/member");
 /**
  * @type {IPaywall}
  */
