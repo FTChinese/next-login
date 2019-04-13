@@ -3,9 +3,7 @@
 {% block content %}
   {% if user.isWxOnly() %}
     <div class="mt-3 text-center">
-      <p>您目前使用了微信账号登录FT中文网。为保障账号安全，建议您绑定在FT中文网注册的邮箱账号。</p>
-    
-      <a class="btn btn-primary" href="">绑定邮箱</a>
+      {% include "partials/pls-bind.html" %}
     </div>
   {% else %}
     <div class="mt-3 pb-3 mb-3 border-bottom">
