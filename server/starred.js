@@ -1,11 +1,7 @@
-const request = require('superagent');
 const Router = require('koa-router');
 const debug = require('debug')('user:starred');
 
 const render = require('../util/render');
-const {
-  nextApi
-} = require("../lib/endpoints");
 const {
   sitemap
 } = require("../lib/sitemap");
@@ -17,29 +13,41 @@ const {
 const {
   paging
 } = require("./middleware");
-const {
-  FtcUser,
-} = require("../lib/request");
+const FtcUser = require("../lib/ftc-user");
 const Account = require("../lib/account");
 
 const router = new Router();
 
-// Show the list of starred articles.
-// /starred?page=<number>
-router.get("/", paging(10), async (ctx, next) => {
-  /**
-   * @type {Account}
-   */
-  const account = ctx.state.user;
+/**
+ * @description Show the list of starred articles.
+ * /starred?page=<number>
+ */
+router.get("/", 
+  paging(10), 
+  async (ctx, next) => {
+    /**
+     * @type {Account}
+     */
+    const userAccount = ctx.state.user;
+    if (userAccount.isWxOnly()) {
+      return await next();
+    }
 
-  const articles = await account
-    .starredArticles(ctx.state.paging);
+    const ftcUser = new FtcUser(ctx.session.user.id);
 
-  ctx.state.articles = articles;
-  ctx.state.paging.listSize = articles.length;
+    const articles = await ftcUser
+      .starredArticles(ctx.state.paging);
 
-  ctx.body = await render("starred.html", ctx.state);
-});
+    ctx.state.articles = articles;
+    ctx.state.paging.listSize = articles.length;
+
+    return await next();
+  },
+
+  async (ctx) => {
+    ctx.body = await render("starred.html", ctx.state);
+  }
+);
 
 router.post("/:id/delete", async (ctx, next) => {
   const id = ctx.params.id;
