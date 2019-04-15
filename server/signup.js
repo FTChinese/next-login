@@ -10,9 +10,7 @@ const {
 } = require("../lib/sitemap");
 const {
   errMessage,
-  isAPIError,
-  buildApiError,
-  buildErrMsg
+  ClientError,
 } = require("../lib/response");
 const {
   clientApp,
@@ -74,16 +72,14 @@ router.post('/',
     } catch (e) {
       ctx.state.account = account;
 
-      if (!isAPIError(e)) {
-        ctx.state.errors = buildErrMsg(e);
+      const clientErr = new ClientError(e);
+
+      if (!clientErr.isFromAPI()) {
+        ctx.state.errors = clientErr.buildGenericError();
 
         return await next();
       }
 
-      /**
-       * @type {APIError}
-       */
-      const body = e.response.body;
       // 400， 422， 429
       switch (e.status) {
         case 429:
@@ -99,7 +95,7 @@ router.post('/',
           // {password: password_invalid}
           // 400: {server: "Problems parsing JSON"}
         default:
-          ctx.state.errors = buildApiError(body);
+          ctx.state.errors = clientErr.buildAPIError();
           break;
       }
 

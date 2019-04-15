@@ -11,9 +11,7 @@ const {
 
 const {
   errMessage,
-  isAPIError,
-  buildApiError,
-  buildErrMsg
+  ClientError,
 } = require("../lib/response");
 const {
   sitemap
@@ -26,6 +24,9 @@ const {
   WxUser,
   wxOAuth,
 } = require("../lib/wxlogin");
+const {
+  isProduction,
+} = require("../lib/config");
 
 const {
   clientApp,
@@ -103,11 +104,12 @@ router.post('/',
 
     } catch (e) {
       // stick form
-      ctx.state.credentials = credentials
+      ctx.state.credentials = credentials;
 
-      if (!isAPIError(e)) {
-        debug("%O", e);
-        ctx.state.errors = buildErrMsg(e);
+      const clientErr = new ClientError(e);
+
+      if (!clientErr.isFromAPI()) {
+        ctx.state.errors = clientErr.buildGenericError();
 
         return await next();
       }
@@ -132,7 +134,7 @@ router.post('/',
         // email: email_missing_field || email_invalid
         // password: password_missing_field || password_invalid
         default:
-          ctx.state.errors = buildApiError(body);
+          ctx.state.errors = clientErr.buildAPIError();
           break;
       }
 
@@ -168,8 +170,13 @@ router.get("/wechat/test",
   clientApp(),
 
   async(ctx) => {
+    if (isProduction) {
+      ctx.status = 404;
+      return;
+    }
+    
     try {
-      const account = await WxUser("tvSxA7L6cgl8nwkrScm_yRzZoVTy")
+      const account = await new WxUser("tvSxA7L6cgl8nwkrScm_yRzZoVTy")
         .fetchAccount(ctx.state.clientApp);
 
       ctx.session.user = account;
