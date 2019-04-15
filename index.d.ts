@@ -68,6 +68,21 @@ declare interface IOrder {
     endDate: string;
 }
 
+declare interface SuperAgentResponse {
+    body: any;
+    header: any;
+    forbidden: boolean;
+    noContent: boolean;
+    notAcceptable: boolean;
+    notFound: boolean;
+    ok: boolean;
+    redirect: boolean;
+    serverError: boolean;
+    unauthorized: boolean;
+    status: number;
+    statusType: number;
+}
+
 // Data structure for API error response.
 declare interface APIError {
     message: string,
@@ -166,3 +181,21 @@ declare interface IWxSession {
     createdAt: string;
 }
 
+declare interface IJoiError extends Error {
+    isJoi: boolean;
+    name: string;
+    details: IJoiErrDetail[];
+}
+
+declare interface IJoiErrDetail {
+    message: string;
+    path: string[];
+    type: string;
+    context: {
+        limit: number,
+        value: string,
+        encoding: string;
+        key: string;
+        label: string;
+    }
+}
