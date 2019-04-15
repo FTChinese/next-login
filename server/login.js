@@ -149,12 +149,12 @@ router.post('/',
 );
 
 router.get("/wechat", async(ctx, next) => {
-  const state = await generateState();
+  const state = await wxOAuth.generateState();
 
   debug("Authorizetion code state: %s", state);
 
   ctx.session.state = state;
-  const redirectTo = wxOAuth.buildCodeUrl(state);
+  const redirectTo = wxOAuth.buildCodeUrl(state.v);
 
   debug("Redirect to %s", redirectTo);
 
@@ -201,10 +201,16 @@ router.get("/callback",
      * @type {{code: string, state: string, error?: string}}
      */
     const query = ctx.request.query;
+    /**
+     * @type {{v: string, t: number}}
+     */
     const state = ctx.session.state;
 
     debug("Query: %O", query);
 
+    /**
+     * error: invalid_request | access_denied
+     */
     if (query.error) {
       ctx.body = query.error;
       return;
@@ -213,32 +219,40 @@ router.get("/callback",
     if (!query.state) {
       debug("Query paramter does not contain state");
       ctx.state = 404;
-      ctx.body = "state not found"
+      ctx.body = "state not found";
       return;
     }
 
-    if (query.state != state) {
+    if (wxOAuth.isStateExpired(state)) {
+      ctx.state = 404;
+      ctx.body = "session expired";
+      return;
+    }
+
+    if (query.state != state.v) {
       debug("state does not match");
       ctx.state = 404;
-      ctx.body = "state not match"
+      ctx.body = "state mismatched"
       return;
     }
 
     if (!query.code) {
       debug("Query does not have code");
       ctx.state = 404;
-      ctx.body = "code not found"
+      ctx.body = "access_denied"
       return;
     }
 
     const sessData = await wxOAuth.getSession(code, clientApp)
 
+    debug("Wx session: %O", sessData);
+
     const wxSess = new WxUser(sessData.unionId);
-    const account = await wxSess.fetchAccount()
+    const account = await wxSess.fetchAccount();
 
     ctx.session.user = account;
 
-    ctx.body = account;
+    ctx.redirect(sitemap.profile);
     
     delete ctx.session.state;
   }
