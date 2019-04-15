@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/FTChinese/next-user#readme",
   "dependencies": {
+    "@hapi/joi": "^15.0.0",
     "csrf": "^3.0.6",
     "debug": "^4.1.1",
     "dotenv": "^6.2.0",
