@@ -34,7 +34,9 @@ router.get('/', async (ctx, next) => {
   const accountData = await account.refreshAccount();
   ctx.state.account = accountData;
   
+  // Update session and ui data.
   ctx.session.user = accountData;
+  ctx.state.user = new Account(accountData);
 
   /**
    * @type {{key: "letter_sent"}}
