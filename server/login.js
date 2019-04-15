@@ -154,7 +154,10 @@ router.get("/wechat", async(ctx, next) => {
   debug("Authorizetion code state: %s", state);
 
   ctx.session.state = state;
-  const redirectTo = wxOAuth.buildCodeUrl(state.v);
+  const redirectTo = wxOAuth.buildCodeUrl({
+    state: state.v,
+    sandbox: true,
+  });
 
   debug("Redirect to %s", redirectTo);
 
