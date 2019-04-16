@@ -87,8 +87,7 @@ exports.nav = function() {
  * @return {Function}
  */
 exports.checkSession = function checkSession({
-    redirect=true,
-    denyWxOnlyAccess=false,
+    redirect=true
   }={}) {
   return async (ctx, next) => {
     
