@@ -227,7 +227,7 @@ router.get("/callback",
       return;
     }
 
-    const sessData = await wxOAuth.getSession(code, clientApp)
+    const sessData = await wxOAuth.getSession(query.code, clientApp)
 
     debug("Wx session: %O", sessData);
 
