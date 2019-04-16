@@ -16,6 +16,7 @@ const {
 const {
   isProduction,
 } = require("../lib/config");
+const Account = require("../lib/account");
 
 const ftaHostname = "www.ftacademy.cn";
 
@@ -36,8 +37,13 @@ router.get('/',
       }
     }
 
+    // If user is already logged in, request authorization code directly.
     if (isLoggedIn(ctx)) {
-      ctx.state.user = ctx.session.user;
+      /**
+       * @type {IAccount}
+       */
+      const acntData = ctx.session.user;
+      ctx.state.user = new Account(acntData);
       return await next();
     }
 

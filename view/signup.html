@@ -1,47 +1,52 @@
 {% extends "layouts/center.html" %}
 
 {% block content %}
-<h4 class="text-center">创建FT中文网账号</h4>
-<form method="post">
-
-  <div class="form-group">
-    <label for="email">邮箱</label>
-
-    <input class="form-control"
-      id="email"
-      type="text"
-      name="account[email]"
-      value="{{account.email}}"
-      placeholder="电子邮箱"
+<div class="mt-4">
+  <h4 class="text-center">创建FT中文网账号</h4>
+  <form method="post">
+  
+    <div class="form-group">
+      <label for="email">邮箱</label>
+  
+      <input class="form-control"
+        id="email"
+        type="email"
+        name="credentials[email]"
+        value="{{credentials.email}}"
+        placeholder="电子邮箱"
+        maxlength="64"
+        required>
+      <small class="form-text text-muted">用于登录FT中文网</small>
+  
+      {% if errors.email %}
+        <div class="form-errortext">{{errors.email}}</div>
+      {% endif %}
+    </div>
+  
+    <div class="form-group">
+      <label for="password">密码</label>
+      <input class="form-control"
+      id="password"
+      type="password"
+      name="credentials[password]"
+      placeholder="密码"
+      minlength="8"
+      maxlength="64"
       required>
-    <small class="form-text text-muted">用于登录FT中文网</small>
-
-    {% if errors.email %}
-      <div class="form-errortext">{{errors.email}}</div>
-    {% endif %}
-  </div>
-
-  <div class="form-group">
-    <label for="password">密码</label>
-    <input class="form-control"
-    id="password"
-    type="password"
-    name="account[password]"
-    placeholder="密码"
-    required>
-    <small class="form-text text-muted">最少8个字符，不能使用空格、表情符号</small>
-
-    {% if errors.password %}
-      <div class="form-errortext">{{errors.password}}</div>
-    {% endif %}
-  </div>
-
-  <button class="btn btn-block btn-primary" type="submit">注册</button>
-
-</form>
-<small class="">注册即代表您同意FT中文网<a href="http://www.ftchinese.com/m/corp/service.html" target="_blank">《用户注册协议》</a></small>
-
-<p class="text-center">已有账号？<a href="{{sitemap.login}}">登录</a></p>
+      <small class="form-text text-muted">最少8个字符，不能使用空格、表情符号</small>
+  
+      {% if errors.password %}
+        <div class="form-errortext">{{errors.password}}</div>
+      {% endif %}
+    </div>
+  
+    <button class="btn btn-block btn-primary" type="submit">注册</button>
+  
+  </form>
+  <small class="">注册即代表您同意FT中文网<a href="http://www.ftchinese.com/m/corp/service.html" target="_blank">《用户注册协议》</a></small>
+  
+  <p class="text-center">已有账号？<a href="{{sitemap.login}}">登录</a></p>
+</div>
 
 <!-- <button type="button" class="btn btn-secondary btn-block">下载FT中文网APP</button> -->
 {% endblock %}

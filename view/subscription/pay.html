@@ -6,7 +6,7 @@
 
       <div class="card mb-5">
         <div class="card-header">订阅FT会员</div>
-        <div class="list-group list-group-flush">
+        <ul class="list-group list-group-flush">
           <li class="list-group-item d-flex justify-content-between">
             <span>会员类型:</span>
             <span>{{ plan.tier | localize }}/{{ plan.cycle | localize }}</span>
@@ -16,7 +16,7 @@
             <span>支付金额:</span>
             <span>¥{{ plan.netPrice | toCurrency }}</span>
           </li>
-        </div>
+        </ul>
       </div>
 
       <div class="card">

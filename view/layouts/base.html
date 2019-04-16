@@ -34,7 +34,7 @@
           <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">myFT</a>
     
           <div class="dropdown-menu dropdown-menu-right">
-            <h6 class="dropdown-header">{{user.userName}}</h6>
+            <h6 class="dropdown-header">{{ user.getDisplayName() }}</h6>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="{{sitemap.profile}}">设置</a>
             <div class="dropdown-divider"></div>
@@ -76,7 +76,7 @@
       {% endif %}
 
       {% block main %}
-        {% if user and (not user.isVerified) %}
+        {% if user and user.email and (not user.isVerified) %}
           <div class="alert alert-primary d-flex align-items-center m-0" role="alert">
             <span>请验证您的登录邮箱。没有收到验证邮件？</span>
             <form action="{{sitemap.requestVerification}}" method="post">

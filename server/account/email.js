@@ -5,17 +5,14 @@ const {
   sitemap
 } = require("../../lib/sitemap");
 const {
-  isAPIError,
-  buildErrMsg,
-  buildApiError,
+  ClientError,
 } = require("../../lib/response");
+const FtcUser = require("../../lib/ftc-user");
+const Account = require("../../lib/account");
 const {
-  AccountValidtor
-} = require("../../lib/validate");
-const {
-  Account,
-  FtcUser,
-} = require("../../lib/request");
+  invalidMessage,
+  validateEmail,
+} = require("../schema");
 
 const router = new Router();
 
@@ -24,13 +21,21 @@ const router = new Router();
  * /user/account/email
  */
 router.get("/", async (ctx) => {
-  const accounWrapper = new Account(ctx.session.user);
 
-  const account = await accounWrapper.fetchAccount();
+  /**
+   * @type {Account}
+   */
+  const account = ctx.state.user;
 
-  ctx.state.account = account;
+  if (account.isWxOnly()) {
+    ctx.status = 404;
+  }
 
-  ctx.body = await render("account/email.html", ctx.state);
+  const acntData = await account.fetch();
+
+  ctx.state.email = acntData.email;
+
+  ctx.body = await render("account/update-email.html", ctx.state);
 });
 
 /**
@@ -38,36 +43,36 @@ router.get("/", async (ctx) => {
  * /user/account/email
  */
 router.post('/', async (ctx, next) => {
+  /**
+   * @type {Account}
+   */
+  const account = ctx.state.user;
 
   /**
-   * @type {{email: string}}
+   * @type {string}
    */
-  const account = ctx.request.body.account;
+  const email = ctx.request.body.email;
 
-  /**
-   * @type {{email: string}}
-   */
-  const {
-    result,
-    errors
-  } = new AccountValidtor({
-      email: account.email,
-      currentEmail: ctx.session.user.email,
-    })
-    .validateEmail()
-    .validateEmailUpdate()
-    .end();
-
+  const { value, errors } = validateEmail(email);
   if (errors) {
     ctx.state.errors = errors;
-    ctx.state.account = account;
+    ctx.state.email = value.email;
+
+    return await next();
+  }
+
+  if (email == account.email) {
+    ctx.state.errors = {
+      email: invalidMessage.staleEmail,
+    }
+    ctx.state.email = value.email;
 
     return await next();
   }
 
   try {
     await new FtcUser(ctx.session.user.id)
-      .updateEmail(result);
+      .updateEmail(value);
 
     // Pass data upon redirect.
     ctx.session.alert = {
@@ -77,24 +82,20 @@ router.post('/', async (ctx, next) => {
     return ctx.redirect(sitemap.account);
   } catch (e) {
 
-    ctx.state.account = account
+    ctx.state.email = value.email;
 
-    if (!isAPIError(e)) {
-      debug("%O", e);
-      ctx.state.errors = buildErrMsg(e);
+    const clientErr = new ClientError(e)
 
-      return await next();
+    if (!clientErr.isFromAPI()) {
+      throw e;
     }
 
-    const body = e.response.body;
-    debug("API error response: %O", body);
-
-    ctx.state.errors = buildApiError(body);
+    ctx.state.errors = clientErr.buildApiError();
 
     return await next();
   }
 }, async (ctx) => {
-  ctx.body = await render("account/email.html", ctx.state);
+  ctx.body = await render("account/update-email.html", ctx.state);
 });
 
 module.exports = router.routes();

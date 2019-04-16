@@ -4,24 +4,25 @@ const debug = require("debug")('user:password-reset');
 const render = require('../util/render');
 
 const {
-  AccountValidtor
-} = require("../lib/validate");
-const {
   sitemap
 } = require("../lib/sitemap");
 const {
-  isAPIError,
-  buildApiError,
-  buildErrMsg,
-  errMessage
+  errMessage,
+  ClientError,
 } = require("../lib/response");
+
+const {
+  ForgotPassword
+} = require("../lib/request");
 
 const {
   clientApp,
 } = require("./middleware");
+
 const {
-  ForgotPassword
-} = require("../lib/request");
+  validateEmail,
+  validatePasswordReset,
+} = require("./schema");
 
 const router = new Router();
 
@@ -33,7 +34,7 @@ router.get('/', async (ctx) => {
 
   /**
    * When password reset letter is sent, or password is reset.
-   * @type {{key: "letter_sent | password_reset"}}
+   * @type {{key: "letter_sent" | "password_reset"}}
    */
   if (ctx.session.alert) {
     ctx.state.alert = ctx.session.alert;
@@ -55,8 +56,7 @@ router.get('/', async (ctx) => {
 });
 
 /**
- * @description Collect user entered email, check if email is valid, and send letter.
- * After letter is sent, redirect back to the GET page with a message.
+ * @description Send a password reset letter.
  * /user/password-reset
  */
 router.post('/', 
@@ -65,28 +65,17 @@ router.post('/',
 
   async function (ctx, next) {
     /**
-     * @type {{email: string}}
+     * @type {string}
      */
     const email = ctx.request.body.email;
 
-    debug("Password reset email: %s", email);
+    const { value, errors } = validateEmail(email);
 
-    /**
-     * @param {(null | {email: string})} result
-     * @param {(null | {email: string})} errors
-     */
-    const {
-      result,
-      errors
-    } = new AccountValidtor({ email })
-      .validateEmail()
-      .end();
-
-    debug("Validation result: %O, error: %O", result, errors);
+    debug("Validation error: %O", errors);
 
     if (errors) {
       ctx.state.errors = errors;
-      ctx.state.email = email;
+      ctx.state.email = value.email;
 
       return await next();
     }
@@ -94,9 +83,9 @@ router.post('/',
     try {
 
       await ForgotPassword.sendResetLetter(
-        result.email,
+        value.email,
         ctx.state.clientApp,
-      )
+      );
 
       // Tell redirected page what message to show.
       ctx.session.alert = {
@@ -109,17 +98,11 @@ router.post('/',
     } catch (e) {
       ctx.state.email = email;
 
-      if (!isAPIError(e)) {
-        ctx.state.errors = buildErrMsg(e);
-
+      const clientErr = new ClientError(e);
+      if (!clientErr.isFromAPI()) {
+        ctx.state.errors = clientErr.buildGenericError();
         return await next();
       }
-
-      /**
-       * @type {APIError}
-       */
-      const body = e.response.body;
-      debug("Error status %d, body: %O", e.status, body);
 
       switch (e.status) {
         // If the email used to receive password reset token is not found
@@ -134,7 +117,7 @@ router.post('/',
           // or
           // { email: email_missing_field }
         default:
-          ctx.state.errors = buildApiError(body);
+          ctx.state.errors = clientErr.buildAPIError();
           break;
       }
 
@@ -150,7 +133,7 @@ router.post('/',
 /**
  * @description Verify password reset token and show reset password page.
  * API response has only two results: 200 or 404
- * /user/password-reset/:token
+ * /password-reset/:token
  */
 router.get('/:token', async (ctx) => {
   // Get `token` from URL parameter.
@@ -158,20 +141,22 @@ router.get('/:token', async (ctx) => {
 
   try {
 
-    ctx.state.email = await ForgotPassword.verifyToken(token);
+    const email = await ForgotPassword.verifyToken(token);
+    ctx.state.email = email;
+    ctx.session.email = email;
 
     // Show form to allow user to enter new password.
     return ctx.body = await render('forgot-password/new-password.html', ctx.state);
 
   } catch (e) {
     // If any error occurred, redirect back to /user/password-reset.
-    if (!isAPIError(e)) {
-      ctx.session.errors = buildErrMsg(e);
+    const clientErr = new ClientError(e);
+
+    if (!clientErr.isFromAPI()) {
+      ctx.session.errors = clientErr.buildGenericError();
 
       return ctx.redirect(sitemap.passwordReset);
     }
-
-    const body = e.response.body;
 
     // 400
     // 404 if the token is not found, expired, or the the user associated with the token is not found.
@@ -185,7 +170,7 @@ router.get('/:token', async (ctx) => {
         // 400 if request URL does not contain a token
         // { server: "Invalid request URI" }
       default:
-        ctx.session.errors = buildApiError(body)
+        ctx.session.errors = clientErr.buildApiError()
         break;
     }
 
@@ -193,76 +178,92 @@ router.get('/:token', async (ctx) => {
   }
 });
 
-// User submit new password.
-// When user submit new password, token should also be included.
-// There are edege cases that the momenet user clicked submit button,
-// the token is expired.
-router.post('/:token', async (ctx, next) => {
-  const token = ctx.params.token;
+/**
+ * @description User reset password.
+ * /password-reset/:token
+ */
+router.post('/:token', 
 
-  /**
-   * @type {{password: string, confirmPassword: string}}
-   */
-  const account = ctx.request.body;
-  const {
-    result,
-    errors
-  } = new AccountValidtor(account)
-    .validatePassword()
-    .confirmPassword()
-    .end();
+  async (ctx, next) => {
+    const token = ctx.params.token;
 
-  if (errors) {
-    ctx.state.errors = errors
+    /**
+     * @type {{password: string, confirmPassword: string}}
+     */
+    const passwords = ctx.request.body;
 
-    return await next();
-  }
+    const { value, errors } = validatePasswordReset(passwords);
 
-  try {
+    if (errors) {
+      ctx.state.errors = errors
 
-    await ForgotPassword.reset(token, result.password);
-
-    ctx.session.alert = {
-      key: "password_reset"
-    };
-
-    // Redirect to /password-reset to prevent user refresh.
-    return ctx.redirect(sitemap.passwordReset);
-
-  } catch (e) {
-    if (!isAPIError(e)) {
-      ctx.state.errors = buildErrMsg(e);
-
+      ctx.state.email = ctx.session.email;
       return await next();
     }
-    /**
-     * @type {APIError}
-     */
-    const body = e.response.body;
-    // 400, 422
-    // 404 here means the token is invalid or expired. Handle it separatedly.
-    switch (e.status) {
-      // 404 Not Found indicates the password reset token is not found or is invalid.
-      // Redirect user to /user/password_reset
-      case 404:
-        ctx.session.errors = {
-          token: errMessage.password_token_invalid,
-        };
-        ctx.redirect(sitemap.passwordReset);
-        break;
+
+    if (value.password != value.confirmPassword) {
+      ctx.state.errors = {
+        confirmPassword: errMessage.passwords_mismatched,
+      }
+
+      ctx.state.email = ctx.session.email;
+      return await next();
+    }
+
+    try {
+
+      await ForgotPassword.reset(token, value.password);
+
+      ctx.session.alert = {
+        key: "password_reset"
+      };
+
+      // Redirect to /password-reset to prevent user refresh.
+      ctx.redirect(sitemap.passwordReset);
+      delete ctx.session.email;
+
+      return;
+    } catch (e) {
+
+      const clientErr = new ClientError(e);
+
+      if (!clientErr.isFromAPI(e)) {
+        ctx.state.errors = clientErr.buildGenericError();
+
+        ctx.state.email = ctx.session.email;
+        return await next();
+      }
+      /**
+       * @type {APIError}
+       */
+      // const body = e.response.body;
+      // 400, 422
+      // 404 here means the token is invalid or expired. Handle it separatedly.
+      switch (e.status) {
+        // 404 Not Found indicates the password reset token is not found or is invalid.
+        // Redirect user to /user/password_reset
+        case 404:
+          ctx.session.errors = {
+            token: errMessage.password_token_invalid,
+          };
+          ctx.redirect(sitemap.passwordReset);
+          break;
 
         // 400: { server: "Problems parsing JSON" }
         // 422: { password: password_missing_field}
         // || {password: password_invalid}
         // || {token: token_missing_field}
-      default:
-        ctx.state.errors = buildApiError(body);
-    }
+        default:
+          ctx.state.errors = clientErr.buildAPIError();
+      }
 
-    return await next();
+      ctx.state.email = ctx.session.email;
+      return await next();
+    }
+  }, 
+  async function (ctx) {
+    ctx.body = await render('forgot-password/new-password.html', ctx.state);
   }
-}, async function (ctx) {
-  ctx.body = await render('forgot-password/new-password.html', ctx.state);
-});
+);
 
 module.exports = router.routes();

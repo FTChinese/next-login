@@ -1,6 +1,45 @@
+import * as Koa from "koa";
+
+declare function clientApp(): Koa.Middleware;
+
+declare module "koa" {
+    interface StateT {
+        userAccount: IAccount;
+        clientApp: {
+            "X-Client-Type": "web",
+            "X-Client-Version": string,
+            "X-User-Ip": string,
+            "X-User-Agent": string,
+        };
+        sideNav: {
+            href: string,
+            text: string,
+            active: boolean,
+        };
+        sitemap: any,
+        env: {
+            isProduction: boolean,
+            year: string,
+            footer: any,
+            version: string,
+        };
+    }
+}
+
 declare interface ICredentials {
     email: string;
     password: string;
+}
+
+declare interface IPasswordReset {
+    password: string;
+    confirmPassword: string;
+}
+
+declare interface IPasswordUpdate {
+    oldPassword: string;
+    password: string;
+    confirmPassword: string;
 }
 
 declare interface IMembership {
@@ -68,6 +107,21 @@ declare interface IOrder {
     endDate: string;
 }
 
+declare interface SuperAgentResponse {
+    body: any;
+    header: any;
+    forbidden: boolean;
+    noContent: boolean;
+    notAcceptable: boolean;
+    notFound: boolean;
+    ok: boolean;
+    redirect: boolean;
+    serverError: boolean;
+    unauthorized: boolean;
+    status: number;
+    statusType: number;
+}
+
 // Data structure for API error response.
 declare interface APIError {
     message: string,
@@ -75,13 +129,6 @@ declare interface APIError {
         field: string,
         code: string, // Possbile value: missing | missing_field | invalid | already_exists
     }
-}
-
-declare interface ErrorForUI {
-    server?: string;
-    credentials?: string;
-    email?: string;
-    password?: string;
 }
 
 // Possbile data passed in redirect.
@@ -124,6 +171,7 @@ declare interface IPaywall {
     banner: IBanner;
     products: IProduct[];
 }
+
 declare interface IPromo {
     startAt: string;
     endAt: string;
@@ -154,4 +202,40 @@ declare interface IOAuthReq {
     state: string;
 }
 
+declare interface IWxApp {
+    app_id: string;
+    secret: string;
+    redirect_uri: string;
+}
 
+declare interface IWxSession {
+    id: string;
+    unionId: string;
+    createdAt: string;
+}
+
+declare interface ValidationResult<T> {
+    value: T;
+    errors: T;
+}
+
+// ValidationError
+declare interface ValidationError extends Error {
+    isJoi: boolean;
+    name: string;
+    details: ValidationErrorItem[];
+}
+
+// ValidationErrorItem
+declare interface ValidationErrorItem {
+    message: string;
+    path: string[];
+    type: string;
+    context: {
+        limit: number,
+        value: string,
+        encoding: string;
+        key: string;
+        label: string;
+    }
+}

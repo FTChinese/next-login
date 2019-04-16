@@ -6,16 +6,12 @@ const {
   sitemap
 } = require("../../lib/sitemap");
 const {
-  isAPIError,
-  buildErrMsg,
-  buildApiError
+  ClientError,
 } = require("../../lib/response");
+const FtcUser = require("../../lib/ftc-user");
 const {
-  ProfileValidator
-} = require("../../lib/validate");
-const {
-  FtcUser,
-} = require("../../lib/request");
+  validateMobile,
+} = require("../schema");
 
 const router = new Router();
 
@@ -36,17 +32,12 @@ router.post('/', async (ctx, next) => {
    * @type {{mobile: string}}
    */
   const profile = ctx.request.body.profile;
-  const {
-    result,
-    errors
-  } = new ProfileValidator(profile)
-    .mobile()
-    .end();
 
+  const { value, errors } = validateMobile(profile.mobile);
 
   if (errors) {
     ctx.state.errors = errors;
-    ctx.state.profile = profile;
+    ctx.state.profile = value;
 
     return await next();
   }
@@ -54,7 +45,7 @@ router.post('/', async (ctx, next) => {
   try {
 
     await new FtcUser(ctx.session.user.id)
-      .updateMobile(result);
+      .updateMobile(value);
 
     // Tell UI data is saved.
     ctx.session.alert = {
@@ -64,19 +55,15 @@ router.post('/', async (ctx, next) => {
     return ctx.redirect(sitemap.profile);
 
   } catch (e) {
-    ctx.state.profile = profile;
+    ctx.state.profile = value;
 
-    if (!isAPIError(e)) {
-      debug("%O", e);
-      ctx.state.errors = buildErrMsg(e);
+    const clientErr = new ClientError(e);
 
-      return await next();
+    if (!clientErr.isFromAPI()) {
+      throw e;
     }
 
-    const body = e.response.body;
-    debug("API error response: %O", body);
-
-    ctx.state.errors = buildApiError(body);
+    ctx.state.errors = clientErr.buildAPIError();
 
     return await next();
   }

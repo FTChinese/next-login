@@ -8,9 +8,7 @@ const {
   isAPIError,
   buildApiError
 } = require("../../lib/response");
-const {
-  FtcUser,
-} = require("../../lib/request");
+const FtcUser = require("../../lib/ftc-user");
 const {
   clientApp,
 } = require("../middleware");

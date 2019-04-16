@@ -3,23 +3,19 @@ const debug = require("debug")('user:signup');
 
 const render = require('../util/render');
 const {
-  AccountValidtor
-} = require("../lib/validate");
-const {
   sitemap
 } = require("../lib/sitemap");
 const {
   errMessage,
-  isAPIError,
-  buildApiError,
-  buildErrMsg
+  ClientError,
 } = require("../lib/response");
 const {
   clientApp,
 } = require("./middleware");
+const Credentials = require("../lib/credentials");
 const {
-  Credentials,
-} = require("../lib/request");
+  validateSignUp,
+} = require("./schema");
 
 const router = new Router();
 
@@ -33,62 +29,53 @@ router.get('/', async (ctx) => {
   ctx.body = await render('signup.html', ctx.state);
 });
 
-// User submitted account to be created.
+/**
+ * @description Create account
+ * /signup
+ */
 router.post('/', 
   clientApp(),
 
   async (ctx, next) => {
     /**
-     * @type {{email: string, password: string}}
+     * @type {ICredentials}
      */
-    const account = ctx.request.body.account;
-    const {
-      result,
-      errors
-    } = new AccountValidtor(account)
-      .validateEmail()
-      .validatePassword()
-      .end();
+    const input = ctx.request.body.credentials;
 
-    debug("Validation result: %O, error: %O", result, errors);
+    const { value, errors } = validateSignUp(input);
+
+    debug("Validation error: %O", errors);
 
     if (errors) {
       ctx.state.errors = errors;
-      ctx.state.account = account;
+      ctx.state.credentials = value;
 
       return await next();
     }
 
     // Request to API
     try {
-      const account = await new Credentials(
-          result.email, 
-          result.password
-        )
+      const account = await new Credentials(value)
         .signUp(ctx.state.clientApp);
 
       ctx.session = {
         user: account,
       };
 
-      ctx.cookies.set('logged_in', 'yes');
+      // ctx.cookies.set('logged_in', 'yes');
 
       // Redirect to user's email page
       return ctx.redirect(sitemap.profile);
 
     } catch (e) {
-      ctx.state.account = account;
+      ctx.state.credentials = input;
 
-      if (!isAPIError(e)) {
-        ctx.state.errors = buildErrMsg(e);
+      const clientErr = new ClientError(e);
 
-        return await next();
+      if (!clientErr.isFromAPI()) {
+        throw e;
       }
 
-      /**
-       * @type {APIError}
-       */
-      const body = e.response.body;
       // 400， 422， 429
       switch (e.status) {
         case 429:
@@ -104,7 +91,7 @@ router.post('/',
           // {password: password_invalid}
           // 400: {server: "Problems parsing JSON"}
         default:
-          ctx.state.errors = buildApiError(body);
+          ctx.state.errors = clientErr.buildAPIError();
           break;
       }
 

@@ -5,16 +5,12 @@ const {
   sitemap
 } = require("../../lib/sitemap");
 const {
-  isAPIError,
-  buildErrMsg,
-  buildApiError
+  ClientError,
 } = require("../../lib/response");
+const FtcUser = require("../../lib/ftc-user");
 const {
-  ProfileValidator
-} = require("../../lib/validate");
-const {
-  FtcUser,
-} = require("../../lib/request");
+  validateProfile,
+} = require("../schema")
 
 const router = new Router();
 
@@ -44,26 +40,21 @@ router.post('/', async (ctx, next) => {
    * @type {{familyName: string, givenName: string, gender: string, birthday: string}}
    */
   const profile = ctx.request.body.profile;
-  const {
-    result,
-    errors
-  } = new ProfileValidator(profile)
-    .familyName()
-    .givenName()
-    .gender()
-    .birthday()
-    .end();
 
+  const { value, errors } = validateProfile(profile);
+
+  debug("Validation result: %O, errors: %O", value, errors);
+  
   if (errors) {
     ctx.state.errors = errors;
-    ctx.state.profile = profile;
+    ctx.state.profile = value;
 
     return await next();
   }
 
   try {
     await new FtcUser(ctx.session.user.id)
-      .updatePersonalInfo(result);
+      .updatePersonalInfo(value);
 
     ctx.session.alert = {
       key: "saved"
@@ -72,19 +63,15 @@ router.post('/', async (ctx, next) => {
     return ctx.redirect(sitemap.profile);
 
   } catch (e) {
-    ctx.state.profile = profile;
+    ctx.state.profile = value;
 
-    if (!isAPIError(e)) {
-      debug("%O", e);
-      ctx.state.errors = buildErrMsg(e);
+    const clientErr = new ClientError(e);
 
-      return await next();
+    if (!clientErr.isFromAPI()) {
+      throw e;
     }
 
-    const body = e.response.body;
-    debug("API error response: %O", body);
-
-    ctx.state.errors = buildApiError(body);
+    ctx.state.errors = clientErr.buildAPIError();
 
     return await next();
   }

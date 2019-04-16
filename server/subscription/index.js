@@ -5,14 +5,15 @@ const render = require('../../util/render');
 const {
   findPlan,
 } = require("../../model/paywall");
-const {
-  Account,
-} = require("../../lib/request");
-const Membership = require("../../model/member");
+const Account = require("../../lib/account");
+const Membership = require("../../lib/member");
 /**
  * @type {IPaywall}
  */
 const defaultPaywall = require("../../model/paywall-default.json");
+const {
+  paywall,
+} = require("../../model/paywall");
 
 const payRouter = require("./pay");
 
@@ -27,23 +28,28 @@ const router = new Router();
  * /user/subscription
  */
 router.get('/', async (ctx, next) => {
-  const accountWrapper = new Account(ctx.session.user);
-  const account = await accountWrapper.fetchAccount();
+  /**
+   * @type {Account}
+   */
+  const account = ctx.state.user;
+  const acntData = await account.fetch();
 
-  debug("Account: %O", account);
+  debug("Account: %O", acntData);
 
-  ctx.state.account = account;
-  ctx.state.member = new Membership(account.membership);
+  ctx.state.user = new Account(acntData);
 
-  console.log(ctx.state.member);
+  /**
+   * @type {IPaywall}
+   */
+  const paywallData = paywall.getPaywall();
 
-  ctx.state.products = defaultPaywall.products;
+  ctx.state.products = paywallData.products;
 
   ctx.body = await render('subscription/membership.html', ctx.state);
 
   // Update session data.
-  if (account && account.hasOwnProperty("id")) {
-    ctx.session.user = account;
+  if (acntData) {
+    ctx.session.user = acntData;
   }
 });
 
@@ -70,11 +76,12 @@ router.get("/test", async (ctx, next) => {
  * /user/subscription/renew
  */
 router.get("/renew", async (ctx, next) => {
-  const accountWrapper = new Account(ctx.session.user);
+  /**
+   * @type {Account}
+   */
+  const account = ctx.state.user;
 
-  const account = await accountWrapper.fetchAccount();
-
-  const member = account.membership;
+  const member = account.member;
 
   // If user is not a member yet, do not show this page.
   if (!member.tier || !member.cycle) {
@@ -82,7 +89,7 @@ router.get("/renew", async (ctx, next) => {
     return;
   }
 
-  const plan = findPlan(member.tier, member.cycle);
+  const plan = paywall.findPlan(member.tier, member.cycle);
 
   if (!plan) {
     ctx.status = 404;
@@ -92,11 +99,6 @@ router.get("/renew", async (ctx, next) => {
   ctx.state.plan = plan;
 
   ctx.body = await render("subscription/pay.html", ctx.state);
-
-  // Update session data.
-  if (account && account.hasOwnProperty("id")) {
-    ctx.session.user = account;
-  }
 });
 
 /**
@@ -105,7 +107,10 @@ router.get("/renew", async (ctx, next) => {
  */
 router.get("/orders", async (ctx, enxt) => {
 
-  const account = new Account(ctx.session.user);
+  /**
+   * @type {Account}
+   */
+  const account = ctx.sate.user;
 
   const orders = await account.fetchOrders();
 

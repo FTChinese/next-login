@@ -1,17 +1,20 @@
 const Router = require('koa-router');
+const debug = require("debug")("user:account");
 
 const render = require('../../util/render');
 const {
   buildApiError
 } = require("../../lib/response");
-const {
-  Account,
-  FtcUser,
-} = require("../../lib/request");
+const Account = require("../../lib/account");
 
 const passwordRouter = require('./password');
 const emailRouter = require("./email");
 const requestVerification = require("./request-verify");
+const bindAccounts = require("./bind");
+
+const {
+  denyWxOnlyAccess,
+} = require("../middleware");
 
 const router = new Router();
 
@@ -21,13 +24,19 @@ const router = new Router();
  */
 router.get('/', async (ctx, next) => {
 
-  const accountWrapper = new Account(ctx.session.user);
-  ;
+  /**
+   * @type {Account}
+   */
+  const account = ctx.state.user;
 
-  const account = await accountWrapper.fetchAccount();
-  ctx.state.account = account;
+  debug("Account: %O", account);
+
+  const accountData = await account.fetch();
+  ctx.state.account = accountData;
   
-  ctx.session.user = account;
+  // Update session and ui data.
+  ctx.session.user = accountData;
+  ctx.state.user = new Account(accountData);
 
   /**
    * @type {{key: "letter_sent"}}
@@ -41,8 +50,9 @@ router.get('/', async (ctx, next) => {
   delete ctx.session.alert;
 });
 
-router.use("/email", emailRouter);
-router.use('/password', passwordRouter);
-router.use("/request-verification", requestVerification);
+router.use("/email", denyWxOnlyAccess(), emailRouter);
+router.use('/password', denyWxOnlyAccess(), passwordRouter);
+router.use("/request-verification", denyWxOnlyAccess(), requestVerification);
+router.use("/bind", bindAccounts);
 
 module.exports = router.routes();

@@ -1,6 +1,6 @@
 {
   "name": "@ftchinese/next-user",
-  "version": "0.4.2",
+  "version": "0.4.4",
   "description": "User setting system",
   "main": "index.js",
   "scripts": {
@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/FTChinese/next-user#readme",
   "dependencies": {
+    "@hapi/joi": "^15.0.0",
     "csrf": "^3.0.6",
     "debug": "^4.1.1",
     "dotenv": "^6.2.0",
@@ -55,6 +56,7 @@
     "bootstrap": "^4.3.1",
     "bootstrap.native": "^2.0.25",
     "chance": "^1.0.18",
+    "faker": "^4.1.0",
     "jest": "^24.1.0",
     "koa-static": "^5.0.0",
     "sinon": "^7.2.2"

@@ -2,7 +2,7 @@
 
 {% block content %}
   <div class="mt-3">
-    {% if account.isVip %}
+    {% if user.isVip %}
       <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
         <span>会员类型</span>
         <span>VIP</span>
@@ -13,23 +13,23 @@
         <span>无限期</span>
       </div>
 
-    {% elif member.isMember() %}
+    {% elif user.isMember() %}
 
       <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
         <span>会员类型</span>
-        <span>{{ member.tier | localize }}/{{ member.cycle | localize }}</span>
+        <span>{{ user.member.buildMemberType() }}</span>
       </div>
 
       <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
         <span>会员期限</span>
-        <span>{{ member.expireDate }}</span>
+        <span>{{ user.member.expireDate }}</span>
       </div>
 
       <div class="mb-3 text-right">
-        {% if member.remainingDays() < 0 %}
+        {% if user.member.remainingDays() < 0 %}
           <span class="text-danger">会员已经过期，请续订</span>
-        {% elif (member.remainingDays() > 0 and member.remainingDays() <= 7) %}
-          <span class="text-danger">会员即将过期，剩余{{ member.remainingDays() }}天，请续订</span>
+        {% elif (user.member.remainingDays() > 0 and user.member.remainingDays() <= 7) %}
+          <span class="text-danger">会员即将过期，剩余{{ user.member.remainingDays() }}天，请续订</span>
         {% endif %}
         <a href="{{ sitemap.renewal }}" class="btn btn-primary">续订</a>
       </div>
@@ -47,7 +47,7 @@
         </div>
         
         <div class="row justify-content-around o-card-group">
-            {% for product in products %}
+          {% for product in products %}
             <div class="col-lg-6 mb-3">
                 <div class="card">
                     <div class="card-body">
@@ -83,7 +83,7 @@
                     </div>
                 </div>
             </div>
-            {% endfor %}
+          {% endfor %}
         </div>
       </div>
 
