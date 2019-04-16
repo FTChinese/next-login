@@ -68,8 +68,8 @@ const joiOptions = {
 }
 
 /**
- * @param {IJoiErrDetail[]} details
- * @return {Map<string, string>}
+ * @param {ValidationErrorItem[]} details
+ * @return {[key: string]: string}
  */
 function transformJoiErr(details) {
   const errors = {};
@@ -81,17 +81,245 @@ function transformJoiErr(details) {
   return errors;
 }
 
+exports.validateEmail = function(email) {
+  const { value, error } = Joi.validate(
+    { email }, 
+    Joi.object().keys({
+      email: Joi.string().trim().email().required(), 
+    }),
+    joiOptions
+  );
+
+  if (error) {
+    return {
+      value,
+      errors: transformJoiErr(error.details),
+    }
+  }
+
+  return {
+    value,
+    errors: null,
+  };
+};
+
 const login = Joi.object().keys({
   email: Joi.string().trim().email().required(),
   password: Joi.string().trim().required(),
 });
 
+/**
+ * @param {ICredentials} input
+ */
+exports.validateLogin = function(input) {
+  const { value, error } = Joi.validate(
+    input,
+    login,
+    joiOptions
+  );
+
+  if (error) {
+    return {
+      value,
+      errors: transformJoiErr(error.details),
+    }
+  }
+
+  return {
+    value,
+    errors: null,
+  }
+};
+
 const signUp = Joi.object().keys({
-  email: Joi.string().trim().email().required(),
-  password: Joi.string().trim().required(),
+  email: Joi.string().trim().email().max(64).required(),
+  password: Joi.string().trim().min(8).max(64).required(),
 });
 
-exports.joiOptions = joiOptions;
-exports.transformJoiErr = transformJoiErr;
-exports.loginSchema = login;
-exports.signUpSchema = signUp;
+/**
+ * @param {ICredentials} input
+ */
+exports.validateSignUp = function(input) {
+  const { value, error } = Joi.validate(
+    input,
+    signUp,
+    joiOptions
+  );
+
+  if (error) {
+    return {
+      value,
+      errors: transformJoiErr(error.details),
+    }
+  }
+
+  return {
+    value,
+    errors: null,
+  }
+};
+
+const passwordReset = Joi.object().keys({
+  password: Joi.string().trim().min(8).max(64).required(),
+  confirmPassword: Joi.string().trim().min(8).max(64).required(),
+});
+
+/**
+ * @param {IPasswordReset}
+ */
+exports.validatePasswordReset = function(input) {
+  const { value, error } = Joi.validate(
+    input,
+    passwordReset,
+    joiOptions,
+  );
+
+  if (error) {
+    return {
+      value,
+      errors: transformJoiErr(error.details),
+    }
+  }
+
+  return {
+    value,
+    errors: null,
+  }
+};
+
+const displayName = Joi.object().keys({
+  userName: Joi.string().trim().max(64).required(),
+});
+
+exports.validateUserName = function(userName) {
+  const { value, error } = Joi.validate(
+    { userName },
+    displayName,
+    joiOptions,
+  );
+
+  if (error) {
+    return {
+      value,
+      errors: transformJoiErr(error.details),
+    }
+  }
+
+  return {
+    value,
+    errors: null,
+  }
+};
+
+const mobileSchema = Joi.object().keys({
+  mobile: Joi.string().trim().max(11).required(),
+});
+
+exports.validateMobile = function(mobile) {
+  const { value, error } = Joi.validate(
+    { mobile },
+    mobileSchema,
+    joiOptions,
+  );
+
+  if (error) {
+    return {
+      value,
+      errors: transformJoiErr(error.details),
+    }
+  }
+
+  return {
+    value,
+    errors: null,
+  }
+};
+
+// empty('') takes space value as undefined, and default(null) turns undefined to null.
+const profile = Joi.object().keys({
+  familyName: Joi.string().trim().empty('').max(64).default(null),
+  givenName: Joi.string().trim().empty('').max(64).default(null),
+  gender: Joi.string().empty('').valid(["M", "F"]).default(null),
+  birthday: Joi.string().empty('').max(10).default(null),
+});
+
+exports.validateProfile = function(input) {
+  const { value, error } = Joi.validate(
+    input,
+    profile,
+    joiOptions,
+  );
+
+  if (error) {
+    return {
+      value,
+      errors: transformJoiErr(error.details),
+    }
+  }
+
+  return {
+    value,
+    errors: null,
+  }
+};
+
+const address = Joi.object().keys({
+  country: Joi.string().trim().empty('').max(64).default(null),
+  province: Joi.string().trim().empty('').max(64).default(null),
+  city: Joi.string().trim().empty('').max(64).default(null),
+  district: Joi.string().trim().empty('').max(64).default(null),
+  street: Joi.string().trim().empty('').max(128).default(null),
+  postcode: Joi.string().trim().empty('').max(16).default(null),
+});
+
+exports.validateAddress = function(input) {
+  const { value, error } = Joi.validate(
+    input,
+    address,
+    joiOptions,
+  );
+
+  if (error) {
+    return {
+      value,
+      errors: transformJoiErr(error.details),
+    }
+  }
+
+  return {
+    value,
+    errors: null,
+  }
+}
+
+const passwordUpdate = Joi.object().keys({
+  oldPassword: Joi.string().trim().required(),
+  password: Joi.string().trim().min(8).max(64).required(),
+  confirmPassword: Joi.string().trim().min(8).max(64).required(),
+});
+
+exports.validatePasswordUpdate = function(input) {
+  const { value, error } = Joi.validate(
+    input,
+    passwordUpdate,
+    joiOptions,
+  );
+
+  if (error) {
+    return {
+      value,
+      errors: transformJoiErr(error.details),
+    };
+  }
+
+  return {
+    value,
+    errors: null,
+  };
+};
+
+exports.invalidMessage = {
+  "staleEmail": "如果你要更改邮箱，请勿使用当前邮箱",
+  "passwordsNotEqual": "两次输入的新密码必须相同",
+  "dateInvalid": "请按照YYYY-MM-DD格式填写日期",
+}
