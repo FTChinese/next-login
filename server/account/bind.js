@@ -1,5 +1,4 @@
 const Router = require('koa-router');
-const Joi = require("@hapi/joi");
 const debug = require("debug")('user:binding');
 const render = require('../../util/render');
 const {
@@ -24,10 +23,9 @@ const {
   clientApp,
 } = require("../middleware");
 const {
-  joiOptions,
-  transformJoiErr,
-  loginSchema,
-  signUpSchema,
+  validateEmail,
+  validateLogin,
+  validateSignUp
 } = require("../schema");
 
 const router = new Router();
@@ -47,17 +45,13 @@ router.get("/email", async (ctx, next) => {
 router.post("/email", async(ctx, next) => {
 
   const email = ctx.request.body.email;
-  const { error, value } = Joi.validate(
-    { email }, 
-    Joi.object().keys({
-      email: Joi.string().trim().email().required(), 
-    }),
-    joiOptions
-  );
 
-  if (error) {
-    debug("Validation error: %O", error);
-    ctx.state.errors = transformJoiErr(error.details);
+  const { value, errors } = validateEmail(email);
+
+  debug("Validation error: %O", error);
+
+  if (errors) {
+    ctx.state.errors = errors;
     ctx.state.email = email;
     ctx.body = await render("account/email-exists.html", ctx.state);
     return
@@ -127,14 +121,9 @@ router.post("/login",
      */
     const input = ctx.request.body.credentials;
 
-    const { value, error } = Joi.validate(
-      input,
-      loginSchema,
-      joiOptions,
-    );
-
+    const { value, errors } = validateLogin(input);
     if (error) {
-      ctx.state.errors = transformJoiErr(error.details);
+      ctx.state.errors = errors;
       ctx.state.credentials = input;
       
       return await next();
@@ -330,14 +319,9 @@ router.post("/signup",
      */
     const input = ctx.request.body.credentials;
 
-    const { value, error } = Joi.validate(
-      input,
-      signUpSchema,
-      joiOptions,
-    );
-
+    const { value, errors } = validateSignUp(input);
     if (error) {
-      ctx.state.errors = transformJoiErr(error.details);
+      ctx.state.errors = errors;
       ctx.state.credentials = input;
       return await next();
     }

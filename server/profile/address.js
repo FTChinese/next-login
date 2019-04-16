@@ -2,17 +2,15 @@ const Router = require('koa-router');
 const debug = require("debug")('user:address');
 const render = require('../../util/render');
 const {
-  AddressValidator
-} = require("../../lib/validate");
-const {
   sitemap
 } = require("../../lib/sitemap");
 const {
-  isAPIError,
-  buildErrMsg,
-  buildApiError
+  ClientError,
 } = require("../../lib/response");
 const FtcUser = require("../../lib/ftc-user");
+const {
+  validateAddress,
+} = require("../schema");
 
 const router = new Router();
 
@@ -44,21 +42,18 @@ router.post('/', async (ctx, next) => {
    */
   const address = ctx.request.body.address;
 
-  const {
-    result,
-    errors
-  } = new AddressValidator(address).validate();
+  const { value, errors } = validateAddress(address);
 
   if (errors) {
     ctx.state.errors = errors;
-    ctx.state.address = address;
+    ctx.state.address = value;
 
     return await next();
   }
 
   try {
     await new FtcUser(ctx.session.user.id)
-      .updateAddress(result)
+      .updateAddress(value)
 
     ctx.session.alert = {
       key: "saved"
@@ -69,19 +64,12 @@ router.post('/', async (ctx, next) => {
   } catch (e) {
     ctx.state.address = address;
 
-    if (!isAPIError(e)) {
-      debug("%O", e);
-      ctx.state.errors = buildErrMsg(e);
-
-      return await next();
+    const clientErr = new ClientError(e);
+    if (!clientErr.isFromAPI()) {
+      throw e;
     }
 
-    /**
-     * @type {{message: string, error: Object}}
-     */
-    const body = e.response.body;
-
-    ctx.state.errors = buildApiError(body);
+    ctx.state.errors = clientErr.buildAPIError();
 
     ctx.body = await render('profile/address.html', ctx.state);
   }

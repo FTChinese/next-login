@@ -1,23 +1,17 @@
-const request = require('superagent');
 const Router = require('koa-router');
 const debug = require("debug")('user:password');
 const render = require('../../util/render');
 const {
-  nextApi
-} = require("../../lib/endpoints")
-const {
   sitemap
 } = require("../../lib/sitemap");
 const {
-  isAPIError,
-  buildErrMsg,
-  buildApiError,
-  errMessage
+  errMessage,
+  ClientError
 } = require("../../lib/response");
-const {
-  AccountValidtor
-} = require("../../lib/validate");
 const FtcUser = require("../../lib/ftc-user");
+const {
+  validatePasswordUpdate
+} = require("../schema");
 
 const router = new Router();
 
@@ -34,22 +28,23 @@ router.get("/", async (ctx, next) => {
  * /user/account/password
  */
 router.post('/', async (ctx, next) => {
-  const account = ctx.request.body;
-
   /**
    * @type {{oldPassword: string, password: string, confirmPassword: string}}
    */
-  const {
-    result,
-    errors
-  } = new AccountValidtor(account)
-    .validatePassword()
-    .confirmPassword()
-    .validateOldPassword()
-    .end();
+  const passwords = ctx.request.body;
+
+  const { value, errors } = validatePasswordUpdate(passwords);
 
   if (errors) {
     ctx.state.errors = errors;
+
+    return await next();
+  }
+
+  if (value.password != value.confirmPassword) {
+    ctx.state.errors = {
+      confirmPassword: errMessage.passwords_mismatched,
+    }
 
     return await next();
   }
@@ -58,8 +53,8 @@ router.post('/', async (ctx, next) => {
     
     await new FtcUser(ctx.session.user.id)
       .updatePassword({
-        oldPassword: result.oldPassword,
-        newPassword: result.password,
+        oldPassword: value.oldPassword,
+        newPassword: value.password,
       });
 
     ctx.session.alert = {
@@ -70,11 +65,10 @@ router.post('/', async (ctx, next) => {
 
   } catch (e) {
 
-    if (!isAPIError(e)) {
-      debug("%O", e);
-      ctx.state.errors = buildErrMsg
+    const clientErr = new ClientError(e);
 
-      return await next();
+    if (!clientErr.isFromAPI) {
+      throw e;
     }
 
     switch (e.status) {
@@ -88,7 +82,7 @@ router.post('/', async (ctx, next) => {
         break;
 
       default:
-        ctx.state.errors = buildApiError(e.response.body);
+        ctx.state.errors = clientErr.buildAPIError();
         break;
     }
 

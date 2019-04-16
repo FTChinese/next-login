@@ -5,9 +5,6 @@ const {
 const debug = require('debug')('user:login');
 
 const render = require('../util/render');
-const {
-  AccountValidtor
-} = require("../lib/validate");
 
 const {
   errMessage,
@@ -17,9 +14,6 @@ const {
   sitemap
 } = require("../lib/sitemap");
 const Credentials = require("../lib/credentials");
-const {
-  generateState,
-} = require("../lib/random");
 const {
   WxUser,
   wxOAuth,
@@ -31,6 +25,9 @@ const {
 const {
   clientApp,
 } = require("./middleware");
+const {
+  validateLogin,
+} = require("./schema");
 
 const router = new Router();
 
@@ -57,22 +54,13 @@ router.post('/',
     /**
      * @type {ICredentials}
      */
-    const credentials = ctx.request.body.credentials;
+    const input = ctx.request.body.credentials;
 
-    /**
-     * @type {{email: string, password: string}} 
-     */
-    const {
-      result,
-      errors
-    } = new AccountValidtor(credentials)
-      .validateEmail(true)
-      .validatePassword(true)
-      .end();
+    const { value, errors } = validateLogin(input);
 
     if (errors) {
       ctx.state.errors = errors;
-      ctx.state.credentials = credentials;
+      ctx.state.credentials = value;
 
       return await next();
     }
@@ -82,7 +70,7 @@ router.post('/',
       /**
        * @type {Account}
        */
-      const account = await new Credentials(result)
+      const account = await new Credentials(value)
         .login(ctx.state.clientApp);
 
       // Keep login state
@@ -90,8 +78,9 @@ router.post('/',
         user: account,
       };
 
-      ctx.cookies.set('logged_in', 'yes');
+      // ctx.cookies.set('logged_in', 'yes');
 
+      // Check if there are any query parameters.
       const query = ctx.request.query;
 
       if (query.response_type && query.client_id) {
@@ -104,21 +93,13 @@ router.post('/',
 
     } catch (e) {
       // stick form
-      ctx.state.credentials = credentials;
+      ctx.state.credentials = input;
 
       const clientErr = new ClientError(e);
 
       if (!clientErr.isFromAPI()) {
-        ctx.state.errors = clientErr.buildGenericError();
-
-        return await next();
+        throw e;
       }
-
-      /**
-       * @type {{message: string, error: Object}}
-       */
-      const body = e.response.body;
-      debug("API error response: %O", body);
 
       // 404, 403
       switch (e.status) {
