@@ -38,7 +38,7 @@ module.exports = {
       "pre-setup": "node -v",
       "post-setup": "ls -la",
       "pre-deploy-local": "echo 'Begin to deploy'",
-      "post-deploy": "npm install --production && pm2 startOrRestart ecosystem.config.js --env production"
+      "post-deploy": "git stash && npm install --production && pm2 startOrRestart ecosystem.config.js --env production"
     }
   }
 }
