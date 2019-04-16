@@ -31,6 +31,17 @@ declare interface ICredentials {
     password: string;
 }
 
+declare interface IPasswordReset {
+    password: string;
+    confirmPassword: string;
+}
+
+declare interface IPasswordUpdate {
+    oldPassword: string;
+    password: string;
+    confirmPassword: string;
+}
+
 declare interface IMembership {
     tier?: "standard" | "premium";
     cycle?: "year" | "month";
@@ -120,13 +131,6 @@ declare interface APIError {
     }
 }
 
-declare interface ErrorForUI {
-    server?: string;
-    credentials?: string;
-    email?: string;
-    password?: string;
-}
-
 // Possbile data passed in redirect.
 declare interface Alert {
     done: string,
@@ -210,13 +214,20 @@ declare interface IWxSession {
     createdAt: string;
 }
 
-declare interface IJoiError extends Error {
-    isJoi: boolean;
-    name: string;
-    details: IJoiErrDetail[];
+declare interface ValidationResult<T> {
+    value: T;
+    errors: T;
 }
 
-declare interface IJoiErrDetail {
+// ValidationError
+declare interface ValidationError extends Error {
+    isJoi: boolean;
+    name: string;
+    details: ValidationErrorItem[];
+}
+
+// ValidationErrorItem
+declare interface ValidationErrorItem {
     message: string;
     path: string[];
     type: string;
