@@ -23,6 +23,7 @@ const {
 } = require("../lib/config");
 
 const {
+  isLoggedIn,
   clientApp,
 } = require("./middleware");
 const {
@@ -129,7 +130,16 @@ router.post('/',
   }
 );
 
+/**
+ * @description Handle wechat login request.
+ * This will redirect user to wechat.
+ * /login/wechat
+ */
 router.get("/wechat", async(ctx, next) => {
+  if (isLoggedIn(ctx)) {
+    ctx.status = 404;
+    return;
+  }
   const state = await wxOAuth.generateState();
 
   debug("Authorizetion code state: %s", state);
