@@ -56,6 +56,7 @@
     "bootstrap": "^4.3.1",
     "bootstrap.native": "^2.0.25",
     "chance": "^1.0.18",
+    "faker": "^4.1.0",
     "jest": "^24.1.0",
     "koa-static": "^5.0.0",
     "sinon": "^7.2.2"
