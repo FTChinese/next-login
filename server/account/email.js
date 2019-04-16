@@ -32,7 +32,7 @@ router.get("/", async (ctx) => {
     ctx.status = 404;
   }
 
-  const acntData = await account.refreshAccount();
+  const acntData = await account.fetch();
 
   ctx.state.account = acntData;
 

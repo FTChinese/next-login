@@ -31,7 +31,7 @@ router.get('/', async (ctx, next) => {
 
   debug("Account: %O", account);
 
-  const accountData = await account.refreshAccount();
+  const accountData = await account.fetch();
   ctx.state.account = accountData;
   
   // Update session and ui data.
