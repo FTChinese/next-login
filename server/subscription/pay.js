@@ -5,7 +5,7 @@ const render = require('../../util/render');
 const MobileDetect = require("mobile-detect");
 
 const {
-  findPlan,
+  paywall,
 } = require("../../model/paywall");
 const {
   clientApp,
@@ -25,7 +25,7 @@ router.get("/:tier/:cycle", async (ctx, next) => {
   const tier = params.tier;
   const cycle = params.cycle;
 
-  const plan = findPlan(tier, cycle);
+  const plan = paywall.findPlan(tier, cycle);
 
   if (!plan) {
     ctx.status = 404;
@@ -54,7 +54,7 @@ router.post("/:tier/:cycle",
     const cycle = params.cycle;
 
     const payMethod = ctx.request.body.payMethod;
-    const plan = findPlan(tier, cycle);
+    const plan = paywall.findPlan(tier, cycle);
 
     if (!plan) {
       ctx.status = 404;
