@@ -1,4 +1,9 @@
 const Joi = require("@hapi/joi");
+const faker = require("faker");
+const {
+  validateProfile,
+  validateAddress,
+} = require("../server/schema");
 
 test("joi", () => {
   const schema = Joi.object().keys({
@@ -107,5 +112,35 @@ test("joi", () => {
     errors[err.path.join("_")] = err.message;
   }
 
+  console.log(errors);
+});
+
+test("profile", () => {
+  const profile = {
+    familyName: "",
+    givenName: "",
+    gender: "G",
+    birthday: "",
+  }
+
+  const { value, errors } = validateProfile(profile);
+
+  console.log(value);
+  console.log(errors);
+});
+
+test("address", () => {
+  const address = {
+    country: "",
+    province: "",
+    city: "",
+    district: "",
+    street: "",
+    postcode: "",
+  };
+
+  const { value, errors } = validateAddress(address);
+
+  console.log(value);
   console.log(errors);
 });
