@@ -1,3 +1,31 @@
+import * as Koa from "koa";
+
+declare function clientApp(): Koa.Middleware;
+
+declare module "koa" {
+    interface StateT {
+        userAccount: IAccount;
+        clientApp: {
+            "X-Client-Type": "web",
+            "X-Client-Version": string,
+            "X-User-Ip": string,
+            "X-User-Agent": string,
+        };
+        sideNav: {
+            href: string,
+            text: string,
+            active: boolean,
+        };
+        sitemap: any,
+        env: {
+            isProduction: boolean,
+            year: string,
+            footer: any,
+            version: string,
+        };
+    }
+}
+
 declare interface ICredentials {
     email: string;
     password: string;
@@ -139,6 +167,7 @@ declare interface IPaywall {
     banner: IBanner;
     products: IProduct[];
 }
+
 declare interface IPromo {
     startAt: string;
     endAt: string;
