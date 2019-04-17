@@ -8,6 +8,9 @@ const {
 const {
   oauthApprove,
 } = require("./schema");
+const {
+  sitemap,
+} = require("../lib/sitemap");
 
 const router = new Router();
 
@@ -70,9 +73,8 @@ router.post("/", async (ctx, next) => {
     }
 
     if (!value.approve) {
-      ctx.redirect(oauth.buildErrRedirect({
-        error: "access_denied",
-      }));
+      ctx.redirect(sitemap.profile);
+      delete ctx.session.oauth;
 
       return;
     }
@@ -89,7 +91,13 @@ router.post("/", async (ctx, next) => {
       const redirectTo = oauth.buildRedirect(granted.code);
 
       ctx.redirect(redirectTo);
+
+      delete ctx.session.oauth;
+
     } catch (e) {
+
+      delete ctx.session.oauth;
+      
       const clientErr = new ClientError(e);
       if (!clientErr.isFromAPI()) {
         throw e;
