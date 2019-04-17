@@ -32,7 +32,10 @@ const {
 
 const router = new Router();
 
-// Show login page
+/**
+ * @description Show login page
+ * /login
+ */
 router.get('/', async function (ctx) {
   // If user is trying to access this page when he is already logged in, redirect away
   if (ctx.session.user) {
@@ -42,6 +45,10 @@ router.get('/', async function (ctx) {
   ctx.body = await render('login.html', ctx.state);
 });
 
+/**
+ * @description Handle login data
+ * /login
+ */
 router.post('/',
 
   clientApp(), 
@@ -84,6 +91,7 @@ router.post('/',
       // Check if there are any query parameters.
       const query = ctx.request.query;
 
+      // Handle FTA OAuth request.
       if (query.response_type && query.client_id) {
         const params = new URLSearchParams(query)
         const redirectTo = `${sitemap.authorize}?${params.toString()}`
@@ -186,6 +194,10 @@ router.get("/wechat/test",
   }
 );
 
+/**
+ * @description Wecaht OAuth callback for authorization_code.
+ * /login/callback
+ */
 router.get("/callback", 
 
   clientApp(),
@@ -217,16 +229,16 @@ router.get("/callback",
       return;
     }
 
-    if (wxOAuth.isStateExpired(state)) {
-      ctx.state = 404;
-      ctx.body = "session expired";
-      return;
-    }
-
     if (query.state != state.v) {
       debug("state does not match");
       ctx.state = 404;
       ctx.body = "state mismatched"
+      return;
+    }
+
+    if (wxOAuth.isStateExpired(state)) {
+      ctx.state = 404;
+      ctx.body = "session expired";
       return;
     }
 
