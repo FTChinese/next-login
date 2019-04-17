@@ -1,0 +1,32 @@
+{% extends "layouts/center.html" %}
+
+{% block content %}
+<div class="jumbotron jumbotron-fluid mt-5">
+  {% if invalid %}
+    <div class="container">
+      <h4>出错了！</h4>
+      <p>{{ invalid.error_description }}</p>
+    </div>
+  {% else %}
+  <div class="container text-center">
+      <h4 class="">登录 ftacademy.cn?</h4>
+
+      <div class="mt-3 mb-5">
+        <span>当前用户: </span>
+        <span>{{ user.getDisplayName() }}</span>
+      </div>
+
+      <div class="d-flex justify-content-around">
+        <form action="" method="post">
+          <input type="hidden" name="approve" value="true">
+          <button class="btn btn-primary">确认</button>
+        </form>
+        <form action="" method="post">
+          <input type="hidden" name="approve" value="false">
+          <button class="btn btn-outline-secondary">取消</button>
+        </form>
+      </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
