@@ -1,81 +1,123 @@
-const {
-  URL,
-  URLSearchParams,
-} = require("url");
 const Router = require('koa-router');
 const debug = require("debug")("user:authorize");
+const render = require("../util/render");
+const OAuthServer = require("../lib/oauth-server");
 const {
-  OAuthClient,
-} = require("../lib/oauth-client");
+  ClientError,
+} = require("../lib/response");
 const {
-  isLoggedIn
-} = require("./middleware");
-const {
-  sitemap,
-} = require("../lib/sitemap");
-const {
-  isProduction,
-} = require("../lib/config");
-const Account = require("../lib/account");
-
-const ftaHostname = "www.ftacademy.cn";
+  oauthApprove,
+} = require("./schema");
 
 const router = new Router();
 
 /**
- * @description Handle OAuth redirect request.
+ * @description This is used to handle FTA's OAuth request. Deny any request that does not come from this domain.
  * /authorize?response_type=code&client_id=xxxx&redirect_uri=xxx&state=xxx
  */
-router.get('/', 
-  async (ctx, next) => {
+router.get('/', async (ctx, next) => {
+  const oauth = new OAuthServer(ctx.request.query);
 
-    if (isProduction) {
-      const srcUrl = new URL(ctx.header["referer"]);
-      if (srcUrl.hostname !== ftaHostname) {
-        ctx.state = 404;
-        return;
-      }
-    }
+  const result = oauth.validateRequest();
 
-    // If user is already logged in, request authorization code directly.
-    if (isLoggedIn(ctx)) {
-      /**
-       * @type {IAccount}
-       */
-      const acntData = ctx.session.user;
-      ctx.state.user = new Account(acntData);
-      return await next();
-    }
+  if (!result) {
+    ctx.body = await render("authorize.html", ctx.state);
 
-    const query = ctx.request.query;
-    const params = new URLSearchParams(query);
-    const redirectTo = `${sitemap.login}?${params.toString()}`;
-
-    ctx.redirect(redirectTo);
     return;
-  },
+  }
 
-  async (ctx, next) => {
+  if (result.shouldRedirect) {
+    ctx.redirect(oauth.buildErrRedirect(result));
+    return;
+  }
+
+  ctx.state.invalid = result;
+
+  ctx.body = await render("authorize.html", ctx.state);
+});
+
+/**
+ * @description User grant/deny OAuth request.
+ * /authorize
+ */
+router.post("/", async (ctx, next) => {
     /**
      * @type {IOAuthReq}
      */
     const query = ctx.request.query;
 
     // Validte query parameters
+    const oauth = new OAuthServer(query);
+    const result = oauth.validateRequest();
 
-    const client = new OAuthClient(query);
+    if (result) {
+      if (result.shouldRedirect) {
+        ctx.redirect(oauth.buildErrRedirect(result));
+        return;
+      }
+    
+      ctx.state.invalid = result;
+    
+      ctx.body = await render("authorize.html", ctx.state);
 
-    /**
-     * @type {code: string}
-     */
-    const granted = await client.requestCode(ctx.session.user);
+      return;
+    }
 
-    debug("Granted code: %O", granted);
+    const body = ctx.request.body;
+    const { value, error } = oauthApprove(body);
+    if (error) {
+      throw error;
+    }
 
-    const redirectTo = client.buildRedirect(granted.code);
+    if (!value.approve) {
+      ctx.redirect(oauth.buildErrRedirect({
+        error: "access_denied",
+      }));
 
-    ctx.redirect(redirectTo);
-  }
-);
+      return;
+    }
+
+    try {
+      /**
+       * @description Ask API to generate a code.
+       * @type {code: string}
+       */
+      const granted = await oauth.createCode(ctx.session.user);
+
+      debug("Granted code: %O", granted);
+
+      const redirectTo = oauth.buildRedirect(granted.code);
+
+      ctx.redirect(redirectTo);
+    } catch (e) {
+      const clientErr = new ClientError(e);
+      if (!clientErr.isFromAPI()) {
+        throw e;
+      }
+
+      /**
+       * @type {APIError}
+       */
+      const body = e.response.body;
+
+      switch (e.status) {
+        // body.error.field: "error"
+        // body.error.code: "unauthorized_client" || "invalid_request"
+        case 422:
+          ctx.redirect(oauth.buildErrRedirect({
+            error: body.error.code,
+          }));
+          return;
+
+        default:
+          ctx.state.invalid = {
+            error_description: body.message
+          }
+          break;
+      }
+
+      ctx.body = await render("authorize.html", ctx.state);
+    }
+});
 
 module.exports = router.routes();
