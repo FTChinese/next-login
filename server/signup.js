@@ -58,15 +58,20 @@ router.post('/',
       const account = await new Credentials(value)
         .signUp(ctx.state.clientApp);
 
-      ctx.session = {
-        user: account,
-      };
+        ctx.session.user = account;
 
       // ctx.cookies.set('logged_in', 'yes');
 
-      // Redirect to user's email page
-      return ctx.redirect(sitemap.profile);
+      // Handle FTA OAUth request.
+      if (ctx.session.oauth) {
+        const params = new URLSearchParams(ctx.session.oauth)
+        const redirectTo = `${sitemap.authorize}?${params.toString()}`
+        ctx.redirect(redirectTo);
 
+        delete ctx.session.oauth;
+      } else {
+        return ctx.redirect(sitemap.profile);
+      }
     } catch (e) {
       ctx.state.credentials = input;
 

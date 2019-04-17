@@ -82,20 +82,18 @@ router.post('/',
         .login(ctx.state.clientApp);
 
       // Keep login state
-      ctx.session = {
-        user: account,
-      };
+      ctx.session.user = account;
 
       // ctx.cookies.set('logged_in', 'yes');
 
-      // Check if there are any query parameters.
-      const query = ctx.request.query;
-
       // Handle FTA OAuth request.
-      if (query.response_type && query.client_id) {
-        const params = new URLSearchParams(query)
+      if (ctx.session.oauth) {
+        const params = new URLSearchParams(ctx.session.oauth)
         const redirectTo = `${sitemap.authorize}?${params.toString()}`
-        return ctx.redirect(redirectTo);
+        ctx.redirect(redirectTo);
+
+        delete ctx.session.oauth;
+        return;
       } else {
         return ctx.redirect(sitemap.profile);
       }
@@ -202,7 +200,7 @@ router.get("/callback",
 
   clientApp(),
 
-  async(ctx, next) => {
+  async(ctx) => {
     /**
      * @type {{code: string, state: string, error?: string}}
      */
@@ -258,7 +256,16 @@ router.get("/callback",
 
     ctx.session.user = account;
 
-    ctx.redirect(sitemap.profile);
+    if (ctx.session.oauth) {
+      const params = new URLSearchParams(ctx.session.oauth)
+      const redirectTo = `${sitemap.authorize}?${params.toString()}`
+      ctx.redirect(redirectTo);
+
+      delete ctx.session.oauth;
+    } else {
+      // If user tries to login to FTAcademy via wechat.
+      ctx.redirect(sitemap.profile);
+    }
     
     delete ctx.session.state;
   }
