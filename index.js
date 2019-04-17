@@ -79,7 +79,7 @@ app.use(bodyParser());
  */
 
 router.use('/login', checkSession({redirect: false}), login);
-router.use("/authorize", authorize);
+router.use("/authorize", checkSession(), authorize);
 router.use('/logout', logout);
 router.use('/signup', signup);
 // router.use('/plan', plan);
