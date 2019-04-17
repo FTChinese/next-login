@@ -318,6 +318,16 @@ exports.validatePasswordUpdate = function(input) {
   };
 };
 
+exports.oauthApprove = function(input) {
+  return Joi.validate(
+    input,
+    Joi.object().keys({
+      approve: Joi.boolean().required(),
+    }),
+    joiOptions,
+  );
+}
+
 exports.invalidMessage = {
   "staleEmail": "如果你要更改邮箱，请勿使用当前邮箱",
   "passwordsNotEqual": "两次输入的新密码必须相同",
