@@ -114,9 +114,13 @@ exports.checkSession = function checkSession({
       return await next();
     }
 
-    const search = ctx.request.search;
+    const query = ctx.request.query;
 
-    return ctx.redirect(`${sitemap.login}${search}`);
+    if (query.client_id && query.redirect_uri) {
+      ctx.session.oauth = query;
+    }
+
+    return ctx.redirect(sitemap.login);
   }
 }
 
