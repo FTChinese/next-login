@@ -95,7 +95,6 @@ exports.checkSession = function checkSession({
     if (ctx.path == '/favicon.ico') return;
 
     debug("Current session: %O", ctx.session);
-
     debug('Redirect: %s', redirect);
 
     if (isLoggedIn(ctx)) {
@@ -104,8 +103,6 @@ exports.checkSession = function checkSession({
        * @type {IAccount}
        */
       const acntData = ctx.session.user;
-      
-
       ctx.state.user = new Account(acntData);
 
       return await next();
@@ -113,12 +110,13 @@ exports.checkSession = function checkSession({
 
     ctx.state.user = null;
 
-    if (redirect) {
-      return ctx.redirect(sitemap.login);
+    if (!redirect) {
+      return await next();
     }
 
-    // Remember to let the following middleware to excute if users are not loggedin and you do not want to redirect away.
-    return await next();
+    const search = ctx.request.search;
+
+    return ctx.redirect(`${sitemap.login}${search}`);
   }
 }
 
