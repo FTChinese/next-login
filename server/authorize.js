@@ -48,6 +48,11 @@ router.post("/", async (ctx, next) => {
      * @type {IOAuthReq}
      */
     const query = ctx.request.query;
+    if (!query) {
+      debug("Authorize page is accessed without OAuth query parameters.");
+      ctx.state = 404;
+      return;
+    }
 
     // Validte query parameters
     const oauth = new OAuthServer(query);
