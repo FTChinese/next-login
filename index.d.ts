@@ -200,6 +200,8 @@ declare interface IOAuthReq {
     client_id: string;
     redirect_uri: string;
     state: string;
+    // When the request was received.
+    t: string;
 }
 
 declare interface IWxApp {
