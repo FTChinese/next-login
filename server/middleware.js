@@ -13,6 +13,7 @@ const {
 const {
   isAPIError,
 } = require("../lib/response");
+const time = require("../lib/time");
 const Account = require("../lib/account");
 
 const render = require("../util/render");
@@ -97,6 +98,16 @@ exports.checkSession = function checkSession({
     debug("Current session: %O", ctx.session);
     debug('Redirect: %s', redirect);
 
+    // If there's oauth key in session, and it is
+    // expired, remove it so that we won't redirect
+    // user to oauth page caused by remanent data.
+    if (ctx.session.oauth) {
+      if (time.isExpired(ctx.session.oauth.t, 5 * 60)) {
+        delete ctx.session.oauth;
+      }
+    }
+
+    // If user is logged in.
     if (isLoggedIn(ctx)) {
       
       /**
@@ -108,16 +119,25 @@ exports.checkSession = function checkSession({
       return await next();
     }
 
+    // If user is not logged in.
     ctx.state.user = null;
 
     if (!redirect) {
       return await next();
     }
 
+    // If user is not logged in and this is an OAuth request,
+    // we should store the query parameter temporarily
+    // and redirect user to login page.
+    // After user logged in succesffuly, retrieve the
+    // OAuth query and redirect back to authorize page.
     const query = ctx.request.query;
 
     if (query.client_id && query.redirect_uri) {
-      ctx.session.oauth = query;
+      ctx.session.oauth = {
+        ...query,
+        t: time.unixNow(),
+      };
     }
 
     return ctx.redirect(sitemap.login);
