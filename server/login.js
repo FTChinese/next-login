@@ -194,9 +194,11 @@ router.get("/wechat/test",
 
 /**
  * @description Wecaht OAuth callback for authorization_code.
- * /login/callback
+ * Here we used subscription api as a transfer point
+ * to deliver wechat OAuth code here.
+ * /login/wechat/callback?code=xxx&state=xxx
  */
-router.get("/callback", 
+router.get("/wechat/callback", 
 
   clientApp(),
 
@@ -256,6 +258,7 @@ router.get("/callback",
 
     ctx.session.user = account;
 
+    // This indicates user is trying to login to ftacademy.
     if (ctx.session.oauth) {
       const params = new URLSearchParams(ctx.session.oauth)
       const redirectTo = `${sitemap.authorize}?${params.toString()}`
@@ -263,7 +266,7 @@ router.get("/callback",
 
       delete ctx.session.oauth;
     } else {
-      // If user tries to login to FTAcademy via wechat.
+      
       ctx.redirect(sitemap.profile);
     }
     
