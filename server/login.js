@@ -222,20 +222,20 @@ router.get("/callback",
 
     if (!query.state) {
       debug("Query paramter does not contain state");
-      ctx.state = 404;
+      ctx.status = 404;
       ctx.body = "state not found";
       return;
     }
 
     if (query.state != state.v) {
       debug("state does not match");
-      ctx.state = 404;
+      ctx.status = 404;
       ctx.body = "state mismatched"
       return;
     }
 
     if (wxOAuth.isStateExpired(state)) {
-      ctx.state = 404;
+      ctx.status = 404;
       ctx.body = "session expired";
       return;
     }
