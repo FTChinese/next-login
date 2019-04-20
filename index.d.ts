@@ -207,7 +207,6 @@ declare interface IOAuthReq {
 declare interface IWxApp {
     app_id: string;
     secret: string;
-    redirect_uri: string;
 }
 
 declare interface IWxSession {
