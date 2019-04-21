@@ -304,4 +304,15 @@ a:hover {
 .o-footer__matrix-link {
   display: block;
   padding: 4px 0; }
-
+.overlay {
+  visibility: hidden;
+  background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+}
+.overlay.show {
+  visibility: visible;
+}

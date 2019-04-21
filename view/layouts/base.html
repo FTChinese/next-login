@@ -151,10 +151,40 @@
     </div>
   </footer>
 
+  <div id="spinnerContainer" class="overlay d-flex justify-content-center align-items-center">
+    <div class="spinner-border" role="status">
+      <span class="sr-only">加载中...</span>
+    </div>
+  </div>
+  
   {% if env.isProduction %}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/2.0.23/bootstrap-native-v4.min.js"></script>
   {% else %}
   <script src="/bootstrap.native/dist/bootstrap-native-v4.js"></script>
   {% endif %}
+
+  <script>
+    function initSpinner() {
+      const loginForm = document.getElementById("loginForm");
+    
+      console.log(loginForm);
+
+      if (!loginForm) {
+        return;
+      }
+    
+      loginForm.addEventListener("submit", function(event) {
+        const spinnerContainer = document.getElementById("spinnerContainer");
+
+        if (!spinnerContainer) {
+          return;
+        }
+
+        spinnerContainer.classList.add("show");
+      });
+    }
+
+    initSpinner();
+  </script>
 </body>
 </html>
