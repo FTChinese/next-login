@@ -4,21 +4,17 @@
   "description": "User setting system",
   "main": "index.js",
   "scripts": {
-    "start": "npm run serve",
-    "serve": "node dist/index.js",
-    "watch-node": "nodemon dist/index.js",
-    "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
-    "test": "jest",
-    "build-ts": "tsc",
+    "start": "NODE_ENV=production PORT=4100 node index.js",
+    "serve": "nodemon dist/index.js",
+    "watch": "watch \"make js\" client",
     "watch-ts": "tsc -w",
-    "tslint": "tslint -c tslint.json -p tsconfig.json",
+    "build-js": "rollup -c",
+    "build-css": "node-sass --output-style=compressed client/scss/main.scss dist/style/bundle.css",
+    "inline": "node ./util/inline.js",
+    "build": "npm run build-js && npm run build-css && npm run inline",
+    "test": "jest",
     "postversion": "git push && git push --tags",
-    "postinstall": "",
-    "clean": "rm -rf dist/*",
-    "profile": "NODE_ENV=production PORT=4100 node --prof index.js",
-    "prod": "NODE_ENV=production PORT=4100 node index.js",
-    "vegeta": "vegeta attack -targets=targets.txt -rate=100 -duration=60s > .tmp/results.bin",
-    "report": "vegeta report -inputs=.tmp/results.bin -reporter=plot > .tmp/plot.html"
+    "postinstall": ""
   },
   "repository": {
     "type": "git",
@@ -34,7 +30,8 @@
     "@hapi/joi": "^15.0.0",
     "csrf": "^3.0.6",
     "debug": "^4.1.1",
-    "dotenv": "^6.2.0",
+    "del": "^4.1.0",
+    "gulp": "^4.0.1",
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
     "koa-csrf": "^3.0.7",
@@ -55,10 +52,16 @@
   "devDependencies": {
     "bootstrap": "^4.3.1",
     "bootstrap.native": "^2.0.25",
-    "chance": "^1.0.18",
     "faker": "^4.1.0",
+    "gulp-typescript": "^5.0.1",
+    "inline-source": "^6.1.9",
     "jest": "^24.1.0",
     "koa-static": "^5.0.0",
-    "sinon": "^7.2.2"
+    "rollup": "^1.10.1",
+    "rollup-plugin-babel-minify": "^8.0.0",
+    "rollup-plugin-typescript": "^1.0.1",
+    "tslib": "^1.9.3",
+    "typescript": "^3.4.4",
+    "watch": "^1.0.2"
   }
 }
