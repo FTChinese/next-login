@@ -1,3 +1,11 @@
+## Front-end Tools
+
+Mutliple sets of bundling tools are included, with each using different context.
+
+`npm run ...` is mainly used to automatically build typescript to vanillia js by continuous integration.
+
+
+
 ## Sitemap
 
 ### Signup
@@ -122,7 +130,7 @@ But be careful wechat might change the lenght any time. So it might be better to
 
 ## Alipay
 
-Alipay studip design: Its so-called api only accepts HTML form!
+Alipay studpid design: Its so-called api only accepts HTML form!
 
 Its SDK build an HTML form and automatically submit it and  then redirect to Alipay website.
 
