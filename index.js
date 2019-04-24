@@ -56,7 +56,7 @@ app.use(logger());
 if (!isProduction) {
   const static = require('koa-static');
   app.use(static(path.resolve(process.cwd(), 'node_modules')));
-  app.use(static(path.resolve(process.cwd(), 'client')));
+  app.use(static(path.resolve(process.cwd(), 'dist')));
 }
 
 // Configurations passed around
