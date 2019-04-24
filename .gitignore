@@ -58,7 +58,7 @@ typings/
 # dotenv environment variables file
 .env
 .tmp
-dist
 *.log
 _docs/**/*.png
 _docs/build
+build
