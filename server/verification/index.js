@@ -1,12 +1,9 @@
 const Router = require('koa-router');
 
 const verifyEmail = require("./email");
-const {
-  denyWxOnlyAccess,
-} = require("../middleware");
 
 const router = new Router();
 
-router.use("/email", denyWxOnlyAccess(), verifyEmail);
+router.use("/email", verifyEmail);
 
 module.exports = router.routes();
