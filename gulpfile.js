@@ -2,12 +2,15 @@ const gulp = require("gulp");
 const ts = require("gulp-typescript");
 const rollup = require("rollup");
 let cache;
+const sass = require('gulp-sass');
+const sourcemaps = require('gulp-sourcemaps');
 
 const tsProject = ts.createProject("tsconfig.json");
 
 const tsOutDir = "build/js";
 const jsInputFile = "build/js/main.js";
-const jsOutFile = "dist/script/bundle.js";
+const jsOutFile = "build/dev/script/main.js";
+const cssOutDir = "build/dev/style";
 
 /**
  * @description Compile TypeScript to ES5
@@ -62,8 +65,32 @@ async function linkJs() {
  */
 const buildJs = gulp.series(compileTs, linkJs);
 
-exports.script = buildJs;
+function buildCss() {
+  return gulp.src('client/scss/*.scss')
+    .pipe(sourcemaps.init({loadMaps:true}))
+    .pipe(sass({
+      outputStyle: 'expanded',
+      precision: 2,
+    }).on('error', (err) => {
+      console.error(err);
+    }))
+    // .pipe(postcss([
+    //   cssnext({
+    //     features: {
+    //       colorRgba: false
+    //     }
+    //   })
+    // ]))
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest(cssOutDir));
+}
 
-exports.watch = gulp.parallel(buildJs, function() {
+exports.script = buildJs;
+exports.style = buildCss;
+
+exports.watch = gulp.parallel(buildJs, buildCss, function() {
   gulp.watch(["client/script/*.ts"], buildJs);
+  gulp.watch(["client/scss/**/*.scss"], buildCss);
 });
+
+exports.build = gulp.parallel(buildJs, buildCss);
