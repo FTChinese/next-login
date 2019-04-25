@@ -4,7 +4,9 @@ Mutliple sets of bundling tools are included, with each using different context.
 
 `npm run ...` is mainly used to automatically build typescript to vanillia js by continuous integration.
 
+### Button State for Forms
 
+Add attribute `data-disable-with="<Loading...>"` to the `<button>` element inside a form. When the form is submitted, the text of the button will be replaced by the value of `data-disable-with` and the button is disabled.
 
 ## Sitemap
 
