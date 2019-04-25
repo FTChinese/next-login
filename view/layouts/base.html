@@ -15,10 +15,10 @@
   
   {% if env.isProduction %}
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-  {% include "assets/style.min.html" %}
+  {% include "assets/style.html" %}
   {% else %}
   <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.css">
-  <link rel="stylesheet" href="/style/bundle.css">
+  <link rel="stylesheet" href="/style/main.css">
   {% endif %}
   
 </head>
@@ -77,10 +77,15 @@
 
       {% block main %}
         {% if user and user.email and (not user.isVerified) %}
-          <div class="alert alert-primary d-flex align-items-center m-0" role="alert">
+          <div class="alert alert-primary m-0" role="alert">
             <span>请验证您的登录邮箱。没有收到验证邮件？</span>
-            <form action="{{sitemap.requestVerification}}" method="post">
-              <button class="btn btn-link">重新发送</button>
+            <form
+              class="d-inline"
+              action="{{sitemap.requestVerification}}"
+              method="post">
+              <button
+                data-disable-with="正在发送..."
+                class="btn btn-link text-teal p-0">重新发送</button>
             </form>
           </div>
         {% endif %}
@@ -118,11 +123,9 @@
 
   <footer class="o-footer o-footer--theme-dark">
     <div class="container">
-      <div class="o-footer__row">
-        <nav class="o-footer__matrix">
-
-          {% for group in env.footer %}
-          <div class="o-footer__matrix-group">
+      <div class="row">
+        {% for group in env.footer %}
+          <div class="col-sm-6 col-md-3 col-lg-2">
   
             <h6 class="o-footer__matrix-title">{{group.title}}</h6>
             <div class="o-footer__matrix-content">
@@ -134,9 +137,7 @@
             </div>
   
           </div>
-          {% endfor %}
-  
-        </nav>			
+        {% endfor %}		
       </div>
 
       <div class="o-footer__copyright">
@@ -145,13 +146,13 @@
           <abbr title="Financial Times" aria-label="F T">FT</abbr> and ‘Financial Times’ are trademarks of The Financial Times Ltd.
         </small>
       </div>
-      <div class="text-muted">
+      <div class="text-muted pb-3">
         <small>测试版 v{{env.version}}</small>
       </div>
     </div>
   </footer>
 
-  <div id="spinnerContainer" class="overlay d-flex justify-content-center align-items-center">
+  <div class="global-spinner">
     <div class="spinner-border" role="status">
       <span class="sr-only">加载中...</span>
     </div>
@@ -159,33 +160,11 @@
   
   {% if env.isProduction %}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/2.0.23/bootstrap-native-v4.min.js"></script>
-  {% include "assets/js.min.html" %}
+  {% include "assets/script.html" %}
 
   {% else %}
   <script src="/bootstrap.native/dist/bootstrap-native-v4.js"></script>
-  <script scr="/script/bundle.js"></script>
+  <script src="/script/main.js"></script>
   {% endif %}
-
-  <script>
-    function initSpinner() {
-      const loginForm = document.getElementById("loginForm");
-
-      if (!loginForm) {
-        return;
-      }
-    
-      loginForm.addEventListener("submit", function(event) {
-        const spinnerContainer = document.getElementById("spinnerContainer");
-
-        if (!spinnerContainer) {
-          return;
-        }
-
-        spinnerContainer.classList.add("show");
-      });
-    }
-
-    initSpinner();
-  </script>
 </body>
 </html>
