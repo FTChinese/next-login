@@ -4,6 +4,7 @@
     "outDir": "build",
     "target": "es5",
     "module": "es6",
+    "downlevelIteration": true,
     "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
