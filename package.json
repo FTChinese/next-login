@@ -4,7 +4,7 @@
   "description": "User setting system",
   "main": "index.js",
   "scripts": {
-    "start": "NODE_ENV=production PORT=4100 node index.js",
+    "start": "NODE_ENV=production PORT=4100 URL_PREFIX=/user node index.js",
     "server": "nodemon dist/index.js",
     "watch-ts": "tsc -w",
     "build-js": "rollup -c",
