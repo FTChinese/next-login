@@ -62,3 +62,4 @@ typings/
 _docs/**/*.png
 _docs/build
 build
+dist
