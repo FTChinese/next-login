@@ -56,7 +56,7 @@ app.use(logger());
 if (!isProduction) {
   const static = require('koa-static');
   app.use(static(path.resolve(process.cwd(), 'node_modules')));
-  app.use(static(path.resolve(process.cwd(), 'dist')));
+  app.use(static(path.resolve(process.cwd(), 'build/dev')));
 }
 
 // Configurations passed around
@@ -82,7 +82,6 @@ router.use('/login', checkSession({redirect: false}), login);
 router.use("/oauth2", checkSession(), oauth2);
 router.use('/logout', logout);
 router.use('/signup', signup);
-// router.use('/plan', plan);
 router.use('/verify', checkSession({redirect: false}), verify);
 router.use('/password-reset', checkSession({redirect: false}), forgotPassword);
 router.use('/profile', checkSession(), profile);
