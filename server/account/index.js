@@ -2,15 +2,12 @@ const Router = require('koa-router');
 const debug = require("debug")("user:account");
 
 const render = require('../../util/render');
-const {
-  buildApiError
-} = require("../../lib/response");
 const Account = require("../../lib/account");
 
-const passwordRouter = require('./password');
-const emailRouter = require("./email");
+const passwordRouter = require('./update-password');
+const emailRouter = require("./update-email");
 const requestVerification = require("./request-verify");
-const bindAccounts = require("./bind");
+const wxBindEmail = require("./wx-bind-email");
 
 const {
   denyWxOnlyAccess,
@@ -53,6 +50,6 @@ router.get('/', async (ctx, next) => {
 router.use("/email", denyWxOnlyAccess(), emailRouter);
 router.use('/password', denyWxOnlyAccess(), passwordRouter);
 router.use("/request-verification", denyWxOnlyAccess(), requestVerification);
-router.use("/bind", bindAccounts);
+router.use("/bind", wxBindEmail);
 
 module.exports = router.routes();
