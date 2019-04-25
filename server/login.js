@@ -14,6 +14,7 @@ const {
   sitemap
 } = require("../lib/sitemap");
 const Credentials = require("../lib/credentials");
+const Account = require("../lib/account");
 const {
   WxUser,
   wxOAuth,
@@ -142,10 +143,7 @@ router.post('/',
  * /login/wechat
  */
 router.get("/wechat", async(ctx, next) => {
-  if (isLoggedIn(ctx)) {
-    ctx.status = 404;
-    return;
-  }
+  
   const state = await wxOAuth.generateState();
 
   debug("Authorizetion code state: %s", state);
@@ -196,6 +194,13 @@ router.get("/wechat/test",
  * @description Wecaht OAuth callback for authorization_code.
  * Here we used subscription api as a transfer point
  * to deliver wechat OAuth code here.
+ * If user accessed this page without login, then they
+ * must be attempting to log in via wechat OAuth;
+ * If user is accessing this page while already logged
+ * in and log in method is not `wechat`, it indicates 
+ * user is trying to bind to wechat account;
+ * If user already logged-in and login method is 
+ * `wechat`, deny access.
  * /login/wechat/callback?code=xxx&state=xxx
  */
 router.get("/wechat/callback", 
@@ -256,21 +261,48 @@ router.get("/wechat/callback",
     const wxSess = new WxUser(sessData.unionId);
     const account = await wxSess.fetchAccount();
 
+    delete ctx.session.state;
+
+    // If user is already logged in.
+    if (isLoggedIn(ctx)) {
+      debug("User already logged in before porming wechat OAuth");
+      /**
+       * @type {Account}
+       */
+      const currentAccount = ctx.state.user;
+      if (currentAccount.loginMethod == "wechat") {
+        /**
+         * @todo Send a human readable 404 page.
+         */
+        ctx.status = 404;
+        return
+      }
+
+      ctx.session.uid = account.unionId;
+
+      debug("Redirect user to bind wechat account");
+      ctx.redirect(sitemap.bindMerge);
+      return 
+    }
+
+    // If user is not logged in, this is a login attempt.
+    // Persist user account to session.
     ctx.session.user = account;
 
-    // This indicates user is trying to login to ftacademy.
+    // This indicates user is trying to login to ftacademy, so direct user to OAuth page.
     if (ctx.session.oauth) {
+      debug("User is trying to log in to FTA via FTC's OAuth, which in turn goes to Wechat OAuth.");
       const params = new URLSearchParams(ctx.session.oauth)
       const redirectTo = `${sitemap.authorize}?${params.toString()}`
+
       ctx.redirect(redirectTo);
 
       delete ctx.session.oauth;
-    } else {
-      
-      ctx.redirect(sitemap.profile);
+
+      return;
     }
-    
-    delete ctx.session.state;
+
+    ctx.redirect(sitemap.profile);
   }
 );
 
