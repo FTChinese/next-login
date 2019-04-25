@@ -1,0 +1,30 @@
+.form-label {
+  font-weight: 600;
+  color: $color-black80;
+}
+
+.form-control {
+  border-radius: 0;
+}
+.form-control:disabled {
+  background-color: $color-black10;
+  color: $color-black60;
+  border-color: $color-black10;
+  cursor: default;
+}
+
+.form-errortext {
+  color: $color-crimson;
+  font-size: 14px;
+  line-height: 16px;
+  clear: both;
+  display: block;
+  margin-top: -1px;
+  padding: 3px 0;
+}
+
+.form-invalid {
+  background-color: #fff;
+  color: $color-crimson;
+  border-color: $color-crimson;
+}

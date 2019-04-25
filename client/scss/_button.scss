@@ -1,0 +1,65 @@
+.btn-primary {
+  background-color: $color-teal;
+  color: #fff;
+
+  &:hover {
+    background-color: $color-teal40;
+    border-color: transparent;
+  }
+
+  &:focus,
+  &.focus {
+    background-color: $color-teal40;
+    border-color: transparent;
+  }
+
+  &.disabled,
+  &:disabled {
+    background-color: $color-teal;
+    pointer-events: none;
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  &:not(:disabled):not(.disabled):active,
+  &:not(:disabled):not(.disabled).active,
+  .show > &.dropdown-toggle {
+    color: #fff;
+    background-color: rgb(64, 133, 139);
+    border-color: transparent;
+  }
+}
+
+.btn-outline-primary {
+  color: $color-teal;
+  background-color: transparent;
+  border-color: $color-teal;
+
+  &:hover {
+    color: $color-teal;
+    background-color: rgba(13, 118, 128, 0.1);
+    border-color: $color-teal;
+  }
+
+  &:focus,
+  &.focus {
+    color: $color-teal;
+    background-color: rgba(13, 118, 128, 0.1);
+    border-color: $color-teal;
+  }
+
+  &.disabled,
+  &:disabled {
+    pointer-events: none;
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  &:not(:disabled):not(.disabled):active,
+  &:not(:disabled):not(.disabled).active,
+  .show > &.dropdown-toggle {
+    color: #fff;
+    background-color: $color-teal;
+    border-color: $color-teal;
+  }
+}

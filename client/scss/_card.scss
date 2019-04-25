@@ -1,0 +1,32 @@
+.o-card-group {
+  .card {
+    height: 100%;
+    background-color: transparent;
+    border-radius: 0;
+
+    ul {
+      padding-left: 0;
+    }
+
+    li {
+      list-style-position: outside;
+      list-style-type: none;
+      padding-left: 1.5em;
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+      background-size: 1.5em;
+      background-image: url(https://www.ft.com/__origami/service/image/v2/images/raw/fticon-v1:tick?tint=26747a&format=svg&source=ftchinese);
+      background-repeat: no-repeat;
+      background-position: left top;
+    }
+  }
+
+  .card-title {
+    border-bottom: 1px solid #26747a;
+  }
+
+  .card-footer {
+    background-color: transparent;
+    border-top: 0;
+  }
+}
