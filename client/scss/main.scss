@@ -47,16 +47,17 @@ a {
 }
 
 .global-spinner {
-  display: none;
   position: fixed;
   top: 50%;
   left: 50%;
   margin-top: -1rem;
   margin-left: -1rem;
 }
-.global-spinner.show {
-  visibility: visible;
-}
-.global-spinner.hide {
-  display: block;
+.spinner-border {
+  &[aria-hidden="true"] {
+    display: none;
+  }
+  &[aria-hidden="false"] {
+    display: inline-block;
+  }
 }
