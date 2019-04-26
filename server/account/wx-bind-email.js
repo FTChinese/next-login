@@ -48,7 +48,7 @@ router.post("/email", async(ctx, next) => {
 
   const { value, errors } = validateEmail(email);
 
-  debug("Validation error: %O", error);
+  debug("Validation error: %O", errors);
 
   if (errors) {
     ctx.state.errors = errors;
@@ -122,7 +122,7 @@ router.post("/login",
     const input = ctx.request.body.credentials;
 
     const { value, errors } = validateLogin(input);
-    if (error) {
+    if (errors) {
       ctx.state.errors = errors;
       ctx.state.credentials = input;
       
@@ -217,6 +217,8 @@ router.get("/merge", async(ctx, next) => {
       break;
   }
   
+  debug("FTC account membership: %O", ftcAccount.member);
+  debug("Wx account membership: %O", wxAccount.member);
 
   let denyMerge = "";
 
@@ -328,7 +330,7 @@ router.post("/signup",
     const input = ctx.request.body.credentials;
 
     const { value, errors } = validateSignUp(input);
-    if (error) {
+    if (errors) {
       ctx.state.errors = errors;
       ctx.state.credentials = input;
       return await next();
