@@ -6,7 +6,6 @@ const {
 } = require("../../lib/sitemap");
 const {
   errMessage,
-  buildApiError,
   ClientError,
 } = require("../../lib/response");
 
@@ -145,9 +144,7 @@ router.post("/login",
       const clientErr = new ClientError(e);
 
       if (!clientErr.isFromAPI()) {
-        ctx.state.errors = clientErr.buildGenericError();
-
-        return await next();
+        throw e;
       }
 
       switch (e.status) {
@@ -159,7 +156,7 @@ router.post("/login",
           break;
 
         default:
-          ctx.state.errors = buildApiError();
+          ctx.state.errors = clientErr.buildApiError();
           break;
       }
 
@@ -186,39 +183,14 @@ router.get("/merge", async(ctx, next) => {
    * @type {Account}
    */
   const account = ctx.state.user;
-  /**
-   * @type {Account}
-   */
-  let wxAccount;
-  /**
-   * @type {Account}
-   */
-  let ftcAccount;
 
   /**
-   * If user's current account is `email`, then
-   * `userId` should be wechat's union id; if 
-   * current account is `wechat`, then `userId` should
-   * be ftc's id.
+   * @type {{ftcAccount: Account, wxAccount: Account}}
    */
-  switch (account.loginMethod) {
-    case "email":
-      const wxAcntData = await new WxUser(userId)
-        .fetchAccount();
-      wxAccount = new Account(wxAcntData);
-      ftcAccount = account;
-      break;
-
-    case "wechat":
-      wxAccount = account;
-      const ftcAcntData = await new FtcUser(userId)
-        .fetchAccount();
-      ftcAccount = new Account(ftcAcntData);
-      break;
-  }
+  const { ftcAccount, wxAccount } = await account.fetchBinding(userId);
   
-  debug("FTC account membership: %O", ftcAccount.member);
-  debug("Wx account membership: %O", wxAccount.member);
+  debug("FTC account: %O", ftcAccount.member);
+  debug("Wx account: %O", wxAccount.member);
 
   let denyMerge = "";
 
@@ -240,6 +212,8 @@ router.get("/merge", async(ctx, next) => {
 
   ctx.state.wxAccount = wxAccount;
   ctx.state.ftcAccount = ftcAccount;
+  ctx.state.userId = userId;
+
   if (denyMerge) {
     ctx.state.denyMerge = denyMerge;
   }
@@ -258,6 +232,9 @@ router.get("/merge", async(ctx, next) => {
  * /account/bind/merge
  */
 router.post("/merge", async(ctx, next) => {
+  /**
+   * @description The id to merge.
+   */
   const userId = ctx.request.body.userId;
 
   if (!userId) {
@@ -273,24 +250,24 @@ router.post("/merge", async(ctx, next) => {
   /**
    * @type {boolean}
    */
-  let done;
-  switch (account.loginMethod) {
-    case "email":
-      done = await new WxUser(userId).merge(account.id)
-      break;
+  try {
+    const done = await account.merge(userId);
 
-    case "wechat":
-      // If user logged in via wechat, then the target userId must be FTC id.
-      done = await new WxUser(account.unionId).merge(userId)
-      break;
+    if (done) {
+      ctx.redirect(sitemap.account);
+      return;
+    }
+
+    throw new Error("Unknown error. Please try later.");
+  } catch (e) {
+    const clientErr = new ClientError(e);
+
+    if (!clientErr.isFromAPI()) {
+      throw e;
+    }
+
+    ctx.body.denyMerge = clientErr.buildGenericError();
   }
-
-  if (done) {
-    ctx.redirect(sitemap.account);
-    return;
-  }
-
-  throw new Error("Unknown error. Please try later.");
 });
 
 /**
@@ -351,12 +328,10 @@ router.post("/signup",
       const clientErr = new ClientError(e);
 
       if (!clientErr.isFromAPI()) {
-        ctx.state.errors = clientErr.buildGenericError();
-
-        return await next();
+        throw e;
       }
 
-      ctx.state.errors = clientErr.buildAPIError();
+      ctx.state.errors = clientErr.buildFormError();
 
       return await next();
     }
