@@ -10,9 +10,6 @@ const {
   sidebarNav,
   sitemap,
 } = require("../lib/sitemap");
-const {
-  isAPIError,
-} = require("../lib/response");
 const time = require("../lib/time");
 const Account = require("../lib/account");
 
@@ -181,13 +178,8 @@ exports.handleErrors = function() {
       
       ctx.state.error = {
         status: e.status || 500,
-        stack: e.stack
-      }
-      
-      if (isAPIError(e)) {
-        ctx.state.error.message = e.response.body.message
-      } else {
-        ctx.state.error.message = e.message || 'Internal Server Error'
+        stack: e.stack,
+        message: e.message || 'Internal Server Error'
       }
 
       ctx.status = ctx.state.error.status;
