@@ -37,6 +37,7 @@ const account = require('./server/account');
 const subscription = require('./server/subscription');
 const notification = require("./server/notification");
 const starred = require("./server/starred");
+// const feedback = require("./server/feedback");
 
 const version = require('./server/version');
 const testRouter = require("./server/test");
@@ -89,6 +90,8 @@ router.use('/account', checkSession(), account);
 router.use('/subscription', checkSession(), subscription);
 router.use('/notification', checkSession(), notification);
 router.use("/starred", checkSession(), starred);
+router.use("/feedback", checkSession(), feedback);
+
 router.use('/__version', version);
 router.use("/test", testRouter);
 

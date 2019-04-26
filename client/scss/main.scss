@@ -61,3 +61,31 @@ a {
     display: inline-block;
   }
 }
+.feedback {
+  z-index: 1000;
+  display: block;
+  width: 100px;
+  // height: 28px;
+  position: fixed;
+  right: 3px;
+  bottom: 50px;
+  margin-right: -39px;
+  padding: 3px 5px;
+  color: #fff;
+  background-color: #0d7680;
+  border: 1px solid #0d7680;
+  -webkit-transform: translate3d(0, 0, 0) rotate(-90deg);
+  transform: translate3d(0, 0, 0) rotate(-90deg);
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 600;
+
+  &:hover {
+    color: #fff;
+    text-decoration: none;
+  }
+  span {
+    display: block;
+    text-align: center;
+  }
+}

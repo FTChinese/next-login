@@ -240,3 +240,11 @@ declare interface ValidationErrorItem {
         label: string;
     }
 }
+
+declare interface IFeedback {
+    title: string;
+    content: string;
+    createdAt: string;
+    userEmail: string;
+    userId: string;
+}
