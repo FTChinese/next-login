@@ -63,6 +63,14 @@
       type="submit">登录</button>
   </form>
   <p class="text-center pt-3">还没有FT中文网账号?<a href="{{sitemap.signup}}">创建</a></p>
+
+  {% if not isMobile %}
+  <div class="text-center mt-5">
+    <a href="{{ sitemap.wxLogin }}">
+        <img src="https://open.weixin.qq.com/zh_CN/htmledition/res/assets/res-design-download/icon32_wx_button.png" alt="微信登录">
+    </a>
+  </div>
+  {% endif %}
 </div>
 
 

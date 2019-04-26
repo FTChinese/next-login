@@ -1,4 +1,5 @@
 const Router = require('koa-router');
+const MobileDetect = require("mobile-detect");
 const {
   URLSearchParams,
 } = require("url");
@@ -42,6 +43,14 @@ router.get('/', async function (ctx) {
   if (ctx.session.user) {
     return ctx.redirect(sitemap.profile);
   }
+
+  const md = new MobileDetect(ctx.header["user-agent"]);
+
+  // Only show wechat login button on desktop.
+  // You cannot use wecaht OAuth on mobile browser
+  // since you can not scan the QRCode on your own
+  // device.
+  ctx.state.isMobile = !!md.mobile();
 
   ctx.body = await render('login.html', ctx.state);
 });
