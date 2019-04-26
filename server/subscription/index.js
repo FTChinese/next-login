@@ -2,9 +2,6 @@ const Router = require('koa-router');
 const debug = require('debug')('user:subscription');
 const render = require('../../util/render');
 
-const {
-  findPlan,
-} = require("../../model/paywall");
 const Account = require("../../lib/account");
 const Membership = require("../../lib/member");
 /**
@@ -44,6 +41,7 @@ router.get('/', async (ctx, next) => {
   const paywallData = paywall.getPaywall();
 
   ctx.state.products = paywallData.products;
+  ctx.state.mailTo = account.buildMailTo();
 
   ctx.body = await render('subscription/membership.html', ctx.state);
 
