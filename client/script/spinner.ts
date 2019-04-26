@@ -1,33 +1,26 @@
 class Spinner {
-  private rootEl: HTMLElement;
+  private spinnerEl: HTMLElement;
 
-  constructor(rootEl: HTMLElement) {
-    this.rootEl = rootEl;
+  constructor() {
+    this.spinnerEl = document.querySelector<HTMLElement>(".global-spinner .spinner-border");
   }
 
   show() {
-    this.rootEl.classList.remove("hide");
-    this.rootEl.classList.add("show");
+    if (!this.spinnerEl) {
+      return;
+    }
+    this.spinnerEl.setAttribute("aria-hidden", "false")
   }
 
   hide() {
-    this.rootEl.classList.remove("show");
-    this.rootEl.classList.add("hide");
+    if (!this.spinnerEl) {
+      return;
+    }
+    this.spinnerEl.setAttribute("aria-hidden", "true");
   }
 
   static init() {
-    const container = document.querySelector(".global-spinner");
-    if (!container) {
-      return;
-    }
-
-    const spinner = container.querySelector<HTMLElement>("spinner-border");
-
-    if (!spinner) {
-      return;
-    }
-
-    const inst = new Spinner(spinner);
+    const inst = new Spinner();
 
     window.addEventListener("load", () => {
       inst.show();
