@@ -82,7 +82,7 @@ router.post('/', async (ctx, next) => {
         break;
 
       default:
-        ctx.state.errors = clientErr.buildAPIError();
+        ctx.state.errors = clientErr.buildFormError();
         break;
     }
 

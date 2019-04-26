@@ -69,7 +69,7 @@ router.post('/', async (ctx, next) => {
       throw e;
     }
 
-    ctx.state.errors = clientErr.buildAPIError();
+    ctx.state.errors = clientErr.buildFormError();
 
     ctx.body = await render('profile/address.html', ctx.state);
   }

@@ -117,7 +117,7 @@ router.post('/',
           // or
           // { email: email_missing_field }
         default:
-          ctx.state.errors = clientErr.buildAPIError();
+          ctx.state.errors = clientErr.buildFormError();
           break;
       }
 
@@ -254,7 +254,7 @@ router.post('/:token',
         // || {password: password_invalid}
         // || {token: token_missing_field}
         default:
-          ctx.state.errors = clientErr.buildAPIError();
+          ctx.state.errors = clientErr.buildFormError();
       }
 
       ctx.state.email = ctx.session.email;

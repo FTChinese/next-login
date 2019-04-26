@@ -123,7 +123,7 @@ router.post('/',
         // email: email_missing_field || email_invalid
         // password: password_missing_field || password_invalid
         default:
-          ctx.state.errors = clientErr.buildAPIError();
+          ctx.state.errors = clientErr.buildFormError();
           break;
       }
 

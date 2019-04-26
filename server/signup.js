@@ -96,7 +96,7 @@ router.post('/',
           // {password: password_invalid}
           // 400: {server: "Problems parsing JSON"}
         default:
-          ctx.state.errors = clientErr.buildAPIError();
+          ctx.state.errors = clientErr.buildFormError();
           break;
       }
 

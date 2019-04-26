@@ -3,9 +3,8 @@ const debug = require("debug")('user:verification');
 
 const render = require('../../util/render');
 const {
-  isAPIError,
-  buildApiError,
-  errMessage
+  errMessage,
+  ClientError,
 } = require("../../lib/response");
 const {
   Verification,
@@ -35,12 +34,10 @@ router.get('/:token', async (ctx) => {
     ctx.body = await render('verification/email.html', ctx.state);
 
   } catch (e) {
+    const clientErr = new ClientError(e);
     // Here using `warning` because it might be better to show message in the content body rather than in the top banner since this page is nearly blank.
-    if (!isAPIError(e)) {
-      debug("%O", e);
-      ctx.state.warning = e.message;
-
-      return await next();
+    if (!clientErr.isFromAPI()) {
+      throw e;
     }
 
     /**
@@ -57,7 +54,7 @@ router.get('/:token', async (ctx) => {
 
         // 400
       default:
-        ctx.state.errors = buildApiError(body);
+        ctx.state.errors = clientErr.buildFormError();
         break;
     }
 

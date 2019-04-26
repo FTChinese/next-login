@@ -71,7 +71,7 @@ router.post('/', async (ctx, next) => {
       throw e;
     }
 
-    ctx.state.errors = clientErr.buildAPIError();
+    ctx.state.errors = clientErr.buildFormError();
 
     return await next();
   }
