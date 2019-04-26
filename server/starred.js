@@ -6,12 +6,12 @@ const {
   sitemap
 } = require("../lib/sitemap");
 const {
-  isAPIError,
-  buildApiError,
-  buildErrMsg
+  ClientError,
 } = require("../lib/response");
+const Ftcuser = require("../lib/ftc-user");
 const {
-  paging
+  paging,
+  denyWxOnlyAccess,
 } = require("./middleware");
 const FtcUser = require("../lib/ftc-user");
 const Account = require("../lib/account");
@@ -49,31 +49,34 @@ router.get("/",
   }
 );
 
-router.post("/:id/delete", async (ctx, next) => {
-  const id = ctx.params.id;
-  /**
-   * @type {Account}
-   */
-  const account = ctx.state.user;
+router.post("/:id/delete",
 
-  try {
-    await account
-      .unstarArticle(id)
+  denyWxOnlyAccess(), 
+  
+  async (ctx, next) => {
+    const id = ctx.params.id;
+    /**
+     * @type {Account}
+     */
+    const account = ctx.state.user;
 
-    return ctx.redirect(sitemap.starred);
-  } catch (e) {
-    if (!isAPIError(e)) {
-      /**
-       * @type {{message: string}}
-       */
-      ctx.session.errors = buildErrMsg(e);
+    try {
+      await new FtcUser(account.id)
+        .unstarArticle(id)
 
       return ctx.redirect(sitemap.starred);
-    }
+    } catch (e) {
 
-    ctx.session.errors = buildApiError(e.response.body);
-    ctx.redirect(sitemap.starred);
+      const clientErr = new ClientError(e);
+
+      if (!clientErr.isFromAPI()) {
+        throw e;
+      }
+
+      ctx.session.errors = clientErr.buildGenericError();
+      ctx.redirect(sitemap.starred);
+    }
   }
-});
+);
 
 module.exports = router.routes();
