@@ -9,4 +9,6 @@ module.exports =  {
   "M": "男",
   "F": "女",
   "zeroMember": "尚未成为会员",
+  "wechat": "微信",
+  "alipay": "支付宝"
 };
