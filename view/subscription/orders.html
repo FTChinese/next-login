@@ -2,16 +2,16 @@
 
 {% block content %}
 
-  <div class="mb-3 mt-3 border-bottom">
+  <div class="mb-3 mt-3">
     <h3>已支付订单</h3>
   </div>
 
   {% for order in orders %}
   <table class="table table-sm">
     <caption>收据</caption>
-    <thead class="thead-light">
+    <thead>
       <tr>
-        <th scope="row">ID</th>
+        <th scope="row">订单ID</th>
         <th>{{ order.orderId }}</td>
       </tr>
     </thead>
@@ -22,7 +22,7 @@
       </tr>
       <tr>
         <th scope="row">价格</th>
-        <td>{{ order.netPrice }}</td>
+        <td>¥{{ order.netPrice | toCurrency }}</td>
       </tr>
       <tr>
         <th scope="row">支付方式</th>
