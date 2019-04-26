@@ -110,7 +110,7 @@ router.get("/orders", async (ctx, enxt) => {
   /**
    * @type {Account}
    */
-  const account = ctx.sate.user;
+  const account = ctx.state.user;
 
   const orders = await account.fetchOrders();
 
