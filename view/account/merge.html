@@ -7,10 +7,12 @@
 
       <h5 class="text-center mb-3">合并如下账号</h5>
       <div class="card mb-5">
+
         <div class="card-header">FT中文网账号</div>
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
-            {{ ftcAccount.email }}
+            <span>邮箱</span>
+            <span>{{ ftcAccount.email }}</span>
           </li>
           <li class="list-group-item d-flex justify-content-between">
             <span>会员类型</span>
@@ -26,9 +28,11 @@
 
       <div class="card mb-3">
         <div class="card-header">微信账号</div>
+        
         <ul class="list-group list-group-flush">
           <li class="list-group-item d-flex justify-content-between">
-            {{ wxAccount.wechat.nickname }}
+            <span>昵称</span>
+            <span>{{ wxAccount.wechat.nickname }}</span>
           </li>
           <li class="list-group-item d-flex justify-content-between">
             <span>会员类型</span>
@@ -37,7 +41,7 @@
   
           <li class="list-group-item d-flex justify-content-between">
             <span>会员期限</span>
-            <span>{{wxAccount.membership.expireDate}}</span>
+            <span>{{wxAccount.member.expireDate}}</span>
           </li>
         </ul>
       </div>
@@ -47,7 +51,10 @@
       {% else %}
       <form method="post" action="{{ sitemap.bindMerge }}">
         <input type="hidden" name="userId" value="{{ftcAccount.id}}">
-        <button class="btn btn-block btn-primary" type="submit">开始</button>
+        <button 
+          class="btn btn-block btn-primary"
+          type="submit"
+          data-disable-with="合并账号...">开始</button>
       </form>
       {% endif %}
     </div>
