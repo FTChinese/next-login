@@ -4,10 +4,6 @@ const debug = require('debug')('user:email');
 const {
   sitemap
 } = require("../../lib/sitemap");
-const {
-  isAPIError,
-  buildApiError
-} = require("../../lib/response");
 const FtcUser = require("../../lib/ftc-user");
 const {
   clientApp,
