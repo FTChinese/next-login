@@ -109,5 +109,14 @@ exports.matrix = [
 				"href": "https://www.ft.com/"
 			}
 		]
-	}
+  },
+  {
+    "title": "移动应用",
+    "items": [
+      {
+        "text": "安卓",
+        "href": "http://app.ftchinese.com/androidmobile.html"
+      }
+    ]
+  }
 ];
