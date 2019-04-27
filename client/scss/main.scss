@@ -1,4 +1,8 @@
 @import "palette";
+@import "scss/functions";
+@import "scss/variables";
+
+@import "scss/mixins/breakpoints";
 
 body {
   font-family: "Helvetica Neue", "Lucida Grande", Verdana, "PingFang SC",
@@ -35,16 +39,6 @@ a {
 @import "button";
 @import "form";
 @import "footer";
-
-.o-toggler {
-  padding: 0.25rem 0.75rem;
-  font-size: 1.25rem;
-  line-height: 1;
-  background-color: transparent;
-  border: 1px solid transparent;
-  border-radius: 0.25rem;
-  cursor: pointer;
-}
 
 .global-spinner {
   position: fixed;

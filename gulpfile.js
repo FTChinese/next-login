@@ -71,6 +71,7 @@ function buildCss() {
     .pipe(sass({
       outputStyle: 'expanded',
       precision: 2,
+      includePaths: "node_modules/bootstrap"
     }).on('error', (err) => {
       console.error(err);
     }))
@@ -90,6 +91,10 @@ exports.style = buildCss;
 
 exports.watch = gulp.parallel(buildJs, buildCss, function() {
   gulp.watch(["client/script/*.ts"], buildJs);
+  gulp.watch(["client/scss/**/*.scss"], buildCss);
+});
+
+exports.watchCss = gulp.parallel(buildCss, function() {
   gulp.watch(["client/scss/**/*.scss"], buildCss);
 });
 
