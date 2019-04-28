@@ -1,5 +1,18 @@
 {% extends "layouts/base.html" %}
 
+{% block headerDrawer %}
+<button class="o-toggle" 
+  type="button" 
+  data-toggle="collapse" 
+  data-target="#o-header-drawer" 
+  aria-controls="#o-header-drawer" 
+  aria-expanded="false" 
+  aria-label="Toggle navigation">
+
+  <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" height="40" width="40" preserveAspectRatio="none"><title>Menu</title><path d="M768 306.2V383H256v-76.8h512zM256 536.6h512v-76.8H256v76.8zm0 153.6h512v-76.8H256v76.8z" fill-rule="evenodd"/></svg>
+</button>
+{% endblock %}
+
 {% block topBanner %}
   {% if user and user.email and (not user.isVerified) %}
     <div class="alert alert-primary mb-0" role="alert">
