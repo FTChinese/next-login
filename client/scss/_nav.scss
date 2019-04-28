@@ -1,4 +1,4 @@
-#sidebarNav {
+.o-header__drawer {
   position: fixed;
   top: 0;
   left: 0;
@@ -15,7 +15,7 @@
 }
 
 @include media-breakpoint-up(sm) {
-  #sidebarNav {
+  .o-header__drawer {
     position: static;
     top: auto;
     left: auto;
