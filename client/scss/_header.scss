@@ -5,63 +5,25 @@
   padding: 0;
   display: inline-block;
   align-self: stretch;
-
-  // .o-header & {  
-  //   margin-left: -15px;
-  // }
 }
 .o-header {
   background-color: $color-paper;
   color: $color-black80;
   border-bottom: 1px solid $color-black20;
-  // padding: 0;
+  padding: $navbar-padding-y 0;
 
-  .dropdown-toggle {
-    background-image: url(https://www.ft.com/__origami/service/image/v2/images/raw/fticon-v1:user?source=ftchinese);
-    background-repeat: no-repeat;
-    background-position: left top;
-  }
-}
-
-#sidebarNav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  background-color: $color-black90;
-  width: 100%;
-  height: 100%;
-  z-index: 1000;
-  
-  .nav-link {
-    color: #fff;
+  .o-toggle {
+    margin-right: -$grid-gutter-width/2;
   }
 }
 
 @include media-breakpoint-up(sm) {
   // .o-header {
-  //   padding: 0.5rem 0;
+  //   padding: $navbar-padding-y 0;
   // }
 
-  .o-toggle {
-    .o-header &, #sidebarNav & {
-      display: none;
-    }
-  }
-
-  #sidebarNav {
-    position: static;
-    top: auto;
-    left: auto;
-    background-color: inherit;
-    width: auto;
-    height: auto;
-    z-index: auto;
-    .nav-link {
-      color: $color-teal;
-    }
-    .nav-link:hover {
-      color: $color-black70;
-    }
+  .o-header .o-toggle {
+    display: none;
   }
 }
   

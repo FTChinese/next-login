@@ -24,25 +24,23 @@
 </head>
 <body>
   <header class="navbar o-header">
-    <div class="container justify-content-between">
+    <div class="container">
 
       <a class="navbar-brand" href="http://www.ftchinese.com" target="__blank">FT中文网</a>
 
       {% if user %}
-      <div class="dropdown">
-        <a class="nav-link dropdown-toggle pl-0 pr-0" 
+      <div class="dropdown d-none d-sm-block">
+        <a class="dropdown-toggle" 
           href="#" 
           role="button" 
           data-toggle="dropdown" 
           aria-haspopup="true" 
-          aria-expanded="false">myFT</a>
+          aria-expanded="false">
+          设置
+        </a>
 
         <div class="dropdown-menu dropdown-menu-right">
-          <h6 class="dropdown-header">
-            {{ user.getDisplayName() }}
-          </h6>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="{{sitemap.profile}}">设置</a>
+          <a class="dropdown-item" href="{{sitemap.profile}}">{{ user.getDisplayName() }}</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="{{sitemap.logout}}">退出</a>
         </div>
@@ -96,22 +94,25 @@
         <div class="row">
           <div class="col-sm-3">
             <div id="sidebarNav" class="collapse d-sm-block">
-              <button class="o-toggle" 
-                type="button" 
-                data-toggle="collapse" 
-                data-target="#sidebarNav" 
-                aria-controls="#sidebarNav" 
-                aria-expanded="false" 
-                aria-label="Toggle navigation">
-        
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="40" with="40"><path fill="#fff" d="M697.4 759.2l61.8-61.8L573.8 512l185.4-185.4-61.8-61.8L512 450.2 326.6 264.8l-61.8 61.8L450.2 512 264.8 697.4l61.8 61.8L512 573.8z"/></svg>
-              </button>
 
-              <nav class="nav flex-column pt-3">
+              <div class="pt-2">
+                <button class="o-toggle" 
+                  type="button" 
+                  data-toggle="collapse" 
+                  data-target="#sidebarNav" 
+                  aria-controls="#sidebarNav" 
+                  aria-expanded="false" 
+                  aria-label="Toggle navigation">
+          
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="40" with="40"><path fill="#fff" d="M697.4 759.2l61.8-61.8L573.8 512l185.4-185.4-61.8-61.8L512 450.2 326.6 264.8l-61.8 61.8L450.2 512 264.8 697.4l61.8 61.8L512 573.8z"/></svg>
+                </button>
+              </div>
+              
+              <nav class="nav flex-column">
                 <a class="nav-link d-block d-sm-none" href="{{sitemap.profile}}">{{ user.getDisplayName() }}</a>
 
                 {% for item in sideNav %}
-                  <a class="nav-link{% if item.active %} active{% endif %}{% if item.desktopOnly %} d-none d-sm-block{% endif %}" href="{{item.href}}">{{item.text}}</a>
+                  <a class="nav-link{% if item.active %} active{% endif %}{% if item.desktop %} d-none d-sm-block{% endif %}" href="{{item.href}}">{{item.text}}</a>
                 {% endfor %}
 
                 <a class="nav-link d-block d-sm-none" href="{{sitemap.logout}}">退出</a>

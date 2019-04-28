@@ -64,8 +64,7 @@ exports.nav = function() {
 
     ctx.state.sideNav = sidebarNav.map(item => {
       return {
-        href: item.href,
-        text: item.text,
+        ...item,
         active: path.startsWith(item.href),
       };
     });
