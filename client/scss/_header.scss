@@ -6,15 +6,21 @@
   display: inline-block;
   align-self: stretch;
 
-  .o-header & {  
-    margin-left: -15px;
-  }
+  // .o-header & {  
+  //   margin-left: -15px;
+  // }
 }
 .o-header {
   background-color: $color-paper;
   color: $color-black80;
   border-bottom: 1px solid $color-black20;
-  padding: 0;
+  // padding: 0;
+
+  .dropdown-toggle {
+    background-image: url(https://www.ft.com/__origami/service/image/v2/images/raw/fticon-v1:user?source=ftchinese);
+    background-repeat: no-repeat;
+    background-position: left top;
+  }
 }
 
 #sidebarNav {
@@ -32,9 +38,9 @@
 }
 
 @include media-breakpoint-up(sm) {
-  .o-header {
-    padding: 0.5rem 0;
-  }
+  // .o-header {
+  //   padding: 0.5rem 0;
+  // }
 
   .o-toggle {
     .o-header &, #sidebarNav & {
