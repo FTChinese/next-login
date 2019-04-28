@@ -45,18 +45,9 @@
           <a class="dropdown-item" href="{{sitemap.logout}}">退出</a>
         </div>
       </div>
-
-      <button class="o-toggle" 
-        type="button" 
-        data-toggle="collapse" 
-        data-target="#o-header-drawer" 
-        aria-controls="#o-header-drawer" 
-        aria-expanded="false" 
-        aria-label="Toggle navigation">
-
-        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" height="40" width="40" preserveAspectRatio="none"><title>Menu</title><path d="M768 306.2V383H256v-76.8h512zM256 536.6h512v-76.8H256v76.8zm0 153.6h512v-76.8H256v76.8z" fill-rule="evenodd"/></svg>
-      </button>
       {% endif %}
+
+      {% block headerDrawer%}{% endblock %}
     </div>
   </header>
 
@@ -69,7 +60,7 @@
         <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
           <span>{{errors.message}}</span>
           <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
+            <span aria-hidden="true">&times;</span>
             </button>
         </div>
       {% endif %}
