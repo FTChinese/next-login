@@ -60,22 +60,7 @@
     </div>
   </header>
 
-
-  {% if user and user.email and (not user.isVerified) %}
-    <div class="alert alert-primary mb-0" role="alert">
-      <div class="container">
-        <span>请验证您的登录邮箱。没有收到验证邮件？</span>
-        <form
-          class="d-inline"
-          action="{{sitemap.requestVerification}}"
-          method="post">
-          <button
-            data-disable-with="正在发送..."
-            class="btn btn-link text-teal p-0">重新发送</button>
-        </form>
-      </div>
-    </div>
-  {% endif %}
+  {% block topBanner %}{% endblock %}
 
   <main class="page-content" role="main">
     <div class="container">
@@ -89,52 +74,7 @@
         </div>
       {% endif %}
 
-      {% block main %}
-        
-        <div class="row">
-          <div class="col-sm-3">
-            <div id="o-header-drawer" class="collapse d-sm-block o-header__drawer">
-
-              <div class="pt-2">
-                <button class="o-toggle" 
-                  type="button" 
-                  data-toggle="collapse" 
-                  data-target="#o-header-drawer" 
-                  aria-controls="#o-header-drawer" 
-                  aria-expanded="false" 
-                  aria-label="Toggle navigation">
-          
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="40" with="40"><path fill="#fff" d="M697.4 759.2l61.8-61.8L573.8 512l185.4-185.4-61.8-61.8L512 450.2 326.6 264.8l-61.8 61.8L450.2 512 264.8 697.4l61.8 61.8L512 573.8z"/></svg>
-                </button>
-              </div>
-              
-              <nav class="nav flex-column">
-                <a class="nav-link d-block d-sm-none" href="{{sitemap.profile}}">{{ user.getDisplayName() }}</a>
-
-                {% for item in sideNav %}
-                  <a class="nav-link{% if item.active %} active{% endif %}{% if item.desktop %} d-none d-sm-block{% endif %}" href="{{item.href}}">{{item.text}}</a>
-                {% endfor %}
-
-                <a class="nav-link d-block d-sm-none" href="{{sitemap.logout}}">退出</a>
-              </nav>
-            </div>
-            
-          </div>
-      
-          <div class="col-sm-9">
-            {% if alert %}
-              <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
-                <span>{{ alert.key | showAlert }}</span>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-              </div>
-            {% endif %}
-            {% block content %}{% endblock %}
-          </div>
-        </div>
-
-      {% endblock %}
+      {% block main %}{% endblock %}
     </div>
   </main>
 
