@@ -1,5 +1,5 @@
 class ProgressButton {
-  private btnElm: HTMLButtonElement;
+  readonly btnElm: HTMLButtonElement;
 
   constructor(formEl: HTMLFormElement) {
     this.btnElm = formEl.querySelector<HTMLButtonElement>(`button[type="submit"]`);
@@ -27,8 +27,6 @@ class ProgressButton {
     const instances: ProgressButton[] = [];
 
     const forms = document.forms;
-    
-    // const btnEls = el.querySelectorAll<HTMLElement>("[data-disable-with]");
 
     for (let i = 0; i < forms.length; i++) {
       instances.push(new ProgressButton(forms[i]));
