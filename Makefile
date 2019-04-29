@@ -14,5 +14,8 @@ built/js/progress-button.js : client/js/progress-button.ts
 built/main.js : client/main.ts
 	tsc client/main.ts --outDir built --target es5 --module es6
 
+deploy :
+	pm2 deploy ecosystem.config.js production
+
 clean :
 	rm -rf build/*
