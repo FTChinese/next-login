@@ -1,3 +1,7 @@
+.btn {
+  border-radius: 0;
+}
+
 .btn-primary {
   background-color: $color-teal;
   color: #fff;
@@ -28,6 +32,10 @@
     background-color: rgb(64, 133, 139);
     border-color: transparent;
   }
+}
+
+.btn-link {
+  color: $color-teal;
 }
 
 .btn-outline-primary {
