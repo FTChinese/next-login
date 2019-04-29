@@ -18,7 +18,7 @@ table caption {
   caption-side: top;
   text-align: right;
 }
-a, .text-teal {
+a {
   color: $color-teal;
 }
 
@@ -28,8 +28,7 @@ a {
   }
 }
 
-.alert,
-.btn {
+.alert {
   border-radius: 0;
 }
 
@@ -66,8 +65,8 @@ a {
   margin-right: -39px;
   padding: 3px 5px;
   color: #fff;
-  background-color: #0d7680;
-  border: 1px solid #0d7680;
+  background-color: $color-teal;
+  border: 1px solid $color-teal;
   -webkit-transform: translate3d(0, 0, 0) rotate(-90deg);
   transform: translate3d(0, 0, 0) rotate(-90deg);
   font-size: 16px;
