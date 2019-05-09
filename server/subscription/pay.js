@@ -24,6 +24,10 @@ router.get("/:tier/:cycle", async (ctx, next) => {
   const params = ctx.params;
   const tier = params.tier;
   const cycle = params.cycle;
+  /**
+   * @type {{sandbox: boolean}}
+   */
+  const query = ctx.request.query;
 
   const plan = paywall.findPlan(tier, cycle);
 
@@ -33,6 +37,7 @@ router.get("/:tier/:cycle", async (ctx, next) => {
   }
 
   ctx.state.plan = plan;
+  ctx.state.sandbox = query.sandbox ? true : false;
 
   ctx.body = await render("subscription/pay.html", ctx.state);
 });
@@ -57,6 +62,7 @@ router.post("/:tier/:cycle",
      * @type {{sandbox: boolean}}
      */
     const query = ctx.request.query;
+    debug("Is sandbox: %O", query);
 
     const payMethod = ctx.request.body.payMethod;
     const plan = paywall.findPlan(tier, cycle);
