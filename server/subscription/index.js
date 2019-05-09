@@ -13,6 +13,7 @@ const {
 } = require("../../model/paywall");
 
 const payRouter = require("./pay");
+const payResult = require("./pay-result");
 const redeem = require("./redeem");
 
 const {
@@ -152,5 +153,7 @@ router.get("/alipay/callback", async (ctx, next) => {
 
   ctx.redirect(sitemap.subs);
 });
+
+router.use("/done", payResult);
 
 module.exports = router.routes();

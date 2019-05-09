@@ -53,6 +53,11 @@ router.post("/:tier/:cycle",
     const tier = params.tier;
     const cycle = params.cycle;
 
+    /**
+     * @type {{sandbox: boolean}}
+     */
+    const query = ctx.request.query;
+
     const payMethod = ctx.request.body.payMethod;
     const plan = paywall.findPlan(tier, cycle);
 
@@ -84,7 +89,21 @@ router.post("/:tier/:cycle",
             ctx.redirect(aliOrder.payUrl);
           } else {
             // Otherwise treat user on desktop
-            const aliOrder = await account.aliDesktopOrder(tier, cycle);
+
+            const req = query.sandbox
+              ? account.aliDesktopOrderTest(tier, cycle)
+              : account.aliDesktopOrder(tier, cycle);
+
+            const aliOrder = await req;
+
+            ctx.session.subs = {
+              orderId: aliOrder.ftcOrderId,
+              tier,
+              cycle,
+              listPrice: aliOrder.listPrice,
+              netPrice: aliOrder.netPrice,
+              payMethod: "alipay",
+            };
 
             ctx.redirect(aliOrder.payUrl);
           }
