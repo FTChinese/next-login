@@ -3,7 +3,7 @@ build_prod := build/production
 scss_input := client/scss/main.scss
 css_output := $(build_prod)/main.css
 
-.PHONY: run build tslint clean
+.PHONY: server js css inline deploy tslint clean
 server :
 	nodemon index.js
 
@@ -14,7 +14,7 @@ js :
 	$(cmd_prefix)/rollup -c
 
 css :
-	$(cmd_prefix)/node-sass --output-style=compressed --source-map=$(build_prod) $(scss_input) $(css_output)
+	$(cmd_prefix)/node-sass --output-style=compressed --source-map=$(build_prod) --include-path=node_modules/bootstrap $(scss_input) $(css_output)
 
 inline : js css
 	node ./util/inline.js
