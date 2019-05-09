@@ -1,18 +1,23 @@
+cmd_prefix := ./node_modules/.bin
+build_prod := build/production
+scss_input := client/scss/main.scss
+css_output := $(build_prod)/main.css
+
 .PHONY: run build tslint clean
-run :
+server :
 	nodemon index.js
 
 tslint :
 	tslint -c tslint.json -p tsconfig.json 
 
-js : built/main.js built/js/progress-button.js
-	rollup built/main.js --format iife --file dist/main.js
+js : 
+	$(cmd_prefix)/rollup -c
 
-built/js/progress-button.js : client/js/progress-button.ts
-	tsc client/js/progress-button.ts --outDir built/js --target es5 --module es6
+css :
+	$(cmd_prefix)/node-sass --output-style=compressed --source-map=$(build_prod) $(scss_input) $(css_output)
 
-built/main.js : client/main.ts
-	tsc client/main.ts --outDir built --target es5 --module es6
+inline : js css
+	node ./util/inline.js
 
 deploy :
 	pm2 deploy ecosystem.config.js production

@@ -5,18 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "NODE_ENV=production PORT=4100 URL_PREFIX=/user node index.js",
-    "server": "nodemon dist/index.js",
-    "watch-ts": "tsc -w",
-    "build-js": "rollup -c",
-    "build-css:prod": "node-sass --output-style=compressed --source-map=build/production --include-path=node_modules/bootstrap client/scss/main.scss build/production/main.css",
-    "build-css:dist": "node-sass --output-style=expanded --source-map=build/dist client/scss/main.scss build/dist/main.css",
-    "build-css": "npm run build-css:dist && npm run build-css:prod",
-    "build": "build-js && build-css",
-    "inline": "node ./util/inline.js",
-    "build:html": "npm run build-js && npm run build-css:prod && npm run inline",
     "test": "jest",
-    "postversion": "git push && git push --tags",
-    "postinstall": ""
+    "postversion": "git push && git push --tags"
   },
   "repository": {
     "type": "git",
