@@ -17,7 +17,7 @@
 
       <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
         <span>会员类型</span>
-        <span>{{ user.member.buildMemberType() }}</span>
+        <span>{{ user.member.tier | localize }}</span>
       </div>
 
       <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
