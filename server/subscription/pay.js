@@ -15,7 +15,7 @@ const router = new Router();
 
 /**
  * @description Show payment selection page.
- * /user/subscription/pay/:tier/:cycle
+ * /user/subscription/pay/:tier/:cycle?sandbox=true
  */
 router.get("/:tier/:cycle", async (ctx, next) => {
   /**
