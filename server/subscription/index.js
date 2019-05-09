@@ -13,6 +13,7 @@ const {
 } = require("../../model/paywall");
 
 const payRouter = require("./pay");
+const redeem = require("./redeem");
 
 const {
   sitemap,
@@ -124,6 +125,11 @@ router.get("/orders", async (ctx, enxt) => {
  * /user/subscription/pay/premium/month
  */
 router.use("/pay", payRouter);
+
+/**
+ * @description Redeem gift card
+ */
+router.use("/redeem", redeem);
 
 /**
  * @description Handle pay result

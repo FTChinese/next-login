@@ -328,6 +328,32 @@ exports.oauthApprove = function(input) {
   );
 }
 
+/**
+ * @param {string} code
+ * @return {{value: {code: string}, errors: {code: string} }}
+ */
+exports.validateGiftCode = function(code) {
+  const { value, error } = Joi.validate(
+    {code},
+    Joi.object().keys({
+      code: Joi.string().trim().replace(/\s*/g, '').alphanum().uppercase().required(),
+    }),
+    joiOptions,
+  );
+
+  if (error) {
+    return {
+      value,
+      errors: transformJoiErr(error.details),
+    };
+  }
+
+  return {
+    value,
+    errors: null,
+  };
+}
+
 exports.invalidMessage = {
   "staleEmail": "如果你要更改邮箱，请勿使用当前邮箱",
   "passwordsNotEqual": "两次输入的新密码必须相同",
