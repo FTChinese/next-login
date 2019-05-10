@@ -55,4 +55,12 @@ env.addFilter("toCST", function(str) {
   }
 });
 
+env.addFilter("formatWxPrice", function(price) {
+  if (typeof price !== "number") {
+    return price;
+  }
+
+  return numeral(price / 100).format("0,0.00");
+});
+
 module.exports = util.promisify(nunjucks.render);
