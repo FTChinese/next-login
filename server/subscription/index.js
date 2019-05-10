@@ -53,24 +53,6 @@ router.get('/', async (ctx, next) => {
   }
 });
 
-router.get("/test", async (ctx, next) => {
-  const accountWrapper = new Account(ctx.session.user);
-  const account = await accountWrapper.fetchAccount();
-
-  debug("Account: %O", account);
-
-  ctx.state.account = account;
-  ctx.state.member = new Membership(account.membership);
-
-  ctx.state.products = defaultPaywall.products;
-
-  ctx.body = await render('subscription/membership-test.html', ctx.state);
-
-  if (account && account.hasOwnProperty("id")) {
-    ctx.session.user = account;
-  }
-});
-
 /**
  * @description Renew membership
  * /user/subscription/renew
@@ -133,27 +115,8 @@ router.use("/pay", payRouter);
 router.use("/redeem", redeem);
 
 /**
- * @description Handle pay result
- * /user/subscription/alipay/callback
+ * @description Show payment result.
  */
-router.get("/alipay/callback", async (ctx, next) => {
-  /**
-   * @type {{error: string, error_description}}
-   */
-  const query = ctx.query;
-  if (query.error) {
-    ctx.state.errors = {
-      message: query.error_description || query.error
-    }
-
-    ctx.body = await render("subscription/alipay-result.html", ctx.state);
-
-    return;
-  }
-
-  ctx.redirect(sitemap.subs);
-});
-
 router.use("/done", payResult);
 
 module.exports = router.routes();
