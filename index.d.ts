@@ -161,6 +161,13 @@ declare interface IPlan {
     description: string;
 }
 
+// Saved in session so that we can tell user what they buy after being redirected from payment providers.
+declare interface ISubsOrder extends IPlan {
+    orderId: string;
+    appId?: string; // wx app id.
+    payMethod: "alipay" | "wechat";
+}
+
 declare interface IPricing {
     standard_year: IPlan;
     standard_month: IPlan;
@@ -184,8 +191,13 @@ declare interface IWxQRPay {
     codeUrl: string;
 }
 
-declare interface IWxMobilePay {
-    mWebUrl: string;
+declare interface IWxQuery {
+    paymentState: string;
+    paymentStateDesc: string;
+    totalFee: number;
+    transactionId: string;
+    ftcOrderId: string;
+    paidAt: string;
 }
 
 declare interface IAliWebPay {
