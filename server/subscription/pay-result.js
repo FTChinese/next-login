@@ -70,14 +70,14 @@ router.get("/wx", async(ctx, next) => {
   ctx.state.subs = subsOrder;
 
   // To test UI.
-  ctx.state.result = {
-    "paymentState": "SUCCESS",
-    "paymentStateDesc": "支付成功",
-    "totalFee": 1,
-    "transactionId": "4200000252201903069440709666",
-    "ftcOrderId": "FT1D3CEDDB2599EFB9",
-    "paidAt": "2019-03-06T07:21:18Z"
-  };
+  // ctx.state.result = {
+  //   "paymentState": "SUCCESS",
+  //   "paymentStateDesc": "支付成功",
+  //   "totalFee": 1,
+  //   "transactionId": "4200000252201903069440709666",
+  //   "ftcOrderId": "FT1D3CEDDB2599EFB9",
+  //   "paidAt": "2019-03-06T07:21:18Z"
+  // };
 
   return await next();
 
