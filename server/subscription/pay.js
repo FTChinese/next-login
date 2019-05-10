@@ -96,7 +96,7 @@ router.post("/:tier/:cycle",
     const builder = new OrderUrlBuilder()
       .setTier(tier)
       .setCycle(cycle)
-      .setSandbox(!!sandbox);
+      .setSandbox(!!query.sandbox);
 
     try {
       switch (payMethod) {
@@ -138,9 +138,6 @@ router.post("/:tier/:cycle",
         // NOTE: we cannot use wechat's MWEB and JSAPI payment due to the fact those two
         // methods could only be used by ftacademy.com
         // accoding to wechat's rule.
-          /**
-           * @type {{codeUrl: string}}
-           */
           const order = await account.wxDesktopOrder(builder.buildWxDesktop());
   
           /**
@@ -156,7 +153,7 @@ router.post("/:tier/:cycle",
             payMethod: payMethod,
           };
 
-          const dataUrl = await QRCode.toDataURL(wxPrepay.codeUrl);
+          const dataUrl = await QRCode.toDataURL(order.codeUrl);
           
           // On the top of the page show the product user is purchasing
           ctx.state.plan = plan;
