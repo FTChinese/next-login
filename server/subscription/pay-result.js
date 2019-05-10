@@ -7,7 +7,7 @@ const {
 } = require("../../lib/config");
 const {
   ClientError,
-} = require("../../lib/request");
+} = require("../../lib/response");
 
 const router = new Router();
 
@@ -79,7 +79,7 @@ router.get("/wx", async(ctx, next) => {
   //   "paidAt": "2019-03-06T07:21:18Z"
   // };
 
-  return await next();
+  // return await next();
 
   if (!subsOrder || !subsOrder.appId) {
     return await next();
