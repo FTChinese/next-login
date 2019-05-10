@@ -9,9 +9,9 @@
   {% block payResult %}{% endblock %}
 
   {% if result %}
-    <p>您可以打印本页以备日后查询，或者在<a href="{{ nextUser.subs }}">用户中心</a>查看会员状态和订单历史。</p>
+    <p class="text-center">您可以打印本页以备日后查询，或者在<a href="{{ sitemap.subs }}">用户中心</a>查看会员状态和订单历史。</p>
   {% else %}
-    <p>暂时未查询到支付结果，您可以前往<a href="{{ nextUser.subs }}">用户中心</a>查看会员状态和订单历史。</p>
+    <p class="text-center">暂时未查询到支付结果，您可以前往<a href="{{ sitemap.subs }}">用户中心</a>查看会员状态和订单历史。</p>
   {% endif %}
 
   <p class="text-center">
