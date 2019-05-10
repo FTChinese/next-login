@@ -1,0 +1,35 @@
+{% extends "layouts/pay-done.html" %}
+
+{% block payResult %}
+
+  {% if result %}
+  <table class="table">
+    <caption class="text-center">微信支付结果</caption>
+    <thead>
+      <tr>
+        <th scope="row">订单号</th>
+        <td>{{ result.ftcOrderId }}</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">支付状态</th>
+        <td>{{ result.paymentStateDesc }}</td>
+      </tr>
+      <tr>
+        <th scope="col">金额</th>
+        <td>{{ result.totalFee | formatWxPrice }}</td>
+      </tr>
+      <tr>
+        <th scope="col">微信交易号</th>
+        <td>{{ result.transactionId }}</td>
+      </tr>
+      <tr>
+        <th scope="col">支付时间</th>
+        <td>{{ result.paidAt | toCST }}</td>
+      </tr>
+    </tbody>
+  </table>
+  {% endif %}
+
+{% endblock %}

@@ -11,11 +11,20 @@ const {
   clientApp,
 } = require("../middleware");
 const Account = require("../../lib/account");
+const {
+  OrderUrlBuilder,
+} = require("../../lib/endpoints");
+const {
+  PAY_ALI,
+  PAY_WX,
+} = require("../../lib/enum");
+
 const router = new Router();
 
 /**
  * @description Show payment selection page.
  * /user/subscription/pay/:tier/:cycle?sandbox=true
+ * To use sandbox in production, apend query paramter `sandbox=true`; you do not need to use this in development since you can run subscription api in sandbox mode locally.
  */
 router.get("/:tier/:cycle", async (ctx, next) => {
   /**
@@ -25,7 +34,7 @@ router.get("/:tier/:cycle", async (ctx, next) => {
   const tier = params.tier;
   const cycle = params.cycle;
   /**
-   * @type {{sandbox: boolean}}
+   * @type {{sandbox?: "true"}}
    */
   const query = ctx.request.query;
 
@@ -37,7 +46,7 @@ router.get("/:tier/:cycle", async (ctx, next) => {
   }
 
   ctx.state.plan = plan;
-  ctx.state.sandbox = query.sandbox ? true : false;
+  ctx.state.sandbox = query.sandbox;
 
   ctx.body = await render("subscription/pay.html", ctx.state);
 });
@@ -84,23 +93,33 @@ router.post("/:tier/:cycle",
     const account = ctx.state.user;
     account.setClientApp(ctx.state.clientApp);
 
+    const builder = new OrderUrlBuilder()
+      .setTier(tier)
+      .setCycle(cycle)
+      .setSandbox(!!sandbox);
+
     try {
       switch (payMethod) {
         // Use user-agent to decide launch desktop web pay or mobile web pay
-        case "alipay":
+        case PAY_ALI:
           // If user is using mobile browser on phone
           if (isMobile) {
-            const aliOrder = await account.aliMobileOrder(tier, cycle);
+            const aliOrder = await account.aliMobileOrder(builder.buildAliMobile());
+
+            // Data used to display pay result.
+            ctx.session.subs = {
+              orderId: aliOrder.ftcOrderId,
+              tier,
+              cycle,
+              listPrice: aliOrder.listPrice,
+              netPrice: aliOrder.netPrice,
+              payMethod: payMethod,
+            };
 
             ctx.redirect(aliOrder.payUrl);
           } else {
             // Otherwise treat user on desktop
-
-            const req = query.sandbox
-              ? account.aliDesktopOrderTest(tier, cycle)
-              : account.aliDesktopOrder(tier, cycle);
-
-            const aliOrder = await req;
+            const aliOrder = await account.aliDesktopOrder(builder.buildAliDesktop());
 
             ctx.session.subs = {
               orderId: aliOrder.ftcOrderId,
@@ -108,31 +127,47 @@ router.post("/:tier/:cycle",
               cycle,
               listPrice: aliOrder.listPrice,
               netPrice: aliOrder.netPrice,
-              payMethod: "alipay",
+              payMethod: payMethod,
             };
 
             ctx.redirect(aliOrder.payUrl);
           }
           break;
 
-        case "wechat":
+        case PAY_WX:
         // NOTE: we cannot use wechat's MWEB and JSAPI payment due to the fact those two
         // methods could only be used by ftacademy.com
         // accoding to wechat's rule.
           /**
            * @type {{codeUrl: string}}
            */
-          const wxPrepay = await account.wxDesktopOrder(tier, cycle);
+          const order = await account.wxDesktopOrder(builder.buildWxDesktop());
   
+          /**
+           * @type {ISubsOrder}
+           */
+          ctx.session.subs = {
+            tier,
+            cycle,
+            listPrice: order.listPrice,
+            netPrice: order.netPrice,
+            orderId: order.ftcOrderId,
+            appId: order.appId,
+            payMethod: payMethod,
+          };
+
           const dataUrl = await QRCode.toDataURL(wxPrepay.codeUrl);
-  
+          
+          // On the top of the page show the product user is purchasing
           ctx.state.plan = plan;
+          // At the bottom of the page show the qr code.
           ctx.state.qrData = dataUrl;
+
           ctx.body = await render("subscription/wxpay-qr.html", ctx.state);
           break;
 
         default:
-          ctx.state = 404;
+          ctx.status = 404;
           return;
       }
     } catch (e) {
