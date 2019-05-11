@@ -3,11 +3,6 @@ const debug = require('debug')('user:subscription');
 const render = require('../../util/render');
 
 const Account = require("../../lib/account");
-const Membership = require("../../lib/member");
-/**
- * @type {IPaywall}
- */
-const defaultPaywall = require("../../model/paywall-default.json");
 const {
   paywall,
 } = require("../../model/paywall");
@@ -15,10 +10,6 @@ const {
 const payRouter = require("./pay");
 const payResult = require("./pay-result");
 const redeem = require("./redeem");
-
-const {
-  sitemap,
-} = require("../../lib/sitemap");
 
 const router = new Router();
 
@@ -110,13 +101,13 @@ router.get("/orders", async (ctx, enxt) => {
 router.use("/pay", payRouter);
 
 /**
- * @description Redeem gift card
- */
-router.use("/redeem", redeem);
-
-/**
  * @description Show payment result.
  */
 router.use("/done", payResult);
+
+/**
+ * @description Redeem gift card
+ */
+router.use("/redeem", redeem);
 
 module.exports = router.routes();
