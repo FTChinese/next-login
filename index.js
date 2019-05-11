@@ -80,11 +80,11 @@ app.use(bodyParser());
  */
 
 router.use('/login', checkSession({redirect: false}), login);
-router.use("/oauth2", checkSession(), oauth2);
 router.use('/logout', logout);
-router.use('/signup', signup);
+router.use('/signup', checkSession({redirect: false}), signup);
 router.use('/verify', checkSession({redirect: false}), verify);
 router.use('/password-reset', checkSession({redirect: false}), forgotPassword);
+router.use("/oauth2", checkSession(), oauth2);
 router.use('/profile', checkSession(), profile);
 router.use('/account', checkSession(), account);
 router.use('/subscription', checkSession(), subscription);
