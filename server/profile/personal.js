@@ -15,7 +15,7 @@ const {
 const router = new Router();
 
 /**
- * @description Show page to update display name
+ * @description Show page to update personal info.
  * /user/profile/info
  */
 router.get("/", async (ctx) => {
