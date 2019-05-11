@@ -19,7 +19,9 @@ const {
 
 const router = new Router();
 
-// Show signup page
+/**
+ * @description Show signup page
+ */
 router.get('/', async (ctx) => {
 
   if (ctx.session.user) {
