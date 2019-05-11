@@ -122,20 +122,6 @@ exports.checkSession = function checkSession({
       return await next();
     }
 
-    // If user is not logged in and this is an OAuth request,
-    // we should store the query parameter temporarily
-    // and redirect user to login page.
-    // After user logged in succesffuly, retrieve the
-    // OAuth query and redirect back to authorize page.
-    const query = ctx.request.query;
-
-    if (query.client_id && query.redirect_uri) {
-      ctx.session.oauth = {
-        ...query,
-        t: time.unixNow(),
-      };
-    }
-
     return ctx.redirect(sitemap.login);
   }
 }

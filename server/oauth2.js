@@ -11,6 +11,13 @@ const {
 const {
   sitemap,
 } = require("../lib/sitemap");
+const {
+  unixNow,
+} = require("../lib/time");
+const {
+  checkSession,
+  isLoggedIn,
+} = require("./middleware");
 
 const router = new Router();
 
@@ -18,32 +25,62 @@ const router = new Router();
  * @description This is used to handle FTA's OAuth request. Deny any request that does not come from this domain.
  * GET /authorize?response_type=code&client_id=xxxx&redirect_uri=xxx&state=xxx
  */
-router.get("/authorize", async (ctx, next) => {
-  const oauth = new OAuthServer(ctx.request.query);
+router.get("/authorize", 
 
-  const result = oauth.validateRequest();
+  checkSession({redirect=false}),
 
-  if (!result) {
+  async (ctx, next) => {
+
+    /**
+     * @type {{response_type: "code", client_id: string, redirect_uri: string, state: string}}
+     */
+    const query = ctx.request.query;
+    // If user is not logged in, redirect user to login page and save the oauth paramters.
+    if (!isLoggedIn(ctx)) {
+      if (query.client_id && query.redirect_uri) {
+        ctx.session.oauth = {
+          ...query,
+          t: unixNow(),
+        };
+      }
+  
+      debug("FTA OAuth parameters: %O", ctx.session.oauth);
+      return ctx.redirect(sitemap.login);
+    }
+
+    const oauth = new OAuthServer(ctx.request.query);
+
+    // Validate OAuth query paramters
+    const result = oauth.validateRequest();
+
+    // If validation passed, show authorize page.
+    if (!result) {
+      return await next();
+    }
+
+    // Accoding to OAuth protocol, you should redirect /// user back to client if:
+    // response_type is missing: error=invalid_request
+    // response_type != code: error=unsupported_response_type
+    // state is missing: error=invalid_request
+    if (result.shouldRedirect) {
+      ctx.redirect(oauth.buildErrRedirect(result));
+      return;
+    }
+
+    ctx.state.invalid = result;
+
+    await next();
+  }, 
+  async (ctx) => {
     ctx.body = await render("authorize.html", ctx.state);
-
-    return;
   }
-
-  if (result.shouldRedirect) {
-    ctx.redirect(oauth.buildErrRedirect(result));
-    return;
-  }
-
-  ctx.state.invalid = result;
-
-  ctx.body = await render("authorize.html", ctx.state);
-});
+);
 
 /**
  * @description User grant/deny OAuth request.
  * /authorize
  */
-router.post("/authorize", async (ctx, next) => {
+router.post("/authorize", checkSession(), async (ctx, next) => {
     /**
      * @type {IOAuthReq}
      */
