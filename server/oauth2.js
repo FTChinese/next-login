@@ -16,7 +16,7 @@ const router = new Router();
 
 /**
  * @description This is used to handle FTA's OAuth request. Deny any request that does not come from this domain.
- * /authorize?response_type=code&client_id=xxxx&redirect_uri=xxx&state=xxx
+ * GET /authorize?response_type=code&client_id=xxxx&redirect_uri=xxx&state=xxx
  */
 router.get("/authorize", async (ctx, next) => {
   const oauth = new OAuthServer(ctx.request.query);
