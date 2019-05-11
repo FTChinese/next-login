@@ -1,60 +1,95 @@
-## Front-end Tools
+# Front-end Tools
 
 Mutliple sets of bundling tools are included, with each using different context.
 
 `npm run ...` is mainly used to automatically build typescript to vanillia js by continuous integration.
 
-### Button State for Forms
+## Button State for Forms
 
 Add attribute `data-disable-with="<Loading...>"` to the `<button>` element inside a form. When the form is submitted, the text of the button will be replaced by the value of `data-disable-with` and the button is disabled.
 
-## Sitemap
+# Sitemap
 
-### Signup
-* GET `/signup`
-* POST `/signup`
-* POST `/signup/check-username`
-* POST `/signup/check-email`
+## Login
+* GET `/login` Show login page.
+* POST `/login` Accept credentials.
+* GET `/login/wechat` Start wechat OAuth.
+* GET `/login/wechat/callback?code=xxx&state=xxx` Wechat OAuth 2 redirect to here.
 
-### Subscribe
+## Logout
 
-* GET `/plan`
-
-### Verify email
-* `GET /verify/email/:token`
-
-### Reset password
-* `GET /password-reset` Ask user to enter email
-* `POST /password-reset` User entered email
-* `GET /password-reset/:token` User clicked reset link.
-* `POST /password-reset/:token`  User submitted new password
-
-### Login
-* GET `/login`
-* POST `/login`
-* GET `/login/wechat`
-* POST `/login/wechat/callback`
-* GET `/login/weibo`
 * GET `/logout`
 
-### Settings
+## Signup
+* GET `/signup` Show sign up page.
+* POST `/signup` Accept credentials.
 
-The following requires authentication.
+## Verify email
+* `GET /verify/email/:token` Email verification link.
 
-* GET `/profile` Basic profile
-* GET `/email` Email related data
-* POST `/email` Update email
-* POST `/email/newletter`
-* POST `/email/request-verification` Resend verification letter
-<!-- * GET `/email/confirm-verification/:token` Verify email -->
-* GET `/account`
-* POST `/account/password`
-* POST `/account/name`
-* POST `/account/mobile`
-* GET `/membership`
-* GET `/address`
+## Forgot password
+* `GET /password-reset` Ask user to enter email
+* `POST /password-reset` Use the email user entered to create a letter.
+* `GET /password-reset/:token` Verify password reset link and show reset password page.
+* `POST /password-reset/:token`  User submitted new password
 
-## Error Message
+## FTC OAuth2
+
+A single sign-in workflow for FTC web apps run under different domains.
+
+* GET `/oauth2/authorize?response_type=code&client_id=xxx&redirect_uri=xxx&state=xxx` Show OAuth2 authorization page, or redirect user to login if not logged in yet.
+* POST `/oauth2/authorize?response_type=code&client_id=xxx&redirect_uri=xxx&state=xxx` Issue OAuth2 code and redirect user back to the `redirect_uri`.
+
+## Profile
+
+* GET `/profile` Show user profile.
+* GET `/profile/display-name` Show form to modify display name. Wechat-only users are denied of access
+* POST `/profile/display-name` Modify display name
+* GET `/profile/mobile` Show form to modify mobile. Deny wechat-only user.
+* POST `/profile/mobile` Modify mobile.
+* GET `/profile/info` Show form to modify real name, gender, birthday.
+* POST `/profile/info` Modify real name, gender, birthday.
+* GET `/profile/address` Show form to modify address.
+* POST `/profile/address` Modify address.
+
+## Account
+
+* GET `/account` User account overview.
+* GET `/account/email` Show form to modify email
+* POST `/account/email` Modify email.
+* GET `/account/password` Show form to modify password.
+* POST `/account/password` Modify password.
+* POST `/account/request-verification` Send a verfication letter to user's current email.
+
+* GET `/account/bind/email` Ask wechat logged in user to bind an email account.
+* POST `/account/bind/email` Check the whether email wechat-user entered already exists
+* GET `/account/bind/login` Show login if the email wechat-user entered already exists in the previously step.
+* POST `/account/bind/login` Email login. Redirect user to `/account/bind/merge`.
+* GET `/account/bind/merge` Show the accounts to be merged. Use could comed from `/account/bind/login` or `/login/wechat/callback`, depending on the current login method.
+* POST `/account/bind/merge` Merge accounts.
+
+## Subscription
+
+* GET `/subscription` Show paywall if user is not a member yet, or show membership status otherwise.
+* GET `/subscription/renew` Show renewal page if user is a member.
+* GET `/subscription/orders` Show user's subscription orders.
+* GET `/subscription/pay/:tier/:cycle` Let user select a payment method.
+* POST `/subscription/pay/:tier/:cycle` Start payment.
+* GET `/subscription/done/ali` Alipay returns here.
+* GET `/subscription/done/wx` Query wxpay result.
+* GET `/subscription/redeem` Show a input box to enter gift card code.
+* POST `/subscription/redeem` Redeem a gift card.
+
+## Starred Articles
+
+* GET `/starred` Show a list of user starred articles.
+* POST `/starred/:id/delete` Unstar an article.
+
+## Version
+
+* GET `/__version` Show current version.
+
+# Error Message
 
 Error message on UI is mostly used to show validation errors, and API error response. Since API errors are not created for reading by humans, client should convert them into human readable text.
 
@@ -62,7 +97,6 @@ To show errors on UI, pass an `errors` object to template. For validations error
 
 In cases where an error occurred not related to any form validation, an error message should be shown on a top banner. The `errors` object passed to template should contain a `message` field describing the reason of the error. This could be used as a generic error container.
 
-Described in TypeScript:
 ```ts
 interface ErrorMessage {
     message?: string;
@@ -70,23 +104,7 @@ interface ErrorMessage {
 }
 ```
 
-If a form's GET and POST urls are the same one, you can attach the `errors` field to `ctx.state` and convert API error response into an `errors` object using the `buildApiError` function.
-
-In case a form's GET and POST urls are different, you should redirect back to the GET url after POST is processed to keep URLs idempotent (See [Idempotence](https://en.wikipedia.org/wiki/Idempotence)). When redirecting, attache the `errors` object to `ctx.session`. For API error response, you can attach the response body directly to `ctx.session` and delay converting the response to `errors` object after redirected, and use the `apiErr` field instead of `errors` field:
-
-```ts
-interface Session {
-    errors?: ErrorMessage;
-    apiErr?: {
-        message: string;
-        field: string;
-        code: string;
-    }
-}
-```
-## Wechat
-
-We use hex encoding of random bytes as state code, just for easy recognition since wechat uses base64url encoding.
+# Wechat
 
 Currently (as of April 12, 2018), OAuth 2.0 data returned by wechat are base64url encoded cryptographic random bytes.
 
@@ -130,7 +148,7 @@ UNIQUE INDEX (unionid)
 
 But be careful wechat might change the lenght any time. So it might be better to store as varchar if you don't mind taking up larger disk space.
 
-## Alipay
+# Alipay
 
 Alipay studpid design: Its so-called api only accepts HTML form!
 
