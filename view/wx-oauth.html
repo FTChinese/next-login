@@ -1,0 +1,11 @@
+{% extends "layouts/center.html" %}
+
+{% block content %}
+
+<div class="jumbotron">
+  <h1>微信授权失败</h1>
+  <p>{{error.message}}</p>
+  <div class="text-center"><a class="btn btn-link" href="{{ sitemap.login }}">返回</a></div>
+</div>
+
+{% endblock %}

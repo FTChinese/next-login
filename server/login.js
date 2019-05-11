@@ -18,7 +18,7 @@ const Credentials = require("../lib/credentials");
 const Account = require("../lib/account");
 const {
   WxUser,
-  wxOAuth,
+  WxOAuth,
 } = require("../lib/wxlogin");
 const {
   isProduction,
@@ -35,8 +35,8 @@ const {
 const router = new Router();
 
 /**
- * @description Show login page
- * /login
+ * @description Show login page. Wechat login button won't be shown if the browser is on a mobile device since wechat OAuth 2 requires scanning QR code and you cannot scan yourself.
+ * GET /login
  */
 router.get('/', async function (ctx) {
   // If user is trying to access this page when he is already logged in, redirect away
@@ -57,7 +57,8 @@ router.get('/', async function (ctx) {
 
 /**
  * @description Handle login data
- * /login
+ * 
+ *  POST /login
  */
 router.post('/',
 
@@ -149,19 +150,26 @@ router.post('/',
 /**
  * @description Handle wechat login request.
  * This will redirect user to wechat.
- * /login/wechat
+ * 
+ * GET /login/wechat
+ * 
+ * Session data saved:
+ * ```json
+ * "state": {
+ *  "v": "string",
+ *  "t": "unixtimestamp"
+ * }
+ * ```
  */
-router.get("/wechat", async(ctx, next) => {
+router.get("/wechat", async(ctx) => {
   
+  const wxOAuth = new WxOAuth();
   const state = await wxOAuth.generateState();
-
   debug("Authorizetion code state: %s", state);
 
+  // Save state so that we can verify the callback state.
   ctx.session.state = state;
-  const redirectTo = wxOAuth.buildCodeUrl({
-    state: state.v,
-    sandbox: true,
-  });
+  const redirectTo = wxOAuth.buildCodeUrl(state.v);
 
   debug("Redirect to %s", redirectTo);
 
@@ -200,7 +208,7 @@ router.get("/wechat/test",
 );
 
 /**
- * @description Wecaht OAuth callback for authorization_code.
+ * @description Wechat OAuth callback for authorization_code.
  * Here we used subscription api as a transfer point
  * to deliver wechat OAuth code here.
  * If user accessed this page without login, then they
@@ -210,7 +218,8 @@ router.get("/wechat/test",
  * user is trying to bind to wechat account;
  * If user already logged-in and login method is 
  * `wechat`, deny access.
- * /login/wechat/callback?code=xxx&state=xxx
+ * 
+ * GET /login/wechat/callback?code=xxx&state=xxx
  */
 router.get("/wechat/callback", 
 
@@ -221,47 +230,31 @@ router.get("/wechat/callback",
      * @type {{code: string, state: string, error?: string}}
      */
     const query = ctx.request.query;
-    /**
-     * @type {{v: string, t: number}}
-     */
-    const state = ctx.session.state;
-
     debug("Query: %O", query);
 
     /**
-     * error: invalid_request | access_denied
+     * @type {{v: string, t: number}}
      */
-    if (query.error) {
-      ctx.body = query.error;
-      return;
-    }
-
-    if (!query.state) {
-      debug("Query paramter does not contain state");
+    const sessState = ctx.session.state;
+    if (!sessState) {
       ctx.status = 404;
-      ctx.body = "state not found";
       return;
     }
 
-    if (query.state != state.v) {
-      debug("state does not match");
-      ctx.status = 404;
-      ctx.body = "state mismatched"
+    const error = WxOAuth.validateCallback(query, sessState)
+    if (error) {
+      ctx.state.error = error;
+
+      ctx.body = await render("wx-oauth.html", ctx.state);
+
+      if (isProduction) {
+        delete ctx.session.state;
+      }
+      
       return;
     }
 
-    if (wxOAuth.isStateExpired(state)) {
-      ctx.status = 404;
-      ctx.body = "session expired";
-      return;
-    }
-
-    if (!query.code) {
-      debug("Query does not have code");
-      ctx.state = 404;
-      ctx.body = "access_denied"
-      return;
-    }
+    const wxOAuth = new WxOAuth();
 
     const sessData = await wxOAuth.getSession(query.code, ctx.state.clientApp);
 
@@ -270,9 +263,11 @@ router.get("/wechat/callback",
     const wxSess = new WxUser(sessData.unionId);
     const account = await wxSess.fetchAccount();
 
+    // Delete state data.
     delete ctx.session.state;
 
-    // If user is already logged in.
+    // If user is already logged in, it indicates the
+    // OAuth workflow is used for binding accounts.
     if (isLoggedIn(ctx)) {
       debug("User already logged in before porming wechat OAuth");
       /**
@@ -287,9 +282,11 @@ router.get("/wechat/callback",
         return
       }
 
+      // Save the uninon id so that /account/bind/merge knows which account to retrieve.
       ctx.session.uid = account.unionId;
 
       debug("Redirect user to bind wechat account");
+
       ctx.redirect(sitemap.bindMerge);
       return 
     }
@@ -298,7 +295,7 @@ router.get("/wechat/callback",
     // Persist user account to session.
     ctx.session.user = account;
 
-    // This indicates user is trying to login to ftacademy, so direct user to OAuth page.
+    // This indicates user is trying to login to ftacademy, so redirect user to OAuth page.
     if (ctx.session.oauth) {
       debug("User is trying to log in to FTA via FTC's OAuth, which in turn goes to Wechat OAuth.");
       const params = new URLSearchParams(ctx.session.oauth)

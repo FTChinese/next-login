@@ -71,7 +71,6 @@ app.use(session({
 app.use(handleErrors());
 app.use(bodyParser());
 
-
 /**
  * @todo Add a middleware to handle Cross Site Request Forgery based on https://github.com/pillarjs/csrf.
  * 
