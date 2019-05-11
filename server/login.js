@@ -97,13 +97,14 @@ router.post('/',
 
       // ctx.cookies.set('logged_in', 'yes');
 
-      // Handle FTA OAuth request.
+      // If user is redirect here from /authorize.
       if (ctx.session.oauth) {
         const params = new URLSearchParams(ctx.session.oauth)
         const redirectTo = `${sitemap.authorize}?${params.toString()}`
         ctx.redirect(redirectTo);
 
         delete ctx.session.oauth;
+        
         return;
       } else {
         return ctx.redirect(sitemap.profile);
@@ -296,6 +297,7 @@ router.get("/wechat/callback",
     ctx.session.user = account;
 
     // This indicates user is trying to login to ftacademy, so redirect user to OAuth page.
+    // Added by /authorize
     if (ctx.session.oauth) {
       debug("User is trying to log in to FTA via FTC's OAuth, which in turn goes to Wechat OAuth.");
       const params = new URLSearchParams(ctx.session.oauth)
