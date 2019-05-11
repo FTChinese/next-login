@@ -27,7 +27,7 @@ const router = new Router();
  */
 router.get("/authorize", 
 
-  checkSession({redirect=false}),
+  checkSession({redirect: false}),
 
   async (ctx, next) => {
 
