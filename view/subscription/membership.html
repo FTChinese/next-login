@@ -55,15 +55,15 @@
             <div class="col-lg-6 mb-3">
                 <div class="card">
                     <div class="card-body">
-                        <h3 class="card-title text-center mb-3 pb-3">{{product.heading}}</h3>
-                        <ul>
-                            {% for item in product.benefits %}
-                            <li>{{ item }}</li>
-                            {% endfor %}
-                        </ul>
-                        {% if product.smallPrint %}
+                      <h3 class="card-title text-center mb-3 pb-3">{{product.heading}}</h3>
+                      <ul>
+                        {% for item in product.benefits %}
+                          <li>{{ item }}</li>
+                        {% endfor %}
+                      </ul>
+                      {% if product.smallPrint %}
                         <small>{{product.smallPrint}}</small>
-                        {% endif %}
+                      {% endif %}
                     </div>
     
                     <div class="card-footer">
