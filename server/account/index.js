@@ -7,7 +7,8 @@ const Account = require("../../lib/account");
 const passwordRouter = require('./update-password');
 const emailRouter = require("./update-email");
 const requestVerification = require("./request-verify");
-const wxBindEmail = require("./wx-bind-email");
+const linkRouter = require("./link");
+const unlinkRouter = require("./unlink");
 
 const {
   denyWxOnlyAccess,
@@ -50,6 +51,7 @@ router.get('/', async (ctx, next) => {
 router.use("/email", denyWxOnlyAccess(), emailRouter);
 router.use('/password', denyWxOnlyAccess(), passwordRouter);
 router.use("/request-verification", denyWxOnlyAccess(), requestVerification);
-router.use("/bind", wxBindEmail);
+router.use("/link", linkRouter);
+router.use("/unlink", unlinkRouter);
 
 module.exports = router.routes();
