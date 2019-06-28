@@ -35,7 +35,7 @@ module.exports = {
       env_production : {
         NODE_ENV: "production",
         URL_PREFIX: "/user",
-        PORT: 4100,
+        PORT: 4300,
         DEBUG: "user*"
       },
       max_restart: 10,
