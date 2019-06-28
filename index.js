@@ -1,6 +1,5 @@
 const {
   viper,
-  urlPrefix,
 } = require("./lib/config");
 const config = viper.setConfigPath(process.env.HOME)
   .setConfigName("config/api.toml")
@@ -44,9 +43,7 @@ const testRouter = require("./server/test");
 
 const isProduction = process.env.NODE_ENV === 'production';
 const app = new Koa();
-const router = new Router({
-  prefix: urlPrefix,
-});
+const router = new Router();
 
 app.proxy = true;
 
