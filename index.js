@@ -74,6 +74,9 @@ app.use(bodyParser());
  * Refer to https://github.com/expressjs/csurf.
  * There is a koa middleware https://github.com/koajs/csrf but neither well written nor well mataintained.
  */
+router.get("/", async(ctx) => {
+  ctx.redirect("/login");
+});
 
 router.use('/login', checkSession({redirect: false}), login);
 router.use('/logout', logout);
