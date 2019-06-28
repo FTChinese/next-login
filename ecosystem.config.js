@@ -23,13 +23,13 @@ module.exports = {
    */
   apps : [
     {
-      name      : "next-user-deprecated",
+      name      : "next-user",
       script    : "./index.js",
       cwd: __dirname,
       interpreter: interpreter,
       env: {
         NODE_ENV: "development",
-        PORT: 4100,
+        PORT: 4300,
         DEBUG: "user*"
       },
       env_production : {
@@ -39,8 +39,8 @@ module.exports = {
         DEBUG: "user*"
       },
       max_restart: 10,
-      error_file: path.resolve(process.env.HOME, 'logs/next-user-deprecated-err.log'),
-      out_file: path.resolve(process.env.HOME, 'logs/next-user-deprecated-out.log')
+      error_file: path.resolve(process.env.HOME, 'logs/next-user-err.log'),
+      out_file: path.resolve(process.env.HOME, 'logs/next-user-out.log')
     }
   ],
   deploy: {
@@ -49,7 +49,7 @@ module.exports = {
       host: "nodeserver",
       ref: "origin/master",
       repo: "https://github.com/FTChinese/next-user.git",
-      path: "/home/node/next/next-user-deprecated",
+      path: "/home/node/next/next-user",
       "pre-setup": "node -v",
       "post-setup": "ls -la",
       "pre-deploy-local": "echo 'Begin to deploy'",
