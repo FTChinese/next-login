@@ -3,6 +3,7 @@
   "version": "0.6.4",
   "description": "User setting system",
   "main": "index.js",
+  "bin": "index.js",
   "scripts": {
     "start": "NODE_ENV=production PORT=4100 node index.js",
     "test": "jest",
@@ -56,5 +57,8 @@
     "rollup-plugin-typescript": "^1.0.1",
     "tslib": "^1.10.0",
     "typescript": "^3.5.3"
+  },
+  "pkg": {
+    "assets": "view/**/*"
   }
 }

@@ -19,6 +19,9 @@ css :
 inline : js css
 	node ./util/inline.js
 
+linux:
+	pkg --targets node12-macos-x64 package.json
+	
 deploy :
 	pm2 deploy ecosystem.config.js production
 
