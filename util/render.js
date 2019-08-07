@@ -24,7 +24,7 @@ const env = nunjucks.configure(
 );
 
 /**
- * Conert a number to currency string.
+ * Convert a number to currency string.
  */
 env.addFilter("toCurrency", function(num) {
   return numeral(num).format("0,0.00");
