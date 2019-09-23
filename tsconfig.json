@@ -1,17 +1,30 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "outDir": "build",
-    "target": "es5",
-    "module": "es6",
-    "downlevelIteration": true,
-    "noImplicitAny": true,
-    "removeComments": true,
-    "preserveConstEnums": true,
-    "sourceMap": true,
-    "moduleResolution": "node"
+      "module": "commonjs",
+      "esModuleInterop": true,
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "allowSyntheticDefaultImports": true,
+      "strictNullChecks": true,
+      "target": "es2017",
+      "noImplicitAny": true,
+      "moduleResolution": "node",
+      "resolveJsonModule": true,
+      "sourceMap": true,
+      "outDir": "dist",
+      "baseUrl": ".",
+      "paths": {
+          "*": [
+              "node_modules/*",
+              "src/types/*"
+          ]
+      }
   },
   "include": [
-    "client/script/*"
+      "src/**/*"
+  ],
+  "exclude": [
+    "package.json"
   ]
 }
