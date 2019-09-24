@@ -1,6 +1,7 @@
 import {
     jsonObject,
     jsonMember,
+    TypedJSON,
 } from "typedjson";
 
 export interface ICredentials {
@@ -90,6 +91,8 @@ export class Account {
     @jsonMember
     membership: Membership;
 }
+
+export const accountSerializer = new TypedJSON(Account);
 
 export interface IClientApp {
     clientType: Platform;

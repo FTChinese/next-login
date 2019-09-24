@@ -1,8 +1,5 @@
 import request from "superagent";
 import {
-    TypedJSON
-} from "typedjson";
-import {
     readerApi,
     KEY_USER_ID,
 } from "../config/api";
@@ -10,15 +7,12 @@ import {
     ICredentials, 
     IClientApp, 
     Account,
+    accountSerializer,
     IEmailFormData,
     IPasswordReset,
-    INameFormData,
-    IMobileFormData,
     IPasswordsFormData,
     IAppHeader,
 } from "../models/reader";
-
-const accountSerializer = new TypedJSON(Account);
 
 class AccountRepo {
 
