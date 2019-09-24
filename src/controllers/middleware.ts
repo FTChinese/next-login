@@ -19,6 +19,7 @@ import {
 } from "../models/pagination";
 import {
     IAppHeader,
+    accountSerializer,
 } from "../models/reader";
 import {
     entranceMap,
@@ -87,7 +88,8 @@ export function checkSession(redirect: boolean = true): Middleware {
 
         if (isLoggedIn(ctx.session)) {
 
-            ctx.state.user = ctx.session.user;
+            ctx.state.user = accountSerializer.parse(ctx.session.user);
+            
             return await next();
         }
         
