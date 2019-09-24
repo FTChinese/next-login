@@ -57,6 +57,7 @@ router.post("/", appHeader(), async (ctx, next) => {
         return await next();
     }
 
+    ctx.session.user = success;
     return ctx.redirect(profileMap.base);
     
 }, async (ctx, next) => {
