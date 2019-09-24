@@ -24,6 +24,10 @@ import {
     nav,
     handleError,
 } from "./controllers/middleware";
+import login from "./controllers/login";
+import { 
+    entranceMap,
+} from "./config/sitemap";
 
 const app = new Koa();
 const router = new Router();
@@ -54,9 +58,6 @@ app.use(session({
 app.use(bodyParser());
 app.use(handleError());
 
-
-
-
 router.get("/__version", async (ctx) => {
     console.log("Version");
 
@@ -64,6 +65,14 @@ router.get("/__version", async (ctx) => {
         "name": pkg.name,
         "version": pkg.version,
     };
+});
+
+router.use("/login", checkSession(false), login);
+
+router.get("/logout", checkSession(false), async (ctx, next) => {
+    ctx.session = null;
+    ctx.redirect(entranceMap.login);
+    return;
 });
 
 app.use(router.routes());

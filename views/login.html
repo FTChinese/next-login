@@ -14,37 +14,11 @@
   {% endif %}
 
   <form method="post" id="loginForm">
-    <div class="form-group">
-      <label for="email">邮箱</label>
-      <input class="form-control"
-        id="email"
-        type="email"
-        name="credentials[email]"
-        value="{{credentials.email}}"
-        placeholder="电子邮箱"
-        maxlength="64"
-        required>
 
-      {% if errors.email %}
-        <div class="form-errortext">{{errors.email}}</div>
-      {% endif %}
-    </div>
+    {% for input in form.inputs %}
+      {% include "partials/input.html" %}
+    {% endfor %}
 
-    <div class="form-group">
-      <label for="password">密码</label>
-      <input class="form-control"
-        id="password"
-        type="password"
-        name="credentials[password]"
-        placeholder="密码"
-        maxlength="64"
-        required>
-
-      {% if errors.password %}
-      <div class="form-errortext">{{errors.password}}</div>
-      {% endif %}
-    </div>
-    
     <div class="form-check clearfix">
       <input class="form-check-input"
         id="rememberMe"
@@ -54,7 +28,7 @@
         checked>
       <label for="rememberMe">记住我</label>
 
-      <a class="float-right" href="{{sitemap.passwordReset}}">忘记密码?</a>
+      <a class="float-right" href="{{ pwResetLink }}">忘记密码?</a>
     </div>
 
     <button
@@ -62,16 +36,16 @@
       data-disable-with="正在登录..."
       type="submit">登录</button>
   </form>
-  <p class="text-center pt-3">还没有FT中文网账号? <a href="{{sitemap.signup}}">创建</a></p>
+
+  <p class="text-center pt-3">还没有FT中文网账号? <a href="{{ signUpLink }}">创建</a></p>
 
   {% if not isMobile %}
   <div class="text-center mt-5">
-    <a href="{{ sitemap.wxLogin }}">
-        <img src="https://open.weixin.qq.com/zh_CN/htmledition/res/assets/res-design-download/icon32_wx_button.png" alt="微信登录">
+    <a href="{{ wxLoginLink }}">
+      <img src="{{ wxIcon }}" alt="微信登录">
     </a>
   </div>
   {% endif %}
 </div>
-
 
 {% endblock %}

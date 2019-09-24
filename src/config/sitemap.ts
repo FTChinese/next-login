@@ -33,9 +33,9 @@ export const subsMap = {
     base:           `${prefix}/subscription`,
     test:           `${prefix}/subscription/test`,
     renewal:        `${prefix}/subscription/renew`,
-    payment: function(tier, cycle) {
-        return `${prefix}/subscription/pay/${tier}/${cycle}`;
-    },
+    // payment: function(tier, cycle) {
+    //     return `${prefix}/subscription/pay/${tier}/${cycle}`;
+    // },
     alipayDone:     `${prefix}/subscription/done/ali`,
     wxpayDone:      `${prefix}/subscription/done/wx`,
     redeem:         `${prefix}/subscription/redeem`,

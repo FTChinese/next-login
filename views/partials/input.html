@@ -1,0 +1,40 @@
+<div class="form-group">
+  <label class="form-label" for="{{input.id}}">{{input.label}}</label>
+  <input class="form-control"
+    type="{{input.type}}"
+    id="{{input.id}}"
+    type="{{input.type}}"
+    name="{{input.name}}"
+    {% if input.value %}
+      value="{{input.value}}"
+    {% endif %}
+    placeholder="{{input.placeholder}}"
+    {% if input.minlength %}
+      minlength="{{input.minlength}}" 
+    {% endif %}
+    {% if input.maxlength %} 
+      maxlength="{{input.maxlength}}"
+    {% endif %}
+    {% if input.required %}
+      required
+    {% endif %}
+    {% if input.datalist %}
+    list="{{input.datalist.id}}"
+    {% endif %}>
+
+  {% if input.datalist %}
+  <datalist id="{{ input.datalist.id }}">
+    {% for option in input.datalist.options %}
+      <option value="{{option}}">{{option}}</option>
+    {% endfor %}
+  </datalist>
+  {% endif %}
+
+  {% if input.desc %}
+    <small class="form-text text-muted">{{input.desc}}</small>
+  {% endif %}
+
+  {% if input.error %}
+    <div class="form-errortext">{{input.error}}</div>
+  {% endif %}
+</div>

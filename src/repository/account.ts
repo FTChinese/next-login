@@ -15,6 +15,7 @@ import {
     INameFormData,
     IMobileFormData,
     IPasswordsFormData,
+    IAppHeader,
 } from "../models/reader";
 
 const accountSerializer = new TypedJSON(Account);
@@ -26,10 +27,10 @@ class AccountRepo {
             .get(readerApi.account)
             .set(KEY_USER_ID, id);
 
-        return accountSerializer.parse(resp.text);
+        return accountSerializer.parse(resp.text)!;
     }
 
-    private async authenticate(c: ICredentials, app: IClientApp): Promise<string> {
+    private async authenticate(c: ICredentials, app: IAppHeader): Promise<string> {
         const resp = await request
             .post(readerApi.login)
             .set(app)
@@ -44,7 +45,7 @@ class AccountRepo {
         throw new Error("Incorrect api response");
     }
 
-    private async createReader(c: ICredentials, app: IClientApp): Promise<string> {
+    private async createReader(c: ICredentials, app: IAppHeader): Promise<string> {
         const resp = await request
             .post(readerApi.signup)
             .set(app)
@@ -59,7 +60,7 @@ class AccountRepo {
         throw new Error("Incorrect api response");
     }
 
-    async login(c: ICredentials, app: IClientApp): Promise<Account> {
+    async login(c: ICredentials, app: IAppHeader): Promise<Account> {
         const userId = await this.authenticate(c, app);
 
         return this.fetchFtcAccount(userId);
@@ -87,7 +88,7 @@ class AccountRepo {
         }
     }
 
-    async signUp(c: ICredentials, app: IClientApp): Promise<Account> {
+    async signUp(c: ICredentials, app: IAppHeader): Promise<Account> {
         const id = await this.createReader(c, app);
 
         return this.fetchFtcAccount(id);

@@ -17,6 +17,12 @@ import {
 import {
     Paging,
 } from "../models/pagination";
+import {
+    IAppHeader,
+} from "../models/reader";
+import {
+    entranceMap,
+} from "../config/sitemap";
 import render from "../util/render";
 const pkg = require("../../package.json");
 
@@ -66,23 +72,32 @@ function isLoggedIn(session?: Session): Boolean {
     }
   
     return true;
-  }
+}
 
-export function checkSession(): Middleware {
+/**
+ * 
+ * @description Check session data to see if user logged in.
+ * `redirect` is used to prevent recursive redirect.
+ * For example, if a non-login user is accessing
+ * profile page, this user will be redirected to `/login`, which should not perform redirection to itself.
+ */
+export function checkSession(redirect: boolean = true): Middleware {
     return async (ctx, next) => {
         if (ctx.path == "/faviocon.ico") return;
 
         if (isLoggedIn(ctx.session)) {
-            log("Use logged");
+
             ctx.state.user = ctx.session.user;
             return await next();
         }
-
-        log("User not logged in");
         
         ctx.state.user = null;
 
-        ctx.redirect("/login");
+        if (!redirect) {
+            return await next();
+        }
+
+        ctx.redirect(entranceMap.login);
     };
 }
 
@@ -122,4 +137,27 @@ export function handleError(): Middleware {
         ctx.body = await render('error.html', ctx.state);
       }
     }
-  }
+}
+
+export function noCache(): Middleware {
+    return async (ctx, next) => {
+        await next();
+        ctx.set('Cache-Control', ['no-cache', 'no-store', 'must-revalidte']);
+        ctx.set('Pragma', 'no-cache');
+    }
+}
+
+export function appHeader(): Middleware {
+    return async function(ctx, next) {
+        const headers: IAppHeader = {
+            "X-Client-Type": "web",
+            "X-Client-Version": pkg.version,
+            "X-User-Ip": ctx.ip,
+            "X-User-Agent": ctx.header["user-agent"],
+        };
+
+        ctx.state.appHeaders = headers;
+
+        await next();
+    }
+}

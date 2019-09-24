@@ -19,11 +19,11 @@ export const readerApi = {
     exists:       `${nextApiBase}/users/exists`,
     signup:       `${nextApiBase}/users/signup`,
     login:        `${nextApiBase}/users/login`,
-    verifyEmail:  function (token) {
+    verifyEmail:  function (token: string): string {
         return `${nextApiBase}/users/verify/email/${token}`;
     },
     passwordResetLetter: `${nextApiBase}/users/password-reset/letter`,
-    passwordResetToken: function (token) {
+    passwordResetToken: function (token: string): string {
         return `${nextApiBase}/users/password-reset/tokens/${token}`;
     },
     resetPassword:  `${nextApiBase}/users/password-reset`,
@@ -48,7 +48,7 @@ export const readerApi = {
 
 export const subsApi = {
     // Receive wechat OAuth2 code here.
-    wxOAuthRedirect: function(sandbox=false) {
+    wxOAuthRedirect: function(sandbox=false): string {
       const p = "wx/oauth/callback";
   
       // If sandbox if true, always use online sandbox url; otherwise use online production url.
@@ -56,7 +56,7 @@ export const subsApi = {
       return `${sandbox ? subsSandbox : subsApi}/wx/oauth/callback`;
     },
   
-    wxQueryOrder: function(orderId) {
+    wxQueryOrder: function(orderId: string): string {
       return `${subsApiBase}/wxpay/query/${orderId}`;
     },
     

@@ -7,7 +7,7 @@ import {
     TypedJSON,
 } from "typedjson";
 
-const apiInvalidMessages = new Map<string, string>([
+export const apiInvalidMessages = new Map<string, string>([
     ["credentials_invalid", "邮箱或密码错误"],
     ["email_missing_field", "邮箱不能为空"],
     ["email_invalid", "不是有效的邮箱地址"],

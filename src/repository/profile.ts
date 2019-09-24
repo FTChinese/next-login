@@ -57,3 +57,5 @@ class ProfileRepo {
         return resp.noContent;
     }
 }
+
+export const profileRepo = new ProfileRepo();
