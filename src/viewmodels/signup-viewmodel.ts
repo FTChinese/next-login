@@ -3,8 +3,7 @@ import {
     ValidationError,
 } from "@hapi/joi";
 import {
-    TextInput,
-    UIApiErrorBase,
+    ITextInput, IErrors, UIBase,
 } from "./ui";
 import {
     buildJoiErrors,
@@ -37,26 +36,30 @@ interface ISignUpFormState {
 }
 
 interface ISignUpForm {
-    inputs: Array<TextInput>;
+    inputs: Array<ITextInput>;
+}
+
+interface ISignUpApiErrors {
+    message?: string;
+    tooManyRequests?: boolean;
 }
 
 interface ISignUpResult {
     success?: Account,
     errForm?: ISignUpFormData,
-    errApi?: UIApiErrorBase,
+    errApi?: ISignUpApiErrors,
 }
 
-interface UISignUp {
-    errors?: UIApiErrorBase,
+interface UISignUp extends UIBase {
     form: ISignUpForm;
     loginLink: string;
 }
 
 class SignUpViewModel {
 
-    private readonly tooManyRequests: string = "您创建账号过于频繁，请稍后再试";
+    private readonly msgTooManyRequests: string = "您创建账号过于频繁，请稍后再试";
 
-    buildInputs(values?: ISignUpFormData, errors?: ISignUpFormData): Array<TextInput> {
+    buildInputs(values?: ISignUpFormData, errors?: ISignUpFormData): Array<ITextInput> {
         return [
             {
                 label: "邮箱",
@@ -134,7 +137,7 @@ class SignUpViewModel {
                 case 429:
                     return {
                         errApi: {
-                            message: this.tooManyRequests,
+                            tooManyRequests: true,
                         }
                     };
 
@@ -167,7 +170,12 @@ class SignUpViewModel {
         }
 
         return {
-            errors: result ? result.errApi : undefined,
+            errors: (result && result.errApi && result.errApi.message) 
+                ? { message: result.errApi.message } 
+                : undefined,
+            alert: (result && result.errApi && result.errApi.tooManyRequests)
+                ? { message: this.msgTooManyRequests }
+                : undefined,
             form: {
                 inputs: this.buildInputs(
                     formData,

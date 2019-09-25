@@ -4,7 +4,7 @@ import {
 } from "@hapi/joi";
 import {
     ITextInput,
-    IApiErrorBase,
+    UIBase,
 } from "./ui";
 import {
     loginSchema,
@@ -36,18 +36,18 @@ interface ILoginForm {
     inputs: Array<ITextInput>
 }
 
-export interface UILoginApiErrors extends IApiErrorBase {
-    credentials?: string;
+export interface ILoginApiErrors {
+    message?: string;
+    invalidCredentials?: boolean;
 }
 
 interface ILoginResult {
     success?: Account;
     errForm?: ICredentials;
-    errApi?: UILoginApiErrors;
+    errApi?: ILoginApiErrors;
 }
 
-interface UILogin {
-    errors?: UILoginApiErrors;
+interface UILogin extends UIBase {
     form: ILoginForm;
     pwResetLink: string;
     signUpLink: string;
@@ -56,7 +56,7 @@ interface UILogin {
 }
 
 class LoginViewModel {
-    private readonly invalidCredentials = "邮箱或密码错误";
+    private readonly msgInvalidCredentials = "邮箱或密码错误";
 
     buildInputs(values?: ICredentials, errors?: ICredentials): Array<ITextInput> {
         return [
@@ -127,20 +127,11 @@ class LoginViewModel {
                 case 403:
                     return {
                         errApi: {
-                            credentials: this.invalidCredentials
+                            invalidCredentials: true,
                         },
                     };
     
                 default:
-                    /**
-                     * {
-                     *  message: "",
-                     *  error: {
-                     *      field: "userName",
-                     *      code: "invalid"
-                     *  }
-                     * }
-                     */
                     const errBody = parseApiError(e);
                     if (errBody.error) {
                         const o = errBody.error.toMap();
@@ -167,8 +158,7 @@ class LoginViewModel {
             formData.email = formData.email.trim();
         }
 
-        return {
-            errors: result ? result.errApi : undefined,
+        const uiData: UILogin = {
             form: {
                 inputs: this.buildInputs(
                     formData, 
@@ -182,6 +172,22 @@ class LoginViewModel {
             wxLoginLink: entranceMap.wxLogin,
             wxIcon: "https://open.weixin.qq.com/zh_CN/htmledition/res/assets/res-design-download/icon32_wx_button.png",
         };
+
+        if (result && result.errApi) {
+            if (result.errApi.message) {
+                uiData.errors = {
+                    message: result.errApi.message,
+                };
+            }
+
+            if (result.errApi.invalidCredentials) {
+                uiData.alert = {
+                    message: this.msgInvalidCredentials,
+                };
+            }
+        }
+
+        return uiData;
     }
 }
 

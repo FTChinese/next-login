@@ -4,14 +4,7 @@
 <div class="mt-4">
   <h4 class="text-center">登录FT中文网</h4>
 
-  {% if errors.credentials %}
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-      <span>{{errors.credentials}}</span>
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-  {% endif %}
+  {% include "partials/alert-danger.html" %}
 
   <form method="post" id="loginForm">
 

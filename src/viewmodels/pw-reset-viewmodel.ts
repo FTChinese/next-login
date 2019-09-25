@@ -4,10 +4,8 @@ import {
 } from "@hapi/joi";
 import {
     ITextInput,
-    IApiErrorBase,
     IActionDone,
     UIBase,
-    IAlert,
     IErrors,
 } from "./ui";
 import {
@@ -376,7 +374,7 @@ class PwResetViewModel {
             inputs: this.buildPwInputs(result ? result.errForm : undefined),
         }
 
-        if (result.errApi) {
+        if (result && result.errApi) {
             if (result.errApi.message) {
                 uiData.errors = {
                     message: result.errApi.message,

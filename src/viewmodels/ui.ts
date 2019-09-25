@@ -43,10 +43,6 @@ export interface IListItem {
     link?: string;
 }
 
-export interface IApiErrorBase {
-    message?: string;
-}
-
 export interface IAnchor {
     href: string;
     text: string;
