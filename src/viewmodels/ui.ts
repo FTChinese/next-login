@@ -3,12 +3,12 @@ export const alerts = new Map([
     ["password_saved", "密码修改成功"],
 ]);
 
-export interface DataList {
+export interface IDataList {
     id: string;
     options: Array<string>;
 }
 
-export interface TextInput {
+export interface ITextInput {
     label: string;
     id: string;
     type: string;
@@ -21,34 +21,53 @@ export interface TextInput {
     maxlength?: string;
     desc?: string;
     error?: string | null;
-    datalist?: DataList;
+    datalist?: IDataList;
 }
 
-export interface CheckBoxInput {
+export interface ICheckBoxInput {
     label: string;
     id: string;
     value: string;
     checked: boolean;
 }
 
-export interface SelectOption {
+export interface ISelectOption {
     value: string;
     text: string;
     selected: boolean;
 }
 
-export interface ListItem {
+export interface IListItem {
     label: string;
     text: string;
     link?: string;
 }
 
-export interface UIApiErrorBase {
+export interface IApiErrorBase {
     message?: string;
 }
 
-export interface Alert {
+export interface IAnchor {
+    href: string;
+    text: string;
+}
+// UI components to show a raw error message as last resort if the error cannot be built programatically.
+export interface IErrors {
     message: string;
-    href?: string;
-    linkText?: string;
+}
+
+// UI components to show a known error or alert message.
+export interface IAlert {
+    message: string;
+    link?: IAnchor;
+}
+
+export interface IActionDone {
+    message: string;
+    link?: IAnchor;
+}
+
+export interface UIBase {
+    errors?: IErrors;
+    alert?: IAlert;
 }

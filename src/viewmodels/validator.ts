@@ -86,23 +86,34 @@ export const joiOptions: ValidationOptions = {
 }
 
 const email = string().trim().email().required();
-const password = string().trim().required();
-
-export const loginSchema = object().keys({
-    email,
-    password,
-});
-
-export const signUpSchema = loginSchema;
+const password = string().trim().min(8).max(64).required();
 
 export const emailSchema = object().keys({
     email,
 });
 
-export const pwResetSchema = object().keys({
+/**
+ * @description Validate password reseting.
+ * This can also be extended to validate updating password.
+ */
+export const passwordsSchema = object().keys({
     password,
     // valid() ensures this field is eqaual to password.
-    confirmPassword: string().trim().min(8).max(64).valid(ref("password")).required(),
+    confirmPassword: password.valid(ref("password")),
+});
+
+export const loginSchema = emailSchema.keys({
+    // To be compatible with legacy password.
+    password: string().trim().required(),
+});
+
+export const signUpSchema = passwordsSchema.keys({
+    email,
+});
+
+export const passwordUpdatingSchema = passwordsSchema.keys({
+    // Legacy password.
+    oldPassword: string().trim().required(),
 });
 
 export const userNameSchema = object().keys({
@@ -129,10 +140,5 @@ export const addressSchema = object().keys({
     postcode: string().trim().empty('').max(16).default(null),
 });
 
-export const passwordsSchema = object().keys({
-    oldPassword: string().trim().required(),
-    password,
-    // valid() ensures this field is eqaual to password.
-    confirmPassword: string().trim().min(8).max(64).valid(ref("password")).required(),
-});
+
 

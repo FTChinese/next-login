@@ -90,6 +90,22 @@ export class Account {
 
     @jsonMember
     membership: Membership;
+
+    getDisplayName(): string {
+        if (this.userName) {
+            return this.userName;
+        }
+
+        if (this.wechat.nickname) {
+            return this.wechat.nickname;
+        }
+
+        if (this.email) {
+            return this.email.split("@")[0];
+        }
+
+        return "";
+    }
 }
 
 export const accountSerializer = new TypedJSON(Account);
@@ -109,7 +125,7 @@ export interface IAppHeader {
 }
 // Form data for requesting password reset token,
 // or change email.
-export interface IEmailFormData {
+export interface IEmail {
     email: string;
 }
 
@@ -117,12 +133,6 @@ export interface IEmailFormData {
 export interface IPasswordReset {
     token: string;
     password: string;
-}
-
-// Form data submitted on the resetting password page.
-export interface IPwResetFormData {
-    password: string;
-    confirmPassword: string;
 }
 
 export interface INameFormData {

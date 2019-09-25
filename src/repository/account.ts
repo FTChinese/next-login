@@ -5,10 +5,9 @@ import {
 } from "../config/api";
 import { 
     ICredentials, 
-    IClientApp, 
     Account,
     accountSerializer,
-    IEmailFormData,
+    IEmail,
     IPasswordReset,
     IPasswordsFormData,
     IAppHeader,
@@ -88,7 +87,7 @@ class AccountRepo {
         return this.fetchFtcAccount(id);
     }
 
-    async requestPwResetLetter(data: IEmailFormData, app: IClientApp): Promise<boolean> {
+    async requestPwResetLetter(data: IEmail, app: IAppHeader): Promise<boolean> {
         const resp = await request
             .post(readerApi.passwordResetLetter)
             .set(app)
@@ -97,7 +96,7 @@ class AccountRepo {
         return resp.noContent;
     }
 
-    async verifyPwResetTOken(token: string): Promise<IEmailFormData> {
+    async verifyPwResetToken(token: string): Promise<IEmail> {
         const resp = await request
             .get(readerApi.passwordResetToken(token))
 
@@ -118,7 +117,7 @@ class AccountRepo {
         return resp.noContent;
     }
 
-    async requestVerification(id: string, app: IClientApp): Promise<boolean> {
+    async requestVerification(id: string, app: IAppHeader): Promise<boolean> {
         const resp = await request
             .get(readerApi.requestVerification)
             .set(app)
@@ -134,7 +133,7 @@ class AccountRepo {
         return resp.noContent;
     }
 
-    async updateEmail(ftcId: string, data: IEmailFormData): Promise<boolean> {
+    async updateEmail(ftcId: string, data: IEmail): Promise<boolean> {
         const resp = await request
             .patch(readerApi.email)
             .set(KEY_USER_ID, ftcId)

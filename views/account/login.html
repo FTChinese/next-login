@@ -2,9 +2,11 @@
 
 {% block content %}
   <h2 class="mt-3 mb-5">绑定FT中文网账号</h2>
+  
   <div class="row justify-content-center">
     <div class="col-md-8">
       <h5 class="text-center">验证</h5>
+
       {% if errors.credentials %}
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
           <span>{{errors.credentials}}</span>

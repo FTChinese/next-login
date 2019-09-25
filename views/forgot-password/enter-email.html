@@ -4,38 +4,31 @@
 <div class="mt-4">
   <h4 class="text-center">找回密码</h4>
 
-  {% if errors.token %}
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-      <span>{{errors.token}}</span>
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
+  {# Show invalid token message #}
+  {% include "partials/alert-danger.html" %}
+
+  {# Show message after password reset letter is sent, or password is reset. #}
+
+  {% if done %}
+    <div>{{ done.message }}</div>
+    {% if done.link %}
+    <a class="btn btn-primary btn-block mt-2" href="{{ done.link.href }}">{{ done.link.text }}</a>
+    {% endif %}
   {% endif %}
 
+  {% if input %}
   <form method="post">
-    <div class="form-group">
-      <label for="email">请输入您的电子邮箱，我们会向该邮箱发送邮件，帮您重置密码</label>
-      <input class="form-control"
-        id="email"
-        type="email"
-        name="email"
-        value="{{email}}"
-        placeholder="登录FT中文网所用的邮箱"
-        required>
 
-      {% if errors.email %}
-        <div class="form-errortext">{{errors.email}}</div>
-      {% endif %}
-
-    </div>
+    {% include "partials/input.html" %}
 
     <button 
       class="btn btn-block btn-primary" 
       type="submit"
       data-disable-with="正在发送...">发送邮件</button>
 
-  </form>      
+  </form>
+{% endif %}
+
 </div>
   
 {% endblock %}

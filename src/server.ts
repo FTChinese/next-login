@@ -25,6 +25,9 @@ import {
     handleError,
 } from "./controllers/middleware";
 import login from "./controllers/login";
+import signUp from "./controllers/signup";
+import forgotPassword from "./controllers/forgot-password";
+
 import { 
     entranceMap,
 } from "./config/sitemap";
@@ -68,12 +71,14 @@ router.get("/__version", async (ctx) => {
 });
 
 router.use("/login", checkSession(false), login);
-
+router.use("/signup", checkSession(false), signUp);
 router.get("/logout", checkSession(false), async (ctx, next) => {
     ctx.session = null;
     ctx.redirect(entranceMap.login);
     return;
 });
+// router.use("/verify", checkSession(false), verify);
+router.use("/password-reset", checkSession(false), forgotPassword);
 
 app.use(router.routes());
 

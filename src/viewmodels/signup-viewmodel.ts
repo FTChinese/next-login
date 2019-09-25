@@ -3,12 +3,12 @@ import {
     ValidationError,
 } from "@hapi/joi";
 import {
-    ITextInput,
-    IApiErrorBase,
+    TextInput,
+    UIApiErrorBase,
 } from "./ui";
 import {
-    loginSchema,
     buildJoiErrors,
+    signUpSchema,
 } from "./validator";
 import {
     parseApiError,
@@ -27,38 +27,36 @@ import {
     entranceMap,
 } from "../config/sitemap";
 
-interface ILoginFormState {
-    values?: ICredentials; // The value after sanitation and validation, if errors if null
-    errors?: ICredentials; // The error fields with error message.
+export interface ISignUpFormData extends ICredentials {
+    confirmPassword: string;
 }
 
-interface ILoginForm {
-    inputs: Array<ITextInput>
+interface ISignUpFormState {
+    values?: ISignUpFormData,
+    errors?: ISignUpFormData
 }
 
-export interface UILoginApiErrors extends IApiErrorBase {
-    credentials?: string;
+interface ISignUpForm {
+    inputs: Array<TextInput>;
 }
 
-interface ILoginResult {
-    success?: Account;
-    errForm?: ICredentials;
-    errApi?: UILoginApiErrors;
+interface ISignUpResult {
+    success?: Account,
+    errForm?: ISignUpFormData,
+    errApi?: UIApiErrorBase,
 }
 
-interface UILogin {
-    errors?: UILoginApiErrors;
-    form: ILoginForm;
-    pwResetLink: string;
-    signUpLink: string;
-    wxLoginLink: string;
-    wxIcon: string;
+interface UISignUp {
+    errors?: UIApiErrorBase,
+    form: ISignUpForm;
+    loginLink: string;
 }
 
-class LoginViewModel {
-    private readonly invalidCredentials = "邮箱或密码错误";
+class SignUpViewModel {
 
-    buildInputs(values?: ICredentials, errors?: ICredentials): Array<ITextInput> {
+    private readonly tooManyRequests: string = "您创建账号过于频繁，请稍后再试";
+
+    buildInputs(values?: ISignUpFormData, errors?: ISignUpFormData): Array<TextInput> {
         return [
             {
                 label: "邮箱",
@@ -69,6 +67,7 @@ class LoginViewModel {
                 placeholder: "电子邮箱",
                 maxlength: "64",
                 required: true,
+                desc: "用于登录FT中文网",
                 error: errors ? errors.email : "",
             },
             {
@@ -79,68 +78,67 @@ class LoginViewModel {
                 placeholder: "密码",
                 maxlength: "64",
                 required: true,
+                desc: "最少8个字符",
                 error: errors ? errors.password : "",
-            }
+            },
+            {
+                label: "确认密码",
+                id: "confirmPassword",
+                type: "password",
+                name: "credentials[confirmPassword]",
+                placeholder: "再次输入新密码",
+                maxlength: "64",
+                required: true,
+                error: errors ? errors.confirmPassword : "",
+            },
         ];
     }
 
-    async validate(input: ICredentials): Promise<ILoginFormState> {
+    async validate(input: ISignUpFormData): Promise<ISignUpFormState> {
         try {
-            const result = await validate<ICredentials>(input, loginSchema)
+            const result = await validate<ISignUpFormData>(input, signUpSchema);
 
             return {
                 values: result,
-            };
-    
+            }
         } catch (e) {
-            
             const ex: ValidationError = e;
-    
+
             return {
-                errors: buildJoiErrors(ex.details) as ICredentials,
+                errors: buildJoiErrors(ex.details) as ISignUpFormData,
             };
         }
     }
 
-    async logIn(formData: ICredentials, app: IAppHeader): Promise<ILoginResult> {
+    async signUp(formData: ISignUpFormData, app: IAppHeader): Promise<ISignUpResult> {
         const { values, errors } = await this.validate(formData);
 
         if (errors) {
             return {
                 errForm: errors,
-            };
+            }
         }
 
         if (!values) {
-            throw new Error("invalid form data to login");
+            throw new Error("invalid form data to sign up");
         }
 
         try {
-            const account = await accountRepo.login(values, app);
+            const account = await accountRepo.signUp(values, app);
 
             return {
                 success: account,
             }
         } catch (e) {
             switch (e.status) {
-                case 404:
-                case 403:
+                case 429:
                     return {
                         errApi: {
-                            credentials: this.invalidCredentials
-                        },
+                            message: this.tooManyRequests,
+                        }
                     };
-    
+
                 default:
-                    /**
-                     * {
-                     *  message: "",
-                     *  error: {
-                     *      field: "userName",
-                     *      code: "invalid"
-                     *  }
-                     * }
-                     */
                     const errBody = parseApiError(e);
                     if (errBody.error) {
                         const o = errBody.error.toMap();
@@ -149,20 +147,21 @@ class LoginViewModel {
                             errForm: {
                                 email: o.get("email") || "",
                                 password: o.get("password") || "",
+                                confirmPassword: o.get("confirmPassword") || "",
                             }
-                        }
+                        };
                     }
+
                     return {
                         errApi: {
                             message: errBody.message,
-                        }
+                        },
                     };
-            
             }
         }
     }
 
-    buildUI(formData?: ICredentials, result?: ILoginResult): UILogin {
+    buildUI(formData?: ISignUpFormData, result?: ISignUpResult): UISignUp {
         if (formData && formData.email) {
             formData.email = formData.email.trim();
         }
@@ -171,18 +170,13 @@ class LoginViewModel {
             errors: result ? result.errApi : undefined,
             form: {
                 inputs: this.buildInputs(
-                    formData, 
-                    result 
-                        ? result.errForm 
-                        : undefined,
-                ),
+                    formData,
+                    result ? result.errForm : undefined
+                )
             },
-            pwResetLink: entranceMap.passwordReset,
-            signUpLink: entranceMap.signup,
-            wxLoginLink: entranceMap.wxLogin,
-            wxIcon: "https://open.weixin.qq.com/zh_CN/htmledition/res/assets/res-design-download/icon32_wx_button.png",
-        };
+            loginLink: entranceMap.login,
+        }
     }
 }
 
-export const loginViewModel = new LoginViewModel();
+export const signUpViewModel = new SignUpViewModel();

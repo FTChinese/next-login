@@ -8,7 +8,6 @@ import {
 } from "typedjson";
 
 export const apiInvalidMessages = new Map<string, string>([
-    ["credentials_invalid", "邮箱或密码错误"],
     ["email_missing_field", "邮箱不能为空"],
     ["email_invalid", "不是有效的邮箱地址"],
     ["email_already_exists", "该邮箱已经注册FT中文网账号，请使用其他邮箱"],
@@ -16,7 +15,7 @@ export const apiInvalidMessages = new Map<string, string>([
     ["email_token_not_found", "您使用了无效的邮箱验证链接"],
     ["password_missing_field", "密码不能为空"],
     ["password_invalid", "密码无效"],
-    ["password_token_invalid", "无法重置密码。您似乎使用了无效的重置密码链接，请重试"],
+    // ["password_token_invalid", "无法重置密码。您似乎使用了无效的重置密码链接，请重试"],
     ["password_forbidden", "当前密码错误"],
     ["passwords_mismatched", "两次输入的密码不符，请重新输入"],
     ["token_mising_field", "token不能为空"],
@@ -27,7 +26,6 @@ export const apiInvalidMessages = new Map<string, string>([
     ["mobile_missing_field", "手机号码不能为空"],
     ["mobile_invalid", "手机号码无效"],
     ["server_unauthorized", "访问被拒绝，无权进行此操作"],
-    ["too_many_requests", "您创建账号过于频繁，请稍后再试"],
     ["userId_missing_field", "请求中缺少'userId'字段"],
     // Gift card error response.
     ["redeem_code_not_found", "没有找到该卡号，请确认您输入的礼品卡号有效、没有过期、未被激活"],
