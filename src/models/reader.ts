@@ -3,6 +3,13 @@ import {
     jsonMember,
     TypedJSON,
 } from "typedjson";
+import {
+    genders
+} from "./localization";
+import {
+    profileMap,
+    accountMap,
+} from "../config/sitemap";
 
 export interface ICredentials {
     email: string;
@@ -106,6 +113,26 @@ export class Account {
 
         return "";
     }
+
+    isWxOnly(): boolean {
+        return (!this.id) && (!!this.unionId)
+    }
+
+    isFtcOnly(): boolean {
+        return (!!this.id) && (!this.unionId)
+    }
+
+    isLinked(): boolean {
+        return !!(this.id && this.unionId);
+    }
+
+    nagVerifyEmail(): boolean {
+        return this.isFtcOnly && !this.isVerified;
+    }
+
+    get requestVerificationLink(): string {
+        return accountMap.requestVerification;
+    }
 }
 
 export const accountSerializer = new TypedJSON(Account);
@@ -154,26 +181,98 @@ export interface IPasswords {
     newPassword: string;
 }
 
-export class IProfile {
-    id: string;
-    email: string;
-    userName?: string;
-    mobile?: string;
-    avatarUrl?: string;
-    gender?: Gender;
+export interface IProfileFormData {
     familyName?: string;
     givenName?: string;
-    birthday?: string;
-    telephone?: string;
-    createdAt?: string;
-    updatedAt?: string;
+    gender?: string;
+    birhtday?: string;
 }
 
-export class IAddress {
+@jsonObject
+export class Profile {
+    @jsonMember
+    id: string;
+
+    @jsonMember
+    email: string;
+
+    @jsonMember
+    userName?: string;
+
+    @jsonMember
+    mobile?: string;
+
+    @jsonMember
+    avatarUrl?: string;
+
+    @jsonMember
+    gender?: Gender;
+
+    @jsonMember
+    familyName?: string;
+
+    @jsonMember
+    givenName?: string;
+
+    @jsonMember
+    birthday?: string;
+
+    @jsonMember
+    telephone?: string;
+
+    @jsonMember
+    createdAt?: string;
+
+    @jsonMember
+    updatedAt?: string;
+
+    get genderCN(): string {
+        if (!this.gender) {
+            return "";
+        }
+
+        return genders.get(this.gender) || "";
+    }
+
+    get updateNameLink(): string {
+        return profileMap.displayName;
+    }
+
+    get updateMobileLink(): string {
+        return profileMap.mobile;
+    }
+
+    get updateInfoLink(): string {
+        return profileMap.personal;
+    }
+
+    get updateAddressLink(): string {
+        return profileMap.address;
+    }
+}
+
+@jsonObject
+export class Address {
+
+    @jsonMember
     country?: string;
+
+    @jsonMember
     province?: string;
+
+    @jsonMember
     city?: string;
+
+    @jsonMember
     district?: string;
+
+    @jsonMember
     street?: string;
+
+    @jsonMember
     postcode?: string;
+}
+
+export interface IAddress extends Address {
+
 }

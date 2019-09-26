@@ -1,0 +1,23 @@
+<div class="form-group border-bottom pb-2">
+  <label class="form-label">{{checkbox.title}}</label>
+
+  {% for item in checkbox.items %}
+    <div class="form-check">
+      <input class="form-check-input"
+      id="group-{{ item.id }}"
+      type="checkbox"
+      name="{{checkbox.name}}}"
+      value="{{ item.value }}"
+      {% if item.checked %} checked{% endif %}>
+      
+      <label for="group-{{group.id}}">{{ item.label }}</label>
+    </div>
+  {% endfor %}
+
+  <small class="form-text text-muted">{{ checkbox.desc }}</small>
+
+  {% if checkbox.error %}
+    <div class="form-errortext">{{ checkbox.error }}</div>
+  {% endif %}
+</div>
+  

@@ -15,7 +15,6 @@ import {
     IEmail
 } from "../models/reader";
 import { 
-    profileMap, 
     entranceMap 
 } from "../config/sitemap";
 

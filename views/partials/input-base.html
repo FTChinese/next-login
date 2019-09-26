@@ -1,5 +1,6 @@
-<div class="form-group">
+{% if input.label %}
   <label class="form-label" for="{{input.id}}">{{input.label}}</label>
+{% endif %}
   <input class="form-control"
     type="{{input.type}}"
     id="{{input.id}}"
@@ -37,4 +38,3 @@
   {% if input.error %}
     <div class="form-errortext">{{input.error}}</div>
   {% endif %}
-</div>

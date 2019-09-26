@@ -1,34 +1,39 @@
 import request from "superagent";
 import {
-    TypedJSON
+    TypedJSON,
 } from "typedjson";
 import {
     readerApi,
     KEY_USER_ID,
 } from "../config/api";
 import { 
-    IProfile,
+    Profile,
     INameFormData,
     IMobileFormData,
+    Address,
     IAddress,
+    IProfileFormData,
 } from "../models/reader";
+
+const addressSerializer = new TypedJSON(Address);
+const profileSeiralizer = new TypedJSON(Profile);
 
 class ProfileRepo {
 
-    async fetchProfile(ftcId: string): Promise<IProfile> {
+    async fetchProfile(ftcId: string): Promise<Profile> {
         const resp = await request
             .get(readerApi.profile)
             .set(KEY_USER_ID, ftcId);
 
-        return resp.body;
+        return profileSeiralizer.parse(resp.text)!;
     }
 
-    async fetchAddress(ftcId: string): Promise<IAddress> {
+    async fetchAddress(ftcId: string): Promise<Address> {
         const resp = await request
             .get(readerApi.address)
             .set(KEY_USER_ID, ftcId)
 
-        return resp.body;
+        return addressSerializer.parse(resp.text)!;
     }
 
     async updateName(ftcId: string, data: INameFormData): Promise<boolean> {
@@ -49,9 +54,19 @@ class ProfileRepo {
         return resp.noContent;
     }
 
-    async updateAddress(address: IAddress): Promise<boolean> {
+    async updateProfile(ftcId: string, data: IProfileFormData): Promise<boolean> {
+        const resp = await request
+            .patch(readerApi.profile)
+            .set(KEY_USER_ID, ftcId)
+            .send(data);
+
+        return resp.noContent;
+    }
+
+    async updateAddress(ftcId: string, address: IAddress): Promise<boolean> {
         const resp = await request
             .patch(readerApi.address)
+            .set(KEY_USER_ID, ftcId)
             .send(address);
 
         return resp.noContent;

@@ -14,13 +14,13 @@
 {% endblock %}
 
 {% block topBanner %}
-  {% if user and user.email and (not user.isVerified) %}
+  {% if user and user.nagVerifyEmail() %}
     <div class="alert alert-primary mb-0" role="alert">
       <div class="container">
         <span>请验证您的登录邮箱。没有收到验证邮件？</span>
         <form
           class="d-inline"
-          action="{{sitemap.requestVerification}}"
+          action="{{ user.requestVerificationLink }}"
           method="post">
           <button
             type="submit"

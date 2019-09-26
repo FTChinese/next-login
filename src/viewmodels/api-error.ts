@@ -65,7 +65,7 @@ class Unprocessable {
 
     toMap(): Map<string, string> {
         return new Map([
-            [this.code, this.text],
+            [this.field, this.text],
         ]);
     }
 }

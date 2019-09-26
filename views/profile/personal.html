@@ -4,74 +4,40 @@
 
 <section class="mt-3">
   <h5>个人信息</h5>
+
+  {% include "partials/alert-danger.html" %}
+
+  {% if form %}
   <form method="post">
     <div class="form-row">
-      <div class="form-group col-md-6">
-        <label for="familyName">姓</label>
-        <input type="text" class="form-control"
-        id="familyName"
-        name="profile[familyName]"
-        value="{{profile.familyName}}">
+      {% for input in form.nameInputs %}
+        <div class="form-group col-md-6">
+          {% include "partials/input-base.html" %}
+        </div>
+      {% endfor %}
 
-        {% if errors.familyName %}
-          <div class="form-errortext">{{errors.familyName}}</div>
-        {% endif %}
-      </div>
-    
-      <div class="form-group col-md-6">
-        <label for="givenName">名</label>
-        <input type="text" class="form-control"
-        id="givenName"
-        name="profile[givenName]"
-        value="{{profile.givenName}}">
-
-        {% if errors.givenName %}
-          <div class="form-errortext">{{errors.givenName}}</div>
-        {% endif %}
-      </div>
     </div>
 
-    <div class="form-group">
-      <label>性别</label>
-      <div class="form-check">
-        <input class="form-check-input"
-        id="genderM"
-        type="radio"
-        name="profile[gender]"
-        value="M"
-        {% if profile.gender == "M" %} checked{% endif %}>
-        <label class="form-check-label" for="genderM">男</label>
+    {% if form.genderRadio %}
+      {% set radio = form.genderRadio %}
+      <div class="form-group">
+        {% include "partials/radio.html" %}
       </div>
-      
-      <div class="form-check">
-        <input class="form-check-input"
-        id="genderF"
-        type="radio"
-        name="profile[gender]" 
-        value="F"
-        {% if profile.gender == "F" %} checked{% endif %}>
-        <label class="form-check-label" for="genderF">女</label>
+    {% endif %}
+
+    {% if form.birthdayInput %}
+      {% set input = form.birthdayInput %}
+      <div class="form-group">
+        {% include "partials/input-base.html" %}
       </div>
-    </div>
-
-    <div class="form-group">
-      <label for="birthday">生日</label>
-      <input class="form-control"
-      id="birthday"
-      type="date"
-      name="profile[birthday]"
-      value="{{profile.birthday}}">
-
-      {% if errors.birthday %}
-        <div class="form-errortext">{{errors.birthday}}</div>
-      {% endif %}
-    </div>
+    {% endif %}
 
     <button
       type="submit"
       data-disable-with="保存..."
       class="btn btn-primary">保存</button>
-  </form>  
+  </form>
+  {% endif %}  
 </section>
 
 

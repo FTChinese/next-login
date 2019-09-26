@@ -14,8 +14,8 @@ export interface ITextInput {
     type: string;
     name: string;
     value?: string | null;
-    placeholder: string;
-    required: boolean;
+    placeholder?: string;
+    required?: boolean;
     readonly?: boolean;
     minlength?: string;
     maxlength?: string;
@@ -29,6 +29,29 @@ export interface ICheckBoxInput {
     id: string;
     value: string;
     checked: boolean;
+}
+
+export interface ICheckBox {
+    title?: string;
+    name: string;
+    items: Array<ICheckBoxInput>
+    desc?: string;
+    error?: string;
+}
+
+export interface IRadioInput {
+    label: string;
+    id: string;
+    value: string;
+    checked: boolean;
+}
+
+export interface IRadio {
+    title?: string;
+    name: string;
+    inputs: Array<IRadioInput>;
+    desc?: string;
+    error?: string;
 }
 
 export interface ISelectOption {

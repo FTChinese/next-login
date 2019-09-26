@@ -1,0 +1,22 @@
+<label>{{ radio.title }}</label>
+
+{% for input in radio.inputs %}
+  <div class="form-check">
+    <input class="form-check-input"
+    id="{{ input.id }}"
+    type="radio"
+    name="{{radio.name}}"
+    value="M"
+    {% if input.checked %} checked{% endif %}>
+    <label class="form-check-label" for="{{ input.id }}">{{ input.label }}</label>
+  </div>
+{% endfor %}
+
+{% if radio.desc %}
+  <small class="form-text text-muted">{{input.desc}}</small>
+{% endif %}
+
+{% if radio.error %}
+  <div class="form-errortext">{{input.error}}</div>
+{% endif %}
+

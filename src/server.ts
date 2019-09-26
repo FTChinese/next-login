@@ -27,6 +27,8 @@ import {
 import login from "./controllers/login";
 import signUp from "./controllers/signup";
 import forgotPassword from "./controllers/forgot-password";
+import profile from "./controllers/profile";
+import account from "./controllers/account";
 
 import { 
     entranceMap,
@@ -79,6 +81,9 @@ router.get("/logout", checkSession(false), async (ctx, next) => {
 });
 // router.use("/verify", checkSession(false), verify);
 router.use("/password-reset", checkSession(false), forgotPassword);
+
+router.use("/profile", checkSession(), profile);
+router.use("/account", checkSession(), account);
 
 app.use(router.routes());
 

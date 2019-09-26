@@ -19,7 +19,9 @@
   {% if input %}
   <form method="post">
 
-    {% include "partials/input.html" %}
+      <div class="form-group">
+        {% include "partials/input-base.html" %}
+      </div>
 
     <button 
       class="btn btn-block btn-primary" 
