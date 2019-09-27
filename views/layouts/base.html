@@ -40,9 +40,9 @@
         </a>
 
         <div class="dropdown-menu dropdown-menu-right">
-          <a class="dropdown-item" href="{{sitemap.profile}}">{{ user.getDisplayName() }}</a>
+          <a class="dropdown-item" href="{{ user.settingsLink }}">{{ user.getDisplayName() }}</a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="{{sitemap.logout}}">退出</a>
+          <a class="dropdown-item" href="{{ user.logoutLink }}">退出</a>
         </div>
       </div>
       {% endif %}

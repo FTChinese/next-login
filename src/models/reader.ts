@@ -9,6 +9,7 @@ import {
 import {
     profileMap,
     accountMap,
+    entranceMap,
 } from "../config/sitemap";
 
 export interface ICredentials {
@@ -98,6 +99,7 @@ export class Account {
     @jsonMember
     membership: Membership;
 
+    
     getDisplayName(): string {
         if (this.userName) {
             return this.userName;
@@ -132,6 +134,14 @@ export class Account {
 
     get requestVerificationLink(): string {
         return accountMap.requestVerification;
+    }
+
+    get settingsLink(): string {
+        return profileMap.base;
+    }
+
+    get logoutLink(): string {
+        return entranceMap.logout;
     }
 }
 
