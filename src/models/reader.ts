@@ -170,12 +170,6 @@ export interface IMobileFormData {
     mobile: string;
 }
 
-export interface IPasswordsFormData {
-    oldPassword: string;
-    password: string;
-    confirmPassword: string;
-}
-
 export interface IPasswords {
     oldPassword: string;
     newPassword: string;
