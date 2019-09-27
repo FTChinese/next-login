@@ -1,7 +1,43 @@
-export const alerts = new Map([
-    ["saved", "保存成功！"],
-    ["password_saved", "密码修改成功"],
-]);
+import {
+    APIError,
+} from "./api-error";
+
+export type SavedKey = "saved" | "password_saved";
+export type ActionDoneKey = "letter_sent" | "password_reset";
+
+const doneMsg = {
+    saved: "保存成功！",
+    pwSaved: "密码修改成功",
+};
+
+export function getDoneMsg(key: SavedKey): string {
+    switch (key) {
+        case "saved":
+            return doneMsg.saved;
+
+        case "password_saved":
+            return doneMsg.pwSaved;
+
+        default:
+            return "";
+    }
+}
+
+export interface IFormState<T> {
+    values?: T;
+    errors?: T;
+}
+
+export interface IFetchResult<T> {
+    success?: T;
+    errResp?: APIError;
+}
+
+export interface IUpdateResult<T> {
+    success?: boolean;
+    errForm?: T;
+    errApi?: IErrors;
+}
 
 export interface IDataList {
     id: string;
@@ -62,8 +98,9 @@ export interface ISelectOption {
 
 export interface IListItem {
     label: string;
-    text: string;
+    value?: string;
     link?: string;
+    linkText?: string;
 }
 
 export interface IAnchor {
