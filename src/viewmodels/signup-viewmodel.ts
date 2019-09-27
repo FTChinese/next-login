@@ -3,14 +3,14 @@ import {
     ValidationError,
 } from "@hapi/joi";
 import {
-    ITextInput, IErrors, UIBase,
+    ITextInput, IErrors, UIBase, IFormState, IFetchResult,
 } from "./ui";
 import {
     buildJoiErrors,
     signUpSchema,
 } from "./validator";
 import {
-    parseApiError,
+    APIError,
 } from "./api-error";
 import {
     ICredentials,
@@ -30,28 +30,12 @@ export interface ISignUpFormData extends ICredentials {
     confirmPassword: string;
 }
 
-interface ISignUpFormState {
-    values?: ISignUpFormData,
-    errors?: ISignUpFormData
-}
-
-interface ISignUpForm {
-    inputs: Array<ITextInput>;
-}
-
-interface ISignUpApiErrors {
-    message?: string;
-    tooManyRequests?: boolean;
-}
-
-interface ISignUpResult {
-    success?: Account,
+interface ISignUpResult extends IFetchResult<Account> {
     errForm?: ISignUpFormData,
-    errApi?: ISignUpApiErrors,
 }
 
 interface UISignUp extends UIBase {
-    form: ISignUpForm;
+    inputs: Array<ITextInput>;
     loginLink: string;
 }
 
@@ -97,7 +81,7 @@ class SignUpViewModel {
         ];
     }
 
-    async validate(input: ISignUpFormData): Promise<ISignUpFormState> {
+    async validate(input: ISignUpFormData): Promise<IFormState<ISignUpFormData>> {
         try {
             const result = await validate<ISignUpFormData>(input, signUpSchema);
 
@@ -133,57 +117,61 @@ class SignUpViewModel {
                 success: account,
             }
         } catch (e) {
-            switch (e.status) {
-                case 429:
-                    return {
-                        errApi: {
-                            tooManyRequests: true,
-                        }
-                    };
+            const errResp = new APIError(e);
 
-                default:
-                    const errBody = parseApiError(e);
-                    if (errBody.error) {
-                        const o = errBody.error.toMap();
+            if (errResp.error) {
+                const o = errResp.error.toMap();
 
-                        return {
-                            errForm: {
-                                email: o.get("email") || "",
-                                password: o.get("password") || "",
-                                confirmPassword: o.get("confirmPassword") || "",
-                            }
-                        };
+                return {
+                    errForm: {
+                        email: o.get("email") || "",
+                        password: o.get("password") || "",
+                        confirmPassword: o.get("confirmPassword") || "",
                     }
-
-                    return {
-                        errApi: {
-                            message: errBody.message,
-                        },
-                    };
+                };
             }
+
+            return {
+                errResp,
+            };
         }
     }
 
-    buildUI(formData?: ISignUpFormData, result?: ISignUpResult): UISignUp {
+    buildUI(
+        formData?: ISignUpFormData, 
+        result?: ISignUpResult
+    ): UISignUp {
         if (formData && formData.email) {
             formData.email = formData.email.trim();
         }
 
-        return {
-            errors: (result && result.errApi && result.errApi.message) 
-                ? { message: result.errApi.message } 
-                : undefined,
-            alert: (result && result.errApi && result.errApi.tooManyRequests)
-                ? { message: this.msgTooManyRequests }
-                : undefined,
-            form: {
-                inputs: this.buildInputs(
-                    formData,
-                    result ? result.errForm : undefined
-                )
-            },
+        const uiData: UISignUp = {
+            inputs: this.buildInputs(
+                formData,
+                result ? result.errForm : undefined
+            ),
             loginLink: entranceMap.login,
+        };
+
+        if (result && result.errResp) {
+            const errResp = result.errResp;
+
+            if (errResp.status == 429) {
+                uiData.alert = {
+                    message: this.msgTooManyRequests,
+                };
+
+                return uiData
+            }
+
+            uiData.errors = {
+                message: errResp.message,
+            };
+
+            return uiData;
         }
+
+        return uiData;
     }
 }
 

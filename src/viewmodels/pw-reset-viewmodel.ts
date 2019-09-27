@@ -7,6 +7,10 @@ import {
     IActionDone,
     UIBase,
     IErrors,
+    ActionDoneKey,
+    IFormState,
+    IUpdateResult,
+    IFetchResult,
 } from "./ui";
 import {
     buildJoiErrors,
@@ -14,7 +18,7 @@ import {
     passwordsSchema,
 } from "./validator";
 import {
-    parseApiError,
+    APIError,
 } from "./api-error";
 import {
     IEmail,
@@ -30,29 +34,13 @@ import {
     entranceMap,
 } from "../config/sitemap";
 
-interface IEmailFormState {
-    values?: IEmail;
-    errors?: IEmail;
-}
-
-interface IRequestLetterResult {
-    success?: boolean;
-    errForm?: IEmail; // Validation errors.
-    errApi?: IErrors; // Fallback error message reserved for errors that cannot be handled programatically.
-}
-
 /**
  * Passed as session data in redirect since we do not
  * want to carry too much data in a session.
  */
 export interface ITokenApiErrors {
     message?: string; // fallback error message
-    invalidToken?: boolean; // indicates the token is invalid.
-}
-
-interface IVerifyTokenResult {
-    success?: IEmail;
-    errApi?: ITokenApiErrors;
+    invalid?: boolean; // indicates the token is invalid.
 }
 
 interface UIForgotPassword extends UIBase {
@@ -60,23 +48,14 @@ interface UIForgotPassword extends UIBase {
     done?: IActionDone; // 
 }
 
-export type ActionDoneKey = "letter_sent" | "password_reset";
-
 // Form data submitted on the resetting password page.
 export interface IPwResetFormData {
     password: string;
     confirmPassword: string;
 }
 
-interface IPwFormState {
-    values?: IPwResetFormData,
-    errors?: IPwResetFormData,
-}
-
-interface IResetPwResult {
-    success?: boolean;
-    errForm?: IPwResetFormData; // Client validation errors, or api validation errors.
-    errApi?: ITokenApiErrors; // Fallback error message if the error cannot parsed programatically.
+interface IResetPwResult extends IFetchResult<boolean> {
+    errForm?: IPwResetFormData; // Client validation 
 }
 
 interface UIPwReset extends UIBase {
@@ -108,7 +87,7 @@ class PwResetViewModel {
         }
     }
     
-    async validateEmail(input: IEmail): Promise<IEmailFormState> {
+    async validateEmail(input: IEmail): Promise<IFormState<IEmail>> {
         try {
             const result = await validate<IEmail>(input, emailSchema);
 
@@ -125,7 +104,10 @@ class PwResetViewModel {
         }
     }
 
-    async requestLetter(formData: IEmail, app: IAppHeader): Promise<IRequestLetterResult> {
+    async requestLetter(
+        formData: IEmail, 
+        app: IAppHeader
+    ): Promise<IUpdateResult<IEmail>> {
         const { values, errors } = await this.validateEmail(formData);
 
         if (errors) {
@@ -145,35 +127,36 @@ class PwResetViewModel {
                 success: ok,
             }
         } catch (e) {
-            switch (e.status) {
-                case 404:
-                    return {
-                        errForm: {
-                            email: this.msgEmailNotFound,
-                        }
+            const errResp = new APIError(e);
+            if (errResp.notFound) {
+                return {
+                    errForm: {
+                        email: this.msgEmailNotFound,
                     }
-
-                default:
-                    const errBody = parseApiError(e);
-                    if (errBody.error) {
-                        const o = errBody.error.toMap();
-
-                        return {
-                            errForm: {
-                                email: o.get("email") || "",
-                            }
-                        };
-                    }
-                    return {
-                        errApi: {
-                            message: errBody.message,
-                        },
-                    };
+                }
             }
+
+            if (errResp.error) {
+                const o = errResp.error.toMap();
+
+                return {
+                    errForm: {
+                        email: o.get("email") || "",
+                    }
+                };
+            }
+            return {
+                errApi: {
+                    message: errResp.message,
+                },
+            };
         }
     }
 
-    buildEmailUI(formData?: IEmail, result?: IRequestLetterResult): UIForgotPassword {
+    buildEmailUI(
+        formData?: IEmail, 
+        result?: IUpdateResult<IEmail>,
+    ): UIForgotPassword {
         if (formData && formData.email) {
             formData.email = formData.email.trim();
         }
@@ -213,7 +196,7 @@ class PwResetViewModel {
         } 
     }
 
-    async verifyToken(token: string): Promise<IVerifyTokenResult> {
+    async verifyToken(token: string): Promise<IFetchResult<IEmail>> {
         try {
             const result = await accountRepo.verifyPwResetToken(token);
 
@@ -221,20 +204,10 @@ class PwResetViewModel {
                 success: result,
             };
         } catch (e) {
-            switch (e.status) {
-                case 404:
-                    return {
-                        errApi: {
-                            invalidToken: true,
-                        }
-                    }
+            const errResp = new APIError(e);
 
-                default:
-                    return {
-                        errApi: {
-                            message: parseApiError(e).message,
-                        }
-                    };
+            return {
+                errResp,
             }
         }
     }
@@ -245,26 +218,31 @@ class PwResetViewModel {
      * page with an alert message.
      * The `errors` object is extracted from `ctx.session.errors` field.
      */
-    buildInvalidTokenUI(errors: ITokenApiErrors): UIForgotPassword {
+    buildInvalidTokenUI(result: ITokenApiErrors): UIForgotPassword {
         const uiData: UIForgotPassword = {
             input: this.buildEmailInput(),
         }
 
-        if (errors.message) {
-            uiData.errors = {
-                message: errors.message,
-            };
-        }
-
-        if (errors.invalidToken) {
+        if (result.invalid) {
             uiData.alert = {
                 message: this.msgTokenInvalid,
             }
+
+            return uiData;
         }
+
+        if (result.message) {
+            uiData.errors = {
+                message: result.message,
+            };
+
+            return uiData;
+        }
+
         return uiData;
     }
 
-    buildPwInputs(errors?: IPwResetFormData): Array<ITextInput> {
+    private buildPwInputs(errors?: IPwResetFormData): Array<ITextInput> {
         return [
             {
                 label: "密码",
@@ -293,7 +271,7 @@ class PwResetViewModel {
         ];
     }
 
-    async validatePasswords(formData: IPwResetFormData): Promise<IPwFormState> {
+    async validatePasswords(formData: IPwResetFormData): Promise<IFormState<IPwResetFormData>> {
         try {
             const result = await validate<IPwResetFormData>(formData, passwordsSchema)
 
@@ -333,59 +311,52 @@ class PwResetViewModel {
                 success: ok,
             };
         } catch (e) {
-            switch (e.status) {
-                case 404:
-                    return {
-                        errApi: {
-                            invalidToken: true,
-                        },
-                    };
-                case 422:
-                    const errBody = parseApiError(e);
-                    if (errBody.error) {
-                        const o = errBody.error.toMap();
-                        return {
-                            errForm: {
-                                password: o.get("password") || "",
-                                confirmPassword: "",
-                            },
-                        };
-                    }
+            const errResp = new APIError(e);
 
-                    return {
-                        errApi: {
-                            message: errBody.message,
-                        },
-                    };
-
-                default:
-                    return {
-                        errApi: {
-                            message: parseApiError(e).message,
-                        },
-                    };
+            if (errResp.error) {
+                const o = errResp.error.toMap();
+                return {
+                    errForm: {
+                        password: o.get("password") || "",
+                        confirmPassword: "",
+                    },
+                };
             }
+
+            return {
+                errResp,
+            };
         }
     }
 
-    buildPwResetUI(email: string, result?: IResetPwResult): UIPwReset {
+    buildPwResetUI(
+        email: string, 
+        result?: IResetPwResult
+    ): UIPwReset {
         const uiData: UIPwReset = {
             email,
-            inputs: this.buildPwInputs(result ? result.errForm : undefined),
+            inputs: this.buildPwInputs(result 
+                ? result.errForm 
+                : undefined
+            ),
         }
 
-        if (result && result.errApi) {
-            if (result.errApi.message) {
-                uiData.errors = {
-                    message: result.errApi.message,
-                }
-            }
-            
-            if (result.errApi.invalidToken) {
+        if (result && result.errResp) {
+            const errResp = result.errResp;
+
+            if (errResp.notFound) {
                 uiData.alert = {
                     message: this.msgTokenInvalid,
-                }
+                };
+
+                return uiData;
             }
+
+            uiData.errors = {
+                message: errResp.message,
+            };
+            
+            return uiData;
         }
 
         return uiData;

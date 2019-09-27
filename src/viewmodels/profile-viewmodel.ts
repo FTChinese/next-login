@@ -5,12 +5,15 @@ import {
 import debug from "debug";
 import {
     UIBase, 
-    IErrors,
     ITextInput,
     IRadio,
+    SavedKey,
+    getDoneMsg,
+    IFormState,
+    IUpdateResult
 } from "./ui";
 import {
-    parseApiError,
+    APIError,
 } from "./api-error";
 import {
     userNameSchema,
@@ -33,27 +36,7 @@ import {
     profileRepo,
 } from "../repository/profile";
 
-
 const log = debug("user:profile-viewmodel");
-
-export type SavedKey = "saved" | "password_saved";
-
-interface IFetchResult<T> {
-    success?: T;
-    notFound?: boolean;
-    errMsg?: string;
-}
-
-interface IFormState<T> {
-    values?: T;
-    errors?: T;
-}
-
-interface IUpdateResult<T> {
-    success?: boolean;
-    errForm?: T;
-    errApi?: IErrors;
-}
 
 interface UIProfile extends UIBase {
     profile?: Profile;
@@ -84,99 +67,22 @@ interface UIAddress extends UIBase {
 
 class ProfileViewModel {
 
-    private readonly msgSaved = "保存成功！";
-    private readonly msgPwSaved = "密码修改成功";
     private readonly msgNotFound = "用户不存在或服务器错误！";
-
-    private getDoneMsg(key: SavedKey): string {
-        switch (key) {
-            case "saved":
-                return this.msgSaved;
-
-            case "password_saved":
-                return this.msgPwSaved;
-
-            default:
-                return "";
-        }
-    }
-
-    async fetchProfile(ftcId: string): Promise<IFetchResult<Profile>> {
-        try {
-            const profile = await profileRepo.fetchProfile(ftcId);
-
-            return {
-                success: profile,
-            }
-        } catch (e) {
-            switch (e.status) {
-                case 404:
-                    return {
-                        notFound: true,
-                    };
-
-                default:
-                    return {
-                        errMsg: parseApiError(e).message,
-                    };
-            }
-        }
-    }
-
-    async fetchAddress(ftcId: string): Promise<IFetchResult<Address>> {
-        try {
-            const address = await profileRepo.fetchAddress(ftcId);
-
-            return {
-                success: address,
-            }
-        } catch (e) {
-            switch (e.status) {
-                case 404:
-                    return {
-                        notFound: true,
-                    };
-
-                default:
-                    return {
-                        errMsg: parseApiError(e).message,
-                    };
-            }
-        }
-    }
 
     async buildProfileUI(account: Account, done?: SavedKey): Promise<UIProfile> {
 
-        try {
-            const [profile, address] = await Promise.all([
-                profileRepo.fetchProfile(account.id),
-                profileRepo.fetchAddress(account.id),
-            ]);
+        const [profile, address] = await Promise.all([
+            profileRepo.fetchProfile(account.id),
+            profileRepo.fetchAddress(account.id),
+        ]);
 
-            return {
-                alert: done 
-                    ? { message: this.getDoneMsg(done) }
-                    : undefined,
-                profile,
-                address,
-            };
-        } catch (e) {
-            switch (e.status) {
-                case 404:
-                    return {
-                        errors: {
-                            message: this.msgNotFound,
-                        }
-                    }
-
-                default:
-                    return {
-                        errors: {
-                            message: parseApiError(e).message,
-                        }
-                    }
-            }
-        }
+        return {
+            alert: done 
+                ? { message: getDoneMsg(done) }
+                : undefined,
+            profile,
+            address,
+        };
     }
 
     /**
@@ -221,12 +127,10 @@ class ProfileViewModel {
                 success: ok,
             };
         } catch (e) {
-            const errBody = parseApiError(e);
+            const errResp = new APIError(e);
 
-            log("Error response: %O", errBody);
-
-            if (errBody.error) {
-                const o = errBody.error.toMap();
+            if (errResp.error) {
+                const o = errResp.error.toMap();
 
                 log("Error message: %O", o);
 
@@ -239,7 +143,7 @@ class ProfileViewModel {
 
             return {
                 errApi: {
-                    message: errBody.message,
+                    message: errResp.message,
                 }
             }
         }
@@ -251,13 +155,25 @@ class ProfileViewModel {
      * exist, thus we fetch user profile from API
      * and use the `Profile.userName` to set the form input value.
      */
-    async buildNameUI(account: Account, formData?: INameFormData, result?: IUpdateResult<INameFormData>): Promise<UISingleInput> {
+    async buildNameUI(
+        account: Account, 
+        formData?: INameFormData, 
+        result?: IUpdateResult<INameFormData>
+    ): Promise<UISingleInput> {
 
         if (formData) {
             formData.userName = formData.userName.trim();
         }
 
-        const uiData: UISingleInput = {
+        if (!formData) {
+            const success = await profileRepo.fetchProfile(account.id);
+
+            formData = {
+                userName: success.userName || "",
+            };
+        }
+
+        return {
             // Contains API error for PATCH request.
             errors: (result && result.errApi)
                 ? result.errApi
@@ -276,32 +192,6 @@ class ProfileViewModel {
                     : undefined,
             }
         };
-
-        if (!formData) {
-            const { success, notFound, errMsg: error } = await this.fetchProfile(account.id);
-
-            if (!success) {
-                // Contains API error for GET request.
-                // If should mutually exclusive with `result.errApi`
-                if (error) {
-                    uiData.errors = {
-                        message: error,
-                    }
-                }
-
-                if (notFound) {
-                    uiData.alert = {
-                        message: this.msgNotFound,
-                    }
-                }
-
-                return uiData;
-            }
-
-            uiData.input.value = success.userName;
-        }
-
-        return uiData;
     }
 
     /**
@@ -346,14 +236,10 @@ class ProfileViewModel {
                 success: ok,
             };
         } catch (e) {
-            const errBody = parseApiError(e);
+            const errResp = new APIError(e);
 
-            log("Error response: %O", errBody);
-
-            if (errBody.error) {
-                const o = errBody.error.toMap();
-
-                log("Error message: %O", o);
+            if (errResp.error) {
+                const o = errResp.error.toMap();
 
                 return {
                     errForm: {
@@ -364,7 +250,7 @@ class ProfileViewModel {
 
             return {
                 errApi: {
-                    message: errBody.message,
+                    message: errResp.message,
                 }
             }
         }
@@ -380,6 +266,14 @@ class ProfileViewModel {
 
         if (formData) {
             formData.mobile = formData.mobile.trim();
+        }
+
+        if (!formData) {
+            const success = await profileRepo.fetchProfile(account.id);
+
+            formData = {
+                mobile: success.mobile || "",
+            };
         }
 
         const uiData: UISingleInput = {
@@ -400,30 +294,6 @@ class ProfileViewModel {
                     : undefined,
             }
         };
-
-        if (!formData) {
-            const { success, notFound, errMsg: error } = await this.fetchProfile(account.id);
-
-            if (!success) {
-                // Contains API error for GET request.
-                // If should mutually exclusive with `result.errApi`
-                if (error) {
-                    uiData.errors = {
-                        message: error,
-                    }
-                }
-
-                if (notFound) {
-                    uiData.alert = {
-                        message: this.msgNotFound,
-                    }
-                }
-
-                return uiData;
-            }
-
-            uiData.input.value = success.mobile;
-        }
 
         return uiData;
     }
@@ -467,14 +337,10 @@ class ProfileViewModel {
                 success: ok,
             };
         } catch (e) {
-            const errBody = parseApiError(e);
+            const errResp = new APIError(e);
 
-            log("Error response: %O", errBody);
-
-            if (errBody.error) {
-                const o = errBody.error.toMap();
-
-                log("Error message: %O", o);
+            if (errResp.error) {
+                const o = errResp.error.toMap();
 
                 return {
                     errForm: {
@@ -488,38 +354,19 @@ class ProfileViewModel {
 
             return {
                 errApi: {
-                    message: errBody.message,
+                    message: errResp.message,
                 }
             }
         }
     }
 
-    async buildInfoUI(account: Account, formData?: IProfileFormData, result?: IUpdateResult<IProfileFormData>): Promise<UIPersonalInfo> {
+    async buildInfoUI(
+        account: Account, 
+        formData?: IProfileFormData, 
+        result?: IUpdateResult<IProfileFormData>,
+    ): Promise<UIPersonalInfo> {
         if (!formData) {
-            const { success, notFound, errMsg } = await this.fetchProfile(account.id)
-
-            if (!success) {
-                if (notFound) {
-                    return {
-                        alert: {
-                            message: this.msgNotFound,
-                        },
-                    }
-                }
-                if (errMsg) {
-                    return {
-                        errors: {
-                            message: errMsg,
-                        }
-                    }
-                }
-
-                return {
-                    errors: {
-                        message: "Unknow error occurred",
-                    },
-                };
-            }
+            const success = await profileRepo.fetchProfile(account.id)
 
             formData = {
                 familyName: success.familyName,
@@ -634,14 +481,10 @@ class ProfileViewModel {
                 success: ok,
             };
         } catch (e) {
-            const errBody = parseApiError(e);
+            const errResp = new APIError(e);
 
-            log("Error response: %O", errBody);
-
-            if (errBody.error) {
-                const o = errBody.error.toMap();
-
-                log("Error message: %O", o);
+            if (errResp.error) {
+                const o = errResp.error.toMap();
 
                 return {
                     errForm: {
@@ -657,7 +500,7 @@ class ProfileViewModel {
 
             return {
                 errApi: {
-                    message: errBody.message,
+                    message: errResp.message,
                 }
             }
         }
@@ -665,30 +508,7 @@ class ProfileViewModel {
 
     async buildAddressUI(account: Account, formData?: IAddress, result?: IUpdateResult<IAddress>): Promise<UIAddress> {
         if (!formData) {
-            const { success, notFound, errMsg } = await this.fetchAddress(account.id)
-
-            if (!success) {
-                if (notFound) {
-                    return {
-                        alert: {
-                            message: this.msgNotFound,
-                        },
-                    }
-                }
-                if (errMsg) {
-                    return {
-                        errors: {
-                            message: errMsg,
-                        }
-                    }
-                }
-
-                return {
-                    errors: {
-                        message: "Unknow error occurred",
-                    },
-                };
-            }
+            const success = await profileRepo.fetchAddress(account.id)
 
             formData = success;
         }

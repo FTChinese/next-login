@@ -5,13 +5,15 @@ import {
 import {
     ITextInput,
     UIBase,
+    IFormState,
+    IFetchResult,
 } from "./ui";
 import {
     loginSchema,
     buildJoiErrors,
 } from "./validator";
 import {
-    parseApiError,
+    APIError,
 } from "./api-error";
 import {
     ICredentials,
@@ -27,28 +29,12 @@ import {
     entranceMap,
 } from "../config/sitemap";
 
-interface ILoginFormState {
-    values?: ICredentials; // The value after sanitation and validation, if errors if null
-    errors?: ICredentials; // The error fields with error message.
-}
-
-interface ILoginForm {
-    inputs: Array<ITextInput>
-}
-
-export interface ILoginApiErrors {
-    message?: string;
-    invalidCredentials?: boolean;
-}
-
-interface ILoginResult {
-    success?: Account;
+interface ILoginResult extends IFetchResult<Account> {
     errForm?: ICredentials;
-    errApi?: ILoginApiErrors;
 }
 
 interface UILogin extends UIBase {
-    form: ILoginForm;
+    inputs: Array<ITextInput>;
     pwResetLink: string;
     signUpLink: string;
     wxLoginLink: string;
@@ -58,7 +44,7 @@ interface UILogin extends UIBase {
 class LoginViewModel {
     private readonly msgInvalidCredentials = "邮箱或密码错误";
 
-    buildInputs(values?: ICredentials, errors?: ICredentials): Array<ITextInput> {
+    private buildInputs(values?: ICredentials, errors?: ICredentials): Array<ITextInput> {
         return [
             {
                 label: "邮箱",
@@ -84,7 +70,7 @@ class LoginViewModel {
         ];
     }
 
-    async validate(input: ICredentials): Promise<ILoginFormState> {
+    async validate(input: ICredentials): Promise<IFormState<ICredentials>> {
         try {
             const result = await validate<ICredentials>(input, loginSchema)
 
@@ -122,33 +108,21 @@ class LoginViewModel {
                 success: account,
             }
         } catch (e) {
-            switch (e.status) {
-                case 404:
-                case 403:
-                    return {
-                        errApi: {
-                            invalidCredentials: true,
-                        },
-                    };
-    
-                default:
-                    const errBody = parseApiError(e);
-                    if (errBody.error) {
-                        const o = errBody.error.toMap();
+            const errResp = new APIError(e);
 
-                        return {
-                            errForm: {
-                                email: o.get("email") || "",
-                                password: o.get("password") || "",
-                            }
-                        }
+            if (errResp.error) {
+                const o = errResp.error.toMap();
+
+                return {
+                    errForm: {
+                        email: o.get("email") || "",
+                        password: o.get("password") || "",
                     }
-                    return {
-                        errApi: {
-                            message: errBody.message,
-                        }
-                    };
-            
+                }
+            }
+
+            return {
+                errResp,
             }
         }
     }
@@ -159,32 +133,34 @@ class LoginViewModel {
         }
 
         const uiData: UILogin = {
-            form: {
-                inputs: this.buildInputs(
-                    formData, 
-                    result 
-                        ? result.errForm 
-                        : undefined,
-                ),
-            },
+            inputs: this.buildInputs(
+                formData, 
+                result 
+                    ? result.errForm 
+                    : undefined,
+            ),
             pwResetLink: entranceMap.passwordReset,
             signUpLink: entranceMap.signup,
             wxLoginLink: entranceMap.wxLogin,
             wxIcon: "https://open.weixin.qq.com/zh_CN/htmledition/res/assets/res-design-download/icon32_wx_button.png",
         };
 
-        if (result && result.errApi) {
-            if (result.errApi.message) {
-                uiData.errors = {
-                    message: result.errApi.message,
-                };
-            }
+        if (result && result.errResp) {
+            const errResp = result.errResp;
 
-            if (result.errApi.invalidCredentials) {
+            if (errResp.notFound || errResp.forbidden) {
                 uiData.alert = {
                     message: this.msgInvalidCredentials,
                 };
+
+                return uiData;
             }
+
+            uiData.errors = {
+                message: errResp.message,
+            };
+
+            return uiData;
         }
 
         return uiData;
