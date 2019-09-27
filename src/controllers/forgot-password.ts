@@ -4,9 +4,11 @@ import render from "../util/render";
 import {
     ITokenApiErrors,
     pwResetViewModel,
-    ActionDoneKey,
     IPwResetFormData,
 } from "../viewmodels/pw-reset-viewmodel";
+import {
+    ActionDoneKey,
+} from "../viewmodels/ui";
 import {
     appHeader,
 } from "./middleware";
@@ -81,11 +83,23 @@ router.post("/", appHeader(),async (ctx, next) => {
 router.get("/:token", async (ctx, next) => {
     const token: string = ctx.params.token;
 
-    const { success, errApi } = await pwResetViewModel.verifyToken(token);
+    const { success, errResp } = await pwResetViewModel.verifyToken(token);
+
+    if (errResp) {
+        const errors: ITokenApiErrors = {};
+
+        if (errResp.notFound) {
+            errors.invalid = true;
+        } else {
+            errors.message = errResp.message;
+        }
+
+        ctx.session.errors = errors;
+        return ctx.redirect(entranceMap.passwordReset);
+    }
 
     if (!success) {
-        ctx.session.errors = errApi;
-        return ctx.redirect(entranceMap.passwordReset);
+        throw new Error("API response error");
     }
 
     const uiData = pwResetViewModel.buildPwResetUI(success.email);
@@ -107,14 +121,14 @@ router.post("/:token", async (ctx, next) => {
         throw new Error("form data not found");
     }
 
-    const { success, errForm, errApi } = await pwResetViewModel.resetPassword(formData, token);
+    const { success, errForm, errResp } = await pwResetViewModel.resetPassword(formData, token);
 
     if (!success) {
         const email: string = ctx.session.email;
 
-        const uiData = pwResetViewModel.buildPwResetUI(email, { errForm, errApi });
+        const uiData = pwResetViewModel.buildPwResetUI(email, { errForm, errResp });
 
-        Object.assign(ctx.state. uiData);
+        Object.assign(ctx.state, uiData);
 
         return await next();
     }
