@@ -9,13 +9,13 @@ import {
     accountSerializer,
     IEmail,
     IPasswordReset,
-    IPasswordsFormData,
     IAppHeader,
+    IPasswords,
 } from "../models/reader";
 
 class AccountRepo {
 
-    private async fetchFtcAccount(id: string): Promise<Account> {
+    async fetchFtcAccount(id: string): Promise<Account> {
         const resp = await request
             .get(readerApi.account)
             .set(KEY_USER_ID, id);
@@ -144,9 +144,9 @@ class AccountRepo {
 
     
 
-    async updatePassword(ftcId: string, data: IPasswordsFormData): Promise<boolean> {
+    async updatePassword(ftcId: string, data: IPasswords): Promise<boolean> {
         const resp = await request
-            .post(readerApi.password)
+            .patch(readerApi.password)
             .set(KEY_USER_ID, ftcId)
             .send(data);
 
