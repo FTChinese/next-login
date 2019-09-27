@@ -1,13 +1,8 @@
 import debug from "debug";
 import Router from "koa-router";
 import render from "../util/render";
-import {
-    appHeader,
-} from "./middleware";
 import { 
-    IAppHeader,
     Account,
-    Profile,
     IProfileFormData,
     INameFormData,
     IMobileFormData,
@@ -15,8 +10,10 @@ import {
 } from "../models/reader";
 import {
     profileViewModel, 
-    SavedKey,
 } from "../viewmodels/profile-viewmodel";
+import {
+    SavedKey
+} from "../viewmodels/ui";
 import { 
     profileMap 
 } from "../config/sitemap";

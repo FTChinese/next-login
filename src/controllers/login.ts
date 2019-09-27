@@ -47,10 +47,10 @@ router.post("/", appHeader(), async (ctx, next) => {
     }
 
     const headers: IAppHeader = ctx.state.appHeaders;
-    const { success, errForm, errApi } = await loginViewModel.logIn(formData, headers);
+    const { success, errForm, errResp } = await loginViewModel.logIn(formData, headers);
 
     if (!success) {
-        const uiData = loginViewModel.buildUI(formData, { errForm, errApi });
+        const uiData = loginViewModel.buildUI(formData, { errForm, errResp });
 
         Object.assign(ctx.state, uiData);
 

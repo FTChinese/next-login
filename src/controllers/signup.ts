@@ -39,10 +39,10 @@ router.post("/", appHeader(), async (ctx, next) => {
 
     const headers: IAppHeader = ctx.state.appHeaders;
 
-    const { success, errForm, errApi } = await signUpViewModel.signUp(formData, headers);
+    const { success, errForm, errResp } = await signUpViewModel.signUp(formData, headers);
 
     if (!success) {
-        const uiData = signUpViewModel.buildUI(formData, { errForm, errApi });
+        const uiData = signUpViewModel.buildUI(formData, { errForm, errResp });
 
         Object.assign(ctx.state, uiData);
 
