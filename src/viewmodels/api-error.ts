@@ -1,11 +1,9 @@
 import {
     Response,
 } from "superagent";
-import {
-    jsonMember,
-    jsonObject,
-    TypedJSON,
-} from "typedjson";
+import debug from "debug";
+
+const log = debug("user:api-error");
 
 export const apiInvalidMessages = new Map<string, string>([
     ["email_missing_field", "邮箱不能为空"],
@@ -42,13 +40,22 @@ export interface SuperAgentError extends Error {
     response?: Response; // Network failures, timeouts, and other errors that produce no response will contain no err.status or err.response fields.
 }
 
-@jsonObject
-class Unprocessable {
-    @jsonMember
-    field: string;
+interface IErrorBody {
+    message?: string,
+    error?: {
+        field: string;
+        code: string;
+    }
+}
 
-    @jsonMember
+class Unprocessable {
+    field: string;
     code: string;
+
+    constructor(field: string, code: string) {
+        this.field = field;
+        this.code = code;
+    }
 
     private get key(): string {
         return `${this.field}_${this.code}`;
@@ -70,30 +77,50 @@ class Unprocessable {
     }
 }
 
-@jsonObject
 export class APIError {
-    @jsonMember
     message: string;
-    
-    @jsonMember
     error?: Unprocessable; // Fields for validation failure.
     
-    constructor(msg?: string) {
-        if (msg) {
-            this.message = msg;
+    status?: number;
+    notFound?: boolean;
+    forbidden?: boolean;
+    unauthorized?: boolean;
+
+    constructor(e: SuperAgentError) {
+
+        log("Erro message: %s", e.message);
+
+        // The error's default message.
+        this.message = e.message;
+
+        // Only when the error is a SuperAgentError does it contains a response.
+        // Error passed to here might be anything. We
+        // cannot assume it must be API errors.
+        // The error content cannot be determined at compile type, at least it is not as long as JS/TS concerned.
+        // We could only check each nested field to know the details of the error.
+        if (e.response) {
+            const resp = e.response;
+
+            // `response.body` field always existse.
+            // If API responds not body, it is `{}`.
+            const body: IErrorBody = resp.body;
+
+            log("Error response body: %O", body);
+            
+            if (body.message) {
+                this.message = body.message;
+            }
+
+            // If the error is a 422 Entity Unprocessable.
+            if (body.error) {
+                this.error = new Unprocessable(body.error.field, body.error.code);
+            }
+
+            this.status = resp.status;
+            this.notFound = resp.notFound;
+            this.forbidden = resp.forbidden;
+            this.unauthorized = resp.unauthorized;
         }
     }
 }
 
-const errSerializer = new TypedJSON(APIError);
-
-export function parseApiError(e: SuperAgentError): APIError {
-    // If this is not a superagent error.
-    // Type checking does not work with those
-    // typical js libraries. You must do this.
-    if (!e.response) {
-        return new APIError(e.message);
-    }
-
-    return errSerializer.parse(e.response.text) || new APIError("Sorry, an unknown error occurred.");
-}
