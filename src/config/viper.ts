@@ -2,15 +2,28 @@ import { resolve } from "path";
 import { readFileSync } from "fs";
 import toml from "toml";
 
-interface OAuthClient {
+export interface IOAuthClient {
     client_id: string;
     client_secret: string;
+}
+
+export interface IWxApp {
+    app_id: string;
+    secret: string;
 }
 
 interface Env {
     koa_session: {
         next_user: string;
     };
+    wxapp: {
+        w_ftc: IWxApp;
+    },
+    oauth_client: {
+        fta_dev: IOAuthClient;
+        fta_sandbox: IOAuthClient;
+        fta_prod: IOAuthClient;
+    }
 }
 
 class Viper {
