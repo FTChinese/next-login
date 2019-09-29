@@ -1,7 +1,5 @@
 import { isProduction } from "./viper";
 
-export const subsSandbox = "http://www.ftacademy.cn/api/sandbox";
-
 export const nextApiBase = isProduction
     ? "http://api.ftchinese.com/v1"
     : "http://localhost:8000";
@@ -10,8 +8,11 @@ export const subsApiBase = isProduction
     ? "http://www.ftacademy.cn/api/v1"
     : "http://localhost:8200";
 
+export const subsSandboxBase = "http://www.ftacademy.cn/api/sandbox";
+
 export const KEY_USER_ID = "X-User-Id";
 export const KEY_UNION_ID = "X-Union-Id";
+export const KEY_APP_ID = "X-App-Id";
 
 export const readerApi = {
     oauthCode:    `${nextApiBase}/oauth/code`,
@@ -47,21 +48,15 @@ export const readerApi = {
 };
 
 export const subsApi = {
-    // Receive wechat OAuth2 code here.
-    wxOAuthRedirect: function(sandbox=false): string {
-      const p = "wx/oauth/callback";
-  
-      // If sandbox if true, always use online sandbox url; otherwise use online production url.
-      // localhost is meaningless for wechat oauth.
-      return `${sandbox ? subsSandbox : subsApi}/wx/oauth/callback`;
-    },
+
+    wxRedirect: "/wx/oauth/callback",
+
+    // Send wechat OAuth2 code here
+    wxLogin: `${subsApiBase}/wx/oauth/login`,
   
     wxQueryOrder: function(orderId: string): string {
       return `${subsApiBase}/wxpay/query/${orderId}`;
     },
     
     redeemGiftCard: `${subsApiBase}/gift-card/redeem`,
-    
-    // Send wechat OAuth2 code here
-    wxLogin: `${subsApiBase}/wx/oauth/login`,
-  };
+};
