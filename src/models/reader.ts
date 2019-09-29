@@ -129,7 +129,7 @@ export class Account {
     }
 
     nagVerifyEmail(): boolean {
-        return this.isFtcOnly && !this.isVerified;
+        return this.isFtcOnly() && (!this.isVerified);
     }
 
     get requestVerificationLink(): string {
@@ -142,6 +142,10 @@ export class Account {
 
     get logoutLink(): string {
         return entranceMap.logout;
+    }
+
+    get linkFtc(): string {
+        return accountMap.linkEmail;
     }
 }
 
