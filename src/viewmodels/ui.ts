@@ -127,3 +127,11 @@ export interface UIBase {
     errors?: IErrors;
     alert?: IAlert;
 }
+
+export interface UISingleInput extends UIBase {
+    input: ITextInput;
+}
+
+export interface UIMultiInputs extends UIBase {
+    inputs: Array<ITextInput>;
+}
