@@ -1,7 +1,13 @@
 import request from "superagent";
+import { 
+    TypedJSON 
+} from "typedjson";
 import {
     readerApi,
     KEY_USER_ID,
+    KEY_UNION_ID,
+    subsApi,
+    KEY_APP_ID,
 } from "../config/api";
 import { 
     ICredentials, 
@@ -12,6 +18,14 @@ import {
     IAppHeader,
     IPasswords,
 } from "../models/reader";
+import { 
+    WxSession
+} from "../models/wx-oauth";
+import { 
+    viper 
+} from "../config/viper";
+
+const sessSerializer = new TypedJSON(WxSession);
 
 class AccountRepo {
 
@@ -22,7 +36,7 @@ class AccountRepo {
 
         return accountSerializer.parse(resp.text)!;
     }
-
+    
     private async authenticate(c: ICredentials, app: IAppHeader): Promise<string> {
         const resp = await request
             .post(readerApi.login)
@@ -59,6 +73,24 @@ class AccountRepo {
         return this.fetchFtcAccount(userId);
     }
 
+    async fetchWxSession(code: string, app: IAppHeader): Promise<WxSession> {
+        const resp = await request
+            .post(subsApi.wxLogin)
+            .set(app)
+            .set(KEY_APP_ID, viper.getConfig().wxapp.w_ftc.app_id)
+            .send({ code });
+
+        return sessSerializer.parse(resp.text)!;
+    }
+
+    async fetchWxAccount(unionId: string): Promise<Account> {
+        const resp = await request
+            .get(readerApi.wxAccount)
+            .set(KEY_UNION_ID, unionId);
+
+        return accountSerializer.parse(resp.text)!;
+    }
+
     async emailExists(email: string): Promise<boolean> {
         try {
             const resp = await request
@@ -85,6 +117,22 @@ class AccountRepo {
         const id = await this.createReader(c, app);
 
         return this.fetchFtcAccount(id);
+    }
+
+    async wxSignUp(c: ICredentials, unionId: string, app: IAppHeader): Promise<string> {
+        const resp = await request
+            .post(readerApi.wxSignUp)
+            .set(app)
+            .set(KEY_UNION_ID, unionId)
+            .send(c);
+
+        const body = resp.body;
+
+        if (body.id) {
+            return body.id;
+        }
+
+        throw new Error("Incorrect API response");
     }
 
     async requestPwResetLetter(data: IEmail, app: IAppHeader): Promise<boolean> {
@@ -141,8 +189,6 @@ class AccountRepo {
 
         return resp.noContent;
     }
-
-    
 
     async updatePassword(ftcId: string, data: IPasswords): Promise<boolean> {
         const resp = await request
