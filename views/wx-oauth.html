@@ -4,8 +4,15 @@
 
 <div class="jumbotron">
   <h1>微信授权失败</h1>
-  <p>{{error.message}}</p>
-  <div class="text-center"><a class="btn btn-link" href="{{ sitemap.login }}">返回</a></div>
+  {% if message.state %}
+    <p>{{ message.state }}</p>
+  {% endif %}
+  
+  {% if message.code %}
+    <p>{{ message.code }}</p>
+  {% endif %}
+  
+  <div class="text-center"><a class="btn btn-link" href="{{ loginLink }}">返回</a></div>
 </div>
 
 {% endblock %}
