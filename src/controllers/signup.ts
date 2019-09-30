@@ -2,14 +2,16 @@ import Router from "koa-router";
 import render from "../util/render";
 import {
     signUpViewModel,
-    ISignUpFormData,
 } from "../viewmodels/signup-viewmodel";
 import {
     appHeader,
 } from "./middleware";
 import { 
-    IAppHeader 
+    IAppHeader,
 } from "../models/reader";
+import {
+    ISignUpFormData,
+} from "../viewmodels/validator";
 import { 
     profileMap 
 } from "../config/sitemap";

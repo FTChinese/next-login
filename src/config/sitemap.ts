@@ -25,7 +25,7 @@ export const accountMap = {
     linkEmail:      `${prefix}/account/link/email`,
     linkFtcLogin:   `${prefix}/account/link/login`,
     linkMerging:    `${prefix}/account/link/merge`,
-    linkWx:         `${prefix}/account/link/signup`,
+    linkSignUp:         `${prefix}/account/link/signup`,
     unlinkWx:       `${prefix}/account/unlink`,
 };
 

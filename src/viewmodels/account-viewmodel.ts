@@ -7,18 +7,18 @@ import {
     UIBase, 
     ITextInput,
     IListItem,
-    IFormState,
     IUpdateResult,
     SavedKey,
     getDoneMsg,
 } from "./ui";
 import {
     APIError,
-} from "./api-error";
+} from "./api-response";
 import {
     emailSchema,
     passwordUpdatingSchema,
     buildJoiErrors,
+    IFormState,
 } from "./validator";
 import {
     Account,
@@ -64,10 +64,20 @@ class AccountViewModel {
     private readonly msgNotFound = "用户不存在或服务器错误！";
     private readonly msgPwIncorrect = "当前密码错误";
 
+    async refresh(account: Account): Promise<Account> {
+        switch (account.loginMethod) {
+            case "email":
+                return accountRepo.fetchFtcAccount(account.id);
+
+            case "wechat":
+                return accountRepo.fetchWxAccount(account.unionId!);
+
+            default:
+                throw new Error("unknown account type");
+        }
+    }
 
     async buildAccountUI(account: Account, done?: SavedKey): Promise<UIAccount> {
-
-        const success = await accountRepo.fetchFtcAccount(account.id)
 
         return {
             alert: done
@@ -78,7 +88,7 @@ class AccountViewModel {
                     items: [
                         {
                             label: "登录邮箱",
-                            value: success.email,
+                            value: account.email,
                             link: accountMap.email,
                         },
                         {

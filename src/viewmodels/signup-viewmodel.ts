@@ -3,17 +3,20 @@ import {
     ValidationError,
 } from "@hapi/joi";
 import {
-    ITextInput, IErrors, UIBase, IFormState, IFetchResult,
+    ITextInput,
+    UIMultiInputs,
 } from "./ui";
 import {
     buildJoiErrors,
     signUpSchema,
+    IFormState,
+    ISignUpFormData,
 } from "./validator";
 import {
     APIError,
-} from "./api-error";
+    IFetchResult, 
+} from "./api-response";
 import {
-    ICredentials,
     Account,
     IAppHeader,
 } from "../models/reader";
@@ -26,15 +29,11 @@ import {
     entranceMap,
 } from "../config/sitemap";
 
-export interface ISignUpFormData extends ICredentials {
-    confirmPassword: string;
-}
-
 interface ISignUpResult extends IFetchResult<Account> {
     errForm?: ISignUpFormData,
 }
 
-interface UISignUp extends UIBase {
+interface UISignUp extends UIMultiInputs {
     inputs: Array<ITextInput>;
     loginLink: string;
 }

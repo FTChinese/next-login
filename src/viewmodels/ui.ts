@@ -1,6 +1,6 @@
 import {
     APIError,
-} from "./api-error";
+} from "./api-response";
 
 export type SavedKey = "saved" | "password_saved";
 export type ActionDoneKey = "letter_sent" | "password_reset";
@@ -21,16 +21,6 @@ export function getDoneMsg(key: SavedKey): string {
         default:
             return "";
     }
-}
-
-export interface IFormState<T> {
-    values?: T;
-    errors?: T;
-}
-
-export interface IFetchResult<T> {
-    success?: T;
-    errResp?: APIError;
 }
 
 export interface IUpdateResult<T> {

@@ -37,24 +37,11 @@ class AccountRepo {
         return accountSerializer.parse(resp.text)!;
     }
     
-    private async authenticate(c: ICredentials, app: IAppHeader): Promise<string> {
+    // As the first step of login process, or verify
+    // password when linking accounts.
+    async authenticate(c: ICredentials, app: IAppHeader): Promise<string> {
         const resp = await request
             .post(readerApi.login)
-            .set(app)
-            .send(c);
-
-        const body = resp.body;
-
-        if (body.id) {
-            return body.id;
-        }
-
-        throw new Error("Incorrect api response");
-    }
-
-    private async createReader(c: ICredentials, app: IAppHeader): Promise<string> {
-        const resp = await request
-            .post(readerApi.signup)
             .set(app)
             .send(c);
 
@@ -71,24 +58,6 @@ class AccountRepo {
         const userId = await this.authenticate(c, app);
 
         return this.fetchFtcAccount(userId);
-    }
-
-    async fetchWxSession(code: string, app: IAppHeader): Promise<WxSession> {
-        const resp = await request
-            .post(subsApi.wxLogin)
-            .set(app)
-            .set(KEY_APP_ID, viper.getConfig().wxapp.w_ftc.app_id)
-            .send({ code });
-
-        return sessSerializer.parse(resp.text)!;
-    }
-
-    async fetchWxAccount(unionId: string): Promise<Account> {
-        const resp = await request
-            .get(readerApi.wxAccount)
-            .set(KEY_UNION_ID, unionId);
-
-        return accountSerializer.parse(resp.text)!;
     }
 
     async emailExists(email: string): Promise<boolean> {
@@ -113,12 +82,48 @@ class AccountRepo {
         }
     }
 
+    private async createReader(c: ICredentials, app: IAppHeader): Promise<string> {
+        const resp = await request
+            .post(readerApi.signup)
+            .set(app)
+            .send(c);
+
+        const body = resp.body;
+
+        if (body.id) {
+            return body.id;
+        }
+
+        throw new Error("Incorrect api response");
+    }
+
     async signUp(c: ICredentials, app: IAppHeader): Promise<Account> {
         const id = await this.createReader(c, app);
 
         return this.fetchFtcAccount(id);
     }
 
+    async fetchWxSession(code: string, app: IAppHeader): Promise<WxSession> {
+        const resp = await request
+            .post(subsApi.wxLogin)
+            .set(app)
+            .set(KEY_APP_ID, viper.getConfig().wxapp.w_ftc.app_id)
+            .send({ code });
+
+        return sessSerializer.parse(resp.text)!;
+    }
+
+    // Fetch Wechat account by union id.
+    async fetchWxAccount(unionId: string): Promise<Account> {
+        const resp = await request
+            .get(readerApi.wxAccount)
+            .set(KEY_UNION_ID, unionId);
+
+        return accountSerializer.parse(resp.text)!;
+    }
+
+    // Create an account for a wechat-logged-in user,
+    // and returns the account's uuid.
     async wxSignUp(c: ICredentials, unionId: string, app: IAppHeader): Promise<string> {
         const resp = await request
             .post(readerApi.wxSignUp)

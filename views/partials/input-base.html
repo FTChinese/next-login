@@ -19,6 +19,9 @@
     {% if input.required %}
       required
     {% endif %}
+    {% if input.readonly %}
+    readonly
+    {% endif %}
     {% if input.datalist %}
     list="{{input.datalist.id}}"
     {% endif %}>

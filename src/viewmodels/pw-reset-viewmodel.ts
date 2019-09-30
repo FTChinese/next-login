@@ -6,20 +6,19 @@ import {
     ITextInput,
     IActionDone,
     UIBase,
-    IErrors,
     ActionDoneKey,
-    IFormState,
     IUpdateResult,
-    IFetchResult,
 } from "./ui";
 import {
     buildJoiErrors,
     emailSchema,
     passwordsSchema,
+    IFormState,
 } from "./validator";
 import {
     APIError,
-} from "./api-error";
+    IFetchResult,
+} from "./api-response";
 import {
     IEmail,
     IAppHeader,

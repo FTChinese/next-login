@@ -7,20 +7,11 @@
         <h5>登录邮箱</h5>
         <form method="post">
           <div class="form-group">
-            <input class="form-control"
-            id="email"
-            type="email" 
-            name="email" 
-            value="{{email}}"
-            placeholder="电子邮箱"
-            maxlength="64"
-            required>
+
+            {% include "partials/input-base.html" %}
       
-            {% if errors.email %}
-              <div class="form-errortext">{{errors.email}}</div>
-            {% endif %}
           </div>
-      
+          
           <button 
             type="submit" 
             class="btn btn-primary btn-block">

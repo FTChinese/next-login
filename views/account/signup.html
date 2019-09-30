@@ -9,36 +9,11 @@
       <p>该邮箱尚未注册FT中文网账号，请设置密码创建账号</p>
 
       <form method="post">
-        <div class="form-group">
-          <label for="email">邮箱</label>
-      
-          <input class="form-control"
-            id="email"
-            type="email"
-            name="credentials[email]"
-            value="{{credentials.email}}"
-            placeholder="电子邮箱"
-            readonly
-            required>
-      
-          {% if errors.email %}
-            <div class="form-errortext">{{errors.email}}</div>
-          {% endif %}
-        </div>
-      
-        <div class="form-group">
-          <label for="password">密码</label>
-          <input class="form-control"
-          id="password"
-          type="password"
-          name="credentials[password]"
-          placeholder="最少8个字符"
-          required>
-      
-          {% if errors.password %}
-            <div class="form-errortext">{{errors.password}}</div>
-          {% endif %}
-        </div>
+        {% for input in inputs %}
+          <div class="form-group">
+            {% include "partials/input-base.html" %}
+          </div>
+        {% endfor %}
       
         <button 
           class="btn btn-block btn-primary" type="submit"

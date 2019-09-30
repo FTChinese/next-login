@@ -2,10 +2,12 @@ import {
     object,
     string,
     ref,
-    boolean,
     ValidationErrorItem,
     ValidationOptions,
 } from "@hapi/joi"
+import { 
+    ICredentials 
+} from "../models/reader";
 
 export function buildJoiErrors(details: ValidationErrorItem[]): object {
     const errors: {[index: string]: string} = {};
@@ -16,6 +18,11 @@ export function buildJoiErrors(details: ValidationErrorItem[]): object {
     }
 
     return errors;
+}
+
+export interface IFormState<T> {
+    values?: T;
+    errors?: T;
 }
 
 export const joiOptions: ValidationOptions = {
@@ -110,6 +117,10 @@ export const loginSchema = emailSchema.keys({
 export const signUpSchema = passwordsSchema.keys({
     email,
 });
+
+export interface ISignUpFormData extends ICredentials {
+    confirmPassword: string;
+}
 
 export const passwordUpdatingSchema = passwordsSchema.keys({
     // Legacy password.

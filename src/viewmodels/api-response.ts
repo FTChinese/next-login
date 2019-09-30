@@ -37,7 +37,7 @@ export const apiInvalidMessages = new Map<string, string>([
 // Why those js-maniacs cannot define data types clearly and riggedly?
 export interface SuperAgentError extends Error {
     status: number;
-    response?: Response; // Network failures, timeouts, and other errors that produce no response will contain no err.status or err.response fields.
+    response: Response; // Network failures, timeouts, and other errors that produce no response will contain no err.status or err.response fields.
 }
 
 interface IErrorBody {
@@ -77,6 +77,14 @@ class Unprocessable {
     }
 }
 
+function isString(x: any): x is string {
+    return typeof x == "string";
+}
+
+function isRequestError(e: SuperAgentError | Error): e is SuperAgentError {
+    return (<SuperAgentError>e).response !== undefined;
+}
+
 export class APIError {
     message: string;
     error?: Unprocessable; // Fields for validation failure.
@@ -86,41 +94,48 @@ export class APIError {
     forbidden?: boolean;
     unauthorized?: boolean;
 
-    constructor(e: SuperAgentError) {
+    constructor(e: SuperAgentError | Error | string) {
+        if (isString(e)) {
+            this.message = e;
+            return;
+        }
 
-        log("Erro message: %s", e.message);
-
-        // The error's default message.
-        this.message = e.message;
+        if (!isRequestError(e)) {
+            this.message = e.message;
+            return;
+        }
 
         // Only when the error is a SuperAgentError does it contains a response.
         // Error passed to here might be anything. We
         // cannot assume it must be API errors.
         // The error content cannot be determined at compile type, at least it is not as long as JS/TS concerned.
         // We could only check each nested field to know the details of the error.
-        if (e.response) {
-            const resp = e.response;
 
-            // `response.body` field always existse.
-            // If API responds not body, it is `{}`.
-            const body: IErrorBody = resp.body;
+        const resp = e.response;
 
-            log("Error response body: %O", body);
-            
-            if (body.message) {
-                this.message = body.message;
-            }
+        // `response.body` field always existse.
+        // If API responds not body, it is `{}`.
+        const body: IErrorBody = resp.body;
 
-            // If the error is a 422 Entity Unprocessable.
-            if (body.error) {
-                this.error = new Unprocessable(body.error.field, body.error.code);
-            }
-
-            this.status = resp.status;
-            this.notFound = resp.notFound;
-            this.forbidden = resp.forbidden;
-            this.unauthorized = resp.unauthorized;
+        log("Error response body: %O", body);
+        
+        if (body.message) {
+            this.message = body.message;
         }
+
+        // If the error is a 422 Entity Unprocessable.
+        if (body.error) {
+            this.error = new Unprocessable(body.error.field, body.error.code);
+        }
+
+        this.status = resp.status;
+        this.notFound = resp.notFound;
+        this.forbidden = resp.forbidden;
+        this.unauthorized = resp.unauthorized;
     }
 }
 
+export interface IFetchResult<T> {
+    success?: T;
+    errResp?: APIError;
+}

@@ -7,55 +7,26 @@
     <div class="col-md-8">
       <h5 class="text-center">验证</h5>
 
-      {% if errors.credentials %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-          <span>{{errors.credentials}}</span>
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-      {% endif %}
+      {% include "partials/alert-danger.html" %}
 
       <p>该邮箱已经注册了FT中文网账号，验证密码后可以合并账号</p>
-      <form method="post" action="{{ sitemap.bindLogin }}">
-        <div class="form-group">
-          <label for="email">邮箱</label>
-          <input class="form-control"
-            id="email"
-            type="email"
-            name="credentials[email]"
-            value="{{credentials.email}}"
-            placeholder="电子邮箱"
-            required
-            readonly>
-    
-          {% if errors.email %}
-            <div class="form-errortext">{{errors.email}}</div>
-          {% endif %}
-        </div>
-      
-        <div class="form-group">
-          <label for="password">密码</label>
-          <input class="form-control"
-            id="password"
-            type="password"
-            name="credentials[password]"
-            placeholder="密码"
-            required>
-    
-          {% if errors.password %}
-            <div class="form-errortext">{{errors.password}}</div>
-          {% endif %}
-        </div>
+
+      <form method="post">
+
+        {% for input in inputs %}
+          <div class="form-group">
+            {% include "partials/input-base.html" %}
+          </div>
+        {% endfor %}
         
         <button
           class="btn btn-block btn-primary" 
           type="submit"
-          data-disable-with="正在登录...">登录</button>
+          data-disable-with="正在验证...">验证</button>
       </form>
 
       <div class="mt-3">
-        <a target="_blank" href="{{sitemap.passwordReset}}">忘记密码?</a>
+        <a target="_blank" href="{{ pwResetLink }}">忘记密码?</a>
       </div>
     </div>
   </div>

@@ -1,9 +1,9 @@
 import debug from "debug";
 import { 
-    Middleware 
-} from "Koa";
+    Middleware,
+} from "koa";
 import { 
-    Session 
+    Session
 } from "koa-session"
 import { 
     isProduction 
@@ -149,6 +149,14 @@ export function noCache(): Middleware {
     }
 }
 
+declare module "koa" {
+    interface Context {
+        state: {
+            appHeaders: IAppHeader;
+        }
+    }
+}
+
 export function appHeader(): Middleware {
     return async function(ctx, next) {
         const headers: IAppHeader = {
@@ -163,3 +171,5 @@ export function appHeader(): Middleware {
         await next();
     }
 }
+
+

@@ -4,13 +4,15 @@ import {
     TypedJSON,
 } from "typedjson";
 import {
-    genders
+    genders,
+    memberTypes,
 } from "./localization";
 import {
     profileMap,
     accountMap,
     entranceMap,
 } from "../config/sitemap";
+import { DateTime } from "luxon";
 
 export interface ICredentials {
     email: string;
@@ -59,6 +61,51 @@ export class Membership {
 
     @jsonMember
     vip?: boolean;
+
+    get tierCN(): string {
+        switch (this.tier) {
+            case "standard":
+                return memberTypes.standard;
+
+            case "premium":
+                return memberTypes.premium;
+
+            default:
+                return memberTypes.zeroMember;
+        }
+    }
+
+    get isMember(): boolean {
+        return (!!this.tier) && (!!this.cycle) && (!!this.expireDate);
+    }
+
+    get remainingDays(): number | null {
+
+        if (!this.expireDate) {
+            return null;
+        }
+
+        const expireOn = DateTime.fromISO(this.expireDate);
+        const today = DateTime.local().startOf("day");
+
+        const diffInDays = expireOn.diff(today, "days");
+
+        return diffInDays.toObject().days || null;
+    }
+
+    get isExpired(): boolean {
+        const remains = this.remainingDays;
+
+        if (!remains) {
+            return true;
+        }
+
+        if (remains > 0) {
+            return false;
+        }
+
+        return true;
+    }
 }
 
 export interface IAccountId {
@@ -146,6 +193,10 @@ export class Account {
 
     get linkFtc(): string {
         return accountMap.linkEmail;
+    }
+
+    isEqual(other: Account): boolean {
+        return this.id === other.id;
     }
 }
 

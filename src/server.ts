@@ -17,7 +17,6 @@ import session from "koa-session";
 import serve from "koa-static";
 const pkg = require("../package.json");
 
-import render from "./util/render";
 import {
     env,
     checkSession,

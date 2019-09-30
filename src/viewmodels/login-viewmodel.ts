@@ -5,16 +5,16 @@ import {
 import {
     ITextInput,
     UIBase,
-    IFormState,
-    IFetchResult,
 } from "./ui";
 import {
     loginSchema,
     buildJoiErrors,
+    IFormState,
 } from "./validator";
 import {
     APIError,
-} from "./api-error";
+    IFetchResult,
+} from "./api-response";
 import {
     ICredentials,
     Account,
