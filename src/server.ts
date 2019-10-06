@@ -28,6 +28,7 @@ import signUp from "./controllers/signup";
 import forgotPassword from "./controllers/forgot-password";
 import profile from "./controllers/profile";
 import account from "./controllers/account";
+import starred from "./controllers/starred";
 
 import { 
     entranceMap,
@@ -83,6 +84,8 @@ router.use("/password-reset", checkSession(false), forgotPassword);
 
 router.use("/profile", checkSession(), profile);
 router.use("/account", checkSession(), account);
+// router.use('/subscription', checkSession(), subscription);
+router.use("/starred", checkSession(), starred);
 
 app.use(router.routes());
 

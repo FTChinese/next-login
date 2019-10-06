@@ -28,9 +28,6 @@ import {
 import { 
     isProduction,
 } from "../config/viper";
-import { 
-    accountRepo 
-} from "../repository/account";
 
 const router = new Router();
 

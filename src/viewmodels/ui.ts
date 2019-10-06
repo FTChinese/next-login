@@ -1,7 +1,3 @@
-import {
-    APIError,
-} from "./api-response";
-
 export type SavedKey = "saved" | "password_saved";
 export type ActionDoneKey = "letter_sent" | "password_reset";
 

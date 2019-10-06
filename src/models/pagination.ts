@@ -14,8 +14,9 @@ export class Paging {
         this.itemsPerPage = perPage;
     }
 
-    setSize(s: number) {
+    setSize(s: number): Paging {
         this.size = s;
+        return this;
     }
 
     get previousPage(): number {
