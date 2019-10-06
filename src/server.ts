@@ -28,6 +28,8 @@ import signUp from "./controllers/signup";
 import forgotPassword from "./controllers/forgot-password";
 import profile from "./controllers/profile";
 import account from "./controllers/account";
+import verification from "./controllers/verification";
+import subscription from "./controllers/subscription";
 import starred from "./controllers/starred";
 
 import { 
@@ -79,12 +81,12 @@ router.get("/logout", checkSession(false), async (ctx, next) => {
     ctx.redirect(entranceMap.login);
     return;
 });
-// router.use("/verify", checkSession(false), verify);
+router.use("/verify", checkSession(false), verification);
 router.use("/password-reset", checkSession(false), forgotPassword);
 
 router.use("/profile", checkSession(), profile);
 router.use("/account", checkSession(), account);
-// router.use('/subscription', checkSession(), subscription);
+router.use('/subscription', checkSession(), subscription);
 router.use("/starred", checkSession(), starred);
 
 app.use(router.routes());

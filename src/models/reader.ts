@@ -148,7 +148,11 @@ export class Account {
     @jsonMember
     membership: Membership;
 
-    
+    withVerified(): Account {
+        this.isVerified = true;
+        return this;
+    }
+
     getDisplayName(): string {
         if (this.userName) {
             return this.userName;

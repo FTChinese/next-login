@@ -107,7 +107,7 @@ class AccountViewModel {
                                 : "",
                             link: account.isLinked()
                                 ? accountMap.unlinkWx
-                                : accountMap.linkEmail,
+                                : entranceMap.wxLogin,
                             linkText: account.isLinked()
                                 ? "解除绑定"
                                 : "尚未绑定"
