@@ -5,7 +5,7 @@ let cache;
 const sass = require('gulp-sass');
 const sourcemaps = require('gulp-sourcemaps');
 
-const tsProject = ts.createProject("tsconfig.json");
+const tsProject = ts.createProject("./client/tsconfig.json");
 
 const tsOutDir = "build/js";
 const jsInputFile = "build/js/main.js";
