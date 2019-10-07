@@ -11,17 +11,19 @@ import {
     appHeader,
 } from "./middleware";
 import { 
-    ICredentials, IAppHeader 
+    ICredentials, 
+    IAppHeader,
+    Account,
 } from "../models/reader";
 import { 
-    profileMap 
+    profileMap,
+    accountMap,
 } from "../config/sitemap";
 import { 
     wxLoginViewModel 
 } from "../viewmodels/wxlogin-viewmodel";
 import { 
-    ICallbackParams, 
-    ISessionState 
+    ICallbackParams, IOAuthSession, 
 } from "../models/wx-oauth";
 import { accountRepo } from "../repository/account";
 
@@ -82,10 +84,12 @@ router.post("/", appHeader(), async (ctx, next) => {
  * GET /login/wechat
  */
 router.get("/wechat", async (ctx, next) => {
-    const data = wxLoginViewModel.codeRequest();
+    const account: Account | undefined = ctx.session.user;
+
+    const data = wxLoginViewModel.codeRequest(account);
 
     // State that will be used later to validate callback query parameters.
-    ctx.session.state = data.state;
+    ctx.session.wx_oauth = data.session;
 
     // Redirect to wechat api.
     ctx.redirect(data.redirectUrl);
@@ -123,26 +127,61 @@ router.get("/wechat/test", appHeader(), async (ctx, next) => {
 router.get("/wechat/callback", appHeader(), async(ctx, next) => {
     const query: ICallbackParams = ctx.request.query;
 
-    const sessState: ISessionState | undefined = ctx.session.state;
+    const oauthSess: IOAuthSession | undefined = ctx.session.wx_oauth;
+    if (isProduction) {
+        delete ctx.session.wx_oauth;
+    };
 
-    const failure = wxLoginViewModel.validateCallback(query, sessState);
+    const headers: IAppHeader = ctx.state.appHeaders;
+    const localAccount: Account | undefined = ctx.session.user;
 
-    if (failure) {
+    const { success, errQuery, errResp } = await wxLoginViewModel.getApiSession(query, headers, oauthSess);
+
+    if (!success) {
+        const uiData = wxLoginViewModel.buildUI(
+            { errQuery, errResp},
+            localAccount,
+        );
+
+        Object.assign(ctx.state, uiData);
+
         return await next();
     }
 
-    const headers: IAppHeader = ctx.state.appHeaders;
-    const account = await wxLoginViewModel.logIn(query.code!, headers);
+    if (!oauthSess) {
+        throw new Error("wechat oauth session not found");
+    }
+
+    if (oauthSess.usage == "link") {
+        
+        if (!localAccount || localAccount.loginMethod == "wechat") {
+            ctx.status = 404;
+            return;
+        }
+
+        // Save unionId to `ctx.session.uid`.
+        ctx.session.uid = success.unionId;
+        return ctx.redirect(accountMap.linkMerging);
+    }
+
+    const result = await wxLoginViewModel.getAccount(success);
     
-    ctx.session.user = account;
+    if (!result.success) {
+        const uiData = wxLoginViewModel.buildUI(
+            { errResp },
+            localAccount,
+        );
+
+        Object.assign(ctx.state, uiData);
+
+        return await next();
+    }
+
+    ctx.session.user = result.success;
 
     ctx.redirect(profileMap.base);
 }, async (ctx, next) => {
     ctx.body = await render("wx-oauth.html", ctx.state);
-
-    if (isProduction) {
-        delete ctx.session.state;
-    };
 });
 
 export default router.routes();
