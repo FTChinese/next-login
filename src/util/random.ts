@@ -69,3 +69,5 @@ export class Random {
 
 export const base64StdEncoding = new Base64StdEncoding();
 export const base64URLEncoding = new Base64URLEncoding();
+
+export const pool = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

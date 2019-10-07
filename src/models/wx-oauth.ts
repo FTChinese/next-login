@@ -26,8 +26,13 @@ import {
     unixNow,
 } from "../util/time";
 import {
+    pool,
+} from "../util/random";
+import {
     Account,
 } from "./reader";
+
+const chance = new Chance();
 
 export interface ICodeRequestParams extends Dictionary<string> {
     appid: string;
@@ -55,7 +60,7 @@ export interface IOAuthSession {
     usage: WxOAuthUsage;
 }
 
-const chance = new Chance();
+
 
 export class OAuthClient {
     private app: IWxApp = viper.getConfig().wxapp.w_ftc;
@@ -77,7 +82,7 @@ export class OAuthClient {
     generateSession(account?: Account): IOAuthSession {
         return {
             state: chance.string({
-                pool: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+                pool,
                 length: 12,
             }),
             created: unixNow(),

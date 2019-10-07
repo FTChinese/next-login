@@ -140,7 +140,7 @@ export class Account {
     avatarUrl?: string;
 
     @jsonMember
-    loginMethod?: LoginMethod;
+    loginMethod: LoginMethod;
 
     @jsonMember
     wechat: Wechat;
