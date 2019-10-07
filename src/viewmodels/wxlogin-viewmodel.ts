@@ -1,7 +1,8 @@
 import {
-    ISessionState,
     ICallbackParams,
     OAuthClient,
+    IOAuthSession,
+    WxSession,
 } from "../models/wx-oauth";
 import {
     Account,
@@ -10,23 +11,24 @@ import {
 import {
     isExpired,
 } from "../util/time";
-import { entranceMap } from "../config/sitemap";
+import { entranceMap, accountMap } from "../config/sitemap";
 import { accountRepo } from "../repository/account";
+import { UIBase } from "./ui";
+import { IFetchResult, APIError } from "./api-response";
+import { IFormState } from "./validator";
 
-interface ICodeData {
-    state: ISessionState;
+interface IOAuthCodeRequest {
+    session: IOAuthSession,
     redirectUrl: string;
 }
 
-// Validation errors.
-interface ICallbackFailure {
-    code?: string;
-    state?: string;
+interface IOAuthResult extends IFetchResult<WxSession> {
+    errQuery?: ICallbackParams;
 }
 
-interface UIInvalidCallback {
-    message: ICallbackFailure;
-    loginLink: string;
+interface UIFailure extends UIBase {
+    reason?: ICallbackParams;
+    link: string;
 }
 
 class WxLoginViewModel {
@@ -37,65 +39,116 @@ class WxLoginViewModel {
     private sessionNotFound = "无效的session";
     private expired = "状态已失效";
 
-    codeRequest(): ICodeData {
+    // Build redirect url and the session data to be persisted on client-side.
+    codeRequest(account?: Account): IOAuthCodeRequest {
         const client = new OAuthClient();
 
-        const state = client.generateState();
+        const sess = client.generateSession(account)
 
         return {
-            state,
-            redirectUrl: client.buildCodeUrl(state.v),
+            session: sess,
+            redirectUrl: client.buildCodeUrl(sess.state),
         };
     }
 
-    validateCallback(params: ICallbackParams, sessState?: ISessionState): ICallbackFailure | null {
-        if (!sessState) {
+    /**
+     * @description Validate callback data.
+     * Treat the query parameter as form inputs.
+     */
+    validate(params: ICallbackParams, sess?: IOAuthSession): IFormState<ICallbackParams> {
+        
+        if (!sess) {
             return {
-                state: this.sessionNotFound,
+                errors: {
+                    state: this.sessionNotFound,
+                }
             };
         }
 
         if (!params.state) {
             return {
-                state: this.missingParam,
+                errors: {
+                    state: this.missingParam,
+                }
             };
         }
 
         if (!params.code) {
             return {
-                code: this.denied,
+                errors: {
+                    code: this.denied,
+                },
             };
         }
 
-        if (params.state != sessState.v) {
+        params.state = params.state.trim();
+        params.code = params.code.trim();
+
+        if (params.state != sess.state) {
             return {
-                state: this.stateMismatched,
+                errors: {
+                    state: this.stateMismatched,
+                },
             };
         }
 
         // The session is valid for 5 minutes
-        if (isExpired(sessState.t, 5 * 60)) {
+        if (isExpired(sess.created, 5 * 60)) {
             return {
-                state: this.expired,
+                errors: {
+                    state: this.expired,
+                },
             };
         }
 
-        return null;
+        return {
+            values: params,
+        };
     }
 
-    buildInvalidCbUi(result: ICallbackFailure): UIInvalidCallback {
-        return {
-            message: result,
-            loginLink: entranceMap.login,
+    async getApiSession(params: ICallbackParams, app: IAppHeader, sess?: IOAuthSession): Promise<IOAuthResult> {
+        const { values, errors } = this.validate(params, sess);
+        if (!values) {
+            return {
+                errQuery: errors,
+            };
+        }
+
+        try {
+            const wxSession = await accountRepo.fetchWxSession(values.code!, app);
+            return {
+                success: wxSession,
+            };
+        } catch (e) {
+            return {
+                errResp: new APIError(e),
+            };
         }
     }
 
-    async logIn(code: string, app: IAppHeader): Promise<Account> {
-        const wxSession = await accountRepo.fetchWxSession(code, app);
+    buildUI(result: IOAuthResult, account?: Account): UIFailure {
+        return {
+            errors: result.errResp
+                ? { message: result.errResp.message }
+                : undefined,
+            reason: result.errQuery,
+            link: account ? accountMap.base : entranceMap.login,
+        };
+    }
 
-        const account = await accountRepo.fetchWxAccount(wxSession.unionId);
+    async getAccount(wxSession: WxSession): Promise<IFetchResult<Account>> {
+        try {
 
-        return account;
+            const account = await accountRepo.fetchWxAccount(wxSession.unionId);
+    
+            return {
+                success: account,
+            };
+        } catch (e) {
+            return {
+                errResp: new APIError(e),
+            };
+        }
     }
 }
 
