@@ -29,6 +29,9 @@ const sessSerializer = new TypedJSON(WxSession);
 
 class AccountRepo {
 
+    /**
+     * @description Fetch an ftc account by uuid.
+     */
     async fetchFtcAccount(id: string): Promise<Account> {
         const resp = await request
             .get(readerApi.account)
@@ -37,8 +40,9 @@ class AccountRepo {
         return accountSerializer.parse(resp.text)!;
     }
     
-    // As the first step of login process, or verify
-    // password when linking accounts.
+    /**
+     * @description As the first step of login process, or verify password when linking accounts.
+     */
     async authenticate(c: ICredentials, app: IAppHeader): Promise<string> {
         const resp = await request
             .post(readerApi.login)
@@ -52,12 +56,6 @@ class AccountRepo {
         }
 
         throw new Error("Incorrect api response");
-    }
-
-    async login(c: ICredentials, app: IAppHeader): Promise<Account> {
-        const userId = await this.authenticate(c, app);
-
-        return this.fetchFtcAccount(userId);
     }
 
     async emailExists(email: string): Promise<boolean> {
@@ -82,7 +80,7 @@ class AccountRepo {
         }
     }
 
-    private async createReader(c: ICredentials, app: IAppHeader): Promise<string> {
+    async createReader(c: ICredentials, app: IAppHeader): Promise<string> {
         const resp = await request
             .post(readerApi.signup)
             .set(app)
@@ -95,12 +93,6 @@ class AccountRepo {
         }
 
         throw new Error("Incorrect api response");
-    }
-
-    async signUp(c: ICredentials, app: IAppHeader): Promise<Account> {
-        const id = await this.createReader(c, app);
-
-        return this.fetchFtcAccount(id);
     }
 
     async fetchWxSession(code: string, app: IAppHeader): Promise<WxSession> {
