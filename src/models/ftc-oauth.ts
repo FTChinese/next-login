@@ -12,10 +12,10 @@ const chance = new Chance();
 
 // Request data send from client.
 export interface IAuthorizeRequest {
-    responst_type: "code";
-    client_id: string;
-    redirect_uri: string;
-    state: string;
+    responst_type?: "code";
+    client_id?: string;
+    redirect_uri?: string;
+    state?: string;
 }
 
 // The request data saved to session that can be used later.
@@ -40,8 +40,8 @@ export class OAuthServer {
     private readonly state: string;
 
     constructor(req: IAuthorizeRequest) {
-        this.redirectUri = req.redirect_uri;
-        this.state = req.state;
+        this.redirectUri = req.redirect_uri!;
+        this.state = req.state!;
     }
 
     /**
