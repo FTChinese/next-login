@@ -25,6 +25,9 @@ import {
 import {
     unixNow,
 } from "../util/time";
+import {
+    Account,
+} from "./reader";
 
 export interface ICodeRequestParams extends Dictionary<string> {
     appid: string;
@@ -39,13 +42,17 @@ export interface ICallbackParams {
     state?: string;
 }
 
+// The purpose of initiating wechat
+// oauth workflow.
+export type WxOAuthUsage = "login" | "link";
+
 /**
- * Store wechat login state code and the creation time
- * in session so that we could verify the callback data.
+ * @description Client-side session data.
  */
-export interface ISessionState {
-    v: string;
-    t: number;
+export interface IOAuthSession {
+    state: string;
+    created: number;
+    usage: WxOAuthUsage;
 }
 
 const chance = new Chance();
@@ -67,13 +74,14 @@ export class OAuthClient {
         return `${this.subsApiBaseUrl}${subsApi.wxRedirect}`;
     }
 
-    generateState(): ISessionState {
+    generateSession(account?: Account): IOAuthSession {
         return {
-            v: chance.string({
+            state: chance.string({
                 pool: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
                 length: 12,
             }),
-            t: unixNow(),
+            created: unixNow(),
+            usage: account ? "link" : "login",
         };
     }
 
@@ -113,3 +121,6 @@ export class WxSession {
         return expireAt > DateTime.utc();
     }
 }
+
+
+
