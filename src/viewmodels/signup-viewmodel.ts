@@ -110,7 +110,9 @@ class SignUpViewModel {
         }
 
         try {
-            const account = await accountRepo.signUp(values, app);
+            const userId = await accountRepo.createReader(values, app);
+
+            const account = await accountRepo.fetchFtcAccount(userId);
 
             return {
                 success: account,
