@@ -304,6 +304,11 @@ router.post("/link/signup", appHeader(), async (ctx, next) => {
     ctx.body = await render("account/signup.html", ctx.state);
 });
 
+/**
+ * @description Redirection target from `/login/callback`
+ * or `/account/link/login`.
+ * `ctx.session.uid: string` is required.
+ */
 router.get("/link/merge", async (ctx, next) => {
 
     const account: Account = ctx.session.user;
