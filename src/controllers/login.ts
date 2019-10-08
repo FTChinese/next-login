@@ -26,6 +26,10 @@ import {
     ICallbackParams, IOAuthSession, 
 } from "../models/wx-oauth";
 import { accountRepo } from "../repository/account";
+import { 
+    oauthServer,
+    IOAuthSession as IFtcOAuthSession,
+ } from "../models/ftc-oauth";
 
 const router = new Router();
 
@@ -127,7 +131,7 @@ router.get("/wechat/test", appHeader(), async (ctx, next) => {
 router.get("/wechat/callback", appHeader(), async(ctx, next) => {
     const query: ICallbackParams = ctx.request.query;
 
-    const oauthSess: IOAuthSession | undefined = ctx.session.wx_oauth;
+    const wxOAuthSess: IOAuthSession | undefined = ctx.session.wx_oauth;
     if (isProduction) {
         delete ctx.session.wx_oauth;
     };
@@ -135,7 +139,7 @@ router.get("/wechat/callback", appHeader(), async(ctx, next) => {
     const headers: IAppHeader = ctx.state.appHeaders;
     const localAccount: Account | undefined = ctx.session.user;
 
-    const { success, errQuery, errResp } = await wxLoginViewModel.getApiSession(query, headers, oauthSess);
+    const { success, errQuery, errResp } = await wxLoginViewModel.getApiSession(query, headers, wxOAuthSess);
 
     if (!success) {
         const uiData = wxLoginViewModel.buildUI(
@@ -148,11 +152,11 @@ router.get("/wechat/callback", appHeader(), async(ctx, next) => {
         return await next();
     }
 
-    if (!oauthSess) {
+    if (!wxOAuthSess) {
         throw new Error("wechat oauth session not found");
     }
 
-    if (oauthSess.usage == "link") {
+    if (wxOAuthSess.usage == "link") {
         
         if (!localAccount || localAccount.loginMethod == "wechat") {
             ctx.status = 404;
@@ -166,6 +170,7 @@ router.get("/wechat/callback", appHeader(), async(ctx, next) => {
 
     const result = await wxLoginViewModel.getAccount(success);
     
+    // Show API request errors.
     if (!result.success) {
         const uiData = wxLoginViewModel.buildUI(
             { errResp },
@@ -178,6 +183,14 @@ router.get("/wechat/callback", appHeader(), async(ctx, next) => {
     }
 
     ctx.session.user = result.success;
+
+    // This indicates user is trying to login to ftacademy, so redirect user to OAuth page.
+    // Added by /authorize
+    if (ctx.session.oauth) {
+        const oauthSession: IFtcOAuthSession = ctx.session.oauth;
+
+        return ctx.redirect(oauthServer.buildAuthorizeUrl(oauthSession));
+    }
 
     ctx.redirect(profileMap.base);
 }, async (ctx, next) => {
