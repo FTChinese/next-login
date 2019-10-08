@@ -5,7 +5,7 @@
   {% if invalid %}
     <div class="container">
       <h4>出错了！</h4>
-      <p>{{ invalid.error_description }}</p>
+      <p>{{ invalid }}</p>
     </div>
   {% else %}
   <div class="container text-center">
@@ -17,20 +17,27 @@
       </div>
 
       <div class="d-flex justify-content-around">
+
         <form action="" method="post">
-          <input type="hidden" name="approve" value="true">
+          <input type="hidden" 
+            name="approve" 
+            value="true">
           <button 
             type="submit"
             class="btn btn-primary"
             data-disable-with="授权..."
             >确认</button>
         </form>
+
         <form action="" method="post">
-          <input type="hidden" name="approve" value="false">
+          <input type="hidden" 
+            name="approve" 
+            value="false">
           <button
             type="submit"
             class="btn btn-outline-secondary">取消</button>
         </form>
+
       </div>
   </div>
   {% endif %}
