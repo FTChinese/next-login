@@ -15,6 +15,7 @@ import {
 import { 
     profileMap 
 } from "../config/sitemap";
+import { IOAuthSession, oauthServer } from "../models/ftc-oauth";
 
 const router = new Router();
 
@@ -53,6 +54,15 @@ router.post("/", appHeader(), async (ctx, next) => {
 
     ctx.session.user = success;
 
+    if (ctx.session.oauth) {
+        const oauthSession: IOAuthSession = ctx.session.oauth;
+
+        ctx.redirect(oauthServer.buildAuthorizeUrl(oauthSession));
+
+        delete ctx.session.oauth;
+        
+        return;
+    }
     return ctx.redirect(profileMap.base);
 
 }, async (ctx, next) => {

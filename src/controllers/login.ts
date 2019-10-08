@@ -189,7 +189,10 @@ router.get("/wechat/callback", appHeader(), async(ctx, next) => {
     if (ctx.session.oauth) {
         const oauthSession: IFtcOAuthSession = ctx.session.oauth;
 
-        return ctx.redirect(oauthServer.buildAuthorizeUrl(oauthSession));
+        ctx.redirect(oauthServer.buildAuthorizeUrl(oauthSession));
+
+        delete ctx.session.oauth;
+        return;
     }
 
     ctx.redirect(profileMap.base);
