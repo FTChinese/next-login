@@ -16,6 +16,7 @@ interface ICodeResp {
 }
 
 class OAuthRepo {
+    
     async requestCode(params: IAuthorizeRequest, account: Account): Promise<string> {
         const data: IReqBody = {
             clientId: params.client_id,
