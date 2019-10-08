@@ -57,7 +57,7 @@ class Unprocessable {
         this.code = code;
     }
 
-    private get key(): string {
+    get key(): string {
         return `${this.field}_${this.code}`;
     }
 
