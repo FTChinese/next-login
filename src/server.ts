@@ -24,6 +24,7 @@ import {
     handleError,
 } from "./controllers/middleware";
 import login from "./controllers/login";
+import oauth2 from "./controllers/oauth2";
 import signUp from "./controllers/signup";
 import forgotPassword from "./controllers/forgot-password";
 import profile from "./controllers/profile";
@@ -83,7 +84,7 @@ router.get("/logout", checkSession(false), async (ctx, next) => {
 });
 router.use("/verify", checkSession(false), verification);
 router.use("/password-reset", checkSession(false), forgotPassword);
-
+router.use("/oauth2", oauth2);
 router.use("/profile", checkSession(), profile);
 router.use("/account", checkSession(), account);
 router.use('/subscription', checkSession(), subscription);
