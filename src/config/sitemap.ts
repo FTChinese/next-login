@@ -33,13 +33,15 @@ export const subsMap = {
     base:           `${prefix}/subscription`,
     test:           `${prefix}/subscription/test`,
     renewal:        `${prefix}/subscription/renew`,
+    orders:         `${prefix}/subscription/orders`,
     // payment: function(tier, cycle) {
     //     return `${prefix}/subscription/pay/${tier}/${cycle}`;
     // },
+    pay:            `${prefix}/subscription/pay`,
     alipayDone:     `${prefix}/subscription/done/ali`,
     wxpayDone:      `${prefix}/subscription/done/wx`,
     redeem:         `${prefix}/subscription/redeem`,
-    aliReturnUrl: `http://next.ftchinese.com/user/subscription/done/ali`,
+    aliReturnUrl:   `http://next.ftchinese.com/user/subscription/done/ali`,
 }
 
 export const starredMap = {
