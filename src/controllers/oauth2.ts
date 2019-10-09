@@ -23,7 +23,7 @@ const router = new Router();
  */
 router.get("/authorize", async (ctx, next) => {
     const query: IAuthorizeRequest = ctx.request.query;
-    const account: Account | undefined = ctx.session.user;
+    const account: Account | undefined = ctx.state.user;
 
     const {values, errors} = oauthViewModel.validateRequest(query);
 
@@ -60,7 +60,7 @@ router.get("/authorize", async (ctx, next) => {
 
 router.post("/authorize", async (ctx, next) => {
     const query: IAuthorizeRequest = ctx.request.query;
-    const account: Account | undefined = ctx.session.user;
+    const account: Account | undefined = ctx.state.user;
     const formData: IAuthorizeFormData = ctx.request.body;
 
     // Validate both query parameters and form data in one step.
