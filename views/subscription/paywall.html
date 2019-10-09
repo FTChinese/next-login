@@ -1,0 +1,57 @@
+{% extends "layouts/two-cols.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between">
+  <h2>订阅FT中文网会员</h2>
+  {# <a class="btn btn-link" href="{{ sitemap.redeem }}">有礼品卡？</a>#}
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-12 pt-3 pb-3">
+      <h4 class="text-center">请选择您的订阅方式</h4>
+    </div>
+  </div>
+  
+  <div class="row justify-content-around o-card-group">
+    {% for product in products %}
+      <div class="col-lg-6 mb-3">
+        <div class="card">
+          <div class="card-body">
+            <h3 class="card-title text-center mb-3 pb-3">{{product.heading}}</h3>
+            <ul>
+              {% for item in product.benefits %}
+                <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+            {% if product.smallPrint %}
+              <small>{{product.smallPrint}}</small>
+            {% endif %}
+          </div>
+
+          <div class="card-footer">
+            {% for plan in product.plans %}
+            <div class="text-center mb-2">
+              <a class="{{"btn btn-primary text-white" if plan.highlight else "btn btn-outline-primary"}}"
+                href="{{ plan.paymentLink }}">
+
+                {% if plan.discountText %}
+                  <s>{{plan.priceText }}</s>
+                  {{ plan.discountText }}
+                {% else %}
+                  {{ plan.priceText }}
+                {% endif %}
+              </a>
+            </div>
+            {% endfor %}
+          </div>
+
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% include "partials/customer-service.html" %}
+
+{% endblock %}
