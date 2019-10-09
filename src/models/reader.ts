@@ -6,6 +6,7 @@ import {
 import {
     genders,
     memberTypes,
+    intervals,
 } from "./localization";
 import {
     profileMap,
@@ -15,6 +16,7 @@ import {
 import { 
     DateTime,
 } from "luxon";
+import { pluck, getProperty } from "./index-types";
 
 export interface ICredentials {
     email: string;
@@ -65,19 +67,26 @@ export class Membership {
     vip?: boolean;
 
     get tierCN(): string {
-        switch (this.tier) {
-            case "standard":
-                return memberTypes.standard;
-
-            case "premium":
-                return memberTypes.premium;
-
-            default:
-                return memberTypes.zeroMember;
+        if (!this.tier) {
+            return memberTypes.zeroMember;
         }
+
+        return getProperty(memberTypes, this.tier);
+    }
+
+    get cycleCN(): string {
+        if (!this.cycle) {
+            return ""
+        }
+        
+        return getProperty(intervals, this.cycle)
     }
 
     get isMember(): boolean {
+        if (this.vip) {
+            return true;
+        }
+
         return (!!this.tier) && (!!this.cycle) && (!!this.expireDate);
     }
 
@@ -204,6 +213,24 @@ export class Account {
     isEqual(other: Account): boolean {
         return this.id === other.id;
     }
+
+    get customerServiceMail(): string {
+        const mailTo = new URL("mailto:subscriber.service@ftchinese.com");
+
+        const params = new URLSearchParams();
+
+        if (this.email) {
+            params.set("from", this.email);
+        }
+
+        if (this.membership.isMember) {
+            params.set("subject", `${this.membership.tierCN}/${this.membership.cycleCN}_${this.membership.expireDate}`);
+        }
+
+        mailTo.search = params.toString();
+
+        return mailTo.href;
+    }
 }
 
 export const accountSerializer = new TypedJSON(Account);
@@ -296,7 +323,7 @@ export class Profile {
             return "";
         }
 
-        return genders.get(this.gender) || "";
+        return getProperty(genders, this.gender);
     }
 
     get updateNameLink(): string {
