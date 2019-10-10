@@ -43,6 +43,10 @@ interface UIPaywall {
     products: Array<UIProduct>;
 }
 
+interface UIPayment {
+    
+}
+
 class SubViewModel {
 
     async refresh(account: Account): Promise<IFetchResult<Account>> {

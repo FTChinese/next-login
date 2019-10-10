@@ -1,30 +1,49 @@
-export const paymentMethods = {
+import { Tier, Cycle, Gender, PaymentMethod } from "./enums";
+import { getProperty } from "./index-types";
+import { Dictionary } from "express-serve-static-core";
+
+const paymentMethods = {
     "wechat": "微信支付",
     "alipay": "支付宝",
     "stripe": "Stripe",
 };
 
-export const genders = {
+export function localizePayMethod(pm: PaymentMethod): string {
+    return getProperty(paymentMethods, pm);
+}
+
+const genders = {
     "M": "男",
     "F": "女",
 };
 
-export const intervals = {
+export function localizeGender(gender: Gender): string {
+    return getProperty(genders, gender);
+}
+
+const intervals = {
     "year": "年",
     "month": "月",
 };
 
-export const memberTypes = {
+export function localizeCycle(cycle: Cycle): string {
+    return getProperty(intervals, cycle);
+}
+
+const tiers = {
     "standard": "标准会员",
     "premium": "高端会员",
-    "zeroMember": "尚未成为会员",
 };
 
-export const currencySymbols = new Map<string, string>([
-    ["cny", "¥"],
-    ["eur", "€"],
-    ["gbp", "£"],
-    ["hkd", "HK$"],
-    ["jpy", "¥"],
-    ["usd", "US$"],
-]);
+export function localizeTier(tier: Tier): string {
+    return getProperty(tiers, tier);
+}
+
+export const currencySymbols: Dictionary<string> = {
+    "cny": "¥",
+    "eur": "€",
+    "gbp": "£",
+    "hkd": "HK$",
+    "jpy": "¥",
+    "usd": "US$",
+};

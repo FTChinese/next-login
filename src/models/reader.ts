@@ -3,33 +3,33 @@ import {
     jsonMember,
     TypedJSON,
 } from "typedjson";
+import { 
+    DateTime,
+} from "luxon";
 import {
-    genders,
-    memberTypes,
-    intervals,
+    localizeGender,
+    localizeTier,
+    localizeCycle,
 } from "./localization";
 import {
     profileMap,
     accountMap,
     entranceMap,
 } from "../config/sitemap";
-import { 
-    DateTime,
-} from "luxon";
-import { pluck, getProperty } from "./index-types";
+import {
+    LoginMethod,
+    PaymentMethod,
+    Tier,
+    Cycle,
+    Gender,
+    Platform,
+    SubStatus,
+} from "./enums";
 
 export interface ICredentials {
     email: string;
     password: string;
 }
-
-export type LoginMethod = "email" | "wechat";
-export type PaymentMethod = "alipay";
-export type Tier = "standard" | "premium";
-export type Cycle = "month" | "year";
-export type Gender = "M" | "F";
-export type Platform = "web" | "ios" | "android"
-export type SubStatus = "active" | "canceled" | "incomplete" | "incomplate_expired" | "past_due" | "trialing" | "unpaid";
 
 @jsonObject
 export class Wechat {
@@ -68,10 +68,10 @@ export class Membership {
 
     get tierCN(): string {
         if (!this.tier) {
-            return memberTypes.zeroMember;
+            return "尚未成为会员";
         }
 
-        return getProperty(memberTypes, this.tier);
+        return localizeTier(this.tier);
     }
 
     get cycleCN(): string {
@@ -79,7 +79,7 @@ export class Membership {
             return ""
         }
         
-        return getProperty(intervals, this.cycle)
+        return localizeCycle(this.cycle);
     }
 
     get isMember(): boolean {
@@ -323,7 +323,7 @@ export class Profile {
             return "";
         }
 
-        return getProperty(genders, this.gender);
+        return localizeGender(this.gender);
     }
 
     get updateNameLink(): string {

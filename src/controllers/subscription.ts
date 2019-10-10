@@ -6,9 +6,11 @@ import {
 import {  
     IAppHeader,
     Account,
+} from "../models/reader";
+import {
     Tier,
     Cycle,
-} from "../models/reader";
+} from "../models/enums";
 import { 
     subsMap 
 } from "../config/sitemap";
@@ -81,6 +83,15 @@ router.get("/orders", async (ctx, next) => {
 router.get("/pay/:tier/:cycle", async (ctx, next) => {
     const tier: Tier = ctx.params.tier;
     const cycle: Cycle = ctx.params.cycle;
+
+    const plan = scheduler.findPlan(tier, cycle);
+
+    if (!plan) {
+        ctx.status = 404;
+        return;
+    }
+
+
 
     ctx.body = await render("subscription/pay.html", ctx.state);
 });

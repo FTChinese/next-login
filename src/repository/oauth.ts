@@ -1,6 +1,7 @@
 import request from "superagent";
 import { IAuthorizeRequest } from "../models/ftc-oauth";
-import { Account, LoginMethod } from "../models/reader";
+import { Account } from "../models/reader";
+import { LoginMethod } from "../models/enums";
 import { readerApi } from "../config/api";
 
 interface IReqBody {

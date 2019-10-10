@@ -3,15 +3,13 @@ import {
     jsonMember,
     jsonArrayMember,
 } from "typedjson";
-import { Tier, Cycle } from "./reader";
+import { Tier, Cycle } from "./enums";
 import { subsMap } from "../config/sitemap";
 import { 
-    currencySymbols, 
-    intervals 
+    currencySymbols, localizeCycle,  
 } from "./localization";
 import { formatMoney } from "../util/formatter";
-import { getProperty } from "./index-types";
-import { Dictionary } from "express-serve-static-core";
+import { Dictionary } from "./data-types";
 import { DateTime } from "luxon";
 
 @jsonObject
@@ -110,7 +108,7 @@ export class Plan {
     }
 
     get currSymbol(): string {
-        return currencySymbols.get(this.currency) || this.currency.toUpperCase();
+        return currencySymbols[this.currency] || this.currency.toUpperCase();
     }
 
     get paymentLink(): string {
@@ -122,7 +120,7 @@ export class Plan {
     }
 
     get priceText(): string {
-        return `${this.currSymbol} ${formatMoney(this.price)}/${getProperty(intervals, this.cycle)}`;
+        return `${this.currSymbol} ${formatMoney(this.price)}/${localizeCycle(this.cycle)}`;
     }
 
     get discountText(): string | null {
@@ -130,7 +128,7 @@ export class Plan {
             return null;
         }
 
-        return `${this.currSymbol} ${formatMoney(this.amount)}/${getProperty(intervals, this.cycle)}`;
+        return `${this.currSymbol} ${formatMoney(this.amount)}/${localizeCycle(this.cycle)}`;
     }
 }
 
