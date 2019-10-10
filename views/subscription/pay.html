@@ -18,6 +18,7 @@
         </ul>
       </div>
 
+      {% if radio %}
       <div class="card">
         <div class="card-header">请选择支付方式</div>
         <div class="card-body">
@@ -37,7 +38,22 @@
           </form>
         </div> 
       </div>
+      {% endif %}
       <!-- End card -->
+
+      {% if qr %}
+      <div class="text-center">
+        <h4>请打开微信扫码</h4>
+        <img src="{{ qr.dataUrl }}" alt="">
+        <div class="mt-1">
+            <small>微信 -> 发现 -> 扫一扫</small>
+        </div>
+        <a href="{{ sitemap.wxpayDone }}">支付完成？</a>
+        <p class="mt-2 text-muted">
+          <small>注：由于微信支付技术上的限制，此处购买FT会员仅能支持扫码支付。如果您需要在移动设备上购买，请安装FT中文网APP。</small>
+        </p>
+      </div>
+      {% endif %}
     </div>
   </div>
 {% endblock %}
