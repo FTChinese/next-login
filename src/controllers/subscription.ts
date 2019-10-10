@@ -18,6 +18,7 @@ import {
 import { 
     isProduction,
 } from "../config/viper";
+import { scheduler } from "../models/paywall";
 
 const router = new Router();
 
@@ -56,7 +57,7 @@ router.get("/", async(ctx, next) => {
     }
     
     // Otherwise show paywall.
-    Object.assign(ctx.state, subViewModel.buildPaywallUI());
+    Object.assign(ctx.state, subViewModel.buildPaywallUI(scheduler.paywall));
 
     ctx.body = await render("subscription/paywall.html", ctx.state);
 });

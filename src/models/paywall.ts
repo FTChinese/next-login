@@ -2,7 +2,6 @@ import {
     jsonObject,
     jsonMember,
     jsonArrayMember,
-    TypedJSON,
 } from "typedjson";
 import { Tier, Cycle } from "./reader";
 import { subsMap } from "../config/sitemap";
@@ -12,6 +11,8 @@ import {
 } from "./localization";
 import { formatMoney } from "../util/formatter";
 import { getProperty } from "./index-types";
+import { Dictionary } from "express-serve-static-core";
+import { DateTime } from "luxon";
 
 @jsonObject
 export class Banner {
@@ -31,7 +32,7 @@ export class Banner {
 }
 
 @jsonObject
-class Plan {
+export class Plan {
 
     @jsonMember
     tier: Tier;
@@ -133,60 +134,91 @@ class Plan {
     }
 }
 
-@jsonObject
-export class Product {
-    @jsonMember
-    heading: string;
+interface IFtcPlans extends Dictionary<Plan> {
+    standard_year: Plan;
+    standard_month: Plan;
+    premium_year: Plan;
+}
 
-    @jsonArrayMember(String)
-    benefits: Array<string>;
+export interface IPaywall {
+    banner: Banner;
+    plans: IFtcPlans;
+}
 
-    @jsonMember
-    smallPrint?: string;
+// Data fetch from API for promotion.
+interface IPromo extends IPaywall {
+    startAt: string;
+    endAt: string;
+}
 
-    @jsonArrayMember(Plan)
-    plans: Array<Plan>;
+// Manully initialize the Promo from IPromo since the data string should be parsed.
+class Promo implements IPaywall {
+    private readonly startTime: DateTime;
+    private readonly endTime: DateTime;
+    readonly banner: Banner;
+    readonly plans: IFtcPlans;
 
-    constructor(tier?: Tier) {
-        const stdYear = new Plan("standard", "year");
-        const stdMonth = new Plan("standard", "month");
-        const premium = new Plan("premium");
+    constructor(promo: IPromo) {
+        this.startTime = DateTime.fromISO(promo.startAt);
+        this.endTime = DateTime.fromISO(promo.endAt);
+        this.banner = promo.banner;
+        this.plans = promo.plans
+    }
 
-        switch (tier) {
-            case "standard":
-                this.heading = "标准会员";
-                this.benefits = [
-                    `专享订阅内容每日仅需${stdYear.dailyPrice}元(或按月订阅每日${stdMonth.dailyPrice}元)`,
-                    "精选深度分析",
-                    "中英双语内容",
-                    "金融英语速读训练",
-                    "英语原声电台",
-                    "无限浏览7日前所有历史文章（近8万篇）"
-                ];
-                this.plans = [
-                    stdYear,
-                    stdMonth,
-                ];
-                break;
-
-            case "premium":
-                this.heading = "标准会员";
-                this.benefits = [
-                    `专享订阅内容每日仅需${premium.dailyPrice}元`,
-                    "享受“标准会员”所有权益",
-                    "编辑精选，总编/各版块主编每周五为您推荐本周必读资讯，分享他们的思考与观点",
-                    "FT中文网2018年度论坛门票2张，价值3999元/张 （不含差旅与食宿）"
-                ];
-                this.smallPrint = "注：所有活动门票不可折算现金、不能转让、不含差旅与食宿";
-                this.plans = [
-                    premium,
-                ];
-                break;
+    get isInEffect(): boolean {
+        if (!this.startTime.isValid || !this.endTime.isValid) {
+            return false;
         }
+
+        const now = DateTime.utc();
+
+        if (this.startTime <= now && this.endTime >= now) {
+            return true;
+        }
+
+        return false;
     }
 }
 
+// Determines whether promo should be used.
+class Scheduler {
+    private readonly defaultPaywall: IPaywall = {
+        banner: new Banner(),
+        plans: {
+            standard_year: new Plan("standard", "year"),
+            standard_month: new Plan("standard", "month"),
+            premium_year: new Plan("premium"),
+        },
+    };
 
+    private promo?: Promo;
 
+    setPromo(p: Promo) {
+        this.promo = p;
+    }
 
+    get paywall(): IPaywall {
+        if (this.promo && this.promo.isInEffect) {
+            return this.promo;
+        }
 
+        return this.defaultPaywall;
+    }
+
+    get plans(): IFtcPlans {
+        return this.paywall.plans;
+    }
+
+    findPlan(tier: Tier, cycle: Cycle): Plan | null {
+        const key = `${tier}_${cycle}`;
+    
+        const plan = this.plans[key];
+        if (plan) {
+            return plan;
+        }
+    
+        return null;
+    }
+}
+
+export const scheduler = new Scheduler();
