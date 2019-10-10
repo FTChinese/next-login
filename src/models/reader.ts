@@ -25,6 +25,7 @@ import {
     Platform,
     SubStatus,
 } from "./enums";
+import { KEY_UNION_ID, KEY_USER_ID } from "../config/api";
 
 export interface ICredentials {
     email: string;
@@ -123,6 +124,11 @@ export interface IAccountId {
     compoundId: string;
     ftcId?: string;
     unionId?: string;
+}
+
+interface IdHeaders {
+    [KEY_UNION_ID]?: string;
+    [KEY_USER_ID]?: string;
 }
 
 @jsonObject
@@ -230,6 +236,19 @@ export class Account {
         mailTo.search = params.toString();
 
         return mailTo.href;
+    }
+
+    get idHeaders(): IdHeaders {
+        const headers: IdHeaders = {};
+        if (this.id) {
+            headers[KEY_USER_ID] = this.id;
+        }
+
+        if (this.unionId) {
+            headers[KEY_UNION_ID] = this.unionId;
+        }
+
+        return headers;
     }
 }
 
