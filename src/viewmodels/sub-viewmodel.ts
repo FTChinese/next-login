@@ -9,7 +9,7 @@ import {
     accountRepo,
 } from "../repository/account";
 import {
-    UIBase,
+    UIBase, IListItem, IRadio,
 } from "./ui";
 import { 
     IFetchResult,
@@ -20,6 +20,7 @@ import {
     Plan,
     IPaywall,
 } from "../models/paywall";
+import { localizeTier } from "../models/localization";
 
 interface UIMembership {
     tier: string;
@@ -44,7 +45,9 @@ interface UIPaywall {
 }
 
 interface UIPayment {
-    
+    items: Array<IListItem>;
+    sandbox: boolean;
+    radio: IRadio;
 }
 
 class SubViewModel {
@@ -155,6 +158,44 @@ class SubViewModel {
                     ]
                 },
             ],
+        };
+    }
+
+    buildPaymentUI(plan: Plan, sandbox: boolean): UIPayment {
+        return {
+            items: [
+                {
+                    label: "会员类型:",
+                    value: localizeTier(plan.tier),
+                },
+                {
+                    label: "支付金额:",
+                    value: plan.amountText,
+                },
+            ],
+            sandbox,
+            radio: {
+                name: "payMethod",
+                inputs: [
+                    {
+                        label: "支付宝",
+                        imageUrl: "http://www.ftacademy.cn/images/alipay-68x24.png",
+                        gap: 3,
+                        id: "alipay",
+                        value: "alipay",
+                        checked: false,
+                    },
+                    {
+                        label: "微信支付",
+                        imageUrl: "http://www.ftacademy.cn/images/wxpay-113x24.png",
+                        gap: 3,
+                        id: "wxpay",
+                        value: "wxpay",
+                        checked: false,
+                    },
+                ],
+                required: true,
+            },
         };
     }
 }
