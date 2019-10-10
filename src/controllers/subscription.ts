@@ -80,18 +80,23 @@ router.get("/orders", async (ctx, next) => {
     ctx.body = await render("subscription/orders.html", ctx.state)
 });
 
+interface Env {
+    sandbox?: "true";
+}
+
 router.get("/pay/:tier/:cycle", async (ctx, next) => {
     const tier: Tier = ctx.params.tier;
     const cycle: Cycle = ctx.params.cycle;
 
     const plan = scheduler.findPlan(tier, cycle);
+    const query: Env = ctx.request.query;
 
     if (!plan) {
         ctx.status = 404;
         return;
     }
 
-
+    Object.assign(ctx.state, subViewModel.buildPaymentUI(plan, query.sandbox == "true"));
 
     ctx.body = await render("subscription/pay.html", ctx.state);
 });
