@@ -1,14 +1,23 @@
+{% if radio.title %}
 <label>{{ radio.title }}</label>
+{% endif %}
 
 {% for input in radio.inputs %}
-  <div class="form-check">
+  <div class="form-check{% if input.gap %} mb-{{ input.gap }}{% endif %}">
     <input class="form-check-input"
     id="{{ input.id }}"
     type="radio"
-    name="{{radio.name}}"
-    value="M"
-    {% if input.checked %} checked{% endif %}>
-    <label class="form-check-label" for="{{ input.id }}">{{ input.label }}</label>
+    name="{{ radio.name }}"
+    value="{{ input.value }}"
+    {% if input.checked %} checked{% endif %}
+    {% if radio.required %} required{% endif %}>
+    <label class="form-check-label" for="{{ input.id }}">
+      {% if input.imageUrl %}
+        <img src="{{ input.imageUrl }}" alt="{{ input.label }}">
+      {% else %}
+        {{ input.label }}
+      {% endif %}
+    </label>
   </div>
 {% endfor %}
 
