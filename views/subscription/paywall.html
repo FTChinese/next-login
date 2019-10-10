@@ -35,12 +35,10 @@
               <a class="{{"btn btn-primary text-white" if plan.highlight else "btn btn-outline-primary"}}"
                 href="{{ plan.paymentLink }}">
 
-                {% if plan.discountText %}
-                  <s>{{plan.priceText }}</s>
-                  {{ plan.discountText }}
-                {% else %}
-                  {{ plan.priceText }}
+                {% if plan.crossedPrice %}
+                  <s>{{ plan.crossedPrice }}</s>
                 {% endif %}
+                {{ plan.paidAmount }}
               </a>
             </div>
             {% endfor %}

@@ -7,54 +7,25 @@
       <div class="card mb-5">
         <div class="card-header">订阅FT会员</div>
         <ul class="list-group list-group-flush">
+
+          {% for item in items %}
           <li class="list-group-item d-flex justify-content-between">
-            <span>会员类型:</span>
-            <span>{{ plan.tier | localize }}/{{ plan.cycle | localize }}</span>
+            <span>{{ item.label }}</span>
+            <span>{{ item.value }}</span>
           </li>
-  
-          <li class="list-group-item d-flex justify-content-between">
-            <span>支付金额:</span>
-            <span>¥{{ plan.netPrice | toCurrency }}</span>
-          </li>
+          {% endfor %}
+
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">请选择支付方式</div>
         <div class="card-body">
-          <form action="{{ sitemap.payment(plan.tier, plan.cycle) }}{% if sandbox %}?sandbox=true{% endif %}" method="post">
+          <form action="{% if sandbox %}?sandbox=true{% endif %}" method="post">
             
-            <div class="form-check mb-3">
-              <input 
-                class="form-check-input" 
-                type="radio" 
-                name="payMethod" 
-                id="alipay" 
-                value="alipay"
-                required>
-              <label 
-                class="form-check-label d-block" 
-                for="alipay">
-                <img src="http://www.ftacademy.cn/images/alipay-68x24.png" alt="支付宝">
-              </label>
+            <div class="form-group">
+              {% include "partials/radio.html" %}
             </div>
-            <div class="form-check">
-              <input 
-                class="form-check-input" 
-                type="radio" 
-                name="payMethod" 
-                id="wxpay" 
-                value="wxpay">
-              <label 
-                class="form-check-label d-block" 
-                for="wxpay">
-                <img src="http://www.ftacademy.cn/images/wxpay-113x24.png" alt="微信支付">
-              </label>
-            </div>
-        
-            {% if errors.payMethod %}
-              <div class="form-errortext">{{errors.payMethod}}</div>
-            {% endif %}
 
             <div class="mt-3">
               <button 
