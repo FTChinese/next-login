@@ -15,6 +15,7 @@ import {
     profileMap,
     accountMap,
     entranceMap,
+    subsMap,
 } from "../config/sitemap";
 import {
     LoginMethod,
@@ -117,6 +118,14 @@ export class Membership {
         }
 
         return true;
+    }
+
+    get renewalUrl(): string | null {
+        if (!this.tier || !this.cycle) {
+            return null;
+        }
+
+        return `${subsMap.pay}/${this.tier}/${this.cycle}`;
     }
 }
 
