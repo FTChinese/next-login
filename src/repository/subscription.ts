@@ -1,14 +1,20 @@
 import request from "superagent";
-import {
-    TypedJSON,
-} from "typedjson";
-import { Account, IAppHeader } from "../models/reader";
-import { Plan } from "../models/paywall";
-import { subsApiBase } from "../config/api";
-import { AliOrder, WxOrder } from "../models/order";
-
-const aliOrderSerializer = new TypedJSON(AliOrder);
-const wxOrderSerializer = new TypedJSON(WxOrder);
+import { 
+    Account, 
+    IAppHeader 
+} from "../models/reader";
+import { 
+    Plan,
+} from "../models/paywall";
+import { 
+    subsApiBase,
+} from "../config/api";
+import { 
+    AliOrder, 
+    WxOrder,
+    aliOrderSerializer,
+    wxOrderSerializer,
+} from "../models/order";
 
 class Subscription {
     readonly aliReturnUrl: string = "http://next.ftchinese.com/user/subscription/done/ali";

@@ -73,6 +73,10 @@ interface IPayResult {
     qrData?: string;
 }
 
+interface UISuccess {
+    
+}
+
 class SubViewModel {
 
     async refresh(account: Account): Promise<IFetchResult<Account>> {

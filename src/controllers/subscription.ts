@@ -21,7 +21,7 @@ import {
 } from "../config/viper";
 import { scheduler } from "../models/paywall";
 import { subRepo } from "../repository/subscription";
-import { AliOrder } from "../models/order";
+import { AliOrder, AliCallback, orderSerializer } from "../models/order";
 import { APIError } from "../viewmodels/api-response";
 
 const log = debug("user:subscription");
@@ -224,12 +224,35 @@ router.post("/pay/:tier/:cycle", appHeader(), async (ctx, next) => {
  * GET /subscription/done/ali
  */
 router.get("/done/ali", async (ctx, next) => {
-    ctx.body = await render("subscription/alipay-done.html", ctx.state);
+    const account: Account = ctx.state.user;
+    const query: AliCallback = ctx.request.query;
+    const orderData = ctx.session.order;
 
+    const order = orderSerializer.parse(orderData);
+
+    const { success, errResp } = await subViewModel.refresh(account);
+
+    if (errResp) {
+        ctx.state.errors = {
+            message: errResp.message,
+        };
+
+        return await next();
+    }
+
+    if (!success) {
+        throw new Error("Unknown error occurred");
+    }
+
+    ctx.session.user = success;
+
+    
     // For development, keep session to test ui.
     if (isProduction) {
-      delete ctx.session.subs;
+      delete ctx.session.order;
     }
+}, async (ctx, next) => {
+    ctx.body = await render("subscription/alipay-done.html", ctx.state);
 });
 
 router.get("/done/wx", async (ctx, next) => {
