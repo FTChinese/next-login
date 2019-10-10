@@ -1,3 +1,4 @@
+import MobileDetect from "mobile-detect";
 import {
     subsMap,
 } from "../config/sitemap";
@@ -21,6 +22,7 @@ import {
     IPaywall,
 } from "../models/paywall";
 import { localizeTier } from "../models/localization";
+import { PaymentMethod } from "../models/enums";
 
 interface UIMembership {
     tier: string;
@@ -44,10 +46,31 @@ interface UIPaywall {
     products: Array<UIProduct>;
 }
 
-interface UIPayment {
+interface UIQR {
+    dataUrl: string;
+    doneLink: string;
+}
+
+interface UIPayment extends UIBase {
     items: Array<IListItem>;
-    sandbox: boolean;
-    radio: IRadio;
+    sandbox?: boolean;
+    radio?: IRadio;
+    qr?: UIQR;
+}
+
+export interface IPayMethodFormData {
+    payMethod: PaymentMethod;
+}
+
+interface IFormState {
+    value?: PaymentMethod;
+    error?: string;
+}
+
+interface IPayResult {
+    formState?: IFormState;
+    errResp?: APIError;
+    qrData?: string;
 }
 
 class SubViewModel {
@@ -161,8 +184,30 @@ class SubViewModel {
         };
     }
 
-    buildPaymentUI(plan: Plan, sandbox: boolean): UIPayment {
+    validatePayMethod(payMethod?: PaymentMethod): IFormState {
+        if (!payMethod) {
+            return {
+                error: "请选择支付方式",
+            };
+        }
+
+        if (payMethod != "alipay" && payMethod != "wechat") {
+            return {
+                error: "请从支付宝或微信支付中选择一种支付方式",
+            };
+        }
+
         return {
+            value: payMethod,
+        };
+    }
+
+    buildPaymentUI(plan: Plan, sandbox?: boolean, result?: IPayResult): UIPayment {
+        const { formState, errResp } = result || {};
+        const uiData: UIPayment = {
+            errors: errResp ? {
+                message: errResp.message,
+            } : undefined,
             items: [
                 {
                     label: "会员类型:",
@@ -173,30 +218,54 @@ class SubViewModel {
                     value: plan.amountText,
                 },
             ],
-            sandbox,
-            radio: {
-                name: "payMethod",
-                inputs: [
-                    {
-                        label: "支付宝",
-                        imageUrl: "http://www.ftacademy.cn/images/alipay-68x24.png",
-                        gap: 3,
-                        id: "alipay",
-                        value: "alipay",
-                        checked: false,
-                    },
-                    {
-                        label: "微信支付",
-                        imageUrl: "http://www.ftacademy.cn/images/wxpay-113x24.png",
-                        gap: 3,
-                        id: "wxpay",
-                        value: "wxpay",
-                        checked: false,
-                    },
-                ],
-                required: true,
-            },
+            
         };
+
+        if (result && result.qrData) {
+            uiData.qr = {
+                dataUrl: result.qrData,
+                doneLink: subsMap.wxpayDone,
+            };
+
+            return uiData;
+        }
+
+        uiData.sandbox = sandbox;
+        uiData.radio = {
+            name: "payMethod",
+            inputs: [
+                {
+                    label: "支付宝",
+                    imageUrl: "http://www.ftacademy.cn/images/alipay-68x24.png",
+                    gap: 3,
+                    id: "alipay",
+                    value: "alipay",
+                    checked: formState 
+                        ? formState.value == "alipay" 
+                        : false,
+                },
+                {
+                    label: "微信支付",
+                    imageUrl: "http://www.ftacademy.cn/images/wxpay-113x24.png",
+                    gap: 3,
+                    id: "wechat",
+                    value: "wechat",
+                    checked: formState
+                        ? formState.value == "wechat"
+                        : false,
+                },
+            ],
+            required: true,
+            error: formState ? formState.error : undefined,
+        };
+
+        return uiData;
+    }
+
+    isMobile(ua: string): boolean {
+        const md = new MobileDetect(ua);
+
+        return !!md.mobile();
     }
 }
 
