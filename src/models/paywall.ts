@@ -120,15 +120,24 @@ export class Plan {
     }
 
     get priceText(): string {
-        return `${this.currSymbol} ${formatMoney(this.price)}/${localizeCycle(this.cycle)}`;
+        return `${this.currSymbol} ${formatMoney(this.price)}`;
     }
 
-    get discountText(): string | null {
+    get amountText(): string {
+        return `${this.currSymbol} ${formatMoney(this.amount)}`;
+    }
+
+    get crossedPrice(): string | null {
+
         if (this.price == this.amount) {
             return null;
         }
 
-        return `${this.currSymbol} ${formatMoney(this.amount)}/${localizeCycle(this.cycle)}`;
+        return `${this.priceText}/${localizeCycle(this.cycle)}`;
+    }
+
+    get paidAmount(): string {
+        return `${this.amountText}/${localizeCycle(this.cycle)}`;
     }
 }
 
