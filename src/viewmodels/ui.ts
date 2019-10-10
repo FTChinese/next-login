@@ -63,6 +63,8 @@ export interface ICheckBox {
 
 export interface IRadioInput {
     label: string;
+    imageUrl?: string;
+    gap?: number;
     id: string;
     value: string;
     checked: boolean;
@@ -72,6 +74,7 @@ export interface IRadio {
     title?: string;
     name: string;
     inputs: Array<IRadioInput>;
+    required?: boolean;
     desc?: string;
     error?: string;
 }
