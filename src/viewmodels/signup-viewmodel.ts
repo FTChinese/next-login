@@ -42,44 +42,6 @@ class SignUpViewModel {
 
     private readonly msgTooManyRequests: string = "您创建账号过于频繁，请稍后再试";
 
-    buildInputs(values?: ISignUpFormData, errors?: ISignUpFormData): Array<ITextInput> {
-        return [
-            {
-                label: "邮箱",
-                id: "email",
-                type: "email",
-                name: "credentials[email]",
-                value: values ? values.email : "",
-                placeholder: "电子邮箱",
-                maxlength: "64",
-                required: true,
-                desc: "用于登录FT中文网",
-                error: errors ? errors.email : "",
-            },
-            {
-                label: "密码",
-                id: "password",
-                type: "password",
-                name: "credentials[password]",
-                placeholder: "密码",
-                maxlength: "64",
-                required: true,
-                desc: "最少8个字符",
-                error: errors ? errors.password : "",
-            },
-            {
-                label: "确认密码",
-                id: "confirmPassword",
-                type: "password",
-                name: "credentials[confirmPassword]",
-                placeholder: "再次输入新密码",
-                maxlength: "64",
-                required: true,
-                error: errors ? errors.confirmPassword : "",
-            },
-        ];
-    }
-
     async validate(input: ISignUpFormData): Promise<IFormState<ISignUpFormData>> {
         try {
             const result = await validate<ISignUpFormData>(input, signUpSchema);
@@ -125,9 +87,9 @@ class SignUpViewModel {
 
                 return {
                     errForm: {
-                        email: o.get("email") || "",
-                        password: o.get("password") || "",
-                        confirmPassword: o.get("confirmPassword") || "",
+                        email: o.get(errResp.error.field) || "",
+                        password: o.get(errResp.error.field) || "",
+                        confirmPassword: "",
                     }
                 };
             }
@@ -146,16 +108,48 @@ class SignUpViewModel {
             formData.email = formData.email.trim();
         }
 
+        const { errForm, errResp } = result || {};
+
         const uiData: UISignUp = {
-            inputs: this.buildInputs(
-                formData,
-                result ? result.errForm : undefined
-            ),
+            inputs: [
+                {
+                    label: "邮箱",
+                    id: "email",
+                    type: "email",
+                    name: "credentials[email]",
+                    value: formData ? formData.email : "",
+                    placeholder: "电子邮箱",
+                    maxlength: "64",
+                    required: true,
+                    desc: "用于登录FT中文网",
+                    error: errForm ? errForm.email : "",
+                },
+                {
+                    label: "密码",
+                    id: "password",
+                    type: "password",
+                    name: "credentials[password]",
+                    placeholder: "密码",
+                    maxlength: "64",
+                    required: true,
+                    desc: "最少8个字符",
+                    error: errForm ? errForm.password : "",
+                },
+                {
+                    label: "确认密码",
+                    id: "confirmPassword",
+                    type: "password",
+                    name: "credentials[confirmPassword]",
+                    placeholder: "再次输入新密码",
+                    maxlength: "64",
+                    required: true,
+                    error: errForm ? errForm.confirmPassword : "",
+                },
+            ],
             loginLink: entranceMap.login,
         };
 
-        if (result && result.errResp) {
-            const errResp = result.errResp;
+        if (errResp) {
 
             if (errResp.status == 429) {
                 uiData.alert = {
