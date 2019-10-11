@@ -5,9 +5,9 @@ import {
 import {
     ITextInput,
     IActionDone,
-    UIBase,
     ActionDoneKey,
-    IUpdateResult,
+    UIMultiInputs,
+    UIBase,
 } from "./ui";
 import {
     buildJoiErrors,
@@ -47,6 +47,10 @@ interface UIForgotPassword extends UIBase {
     done?: IActionDone; // 
 }
 
+interface ILetterResult extends IFetchResult<boolean> {
+    errForm?: IEmail;
+}
+
 // Form data submitted on the resetting password page.
 export interface IPwResetFormData {
     password: string;
@@ -57,7 +61,7 @@ interface IResetPwResult extends IFetchResult<boolean> {
     errForm?: IPwResetFormData; // Client validation 
 }
 
-interface UIPwReset extends UIBase {
+interface UIPwReset extends UIMultiInputs {
     email: string;
     inputs: Array<ITextInput>;
 }
@@ -70,8 +74,8 @@ class PwResetViewModel {
     private readonly msgPwReset: string = "密码已更新";
     private readonly btnBack: string = "返回";
     private readonly btnLogin: string = "登录";
-
-    buildEmailInput(values?: IEmail, errors?: IEmail): ITextInput {
+    
+    private buildEmailInput(values?: IEmail, errors?: IEmail): ITextInput {
         return {
             label: "",
             id: "email",
@@ -85,7 +89,7 @@ class PwResetViewModel {
             error: errors ? errors.email : "",
         }
     }
-    
+
     async validateEmail(input: IEmail): Promise<IFormState<IEmail>> {
         try {
             const result = await validate<IEmail>(input, emailSchema);
@@ -106,7 +110,7 @@ class PwResetViewModel {
     async requestLetter(
         formData: IEmail, 
         app: IAppHeader
-    ): Promise<IUpdateResult<IEmail>> {
+    ): Promise<ILetterResult> {
         const { values, errors } = await this.validateEmail(formData);
 
         if (errors) {
@@ -127,12 +131,13 @@ class PwResetViewModel {
             }
         } catch (e) {
             const errResp = new APIError(e);
+
             if (errResp.notFound) {
                 return {
                     errForm: {
                         email: this.msgEmailNotFound,
-                    }
-                }
+                    },
+                };
             }
 
             if (errResp.error) {
@@ -140,28 +145,29 @@ class PwResetViewModel {
 
                 return {
                     errForm: {
-                        email: o.get("email") || "",
+                        email: o.get(errResp.error.field) || "",
                     }
                 };
             }
             return {
-                errApi: {
-                    message: errResp.message,
-                },
+                errResp,
             };
         }
     }
 
     buildEmailUI(
         formData?: IEmail, 
-        result?: IUpdateResult<IEmail>,
+        result?: ILetterResult,
     ): UIForgotPassword {
         if (formData && formData.email) {
             formData.email = formData.email.trim();
         }
 
+        const { errForm, errResp } = result || {};
         return {
-            errors: result ? result.errApi : undefined,
+            errors: errResp ? {
+                message: errResp.message
+            } : undefined,
             input: this.buildEmailInput(
                 formData,
                 result ? result.errForm : undefined,
@@ -241,35 +247,6 @@ class PwResetViewModel {
         return uiData;
     }
 
-    private buildPwInputs(errors?: IPwResetFormData): Array<ITextInput> {
-        return [
-            {
-                label: "密码",
-                id: "password",
-                type: "password",
-                name: "credentials[password]",
-                placeholder: "",
-                required: true,
-                minlength: "8",
-                maxlength: "64",
-                desc: "",
-                error: errors ? errors.password : undefined,
-            },
-            {
-                label: "再次输入确认",
-                id: "confirmPassword",
-                type: "password",
-                name: "credentials[confirmPassword]",
-                placeholder: "",
-                required: true,
-                minlength: "8",
-                maxlength: "64",
-                desc: "请确保两次输入的密码一致",
-                error: errors ? errors.confirmPassword : undefined,
-            },
-        ];
-    }
-
     async validatePasswords(formData: IPwResetFormData): Promise<IFormState<IPwResetFormData>> {
         try {
             const result = await validate<IPwResetFormData>(formData, passwordsSchema)
@@ -280,7 +257,7 @@ class PwResetViewModel {
         } catch (e) {
             const ex: ValidationError = e;
             return {
-                errors: buildJoiErrors(e) as IPwResetFormData,
+                errors: buildJoiErrors(ex.details) as IPwResetFormData,
             };
         }
     }
@@ -314,9 +291,10 @@ class PwResetViewModel {
 
             if (errResp.error) {
                 const o = errResp.error.toMap();
+                // API only returns error message for `password` field.
                 return {
                     errForm: {
-                        password: o.get("password") || "",
+                        password: o.get(errResp.error.field) || "",
                         confirmPassword: "",
                     },
                 };
@@ -332,16 +310,40 @@ class PwResetViewModel {
         email: string, 
         result?: IResetPwResult
     ): UIPwReset {
+
+        const { errForm, errResp } = result || {};
+
         const uiData: UIPwReset = {
             email,
-            inputs: this.buildPwInputs(result 
-                ? result.errForm 
-                : undefined
-            ),
+            inputs: [
+                {
+                    label: "密码",
+                    id: "password",
+                    type: "password",
+                    name: "credentials[password]",
+                    placeholder: "",
+                    required: true,
+                    minlength: "8",
+                    maxlength: "64",
+                    desc: "",
+                    error: errForm ? errForm.password : undefined,
+                },
+                {
+                    label: "再次输入确认",
+                    id: "confirmPassword",
+                    type: "password",
+                    name: "credentials[confirmPassword]",
+                    placeholder: "",
+                    required: true,
+                    minlength: "8",
+                    maxlength: "64",
+                    desc: "请确保两次输入的密码一致",
+                    error: errForm ? errForm.confirmPassword : undefined,
+                },
+            ],
         }
 
-        if (result && result.errResp) {
-            const errResp = result.errResp;
+        if (errResp) {
 
             if (errResp.notFound) {
                 uiData.alert = {
