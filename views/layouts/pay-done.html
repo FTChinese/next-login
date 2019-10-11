@@ -4,18 +4,30 @@
 
   <h5 class="text-center mt-3">感谢您订阅FT中文网会员</h5>
 
-  <p class="text-center">{{ subs.tier | localize}}/{{ subs.cycle | localize }}</p>
+  <p class="text-center">{{ product }}</p>
 
-  {% block payResult %}{% endblock %}
+  <table class="table">
+    <caption class="text-center">{{ caption }}</caption>
+  
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <th scope="col">{{ row.label }}</th>
+        <td>{{ row.value }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    
+  </table>
 
-  {% if result %}
-    <p class="text-center">您可以打印本页以备日后查询，或者在<a href="{{ sitemap.subs }}">用户中心</a>查看会员状态和订单历史。</p>
+  {% if rows %}
+    <p class="text-center">您可以打印本页以备日后查询，或者在<a href="{{ backLink }}">用户中心</a>查看会员状态和订单历史。</p>
   {% else %}
-    <p class="text-center">暂时未查询到支付结果，您可以前往<a href="{{ sitemap.subs }}">用户中心</a>查看会员状态和订单历史。</p>
+    <p class="text-center">暂时未查询到支付结果，您可以前往<a href="{{ backLink }}">用户中心</a>查看会员状态和订单历史。</p>
   {% endif %}
 
   <p class="text-center">
-    <a class="btn btn-primary" href="{{ sitemap.subs }}">返回</a>
+    <a class="btn btn-primary" href="{{ backLink }}">返回</a>
   </p>
 
 {% endblock %}
