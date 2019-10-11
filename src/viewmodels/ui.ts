@@ -19,12 +19,6 @@ export function getDoneMsg(key: SavedKey): string {
     }
 }
 
-export interface IUpdateResult<T> {
-    success?: boolean;
-    errForm?: T;
-    errApi?: IErrors;
-}
-
 export interface IDataList {
     id: string;
     options: Array<string>;
