@@ -21,8 +21,11 @@ import {
     Plan,
     IPaywall,
 } from "../models/paywall";
-import { localizeTier } from "../models/localization";
 import { PaymentMethod } from "../models/enums";
+import { OrderBase, IAliCallback, IWxQueryResult } from "../models/order";
+import { subRepo } from "../repository/subscription";
+import { formatMoneyInCent } from "../util/formatter";
+import { iso8601ToCST } from "../util/formatter";
 
 interface UIMembership {
     tier: string;
@@ -62,19 +65,30 @@ export interface IPayMethodFormData {
     payMethod: PaymentMethod;
 }
 
-interface IFormState {
+interface IPayFormState {
     value?: PaymentMethod;
     error?: string;
 }
 
-interface IPayResult {
-    formState?: IFormState;
+interface IWxPayResult {
+    formState?: IPayFormState;
     errResp?: APIError;
     qrData?: string;
 }
 
-interface UISuccess {
-    
+interface UISuccess extends UIBase {
+    product: string;
+    caption: string;
+    rows?: Array<IListItem>;
+    backLink: string;
+}
+
+interface IPayDoneResult extends IFetchResult<Account> {
+    invalid?: string;
+}
+
+interface IWxPayDoneResult extends IPayDoneResult {
+    queryResult?: IWxQueryResult; // `success` might not exist when this field exists. It indicates wechat order query succeeded buth later account refreshing afiled (e.g. network failed upon request).
 }
 
 class SubViewModel {
@@ -188,7 +202,7 @@ class SubViewModel {
         };
     }
 
-    validatePayMethod(payMethod?: PaymentMethod): IFormState {
+    validatePayMethod(payMethod?: PaymentMethod): IPayFormState {
         if (!payMethod) {
             return {
                 error: "请选择支付方式",
@@ -206,7 +220,7 @@ class SubViewModel {
         };
     }
 
-    buildPaymentUI(plan: Plan, sandbox?: boolean, result?: IPayResult): UIPayment {
+    buildPaymentUI(plan: Plan, sandbox?: boolean, result?: IWxPayResult): UIPayment {
         const { formState, errResp } = result || {};
         const uiData: UIPayment = {
             errors: errResp ? {
@@ -215,7 +229,7 @@ class SubViewModel {
             items: [
                 {
                     label: "会员类型:",
-                    value: localizeTier(plan.tier),
+                    value: plan.productName,
                 },
                 {
                     label: "支付金额:",
@@ -270,6 +284,125 @@ class SubViewModel {
         const md = new MobileDetect(ua);
 
         return !!md.mobile();
+    }
+
+    async aliPayDone(account: Account, order: OrderBase, param: IAliCallback): Promise<IPayDoneResult> {
+        if (order.id != param.out_trade_no) {
+            return {
+                invalid: "订单号不匹配",
+            };
+        }
+
+        const { success, errResp } = await this.refresh(account);
+
+        if (!success) {
+            return {
+                errResp,
+            }
+        }
+
+        return {
+            success,
+        }
+    }
+
+    buildAliResultUI(order: OrderBase, param: IAliCallback, result: IPayDoneResult): UISuccess {
+        return {
+            errors: result.errResp ? {
+                message: result.errResp.message,
+            } : undefined,
+            alert: result.invalid ? {
+                message: result.invalid,
+            } : undefined,
+            product: order.productName,
+            caption: "支付宝支付结果",
+            rows: result.invalid ? undefined : [
+                {
+                    label: "订单号",
+                    value: param.out_trade_no,
+                },
+                {
+                    label: "金额",
+                    value: param.total_amount,
+                },
+                {
+                    label: "支付宝交易号",
+                    value: param.trade_no
+                },
+                {
+                    label: "支付时间",
+                    value: param.timestamp,
+                },
+            ],
+            backLink: subsMap.base,
+        };
+    }
+
+    async wxPayDone(account: Account, orderId: string): Promise<IWxPayDoneResult> {
+        try {
+            const result = await subRepo.wxOrderQuery(account, orderId);
+
+            if (result.paymentState !== "SUCCESS") {
+                return {
+                    invalid: result.paymentStateDesc,
+                };
+            }
+
+            const { success, errResp } = await this.refresh(account);
+
+            if (!success) {
+                return {
+                    errResp,
+                    queryResult: result,
+                };
+            }
+
+            return {
+                success,
+                queryResult: result,
+            };
+        } catch (e) {
+            return {
+                errResp: new APIError(e),
+            };
+        }
+    }
+
+    buildWxResultUI(order: OrderBase, result: IWxPayDoneResult): UISuccess {
+        const { invalid, errResp, queryResult } = result;
+        return {
+            errors: errResp ? {
+                message: errResp.message,
+            } : undefined,
+            alert: invalid ? {
+                message: invalid,
+            } : undefined,
+            product: order.productName,
+            caption: "微信支付结果",
+            rows: queryResult ? [
+                {
+                    label: "订单号",
+                    value: queryResult.ftcOrderId,
+                },
+                {
+                    label: "支付状态",
+                    value: queryResult.paymentStateDesc,
+                },
+                {
+                    label: "金额",
+                    value: formatMoneyInCent(queryResult.totalFee),
+                },
+                {
+                    label: "微信交易号",
+                    value: queryResult.transactionId
+                },
+                {
+                    label: "支付时间",
+                    value: iso8601ToCST(queryResult.paidAt),
+                },
+            ] : undefined,
+            backLink: subsMap.base,
+        };
     }
 }
 
