@@ -96,10 +96,12 @@ class AccountRepo {
     }
 
     async fetchWxSession(code: string, app: IAppHeader): Promise<WxSession> {
+        const appId = viper.getConfig().wxapp.web_oauth.app_id;
+
         const resp = await request
             .post(subsApi.wxLogin)
             .set(app)
-            .set(KEY_APP_ID, viper.getConfig().wxapp.w_ftc.app_id)
+            .set(KEY_APP_ID, appId)
             .send({ code });
 
         return sessSerializer.parse(resp.text)!;
