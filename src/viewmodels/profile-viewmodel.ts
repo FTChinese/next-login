@@ -9,10 +9,10 @@ import {
     IRadio,
     SavedKey,
     getDoneMsg,
-    IUpdateResult,
+    UISingleInput,
 } from "./ui";
 import {
-    APIError,
+    APIError, IFetchResult,
 } from "./api-response";
 import {
     userNameSchema,
@@ -27,8 +27,8 @@ import {
     Profile,
     IProfileFormData,
     Address,
-    INameFormData,
-    IMobileFormData,
+    IName,
+    IMobile,
     IAddress,
 } from "../models/reader";
 
@@ -43,10 +43,20 @@ interface UIProfile extends UIBase {
     address?: Address;
 }
 
-// `alert` is used to show a 404 error if API does not find current user.
-interface UISingleInput extends UIBase {
-    heading: string;
-    input: ITextInput;
+interface IUpdateNameResult extends IFetchResult<boolean> {
+    errForm?: IName;
+}
+
+interface IUpdateMobileResult extends IFetchResult<boolean> {
+    errForm?: IMobile;
+}
+
+interface IUpdateInfoResult extends IFetchResult<boolean> {
+    errForm?: IProfileFormData;
+}
+
+interface IUpdateAddressResult extends IFetchResult<boolean> {
+    errForm?: IAddress;
 }
 
 interface UIPersonalInfo extends UIBase {
@@ -67,7 +77,33 @@ interface UIAddress extends UIBase {
 
 class ProfileViewModel {
 
-    private readonly msgNotFound = "用户不存在或服务器错误！";
+    async fetchProfile(account: Account): Promise<IFetchResult<Profile>> {
+        try {
+            const profile = await profileRepo.fetchProfile(account.id);
+
+            return {
+                success: profile,
+            };
+        } catch (e) {
+            return {
+                errResp: new APIError(e),
+            };
+        }
+    }
+
+    async fetchAddress(account: Account): Promise<IFetchResult<Address>> {
+        try {
+            const addr = await profileRepo.fetchAddress(account.id);
+
+            return {
+                success: addr,
+            };
+        } catch (e) {
+            return {
+                errResp: new APIError(e),
+            }
+        }
+    }
 
     async buildProfileUI(account: Account, done?: SavedKey): Promise<UIProfile> {
 
@@ -88,9 +124,9 @@ class ProfileViewModel {
     /**
      * @description Update user name.
      */
-    async validateName(data: INameFormData): Promise<IFormState<INameFormData>> {
+    async validateName(data: IName): Promise<IFormState<IName>> {
         try {
-            const result = await validate<INameFormData>(data, userNameSchema);
+            const result = await validate<IName>(data, userNameSchema);
 
             return {
                 values: result,
@@ -99,12 +135,12 @@ class ProfileViewModel {
             const ex: ValidationError = e;
 
             return {
-                errors: buildJoiErrors(ex.details) as INameFormData,
+                errors: buildJoiErrors(ex.details) as IName,
             };
         }
     }
 
-    async updateName(account: Account, formData: INameFormData): Promise<IUpdateResult<INameFormData>> {
+    async updateName(account: Account, formData: IName): Promise<IUpdateNameResult> {
         const { values, errors } = await this.validateName(formData);
 
         if (errors) {
@@ -136,15 +172,13 @@ class ProfileViewModel {
 
                 return {
                     errForm: {
-                        userName: o.get("userName") || ""
+                        userName: o.get(errResp.error.field) || ""
                     }
                 };
             }
 
             return {
-                errApi: {
-                    message: errResp.message,
-                }
+                errResp,
             }
         }
     }
@@ -155,28 +189,28 @@ class ProfileViewModel {
      * exist, thus we fetch user profile from API
      * and use the `Profile.userName` to set the form input value.
      */
-    async buildNameUI(
-        account: Account, 
-        formData?: INameFormData, 
-        result?: IUpdateResult<INameFormData>
-    ): Promise<UISingleInput> {
+    buildNameUI(
+        formData?: IName, 
+        result?: IUpdateNameResult,
+    ): UISingleInput {
 
         if (formData) {
             formData.userName = formData.userName.trim();
         }
 
-        if (!formData) {
-            const success = await profileRepo.fetchProfile(account.id);
+        // if (!formData) {
+        //     const success = await profileRepo.fetchProfile(account.id);
 
-            formData = {
-                userName: success.userName || "",
-            };
-        }
+        //     formData = {
+        //         userName: success.userName || "",
+        //     };
+        // }
 
+        const { errForm, errResp } = result || {};
         return {
             // Contains API error for PATCH request.
-            errors: (result && result.errApi)
-                ? result.errApi
+            errors: errResp
+                ? { message: errResp.message }
                 : undefined,
             heading: "用户名",
             input: {
@@ -187,8 +221,8 @@ class ProfileViewModel {
                 value: formData ? formData.userName : "",
                 maxlength: "64",
                 desc: "20字符以内",
-                error: (result && result.errForm) 
-                    ? result.errForm.userName 
+                error: errForm 
+                    ? errForm.userName 
                     : undefined,
             }
         };
@@ -197,9 +231,9 @@ class ProfileViewModel {
     /**
      * @description Update mobile
      */
-    async validateMobile(data: IMobileFormData): Promise<IFormState<IMobileFormData>> {
+    async validateMobile(data: IMobile): Promise<IFormState<IMobile>> {
         try {
-            const result = await validate<IMobileFormData>(data, mobileSchema);
+            const result = await validate<IMobile>(data, mobileSchema);
 
             return {
                 values: result,
@@ -208,12 +242,12 @@ class ProfileViewModel {
             const ex: ValidationError = e;
 
             return {
-                errors: buildJoiErrors(ex.details) as IMobileFormData,
+                errors: buildJoiErrors(ex.details) as IMobile,
             };
         }
     }
 
-    async updateMobile(account: Account, formData: IMobileFormData): Promise<IUpdateResult<IMobileFormData>> {
+    async updateMobile(account: Account, formData: IMobile): Promise<IUpdateMobileResult> {
         const { values, errors } = await this.validateMobile(formData);
 
         if (errors) {
@@ -243,15 +277,13 @@ class ProfileViewModel {
 
                 return {
                     errForm: {
-                        mobile: o.get("mobile") || ""
+                        mobile: o.get(errResp.error.field) || ""
                     }
                 };
             }
 
             return {
-                errApi: {
-                    message: errResp.message,
-                }
+                errResp,
             }
         }
     }
@@ -262,24 +294,17 @@ class ProfileViewModel {
      * exist, thus we fetch user profile from API
      * and use the `Profile.userName` to set the form input value.
      */
-    async buildMobileUI(account: Account, formData?: IMobileFormData, result?: IUpdateResult<IMobileFormData>): Promise<UISingleInput> {
+    buildMobileUI(formData?: IMobile, result?: IUpdateMobileResult): UISingleInput {
 
         if (formData) {
             formData.mobile = formData.mobile.trim();
         }
 
-        if (!formData) {
-            const success = await profileRepo.fetchProfile(account.id);
-
-            formData = {
-                mobile: success.mobile || "",
-            };
-        }
-
+        const { errForm, errResp } = result || {};
         const uiData: UISingleInput = {
             // Contains API error for PATCH request.
-            errors: (result && result.errApi)
-                ? result.errApi
+            errors: errResp
+                ? { message: errResp.message}
                 : undefined,
             heading: "手机号码",
             input: {
@@ -289,8 +314,8 @@ class ProfileViewModel {
                 name: "profile[mobile]",
                 value: formData ? formData.mobile : "",
                 maxlength: "11",
-                error: (result && result.errForm) 
-                    ? result.errForm.mobile 
+                error: errForm 
+                    ? errForm.mobile 
                     : undefined,
             }
         };
@@ -298,7 +323,7 @@ class ProfileViewModel {
         return uiData;
     }
 
-    async validateProfile(data: IProfileFormData): Promise<IFormState<IProfileFormData>> {
+    async validateInfo(data: IProfileFormData): Promise<IFormState<IProfileFormData>> {
         try {
             const result = await validate<IProfileFormData>(data, profileSchema);
 
@@ -314,8 +339,8 @@ class ProfileViewModel {
         }
     }
 
-    async updateProfile(account: Account, formData: IProfileFormData): Promise<IUpdateResult<IProfileFormData>> {
-        const { values, errors } = await this.validateProfile(formData);
+    async updateInfo(account: Account, formData: IProfileFormData): Promise<IUpdateInfoResult> {
+        const { values, errors } = await this.validateInfo(formData);
 
         if (errors) {
             return {
@@ -344,41 +369,29 @@ class ProfileViewModel {
 
                 return {
                     errForm: {
-                        familyName: o.get("familyName") || "",
-                        givenName: o.get("givenName") || "",
-                        gender: o.get("gender") || "",
-                        birhtday: o.get("birthday") || "",
+                        familyName: o.get(errResp.error.field) || "",
+                        givenName: o.get(errResp.error.field) || "",
+                        gender: o.get(errResp.error.field) || "",
+                        birhtday: o.get(errResp.error.field) || "",
                     },
                 };
             }
 
             return {
-                errApi: {
-                    message: errResp.message,
-                }
+                errResp,
             }
         }
     }
 
-    async buildInfoUI(
-        account: Account, 
+    buildInfoUI(
         formData?: IProfileFormData, 
-        result?: IUpdateResult<IProfileFormData>,
-    ): Promise<UIPersonalInfo> {
-        if (!formData) {
-            const success = await profileRepo.fetchProfile(account.id)
+        result?: IUpdateInfoResult,
+    ): UIPersonalInfo {
 
-            formData = {
-                familyName: success.familyName,
-                givenName: success.givenName,
-                gender: success.gender,
-                birhtday: success.birthday,
-            };
-        }
-
+        const { errForm, errResp } = result || {};
         return {
-            errors: (result && result.errApi)
-                ? result.errApi
+            errors: errResp
+                ? { message: errResp.message }
                 : undefined,
             form: {
                 nameInputs: [
@@ -388,8 +401,8 @@ class ProfileViewModel {
                         id: "familyName",
                         name: "profile[familyName]",
                         value: formData ? formData.familyName : "",
-                        error: (result && result.errForm)
-                            ? result.errForm.familyName
+                        error: errForm
+                            ? errForm.familyName
                             : undefined,
                     },
                     {
@@ -398,8 +411,8 @@ class ProfileViewModel {
                         id: "givenName",
                         name: "profile[givenName]",
                         value: formData ? formData.familyName : "",
-                        error: (result && result.errForm)
-                            ? result.errForm.familyName
+                        error: errForm
+                            ? errForm.familyName
                             : undefined,
                     }
                 ],
@@ -424,8 +437,8 @@ class ProfileViewModel {
                                 : false,
                         }
                     ],
-                    error: (result && result.errForm)
-                        ? result.errForm.gender
+                    error: errForm
+                        ? errForm.gender
                         : undefined,
                 },
                 birthdayInput: {
@@ -434,8 +447,8 @@ class ProfileViewModel {
                     type: "date",
                     name: "profile[birthday]",
                     value: formData ? formData.birhtday : undefined,
-                    error: (result && result.errForm)
-                        ? result.errForm.birhtday
+                    error: errForm
+                        ? errForm.birhtday
                         : undefined,
                 },    
             },
@@ -458,7 +471,7 @@ class ProfileViewModel {
         }
     }
 
-    async updateAddress(account: Account, formData: IAddress): Promise<IUpdateResult<IAddress>> {
+    async updateAddress(account: Account, formData: IAddress): Promise<IUpdateAddressResult> {
         const { values, errors } = await this.validateAddress(formData);
 
         if (errors) {
@@ -488,33 +501,29 @@ class ProfileViewModel {
 
                 return {
                     errForm: {
-                        country: o.get("country") || "",
-                        province: o.get("province") || "",
-                        city: o.get("city") || "",
-                        district: o.get("district") || "",
-                        street: o.get("street") || "",
-                        postcode: o.get("postcode") || "",
+                        country: o.get(errResp.error.field) || "",
+                        province: o.get(errResp.error.field) || "",
+                        city: o.get(errResp.error.field) || "",
+                        district: o.get(errResp.error.field) || "",
+                        street: o.get(errResp.error.field) || "",
+                        postcode: o.get(errResp.error.field) || "",
                     },
                 };
             }
 
             return {
-                errApi: {
-                    message: errResp.message,
-                }
+                errResp,
             }
         }
     }
 
-    async buildAddressUI(account: Account, formData?: IAddress, result?: IUpdateResult<IAddress>): Promise<UIAddress> {
-        if (!formData) {
-            const success = await profileRepo.fetchAddress(account.id)
+    buildAddressUI(formData?: IAddress, result?: IUpdateAddressResult): UIAddress {
 
-            formData = success;
-        }
-
+        const { errForm, errResp } = result || {};
         return {
-            errors: (result && result.errApi) ? result.errApi : undefined,
+            errors: errResp ? {
+                message: errResp.message,
+            } : undefined,
             formRows: [
                 [
                     {
@@ -522,9 +531,9 @@ class ProfileViewModel {
                         type: "text",
                         id: "country",
                         name: "address[country]",
-                        value: formData.country,
-                        error: (result && result.errForm)
-                            ? result.errForm.country
+                        value: formData ? formData.country : "",
+                        error: errForm
+                            ? errForm.country
                             : undefined
                     }
                 ],
@@ -534,9 +543,9 @@ class ProfileViewModel {
                         type: "text",
                         id: "province",
                         name: "address[province]",
-                        value: formData.province,
-                        error: (result && result.errForm)
-                            ? result.errForm.province
+                        value: formData ? formData.province : "",
+                        error: errForm
+                            ? errForm.province
                             : undefined,
                         col: 4,
                     },
@@ -545,9 +554,9 @@ class ProfileViewModel {
                         type: "text",
                         id: "city",
                         name: "address[city]",
-                        value: formData.city,
-                        error: (result && result.errForm)
-                            ? result.errForm.city
+                        value: formData ? formData.city : "",
+                        error: errForm
+                            ? errForm.city
                             : undefined,
                         col: 4,
                     },
@@ -556,9 +565,9 @@ class ProfileViewModel {
                         type: "text",
                         id: "district",
                         name: "address[district]",
-                        value: formData.district,
-                        error: (result && result.errForm)
-                            ? result.errForm.district
+                        value: formData ? formData.district : "",
+                        error: errForm
+                            ? errForm.district
                             : undefined,
                         col: 4,
                     }
@@ -569,9 +578,9 @@ class ProfileViewModel {
                         type: "text",
                         id: "street",
                         name: "address[street]",
-                        value: formData.street,
-                        error: (result && result.errForm)
-                            ? result.errForm.street
+                        value: formData ? formData.street : "",
+                        error: errForm
+                            ? errForm.street
                             : undefined,
                         col: 10,
                     },
@@ -580,9 +589,9 @@ class ProfileViewModel {
                         type: "text",
                         id: "postcode",
                         name: "address[postcode]",
-                        value: formData.postcode,
-                        error: (result && result.errForm)
-                            ? result.errForm.postcode
+                        value: formData ? formData.postcode : "",
+                        error: errForm
+                            ? errForm.postcode
                             : undefined,
                         col: 2,
                     },
