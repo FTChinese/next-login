@@ -7,14 +7,18 @@ import {
     Plan,
 } from "../models/paywall";
 import { 
-    subsApiBase,
+    subsApiBase, subsApi, KEY_APP_ID,
 } from "../config/api";
 import { 
     AliOrder, 
     WxOrder,
     aliOrderSerializer,
     wxOrderSerializer,
+    IWxQueryResult,
 } from "../models/order";
+import {
+    viper,
+} from "../config/viper";
 
 class Subscription {
     readonly aliReturnUrl: string = "http://next.ftchinese.com/user/subscription/done/ali";
@@ -56,6 +60,17 @@ class Subscription {
             .set(app);
 
         return wxOrderSerializer.parse(resp.text)!;
+    }
+
+    async wxOrderQuery(accout: Account, orderId: string): Promise<IWxQueryResult> {
+        const appId = viper.getConfig().wxapp.web_pay.app_id;
+
+        const resp = await request
+            .get(subsApi.wxQueryOrder(orderId))
+            .set(KEY_APP_ID, appId)
+            .set(accout.idHeaders);
+
+        return resp.body as IWxQueryResult;
     }
 }
 
