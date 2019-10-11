@@ -9,6 +9,10 @@ import {
     OrderType, 
     PaymentMethod ,
 } from "./enums";
+import {
+    localizeTier,
+    localizeCycle,
+} from "./localization";
 
 @jsonObject
 export class OrderBase {
@@ -41,6 +45,10 @@ export class OrderBase {
 
     @jsonMember
     createdAt: string;
+
+    get productName(): string {
+        return `${localizeTier(this.tier)}/${localizeCycle(this.cycle)}`;
+    }
 }
 
 export const orderSerializer = new TypedJSON(OrderBase);
@@ -63,7 +71,7 @@ export class WxOrder extends OrderBase {
 
 export const wxOrderSerializer = new TypedJSON(WxOrder);
 
-export interface AliCallback {
+export interface IAliCallback {
     charset: string;
     out_trade_no: string;
     method: string;
@@ -76,4 +84,13 @@ export interface AliCallback {
     sign_type: string;
     seller_id: string;
     timestamp: string;
+}
+
+export interface IWxQueryResult {
+    paymentState: "SUCCESS" | "REFUND" | "NOTPAY" | "CLOSED" | "REVOKED" | "USERPAYING" | "PAYERROR";
+    paymentStateDesc: string;
+    totalFee: number;
+    transactionId: string;
+    ftcOrderId: string;
+    paidAt: string;
 }
