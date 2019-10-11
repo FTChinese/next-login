@@ -12,12 +12,18 @@ export interface IWxApp {
     secret: string;
 }
 
+export interface IWxPayApp extends IWxApp {
+    mch_id: string;
+    api_key: string;
+}
+
 interface Env {
     koa_session: {
         next_user: string;
     };
     wxapp: {
-        w_ftc: IWxApp;
+        web_pay: IWxPayApp;
+        web_oauth: IWxApp;
     },
     oauth_client: {
         fta_dev: IOAuthClient;
