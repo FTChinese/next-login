@@ -8,8 +8,8 @@ import {
 } from "../config/api";
 import { 
     Profile,
-    INameFormData,
-    IMobileFormData,
+    IName,
+    IMobile,
     Address,
     IAddress,
     IProfileFormData,
@@ -36,7 +36,7 @@ class ProfileRepo {
         return addressSerializer.parse(resp.text)!;
     }
 
-    async updateName(ftcId: string, data: INameFormData): Promise<boolean> {
+    async updateName(ftcId: string, data: IName): Promise<boolean> {
         const resp = await request
             .patch(readerApi.name)
             .set(KEY_USER_ID, ftcId)
@@ -45,7 +45,7 @@ class ProfileRepo {
         return resp.noContent;
     }
 
-    async updateMobile(ftcId: string, data: IMobileFormData): Promise<boolean> {
+    async updateMobile(ftcId: string, data: IMobile): Promise<boolean> {
         const resp = await request
             .patch(readerApi.mobile)
             .set(KEY_USER_ID, ftcId)
