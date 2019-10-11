@@ -46,7 +46,7 @@ const invalids: Dictionary<InvalidMsg> = {
         already_exists: "该邮箱已经注册FT中文网账号，请使用其他邮箱"
     },
     password: {
-        missing_field: "当前密码不能为空",
+        missing_field: "密码不能为空",
         invalid: "密码不合法",
     },
     oldPassword: {
