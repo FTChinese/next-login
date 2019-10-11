@@ -7,14 +7,14 @@ const path = require("path");
 async function buildSass() {
   try {
     const result = await render({
-      file: path.resolve(__dirname, "../client/scss/main.scss"),
+      file: path.resolve(__dirname, "./client/scss/main.scss"),
       outFile: "bundle.css",
       outputStyle: "expanded",
       sourceMap: true,
 
     });
 
-    const dir = path.resolve(__dirname, "../dist/style");
+    const dir = path.resolve(__dirname, "../../dist/style");
     await Promise.all([
       fs.writeFile(`${dir}/bundle.css`, result.css),
       fs.writeFile(`${dir}/bundle.css.map`, result.map),

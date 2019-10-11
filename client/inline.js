@@ -8,7 +8,7 @@ const style = `<link inline rel="stylesheet" href="build/production/main.css">`
 async function inlineJs() {
   const html = await inlineSource(script);
 
-  const dest = path.resolve(__dirname, "../view/assets/script.html");
+  const dest = path.resolve(__dirname, "../../view/assets/script.html");
 
   console.log(`Wrting file to ${dest}`);
 
@@ -18,7 +18,7 @@ async function inlineJs() {
 async function inlineCss() {
   const html = await inlineSource(style);
 
-  const dest = path.resolve(__dirname, "../view/assets/style.html");
+  const dest = path.resolve(__dirname, "../../view/assets/style.html");
 
   console.log(`Writing file to ${dest}`);
 
