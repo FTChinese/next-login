@@ -63,7 +63,7 @@ export interface IOAuthSession {
 
 
 export class OAuthClient {
-    private app: IWxApp = viper.getConfig().wxapp.w_ftc;
+    private app: IWxApp = viper.getConfig().wxapp.web_oauth;
     private codeUrl: string = "https://open.weixin.qq.com/connect/qrconnect";
     private subsApiBaseUrl: string;
 
