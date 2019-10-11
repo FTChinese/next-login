@@ -17,3 +17,7 @@ export function iso8601ToCST(str: string): string {
 export function formatMoney(num: number): string {
     return numeral(num).format("0,0.00");
 }
+
+export function formatMoneyInCent(cent: number): string {
+    return formatMoney(cent / 100);
+}
