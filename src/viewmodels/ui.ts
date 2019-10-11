@@ -118,6 +118,7 @@ export interface UIBase {
 }
 
 export interface UISingleInput extends UIBase {
+    heading?: string;
     input: ITextInput;
 }
 
