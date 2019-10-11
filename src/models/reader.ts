@@ -288,11 +288,11 @@ export interface IPasswordReset {
     password: string;
 }
 
-export interface INameFormData {
+export interface IName {
     userName: string;
 }
 
-export interface IMobileFormData {
+export interface IMobile {
     mobile: string;
 }
 
