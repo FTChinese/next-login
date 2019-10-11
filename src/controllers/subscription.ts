@@ -21,7 +21,7 @@ import {
 } from "../config/viper";
 import { scheduler } from "../models/paywall";
 import { subRepo } from "../repository/subscription";
-import { AliOrder, AliCallback, orderSerializer } from "../models/order";
+import { AliOrder, IAliCallback, orderSerializer, IWxQueryResult } from "../models/order";
 import { APIError } from "../viewmodels/api-response";
 
 const log = debug("user:subscription");
@@ -225,44 +225,86 @@ router.post("/pay/:tier/:cycle", appHeader(), async (ctx, next) => {
  */
 router.get("/done/ali", async (ctx, next) => {
     const account: Account = ctx.state.user;
-    const query: AliCallback = ctx.request.query;
+    const query: IAliCallback = ctx.request.query;
     const orderData = ctx.session.order;
 
-    const order = orderSerializer.parse(orderData);
+    const order = orderSerializer.parse(orderData)!;
 
-    const { success, errResp } = await subViewModel.refresh(account);
+    const { success, invalid, errResp } = await subViewModel.aliPayDone(
+        account,
+        order,
+        query,
+    );
 
-    if (errResp) {
-        ctx.state.errors = {
-            message: errResp.message,
-        };
+    if (!success) {
+        const uiData = subViewModel.buildAliResultUI(
+            order,
+            query,
+            { invalid, errResp },
+        );
+
+        Object.assign(ctx.state, uiData);
 
         return await next();
     }
 
-    if (!success) {
-        throw new Error("Unknown error occurred");
-    }
-
     ctx.session.user = success;
-
-    
+    Object.assign(ctx.state, subViewModel.buildAliResultUI(
+        order,
+        query,
+        {},
+    ));
     // For development, keep session to test ui.
     if (isProduction) {
       delete ctx.session.order;
     }
+
+    return await next();
 }, async (ctx, next) => {
-    ctx.body = await render("subscription/alipay-done.html", ctx.state);
+    ctx.body = await render("subscription/pay-done.html", ctx.state);
 });
 
 router.get("/done/wx", async (ctx, next) => {
+    const account: Account = ctx.state.user;
+    const orderData = ctx.session.order;
+    const order = orderSerializer.parse(orderData)!;
 
-}, async (ctx) => {
-    ctx.body = await render("subscription/wxpay-done.html", ctx.state);
+    // To test UI.
+    // const queryResult: IWxQueryResult = {
+    //     "paymentState": "SUCCESS",
+    //     "paymentStateDesc": "支付成功",
+    //     "totalFee": 1,
+    //     "transactionId": "4200000252201903069440709666",
+    //     "ftcOrderId": "FT1D3CEDDB2599EFB9",
+    //     "paidAt": "2019-03-06T07:21:18Z"
+    // };
+
+    const { success, invalid, errResp, queryResult } = await subViewModel.wxPayDone(account, order.id);
+
+    if (!success) {
+        const uiData = subViewModel.buildWxResultUI(
+            order,
+            { invalid, errResp, queryResult },
+        );
+
+        Object.assign(ctx.state, uiData);
+
+        return await next();
+    }
+
+    ctx.session.user = success;
+    Object.assign(ctx.state, subViewModel.buildWxResultUI(
+        order,
+        { queryResult },
+    ));
 
     if (isProduction) {
         delete ctx.session.subs;
     }
+
+    return await next();
+}, async (ctx) => {
+    ctx.body = await render("subscription/pay-done.html", ctx.state);
 });
 
 export default router.routes();
