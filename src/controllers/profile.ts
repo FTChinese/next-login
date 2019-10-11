@@ -4,8 +4,8 @@ import render from "../util/render";
 import { 
     Account,
     IProfileFormData,
-    INameFormData,
-    IMobileFormData,
+    IName,
+    IMobile,
     IAddress,
 } from "../models/reader";
 import {
@@ -52,7 +52,12 @@ router.get("/", async (ctx, next) => {
 router.get("/display-name", async (ctx, next) => {
     const account: Account = ctx.session.user;
 
-    const uiData = await profileViewModel.buildNameUI(account);
+    const { success, errResp } = await profileViewModel.fetchProfile(account);
+
+    const uiData = await profileViewModel.buildNameUI(
+        success ? { userName: success.userName || "" } : undefined,
+        { errResp }
+    );
 
     Object.assign(ctx.state, uiData);
 
@@ -62,15 +67,14 @@ router.get("/display-name", async (ctx, next) => {
 router.post("/display-name", async (ctx, next) => {
     const account: Account = ctx.session.user;
 
-    const formData: INameFormData = ctx.request.body.profile;
+    const formData: IName = ctx.request.body.profile;
 
-    const { success, errForm, errApi } = await profileViewModel.updateName(account, formData);
+    const { success, errForm, errResp } = await profileViewModel.updateName(account, formData);
 
     if (!success) {
         const uiData = await profileViewModel.buildNameUI(
-            account, 
             formData, 
-            { errForm, errApi },
+            { errForm, errResp },
         );
 
         Object.assign(ctx.state, uiData);
@@ -91,7 +95,12 @@ router.post("/display-name", async (ctx, next) => {
 router.get("/mobile", async (ctx, next) => {
     const account: Account = ctx.session.user;
 
-    const uiData = await profileViewModel.buildMobileUI(account);
+    const { success, errResp } = await profileViewModel.fetchProfile(account);
+
+    const uiData = profileViewModel.buildMobileUI(
+        success ? { mobile: success.mobile || "" } : undefined,
+        { errResp },
+    );
 
     Object.assign(ctx.state, uiData);
 
@@ -101,15 +110,14 @@ router.get("/mobile", async (ctx, next) => {
 router.post("/mobile", async (ctx, next) => {
     const account: Account = ctx.session.user;
 
-    const formData: IMobileFormData = ctx.request.body.profile;
+    const formData: IMobile = ctx.request.body.profile;
 
-    const { success, errForm, errApi } = await profileViewModel.updateMobile(account, formData);
+    const { success, errForm, errResp } = await profileViewModel.updateMobile(account, formData);
 
     if (!success) {
         const uiData = await profileViewModel.buildMobileUI(
-            account, 
             formData, 
-            { errForm, errApi },
+            { errForm, errResp },
         );
 
         Object.assign(ctx.state, uiData);
@@ -129,7 +137,17 @@ router.post("/mobile", async (ctx, next) => {
 router.get("/info", async (ctx, next) => {
     const account: Account = ctx.session.user;
 
-    const uiData = await profileViewModel.buildInfoUI(account);
+    const { success, errResp } = await profileViewModel.fetchProfile(account);
+
+    const uiData = await profileViewModel.buildInfoUI(
+        success ? {
+            familyName: success.familyName,
+            givenName: success.givenName,
+            gender: success.gender,
+            birhtday: success.birthday,
+        } : undefined,
+        { errResp },
+    );
 
     Object.assign(ctx.state, uiData);
 
@@ -144,13 +162,12 @@ router.post("/info", async (ctx, next) => {
         throw new Error("form data not found to update profile");
     }
 
-    const { success, errForm, errApi } = await profileViewModel.updateProfile(account, formData)
+    const { success, errForm, errResp } = await profileViewModel.updateInfo(account, formData)
 
     if (!success) {
         const uiData = profileViewModel.buildInfoUI(
-            account, 
             formData, 
-            { errForm, errApi }
+            { errForm, errResp }
         );
 
         Object.assign(ctx.state, uiData);
@@ -171,7 +188,12 @@ router.get("/address", async (ctx, next) => {
 
     const account: Account = ctx.session.user;
 
-    const uiData = await profileViewModel.buildAddressUI(account);
+    const { success, errResp } = await profileViewModel.fetchAddress(account);
+
+    const uiData = await profileViewModel.buildAddressUI(
+        success,
+        { errResp }
+    );
 
     Object.assign(ctx.state, uiData);
 
@@ -186,13 +208,12 @@ router.post("/address", async (ctx, next) => {
         throw new Error("form data to upate address not found");
     }
 
-    const { success, errForm, errApi } = await profileViewModel.updateAddress(account, formData);
+    const { success, errForm, errResp } = await profileViewModel.updateAddress(account, formData);
 
     if (!success) {
         const uiData = await profileViewModel.buildAddressUI(
-            account, 
             formData,
-            { errForm, errApi },
+            { errForm, errResp },
         );
 
         Object.assign(ctx.state, uiData);
