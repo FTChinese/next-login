@@ -6,7 +6,7 @@ import {
 import { Tier, Cycle } from "./enums";
 import { subsMap } from "../config/sitemap";
 import { 
-    currencySymbols, localizeCycle,  
+    currencySymbols, localizeCycle, localizeTier,  
 } from "./localization";
 import { formatMoney } from "../util/formatter";
 import { Dictionary } from "./data-types";
@@ -95,6 +95,10 @@ export class Plan {
         this.amount = 1998;
         this.currency = "cny";
         this.description = "FT中文网 - 年度高端会员";
+    }
+
+    get productName(): string {
+        return `${localizeTier(this.tier)}/${localizeCycle(this.cycle)}`;
     }
 
     // Divisor shoud be 30 for monthly subscription, and
