@@ -4,7 +4,7 @@ import {
 } from "@hapi/joi";
 import {
     ITextInput,
-    UIBase,
+    UIMultiInputs,
 } from "./ui";
 import {
     loginSchema,
@@ -33,7 +33,7 @@ interface ILoginResult extends IFetchResult<Account> {
     errForm?: ICredentials;
 }
 
-interface UILogin extends UIBase {
+interface UILogin extends UIMultiInputs {
     inputs: Array<ITextInput>;
     pwResetLink: string;
     signUpLink: string;
@@ -43,32 +43,6 @@ interface UILogin extends UIBase {
 
 class LoginViewModel {
     private readonly msgInvalidCredentials = "邮箱或密码错误";
-
-    private buildInputs(values?: ICredentials, errors?: ICredentials): Array<ITextInput> {
-        return [
-            {
-                label: "邮箱",
-                id: "email",
-                type: "email",
-                name: "credentials[email]",
-                value: values ? values.email : "",
-                placeholder: "电子邮箱",
-                maxlength: "64",
-                required: true,
-                error: errors ? errors.email : "",
-            },
-            {
-                label: "密码",
-                id: "password",
-                type: "password",
-                name: "credentials[password]",
-                placeholder: "密码",
-                maxlength: "64",
-                required: true,
-                error: errors ? errors.password : "",
-            }
-        ];
-    }
 
     async validate(input: ICredentials): Promise<IFormState<ICredentials>> {
         try {
@@ -118,8 +92,8 @@ class LoginViewModel {
 
                 return {
                     errForm: {
-                        email: o.get("email") || "",
-                        password: o.get("password") || "",
+                        email: o.get(errResp.error.field) || "",
+                        password: o.get(errResp.error.field) || "",
                     }
                 }
             }
@@ -135,21 +109,38 @@ class LoginViewModel {
             formData.email = formData.email.trim();
         }
 
+        const { errForm, errResp } = result || {};
         const uiData: UILogin = {
-            inputs: this.buildInputs(
-                formData, 
-                result 
-                    ? result.errForm 
-                    : undefined,
-            ),
+            inputs: [
+                {
+                    label: "邮箱",
+                    id: "email",
+                    type: "email",
+                    name: "credentials[email]",
+                    value: formData ? formData.email : "",
+                    placeholder: "电子邮箱",
+                    maxlength: "64",
+                    required: true,
+                    error: errForm ? errForm.email : "",
+                },
+                {
+                    label: "密码",
+                    id: "password",
+                    type: "password",
+                    name: "credentials[password]",
+                    placeholder: "密码",
+                    maxlength: "64",
+                    required: true,
+                    error: errForm ? errForm.password : "",
+                }
+            ],
             pwResetLink: entranceMap.passwordReset,
             signUpLink: entranceMap.signup,
             wxLoginLink: entranceMap.wxLogin,
             wxIcon: "https://open.weixin.qq.com/zh_CN/htmledition/res/assets/res-design-download/icon32_wx_button.png",
         };
 
-        if (result && result.errResp) {
-            const errResp = result.errResp;
+        if (errResp) {
 
             if (errResp.notFound || errResp.forbidden) {
                 uiData.alert = {
