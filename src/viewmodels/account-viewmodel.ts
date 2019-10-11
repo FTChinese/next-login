@@ -1,18 +1,20 @@
 import {
     validate,
     ValidationError,
+    string,
 } from "@hapi/joi";
 import debug from "debug";
 import {
     UIBase, 
-    ITextInput,
     IListItem,
-    IUpdateResult,
     SavedKey,
     getDoneMsg,
+    UISingleInput,
+    UIMultiInputs,
 } from "./ui";
 import {
     APIError,
+    IFetchResult,
 } from "./api-response";
 import {
     emailSchema,
@@ -30,7 +32,8 @@ import {
 } from "../repository/account";
 
 import {
-    accountMap, entranceMap,
+    accountMap, 
+    entranceMap,
 } from "../config/sitemap";
 
 const log = debug("user:profile-viewmodel");
@@ -40,22 +43,25 @@ interface ISection {
     items: Array<IListItem>;
 }
 
+interface UIAccount extends UIBase {
+    sections?: Array<ISection>;
+}
+
+interface IUpdateEmailResult extends IFetchResult<boolean> {
+    errForm?: IEmail;
+}
+
 export interface IPasswordsFormData {
     oldPassword: string;
     password: string;
     confirmPassword: string;
 }
 
-interface UIAccount extends UIBase {
-    sections?: Array<ISection>;
+interface IUpdatePwResult extends IFetchResult<boolean> {
+    errForm?: IPasswordsFormData;
 }
 
-interface UIUpdateEmail extends UIBase {
-    input?: ITextInput;
-}
-
-interface UIUPdatePassword extends UIBase {
-    inputs: Array<ITextInput>;
+interface UIUPdatePassword extends UIMultiInputs {
     passwordResetLink: string;
 }
 
@@ -64,31 +70,52 @@ class AccountViewModel {
     private readonly msgNotFound = "用户不存在或服务器错误！";
     private readonly msgPwIncorrect = "当前密码错误";
 
-    async refresh(account: Account): Promise<Account> {
-        switch (account.loginMethod) {
-            case "email":
-                return accountRepo.fetchFtcAccount(account.id);
+    async refresh(account: Account): Promise<IFetchResult<Account>> {
+        try {
+            switch (account.loginMethod) {
+                case "email": {
+                    const acnt = await accountRepo.fetchFtcAccount(account.id);
 
-            case "wechat":
-                return accountRepo.fetchWxAccount(account.unionId!);
+                    return {
+                        success: acnt,
+                    };
+                }
 
-            default:
-                throw new Error("unknown account type");
+                case "wechat": {
+                    const acnt = await accountRepo.fetchWxAccount(account.unionId!);
+
+                    return {
+                        success: acnt,
+                    }
+                }
+    
+                default:
+                    throw new Error("unknown account type");
+            }
+        } catch (e) {
+            return {
+                errResp: new APIError(e),
+            };
         }
     }
 
-    async buildAccountUI(account: Account, done?: SavedKey): Promise<UIAccount> {
-
+    buildAccountUI(result?: IFetchResult<Account>, done?: SavedKey): UIAccount {
+        const { success, errResp } = result || {};
         return {
+            errors: errResp ? {
+                message: errResp.notFound
+                    ? this.msgNotFound
+                    : errResp.message
+            } : undefined,
             alert: done
                 ? { message: getDoneMsg(done) }
                 : undefined,
-            sections: [
+            sections: success ? [
                 {
                     items: [
                         {
                             label: "登录邮箱",
-                            value: account.email,
+                            value: success.email,
                             link: accountMap.email,
                         },
                         {
@@ -102,19 +129,19 @@ class AccountViewModel {
                     items: [
                         {
                             label: "微信",
-                            value: account.isLinked()
-                                ? `已绑定 ${account.wechat.nickname}`
+                            value: success.isLinked()
+                                ? `已绑定 ${success.wechat.nickname}`
                                 : "",
-                            link: account.isLinked()
+                            link: success.isLinked()
                                 ? accountMap.unlinkWx
                                 : entranceMap.wxLogin,
-                            linkText: account.isLinked()
+                            linkText: success.isLinked()
                                 ? "解除绑定"
                                 : "尚未绑定"
                         }
                     ]
                 }
-            ],
+            ] : undefined,
         };
     }
 
@@ -137,7 +164,7 @@ class AccountViewModel {
         }
     }
 
-    async updateEmail(account: Account, formData: IEmail): Promise<IUpdateResult<IEmail>> {
+    async updateEmail(account: Account, formData: IEmail): Promise<IUpdateEmailResult> {
         const { values, errors } = await this.validateEmail(formData);
 
         if (errors) {
@@ -160,40 +187,39 @@ class AccountViewModel {
                 success: ok,
             };
         } catch (e) {
+
             const errResp = new APIError(e);
 
             if (errResp.error) {
+                // error.field: "email"
+                // error.code: "missing_field" | "invalid"
                 const o = errResp.error.toMap();
-
-                log("Error message: %O", o);
 
                 return {
                     errForm: {
-                        email: o.get("email") || ""
-                    }
+                        email: o.get(errResp.error.code) || "",
+                    },
                 };
             }
 
             return {
-                errApi: {
-                    message: errResp.message,
-                },
+                errResp,
             };
         }
     }
 
-    async buildEmailUI(account: Account, formData?: IEmail, result?: IUpdateResult<IEmail>): Promise<UIUpdateEmail> {
-        if (!formData) {
-            const success = await accountRepo.fetchFtcAccount(account.id);
+    /**
+     * `formData` should always present unless API errored and data cannot be fetch.
+     * For GET use `Account` to compose this `formData`;
+     * For POSt just use the submitted form data.
+     */
+    buildEmailUI(formData?: IEmail, result?: IUpdateEmailResult): UISingleInput {
 
-            formData = {
-                email: success.email,
-            };
-        }
+        const { errForm, errResp } = result || {};
 
         return {
-            errors: (result && result.errApi)
-                ? result.errApi
+            errors: errResp
+                ? { message: errResp.message }
                 : undefined,
             input: {
                 label: "",
@@ -202,8 +228,8 @@ class AccountViewModel {
                 name: "email",
                 value: formData ? formData.email : "",
                 placeholder: "email@example.org",
-                error: (result && result.errForm)
-                    ? result.errForm.email
+                error: errForm
+                    ? errForm.email
                     : undefined,
             }
         };
@@ -225,7 +251,7 @@ class AccountViewModel {
         }
     }
 
-    async updatePassword(account: Account, formData: IPasswordsFormData): Promise<IUpdateResult<IPasswordsFormData>> {
+    async updatePassword(account: Account, formData: IPasswordsFormData): Promise<IUpdatePwResult> {
         const { values, errors } = await this.validatePasswords(formData);
 
         if (errors) {
@@ -265,29 +291,33 @@ class AccountViewModel {
             }
 
             if (errResp.error) {
+                // field: "oldPassword" | "newPassword"
+                // code: "missing_fied" | "invalid"
+                // This generates 
                 const o = errResp.error.toMap();
+
                 return {
                     errForm: {
-                        oldPassword: o.get("oldPassword") || "",
-                        password: o.get("newPassword") || "",
+                        oldPassword: o.get(errResp.error.field) || "",
+                        password: o.get(errResp.error.field) || "",
                         confirmPassword: "",
                     }
-                };
+                }
             }
 
             return {
-                errApi: {
-                    message: errResp.message
-                }
+                errResp,
             };
         }
     }
 
-    buildPasswordsUI(result?: IUpdateResult<IPasswordsFormData>): UIUPdatePassword {
+    buildPasswordsUI(result?: IUpdatePwResult): UIUPdatePassword {
+
+        const { errForm, errResp} = result || {};
 
         return {
-            errors: (result && result.errApi) 
-                ? result.errApi 
+            errors: errResp
+                ? { message: errResp.message }
                 : undefined,
             inputs: [
                 {
@@ -298,8 +328,8 @@ class AccountViewModel {
                     placeholder: "",
                     required: true,
                     desc: "",
-                    error: (result && result.errForm) 
-                        ? result.errForm.oldPassword 
+                    error: errForm 
+                        ? errForm.oldPassword 
                         : undefined,
                 },
                 {
@@ -312,8 +342,8 @@ class AccountViewModel {
                     minlength: "8",
                     maxlength: "64",
                     desc: "最少8个字符",
-                    error: (result && result.errForm) 
-                        ? result.errForm.password 
+                    error: errForm
+                        ? errForm.password 
                         : undefined,
                 },
                 {
@@ -326,8 +356,8 @@ class AccountViewModel {
                     minlength: "8",
                     maxlength: "64",
                     desc: "两次输入的新密码须一致",
-                    error: (result && result.errForm) 
-                        ? result.errForm.password 
+                    error: errForm
+                        ? errForm.password 
                         : undefined,
                 },
             ],

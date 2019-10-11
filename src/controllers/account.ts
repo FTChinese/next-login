@@ -28,6 +28,7 @@ import {
 import { 
     isProduction,
 } from "../config/viper";
+import { accountRepo } from "../repository/account";
 
 const router = new Router();
 
@@ -43,16 +44,30 @@ router.get("/", async (ctx, next) => {
         return await next();
     }
 
-    const latestAcnt = await accountViewModel.refresh(account);
-
     // Only exists if user perform update action.
     const key: SavedKey | undefined = ctx.session.ok;
 
-    const uiData = await accountViewModel.buildAccountUI(account, key);
+    const { success, errResp } = await accountViewModel.refresh(account);
+
+    if (!success) {
+        Object.assign(
+            ctx.state, 
+            accountViewModel.buildAccountUI(
+                { errResp },
+                key,
+            ),
+        );
+
+        return await next();
+    }
+
+    const uiData = await accountViewModel.buildAccountUI({
+        success,
+    }, key);
 
     Object.assign(ctx.state, uiData);
 
-    ctx.session.user = latestAcnt;
+    ctx.session.user = success;
 
     return await next();
 
@@ -70,7 +85,12 @@ router.get("/email", async (ctx, next) => {
         return;
     }
 
-    const uiData = await accountViewModel.buildEmailUI(account);
+    const { success, errResp } = await accountViewModel.refresh(account);
+
+    const uiData = await accountViewModel.buildEmailUI(
+        success ? { email: success.email } : undefined,
+        { errResp},
+    );
 
     Object.assign(ctx.state, uiData);
 
@@ -87,13 +107,12 @@ router.post("/email", async (ctx, next) => {
 
     const formData: IEmail = ctx.request.body;
 
-    const { success, errForm, errApi } = await accountViewModel.updateEmail(account, formData);
+    const { success, errForm, errResp } = await accountViewModel.updateEmail(account, formData);
 
     if (!success) {
         const uiData = await accountViewModel.buildEmailUI(
-            account,
             formData,
-            { errForm, errApi },
+            { errForm, errResp },
         );
 
         Object.assign(ctx.state, uiData);
@@ -130,10 +149,12 @@ router.post("/password", async (ctx, next) => {
 
     const formData: IPasswordsFormData = ctx.request.body;
 
-    const { success, errForm, errApi } = await accountViewModel.updatePassword(account, formData);
+    const { success, errForm, errResp } = await accountViewModel.updatePassword(account, formData);
 
     if (!success) {
-        const uiData = accountViewModel.buildPasswordsUI({ errForm, errApi });
+        const uiData = accountViewModel.buildPasswordsUI(
+            { errForm, errResp }
+        );
 
         Object.assign(ctx.state, uiData);
 
