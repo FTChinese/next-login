@@ -24,6 +24,7 @@ import {
 import { 
     viper 
 } from "../config/viper";
+import { AccountKind } from "../models/enums";
 
 const sessSerializer = new TypedJSON(WxSession);
 
@@ -195,6 +196,42 @@ class AccountRepo {
             .set(KEY_USER_ID, ftcId)
             .send(data);
 
+        return resp.noContent;
+    }
+
+    async link(account: Account, targetId: string): Promise<boolean> {
+        const req = request.put(readerApi.linking)
+        
+        switch (account.loginMethod) {
+            case "email":
+                req.set(KEY_UNION_ID, targetId)
+                    .send({ userId: account.id});
+
+                break;
+
+            case "wechat":
+                req.set(KEY_UNION_ID, account.unionId!)
+                    .send({ userId: targetId});
+                break;
+        }
+
+        const resp = await req;
+
+        return resp.noContent;
+    }
+
+    async unlink(account: Account, anchor?: AccountKind): Promise<boolean> {
+        const req = request
+            .delete(readerApi.linking)
+            .set(KEY_UNION_ID, account.unionId!)
+            .set(KEY_USER_ID, account.id);
+
+        if (anchor) {
+            req.set( { anchor } );
+        }
+
+        const resp = await req;
+        
         return resp.noContent;
     }
 }
