@@ -6,7 +6,7 @@ import {
     IPwResetFormData,
 } from "../viewmodels/pw-reset-viewmodel";
 import {
-    appHeader,
+    collectAppHeaders,
 } from "./middleware";
 import { 
     IAppHeader, 
@@ -45,7 +45,7 @@ router.get("/", async (ctx, next) => {
  * to the this page and show a message that email
  * is sent.
  */
-router.post("/", appHeader(),async (ctx, next) => {
+router.post("/", collectAppHeaders(),async (ctx, next) => {
     const formData: IEmail = ctx.request.body;
 
     const headers: IAppHeader = ctx.state.appHeaders;

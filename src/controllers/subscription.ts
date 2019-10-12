@@ -3,7 +3,7 @@ import debug from "debug";
 import { toDataURL } from "qrcode";
 import render from "../util/render";
 import {
-    appHeader,
+    collectAppHeaders,
 } from "./middleware";
 import {  
     Account,
@@ -115,7 +115,7 @@ router.get("/pay/:tier/:cycle", async (ctx, next) => {
  * @description Start payment process.
  * `ctx.session.order: OrderBase` is added for verification after callback.
  */
-router.post("/pay/:tier/:cycle", appHeader(), async (ctx, next) => {
+router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
     const tier: Tier = ctx.params.tier;
     const cycle: Cycle = ctx.params.cycle;
 

@@ -157,7 +157,7 @@ declare module "koa" {
     }
 }
 
-export function appHeader(): Middleware {
+export function collectAppHeaders(): Middleware {
     return async function(ctx, next) {
         const headers: IAppHeader = {
             "X-Client-Type": "web",

@@ -8,7 +8,7 @@ import {
     loginViewModel,
 } from "../viewmodels/login-viewmodel";
 import {
-    appHeader,
+    collectAppHeaders,
 } from "./middleware";
 import { 
     ICredentials, 
@@ -51,7 +51,7 @@ router.get("/", async (ctx, next) => {
 /**
  * @description Handle login form data.
  */
-router.post("/", appHeader(), async (ctx, next) => {
+router.post("/", collectAppHeaders(), async (ctx, next) => {
     /**
      * @todo Keep session longer
      */
@@ -99,7 +99,7 @@ router.get("/wechat", async (ctx, next) => {
     ctx.redirect(data.redirectUrl);
 });
 
-router.get("/wechat/test", appHeader(), async (ctx, next) => {
+router.get("/wechat/test", collectAppHeaders(), async (ctx, next) => {
     if (isProduction) {
         ctx.status = 404;
         return;
@@ -128,7 +128,7 @@ router.get("/wechat/test", appHeader(), async (ctx, next) => {
  * 
  * GET /login/wechat/callback?code=xxx&state=xxx
  */
-router.get("/wechat/callback", appHeader(), async(ctx, next) => {
+router.get("/wechat/callback", collectAppHeaders(), async(ctx, next) => {
     const query: ICallbackParams = ctx.request.query;
 
     const wxOAuthSess: IOAuthSession | undefined = ctx.session.wx_oauth;

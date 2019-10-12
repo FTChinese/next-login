@@ -22,6 +22,7 @@ import {
 import {
     Account,
     IEmail,
+    IAppHeader,
 } from "../models/reader";
 
 import {
@@ -361,6 +362,20 @@ class AccountViewModel {
             ],
             passwordResetLink: entranceMap.passwordReset,
         };
+    }
+
+    async requestVerification(account: Account, app: IAppHeader): Promise<IFetchResult<boolean>> {
+        try {
+            const ok = await accountRepo.requestVerification(account.id, app);
+
+            return {
+                success: ok,
+            };
+        } catch (e) {
+            return {
+                errResp: new APIError(e),
+            };
+        }
     }
 }
 

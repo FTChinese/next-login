@@ -4,7 +4,7 @@ import {
     signUpViewModel,
 } from "../viewmodels/signup-viewmodel";
 import {
-    appHeader,
+    collectAppHeaders,
 } from "./middleware";
 import { 
     IAppHeader,
@@ -33,7 +33,7 @@ router.get("/", async (ctx, next) => {
 /**
  * @description Handle signup data.
  */
-router.post("/", appHeader(), async (ctx, next) => {
+router.post("/", collectAppHeaders(), async (ctx, next) => {
     const formData: ISignUpFormData | undefined = ctx.request.body.credentials;
 
     if (!formData) {
