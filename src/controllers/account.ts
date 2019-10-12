@@ -20,7 +20,7 @@ import {
     IPasswordsFormData,
 } from "../viewmodels/account-viewmodel";
 import {
-    linkViewModel,
+    linkViewModel, ILinkingFormData, IUnlinkFormData,
 } from "../viewmodels/link-viewmodel";
 import {
     ISignUpFormData,
@@ -356,7 +356,10 @@ router.get("/link/merge", async (ctx, next) => {
 
     const account: Account = ctx.session.user;
 
+    // Passed from `/login/callback` or `/account/link/login`
     const targetId: string | undefined = ctx.session.uid;
+    // Passed from POST error.
+    const errMsg: string | undefined = ctx.session.errMsg;
 
     if (!targetId) {
         ctx.status = 404;
@@ -365,20 +368,83 @@ router.get("/link/merge", async (ctx, next) => {
 
     const accounts = await linkViewModel.fetchAccountToLink(account, targetId);
 
-    const uiData = linkViewModel.buildMergeUI(accounts);
+    const uiData = linkViewModel.buildMergeUI(accounts, { targetId }, errMsg);
 
     Object.assign(ctx.state, uiData);
     
     ctx.body = await render("account/merge.html", ctx.state);
+
+    delete ctx.session.uid;
+    delete ctx.session.errMsg;
 });
 
 router.post("/link/merge", async (ctx, next) => {
     const account: Account = ctx.state.user;
 
-    if (account.isWxOnly()) {
+    if (account.isLinked()) {
         ctx.status = 404;
         return;
     }
+
+    const formData: ILinkingFormData = ctx.request.body;
+
+    const { success, errForm, errResp } = await linkViewModel.mergeAccount(
+        account,
+        formData,
+    );
+
+    if (!success) {
+        // Pass error message in redirection.
+        if (errForm) {
+            ctx.session.errMsg = errForm.targetId;
+        } else if (errResp) {
+            ctx.session.errMsg = errResp.message;
+        }
+        ctx.session.uid = formData.targetId;
+        return ctx.redirect(ctx.path);
+    }
+
+    ctx.redirect(accountMap.base);
+});
+
+router.get("/unlink", async (ctx, next) => {
+    const account: Account = ctx.state.user;
+
+    if (!account.isLinked()) {
+        ctx.status = 404;
+        return;
+    }
+
+    Object.assign(ctx.state, linkViewModel.buildUnlinkUI(account));
+
+    ctx.body = await render("account/unlink.html", ctx.state);
+});
+
+router.post("/unlink", async (ctx, next) => {
+    const account: Account = ctx.state.user;
+
+    if (!account.isLinked()) {
+        ctx.status = 404;
+        return;
+    }
+
+    const formData: IUnlinkFormData = ctx.request.body;
+
+    const { success, formState, errResp } = await linkViewModel.sever(account, formData);
+
+    if (!success) {
+        Object.assign(ctx.state, linkViewModel.buildUnlinkUI(
+            account,
+            { formState, errResp },
+        ));
+
+        return await next();
+    }
+
+    ctx.redirect(accountMap.base);
+
+}, async (ctx, next) => {
+    ctx.body = await render("account/unlink.html", ctx.state);
 });
 
 export default router.routes();
