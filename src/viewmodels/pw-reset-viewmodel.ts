@@ -5,7 +5,6 @@ import {
 import {
     ITextInput,
     IActionDone,
-    ActionDoneKey,
     UIMultiInputs,
     UIBase,
 } from "./ui";
@@ -32,6 +31,7 @@ import {
 import {
     entranceMap,
 } from "../config/sitemap";
+import { KeyPwReset, getMsgReset } from "./redirection";
 
 /**
  * Passed as session data in redirect since we do not
@@ -42,13 +42,20 @@ export interface ITokenApiErrors {
     invalid?: boolean; // indicates the token is invalid.
 }
 
+// For this UI, `alert` is used to show messages that
+// password token is invalid.
+// We are reusing this UI in cases:
+// 1. Show the email input box;
+// 2. Re-display input box in case email is invalid;
+// 3. Password reset letter is sent via redirection;
+// 4. Password reset link is invalid via redirection;
 interface UIForgotPassword extends UIBase {
     input?: ITextInput; // The input box to enter email
-    done?: IActionDone; // 
+    done?: IActionDone; // Show success message if password reset letter is sent, or password is reset.
 }
 
 interface ILetterResult extends IFetchResult<boolean> {
-    errForm?: IEmail;
+    formState?: IFormState<IEmail>;
 }
 
 // Form data submitted on the resetting password page.
@@ -61,35 +68,12 @@ interface IResetPwResult extends IFetchResult<boolean> {
     errForm?: IPwResetFormData; // Client validation 
 }
 
-interface UIPwReset extends UIMultiInputs {
-    email: string;
-    inputs: Array<ITextInput>;
-}
-
 class PwResetViewModel {
 
     private readonly msgEmailNotFound: string = "该邮箱不存在，请检查您输入的邮箱是否正确";
-    private readonly msgTokenInvalid: string = "无法重置密码。您似乎使用了无效的重置密码链接，请重试";
-    private readonly msgLetterSent: string = "请检查您的邮件，点击邮件中的“重置密码”按钮修改您的密码。如果几分钟内没有看到邮件，请检查是否被放进了垃圾邮件列表。";
-    private readonly msgPwReset: string = "密码已更新";
     private readonly btnBack: string = "返回";
     private readonly btnLogin: string = "登录";
     
-    private buildEmailInput(values?: IEmail, errors?: IEmail): ITextInput {
-        return {
-            label: "",
-            id: "email",
-            type: "email",
-            name: "email",
-            value: values ? values.email : "",
-            placeholder: "登录FT中文网所用的邮箱",
-            required: true,
-            maxlength: "64",
-            desc: "请输入您的电子邮箱，我们会向该邮箱发送邮件，帮您重置密码",
-            error: errors ? errors.email : "",
-        }
-    }
-
     async validateEmail(input: IEmail): Promise<IFormState<IEmail>> {
         try {
             const result = await validate<IEmail>(input, emailSchema);
@@ -107,16 +91,16 @@ class PwResetViewModel {
         }
     }
 
-    async requestLetter(
-        formData: IEmail, 
-        app: IAppHeader
-    ): Promise<ILetterResult> {
+    async requestLetter(formData: IEmail, app: IAppHeader): Promise<ILetterResult> {
         const { values, errors } = await this.validateEmail(formData);
 
         if (errors) {
             return {
-                errForm: errors,
-            }
+                formState: {
+                    values: formData,
+                    errors,
+                },
+            };
         }
 
         if (!values) {
@@ -127,6 +111,9 @@ class PwResetViewModel {
             const ok = await accountRepo.requestPwResetLetter(values, app)
 
             return {
+                formState: {
+                    values,
+                },
                 success: ok,
             }
         } catch (e) {
@@ -134,8 +121,10 @@ class PwResetViewModel {
 
             if (errResp.notFound) {
                 return {
-                    errForm: {
-                        email: this.msgEmailNotFound,
+                    formState: {
+                        errors: {
+                            email: this.msgEmailNotFound,
+                        },
                     },
                 };
             }
@@ -144,9 +133,11 @@ class PwResetViewModel {
                 const o = errResp.error.toMap();
 
                 return {
-                    errForm: {
-                        email: o.get(errResp.error.field) || "",
-                    }
+                    formState: {
+                        errors: {
+                            email: o.get(errResp.error.field) || ""
+                        },
+                    },
                 };
             }
             return {
@@ -155,32 +146,30 @@ class PwResetViewModel {
         }
     }
 
-    buildEmailUI(
-        formData?: IEmail, 
-        result?: ILetterResult,
-    ): UIForgotPassword {
-        if (formData && formData.email) {
-            formData.email = formData.email.trim();
-        }
-
-        const { errForm, errResp } = result || {};
+    private buildEmailInput(formState?: IFormState<IEmail>): ITextInput {
+        const { values, errors } = formState || {};
         return {
-            errors: errResp ? {
-                message: errResp.message
-            } : undefined,
-            input: this.buildEmailInput(
-                formData,
-                result ? result.errForm : undefined,
-            ),
+            label: "",
+            id: "email",
+            type: "email",
+            name: "email",
+            value: values ? values.email : "",
+            placeholder: "登录FT中文网所用的邮箱",
+            required: true,
+            maxlength: "64",
+            desc: "请输入您的电子邮箱，我们会向该邮箱发送邮件，帮您重置密码",
+            error: errors ? errors.email : "",
         }
     }
 
-    buildSuccessUI(key: ActionDoneKey): UIForgotPassword {
+    private buildRedirectedUI(key: KeyPwReset): UIForgotPassword {
+        const msg = getMsgReset(key);
+
         switch (key) {
             case "letter_sent":
                 return {
                     done: {
-                        message: this.msgLetterSent,
+                        message: msg,
                         link: {
                             href: entranceMap.login,
                             text: this.btnBack,
@@ -188,17 +177,43 @@ class PwResetViewModel {
                     }
                 };
 
-            case "password_reset":
+            case "pw_reset":
                 return {
                     done: {
-                        message: this.msgPwReset,
+                        message: msg,
                         link: {
                             href: entranceMap.login,
                             text: this.btnLogin,
                         },
                     }
-                }
+                };
+            
+            case "invalid_token":
+                return {
+                    alert: {
+                        message: msg,
+                    },
+                    input: this.buildEmailInput(),
+                };
         } 
+    }
+
+    buildEmailUI(
+        result?: ILetterResult,
+        key?: KeyPwReset,
+    ): UIForgotPassword {
+        
+        if (key) {
+            return this.buildRedirectedUI(key);
+        }
+
+        const { formState, errResp } = result || {};
+        return {
+            errors: errResp ? {
+                message: errResp.message
+            } : undefined,
+            input: this.buildEmailInput(formState),
+        };
     }
 
     async verifyToken(token: string): Promise<IFetchResult<IEmail>> {
@@ -215,36 +230,6 @@ class PwResetViewModel {
                 errResp,
             }
         }
-    }
-
-    /**
-     * @description If password reset token is invalid,
-     * user will be redirected to the /password-reset
-     * page with an alert message.
-     * The `errors` object is extracted from `ctx.session.errors` field.
-     */
-    buildInvalidTokenUI(result: ITokenApiErrors): UIForgotPassword {
-        const uiData: UIForgotPassword = {
-            input: this.buildEmailInput(),
-        }
-
-        if (result.invalid) {
-            uiData.alert = {
-                message: this.msgTokenInvalid,
-            }
-
-            return uiData;
-        }
-
-        if (result.message) {
-            uiData.errors = {
-                message: result.message,
-            };
-
-            return uiData;
-        }
-
-        return uiData;
     }
 
     async validatePasswords(formData: IPwResetFormData): Promise<IFormState<IPwResetFormData>> {
@@ -309,12 +294,15 @@ class PwResetViewModel {
     buildPwResetUI(
         email: string, 
         result?: IResetPwResult
-    ): UIPwReset {
+    ): UIMultiInputs {
 
         const { errForm, errResp } = result || {};
 
-        const uiData: UIPwReset = {
-            email,
+        return {
+            errors: errResp ? {
+                message: errResp.message,
+            } : undefined,
+            heading: email ? email : undefined,
             inputs: [
                 {
                     label: "密码",
@@ -341,26 +329,7 @@ class PwResetViewModel {
                     error: errForm ? errForm.confirmPassword : undefined,
                 },
             ],
-        }
-
-        if (errResp) {
-
-            if (errResp.notFound) {
-                uiData.alert = {
-                    message: this.msgTokenInvalid,
-                };
-
-                return uiData;
-            }
-
-            uiData.errors = {
-                message: errResp.message,
-            };
-            
-            return uiData;
-        }
-
-        return uiData;
+        };
     }
 }
 

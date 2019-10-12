@@ -12,8 +12,8 @@ import {
     profileViewModel, 
 } from "../viewmodels/profile-viewmodel";
 import {
-    SavedKey
-} from "../viewmodels/ui";
+    KeyUpdated,
+} from "../viewmodels/redirection";
 import { 
     profileMap 
 } from "../config/sitemap";
@@ -34,7 +34,7 @@ router.get("/", async (ctx, next) => {
     }
     
     // If this page is accessed from redirection after updating successfully.
-    const key: SavedKey | undefined = ctx.session.ok;
+    const key: KeyUpdated | undefined = ctx.session.ok;
 
     // If current is an ftc account, or is linked,
     // fetch data from API.
@@ -82,7 +82,7 @@ router.post("/display-name", async (ctx, next) => {
         return await next();
     }
 
-    const key: SavedKey = "saved";
+    const key: KeyUpdated = "saved";
 
     ctx.session.ok = key;
 
@@ -125,7 +125,7 @@ router.post("/mobile", async (ctx, next) => {
         return await next();
     }
 
-    const key: SavedKey = "saved";
+    const key: KeyUpdated = "saved";
 
     ctx.session.ok = key;
 
@@ -175,7 +175,7 @@ router.post("/info", async (ctx, next) => {
         return await next();
     }
 
-    const key: SavedKey = "saved";
+    const key: KeyUpdated = "saved";
 
     ctx.session.ok = key;
 
@@ -221,7 +221,7 @@ router.post("/address", async (ctx, next) => {
         return await next();
     }
     
-    const key: SavedKey = "saved";
+    const key: KeyUpdated = "saved";
 
     ctx.session.ok = key;
 

@@ -1,14 +1,11 @@
 import {
     validate,
     ValidationError,
-    string,
 } from "@hapi/joi";
 import debug from "debug";
 import {
     UIBase, 
     IListItem,
-    SavedKey,
-    getDoneMsg,
     UISingleInput,
     UIMultiInputs,
 } from "./ui";
@@ -35,6 +32,7 @@ import {
     accountMap, 
     entranceMap,
 } from "../config/sitemap";
+import { KeyUpdated, getMsgUpdated } from "./redirection";
 
 const log = debug("user:profile-viewmodel");
 
@@ -99,7 +97,7 @@ class AccountViewModel {
         }
     }
 
-    buildAccountUI(result?: IFetchResult<Account>, done?: SavedKey): UIAccount {
+    buildAccountUI(result?: IFetchResult<Account>, done?: KeyUpdated): UIAccount {
         const { success, errResp } = result || {};
         return {
             errors: errResp ? {
@@ -108,7 +106,7 @@ class AccountViewModel {
                     : errResp.message
             } : undefined,
             alert: done
-                ? { message: getDoneMsg(done) }
+                ? { message: getMsgUpdated(done) }
                 : undefined,
             sections: success ? [
                 {

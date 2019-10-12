@@ -7,12 +7,14 @@ import {
     UIBase, 
     ITextInput,
     IRadio,
-    SavedKey,
-    getDoneMsg,
     UISingleInput,
 } from "./ui";
 import {
-    APIError, IFetchResult,
+    KeyUpdated, getMsgUpdated,
+} from "./redirection"
+import {
+    APIError, 
+    IFetchResult,
 } from "./api-response";
 import {
     userNameSchema,
@@ -105,7 +107,7 @@ class ProfileViewModel {
         }
     }
 
-    async buildProfileUI(account: Account, done?: SavedKey): Promise<UIProfile> {
+    async buildProfileUI(account: Account, done?: KeyUpdated): Promise<UIProfile> {
 
         const [profile, address] = await Promise.all([
             profileRepo.fetchProfile(account.id),
@@ -114,7 +116,7 @@ class ProfileViewModel {
 
         return {
             alert: done 
-                ? { message: getDoneMsg(done) }
+                ? { message: getMsgUpdated(done) }
                 : undefined,
             profile,
             address,

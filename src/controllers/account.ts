@@ -13,8 +13,8 @@ import {
     accountMap 
 } from "../config/sitemap";
 import { 
-    SavedKey,
-} from "../viewmodels/ui";
+    KeyUpdated,
+} from "../viewmodels/redirection";
 import {
     accountViewModel,
     IPasswordsFormData,
@@ -45,7 +45,7 @@ router.get("/", async (ctx, next) => {
     }
 
     // Only exists if user perform update action.
-    const key: SavedKey | undefined = ctx.session.ok;
+    const key: KeyUpdated | undefined = ctx.session.ok;
 
     const { success, errResp } = await accountViewModel.refresh(account);
 
@@ -120,7 +120,7 @@ router.post("/email", async (ctx, next) => {
         return await next();
     }
 
-    const key: SavedKey = "saved";
+    const key: KeyUpdated = "saved";
 
     ctx.session.ok = key;
 
@@ -161,7 +161,7 @@ router.post("/password", async (ctx, next) => {
         return await next();
     }
     
-    const key: SavedKey = "password_saved";
+    const key: KeyUpdated = "password_saved";
 
     ctx.session.ok = key;
 

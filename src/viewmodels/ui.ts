@@ -1,24 +1,3 @@
-export type SavedKey = "saved" | "password_saved";
-export type ActionDoneKey = "letter_sent" | "password_reset";
-
-const doneMsg = {
-    saved: "保存成功！",
-    pwSaved: "密码修改成功",
-};
-
-export function getDoneMsg(key: SavedKey): string {
-    switch (key) {
-        case "saved":
-            return doneMsg.saved;
-
-        case "password_saved":
-            return doneMsg.pwSaved;
-
-        default:
-            return "";
-    }
-}
-
 export interface IDataList {
     id: string;
     options: Array<string>;
@@ -117,5 +96,6 @@ export interface UISingleInput extends UIBase {
 }
 
 export interface UIMultiInputs extends UIBase {
+    heading?: string;
     inputs: Array<ITextInput>;
 }
