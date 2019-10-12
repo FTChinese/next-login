@@ -4,8 +4,8 @@ export interface IDataList {
 }
 
 export interface ITextInput {
-    label: string;
-    id: string;
+    label?: string;
+    id?: string;
     type: string;
     name: string;
     value?: string | null;
@@ -63,6 +63,11 @@ export interface IListItem {
     value?: string;
     link?: string;
     linkText?: string;
+}
+
+export interface UICard {
+    header?: string;
+    list: Array<IListItem>;
 }
 
 export interface IAnchor {
