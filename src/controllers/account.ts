@@ -1,7 +1,7 @@
 import Router from "koa-router";
 import render from "../util/render";
 import {
-    appHeader,
+    collectAppHeaders,
 } from "./middleware";
 import {  
     IAppHeader,
@@ -28,7 +28,6 @@ import {
 import { 
     isProduction,
 } from "../config/viper";
-import { accountRepo } from "../repository/account";
 
 const router = new Router();
 
@@ -170,8 +169,31 @@ router.post("/password", async (ctx, next) => {
     ctx.body = await render("account/password.html", ctx.state);
 });
 
-router.post("/request-verification", async (ctx, next) => {
+router.post("/request-verification", collectAppHeaders(), async (ctx, next) => {
+    const account: Account = ctx.state.user;
 
+    if (account.isWxOnly()) {
+        ctx.status = 404;
+        return;
+    }
+
+    const { success, errResp } = await accountViewModel.requestVerification(account, ctx.state.appHeaders);
+
+    if (!success) {
+        ctx.state.errors = {
+            message: errResp ? errResp.message : "Request failed",
+        }
+
+        return await next();
+    }
+
+    const key: KeyUpdated = "letter_sent";
+
+    ctx.session.ok = key;
+
+    return ctx.redirect(accountMap.base);
+}, async (ctx, next) => {
+    ctx.body = await render("layout/two-cols.html", ctx.state);
 });
 
 /**
@@ -242,7 +264,7 @@ router.get("/link/login", async (ctx, next) => {
 });
 
 router.post("/link/login", 
-appHeader(), async (ctx, next) => {
+collectAppHeaders(), async (ctx, next) => {
     const formData: ICredentials | undefined = ctx.request.body.credentials;
 
     if (!formData) {
@@ -295,7 +317,7 @@ router.get("/link/signup", async (ctx, next) => {
     }
 });
 
-router.post("/link/signup", appHeader(), async (ctx, next) => {
+router.post("/link/signup", collectAppHeaders(), async (ctx, next) => {
     const formData: ISignUpFormData = ctx.request.body.credentials;
 
     if (!formData) {
