@@ -28,7 +28,7 @@ export const readerApi = {
         return `${nextApiBase}/users/password-reset/tokens/${token}`;
     },
     resetPassword:  `${nextApiBase}/users/password-reset`,
-    account:        `${nextApiBase}/user/account`,
+    account:        `${nextApiBase}/user/account/v2`,
     
     profile:         `${nextApiBase}/user/profile`,
     email:          `${nextApiBase}/user/email`,
@@ -36,11 +36,10 @@ export const readerApi = {
     name:           `${nextApiBase}/user/name`,
     mobile:         `${nextApiBase}/user/mobile`,
     password:       `${nextApiBase}/user/password`,
-    wxAccount:    `${nextApiBase}/user/wx/account`,
+    wxAccount:    `${nextApiBase}/user/wx/account/v2`,
     wxSignUp:     `${nextApiBase}/user/wx/signup`,
-    wxMerge:      `${nextApiBase}/user/wx/link`,
 
-    linkWx:       `${nextApiBase}/user/wx/link`,
+    linking:       `${nextApiBase}/user/wx/link`,
     orders:         `${nextApiBase}/user/orders`,
     address:        `${nextApiBase}/user/address`,
     // newsletter: `${user}/newsletter`,
