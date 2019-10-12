@@ -6,6 +6,11 @@ import debug from "debug";
 import {
     UISingleInput,
     UIMultiInputs,
+    UIBase,
+    ITextInput,
+    UICard,
+    IRadio,
+    IListItem,
 } from "./ui";
 
 import {
@@ -22,6 +27,7 @@ import {
     ICredentials,
     IAppHeader,
     Account,
+    Membership,
 } from "../models/reader";
 
 import {
@@ -33,6 +39,7 @@ import {
 import { 
     entranceMap,
 } from "../config/sitemap";
+import { AccountKind } from "../models/enums";
 
 const log = debug("user:link-viewmodel");
 
@@ -58,16 +65,41 @@ interface ILinkingAccounts {
     wx: Account;
 }
 
-interface UIAccountCard {
-    header: string;
-    name: string;
-    memberType: string;
-    expiration: string;
+export interface ILinkingFormData {
+    targetId: string;
 }
 
-interface UIMerging {
-    cards: Array<UIAccountCard>;
+interface ILinkResult extends IFetchResult<boolean>{
+    errForm?: ILinkingFormData
+}
+
+interface UIMerging extends UIBase {
+    cards: Array<UICard>;
     denyMerge?: string;
+    form: {
+        input: ITextInput;
+    };
+}
+
+export interface IUnlinkFormData {
+    anchor?: AccountKind;
+}
+
+interface IUnlinkFormState {
+    value?: AccountKind;
+    error?: string;
+}
+
+interface IUnlinkResult extends IFetchResult<boolean> {
+    formState?: IUnlinkFormState;
+}
+
+interface UIUnlink extends UIBase {
+    card: UICard;
+    form?: {
+        header: string;
+        radio: IRadio;
+    }
 }
 
 class LinkViewModel {
@@ -418,23 +450,55 @@ class LinkViewModel {
         }
     }
 
-    buildMergeUI(accounts: ILinkingAccounts): UIMerging {
+    buildMergeUI(accounts: ILinkingAccounts, formData: ILinkingFormData, errMsg?: string): UIMerging {
 
         const uiData: UIMerging = {
+            errors: errMsg ? {
+                message: errMsg,
+            }: undefined,
             cards: [
                 {
                     header: "FT中文网账号",
-                    name: accounts.ftc.email,
-                    memberType: accounts.ftc.membership.tierCN,
-                    expiration: accounts.ftc.membership.expireDate || "-"
+                    list: [
+                        {
+                            label: "邮箱",
+                            value: accounts.ftc.email,
+                        },
+                        {
+                            label: "会员类型",
+                            value: accounts.ftc.membership.tierCN
+                        },
+                        {
+                            label: "会员期限",
+                            value: accounts.ftc.membership.expireDate || "-"
+                        },
+                    ],
                 },
                 {
                     header: "微信账号",
-                    name: accounts.wx.wechat.nickname || "-",
-                    memberType: accounts.wx.membership.tierCN,
-                    expiration: accounts.wx.membership.expireDate || "-"
+                    list: [
+                        {
+                            label: "昵称",
+                            value: accounts.wx.wechat.nickname || "-",
+                        },
+                        {
+                            label: "会员类型",
+                            value: accounts.wx.membership.tierCN,
+                        },
+                        {
+                            label: "会员期限",
+                            value: accounts.wx.membership.expireDate || "-",
+                        },
+                    ]
                 }
             ],
+            form: {
+                input: {
+                    type: "hidden",
+                    name: "targetId",
+                    value: formData.targetId,
+                }
+            }
         };
 
         if (accounts.ftc.isEqual(accounts.wx)) {
@@ -462,6 +526,135 @@ class LinkViewModel {
         }
 
         return uiData;
+    }
+
+    async mergeAccount(account: Account, formData: ILinkingFormData): Promise<ILinkResult> {
+        try {
+            const ok = await accountRepo.link(account, formData.targetId);
+
+            return {
+                success: ok,
+            };
+
+        } catch (e) {
+            // 204 if alread linked.
+            // 422: 
+            // field: ftcId, code: missing_field;
+            // field: link, code: already_exists;
+            // field: account, code: link_aready_taken
+            // field: membership, code: link_already_taken
+            // fieldd: memberships, code: none_expired
+            // 404 Not Found if one of the account is not found from DB.
+            return {
+                errResp: new APIError(e),
+            };
+        }
+    }
+
+    validateUnlink(member: Membership, formData: IUnlinkFormData): IUnlinkFormState {
+        if (!member.isMember) {
+            return {};
+        }
+
+        if (!formData.anchor) {
+            return {
+                error: "当前账号拥有FT会员，解除绑定必须选择会员保留在哪个账号上"
+            };
+        }
+
+        if (formData.anchor != "ftc" && formData.anchor != "wechat") {
+            return {
+                error: "必须选择会员所保留的账号",
+            };
+        }
+
+        return {
+            value: formData.anchor,
+        };
+    }
+
+    async sever(account: Account, formData: IUnlinkFormData): Promise<IUnlinkResult> {
+        // value might be empty even if not error returned.
+        const { value, error } = this.validateUnlink(account.membership, formData);
+
+        if (error) {
+            return {
+                formState: {
+                    error,
+                },
+            };
+        }
+
+        try {
+            const ok = await accountRepo.unlink(account, value);
+
+            return {
+                success: ok,
+            };
+        } catch (e) {
+            return {
+                errResp: new APIError(e),
+            };
+        }
+    }
+
+    buildUnlinkUI(account: Account, result?: IUnlinkResult): UIUnlink {
+        const cardList: Array<IListItem> = [
+            {
+                label: "FT账号",
+                value: account.email,
+            },
+            {
+                label: "微信账号",
+                value: account.wechat.nickname
+            }
+        ];
+
+        if (account.membership.isMember) {
+            cardList.concat([
+                {
+                    label: "会员类型",
+                    value: account.membership.tierCN,
+                },
+                {
+                    label: "会员期限",
+                    value: account.membership.expireDate,
+                }
+            ]);
+        }
+
+        const { formState, errResp } = result || {};
+        return {
+            errors: errResp ? {
+                message: errResp.message,
+            } : undefined,
+            card: {
+                list: cardList,
+            },
+            form: {
+                header: "检测到您是FT的会员，解除账号绑定需要选择会员信息保留在哪个账号下，请选择",
+                radio: {
+                    name: "anchor",
+                    inputs: [
+                        {
+                            label: "FTC账号",
+                            id: "anchorFtc",
+                            value: "ftc",
+                            checked: false,
+                        },
+                        {
+                            label: "微信账号",
+                            id: "anchorWechat",
+                            value: "wechat",
+                            checked: false,
+                        }
+                    ],
+                    error: (formState && formState.error) 
+                        ? formState.error 
+                        : undefined,
+                }
+            },
+        }
     }
 }
 
