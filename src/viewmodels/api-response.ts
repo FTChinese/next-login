@@ -115,6 +115,8 @@ function isRequestError(e: SuperAgentError | Error): e is SuperAgentError {
 export class APIError {
     message: string;
     error?: Unprocessable; // Fields for validation failure.
+    code?: string;
+    param?: string;
     
     status?: number;
     notFound?: boolean;
