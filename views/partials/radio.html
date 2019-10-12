@@ -11,7 +11,7 @@
     value="{{ input.value }}"
     {% if input.checked %} checked{% endif %}
     {% if radio.required %} required{% endif %}>
-    <label class="form-check-label" for="{{ input.id }}">
+    <label class="form-check-label d-block" for="{{ input.id }}">
       {% if input.imageUrl %}
         <img src="{{ input.imageUrl }}" alt="{{ input.label }}">
       {% else %}

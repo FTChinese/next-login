@@ -4,67 +4,25 @@
   <h2 class="mt-3 mb-5">解除账号绑定</h2>
   <div class="row justify-content-center">
     <div class="col-md-8">
+
       <div class="card mb-3">
         <ul class="list-group list-group-">
-          <li class="list-group-item d-flex justify-content-between">
-            <span>FT账号</span>
-            <span>{{ user.email }}</span>
-          </li>
 
+          {% for item in card.list %}
           <li class="list-group-item d-flex justify-content-between">
-            <span>微信账号</span>
-            <span>{{ user.wechat.nickname }}</span>
+            <span>{{ item.label }}</span>
+            <span>{{ item.value }}</span>
           </li>
+          {% endfor %}
 
-          {% if user.isMember() %}
-          <li class="list-group-item d-flex justify-content-between">
-            <span>会员类型</span>
-            <span>{{ user.member.tier | localize }}</span>
-          </li>
-
-          <li class="list-group-item d-flex justify-content-between">
-            <span>会员期限</span>
-            <span>{{ user.member.expireDate }}</span>
-          </li>
-
-          {% endif %}
         </ul>
       </div>
 
       <form action="" method="post">
-        {% if user.isMember() %}
-          <p>检测到您是FT的会员，解除账号绑定需要选择会员信息保留在哪个账号下，请选择</p>
-
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="anchor"
-              id="anchorFtc"
-              value="ftc"
-              required>
-
-            <label
-              class="form-check-label d-block"
-              for="anchorFtc">FTC账号</label>
-          </div>
-
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="anchor"
-              id="anchorWechat"
-              value="wechat">
-            <label
-              class="form-check-label d-block"
-              for="wechat">微信账号</label>
-          </div>
-
-          {% if errors.anchor %}
-            <div class="form-errortext">{{ errors.anchor }}</div>
-          {% endif %}
-          
+        {% if form %}
+          <p>{{ form.header }}</p>
+          {% set radio = form.radio %}
+          {% include "partials/radio.html " }
         {% endif %}
 
         <div class="mt-5">

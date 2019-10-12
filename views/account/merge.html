@@ -6,56 +6,33 @@
     <div class="col-md-8">
 
       <h5 class="text-center mb-3">合并如下账号</h5>
+
+      {% for card in cards %}
       <div class="card mb-5">
 
-        <div class="card-header">FT中文网账号</div>
+        <div class="card-header">{{ card.header }}</div>
         <ul class="list-group list-group-flush">
+          {% for item in card.list %}
           <li class="list-group-item d-flex justify-content-between">
-            <span>邮箱</span>
-            <span>{{ ftcAccount.email }}</span>
+            <span>{{ item.label }}</span>
+            <span>{{ item.value }}</span>
           </li>
-          <li class="list-group-item d-flex justify-content-between">
-            <span>会员类型</span>
-            <span>{{ ftcAccount.member.buildMemberType() }}</span>
-          </li>
-  
-          <li class="list-group-item d-flex justify-content-between">
-            <span>会员期限</span>
-            <span>{{ftcAccount.member.expireDate}}</span>
-          </li>
+          {% endfor %}
         </ul>
       </div>
-
-      <div class="card mb-3">
-        <div class="card-header">微信账号</div>
-        
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item d-flex justify-content-between">
-            <span>昵称</span>
-            <span>{{ wxAccount.wechat.nickname }}</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between">
-            <span>会员类型</span>
-            <span>{{ wxAccount.member.buildMemberType() }}</span>
-          </li>
-  
-          <li class="list-group-item d-flex justify-content-between">
-            <span>会员期限</span>
-            <span>{{wxAccount.member.expireDate}}</span>
-          </li>
-        </ul>
-      </div>
+      {% endfor %}
 
       {% if denyMerge %}
         <p class="text-danger">{{ denyMerge }}</p>
       {% else %}
-      <form method="post" action="{{ sitemap.bindMerge }}">
-        <input type="hidden" name="userId" value="{{userId}}">
-        <button 
-          class="btn btn-block btn-primary"
-          type="submit"
-          data-disable-with="合并账号...">开始</button>
-      </form>
+        {% set input = form.input %}
+        <form method="post">
+          {% include "partials/text-input.html" %}
+          <button 
+            class="btn btn-block btn-primary"
+            type="submit"
+            data-disable-with="合并账号...">开始</button>
+        </form>
       {% endif %}
     </div>
   </div>
