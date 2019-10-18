@@ -4,13 +4,13 @@
   {% for item in checkbox.items %}
     <div class="form-check">
       <input class="form-check-input"
-      id="group-{{ item.id }}"
+      id="{{ item.id }}"
       type="checkbox"
       name="{{checkbox.name}}}"
       value="{{ item.value }}"
       {% if item.checked %} checked{% endif %}>
       
-      <label for="group-{{group.id}}">{{ item.label }}</label>
+      <label for="{{ item.id }}">{{ item.label }}</label>
     </div>
   {% endfor %}
 
