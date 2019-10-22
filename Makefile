@@ -4,9 +4,9 @@ scss_input := client/scss/main.scss
 css_output := $(build_prod)/main.css
 
 BUILD_DIR := build
-BINARY := superyard
-LINUX_BIN := superyard-linux
-MAC_BIN := superyard-macos
+BINARY := next-user
+LINUX_BIN := next-user-linux
+MAC_BIN := next-user-macos
 ENTRY := dist/server.js
 
 .PHONY: tslint js css inline clean ts run build deploy
