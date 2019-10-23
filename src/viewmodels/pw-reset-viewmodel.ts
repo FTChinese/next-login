@@ -20,10 +20,11 @@ import {
 } from "./api-response";
 import {
     IEmail,
-    IAppHeader,
     IPasswordReset,
 } from "../models/reader";
-
+import {
+    IHeaderApp,
+} from "../models/header";
 import {
     accountRepo,
 } from "../repository/account";
@@ -91,7 +92,7 @@ class PwResetViewModel {
         }
     }
 
-    async requestLetter(formData: IEmail, app: IAppHeader): Promise<ILetterResult> {
+    async requestLetter(formData: IEmail, app: IHeaderApp): Promise<ILetterResult> {
         const { values, errors } = await this.validateEmail(formData);
 
         if (errors) {

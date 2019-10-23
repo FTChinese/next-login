@@ -4,11 +4,14 @@ import {
     collectAppHeaders,
 } from "./middleware";
 import {  
-    IAppHeader,
+
     Account,
     IEmail,
     ICredentials,
 } from "../models/reader";
+import {
+    IHeaderApp,
+} from "../models/header";
 import { 
     accountMap 
 } from "../config/sitemap";
@@ -271,7 +274,7 @@ collectAppHeaders(), async (ctx, next) => {
         throw new Error("form data not found");
     }
 
-    const headers: IAppHeader = ctx.state.appHeaders;
+    const headers: IHeaderApp = ctx.state.appHeaders;
 
     const { success, errForm, errResp } = await linkViewModel.logIn(formData, headers)
 
@@ -324,7 +327,7 @@ router.post("/link/signup", collectAppHeaders(), async (ctx, next) => {
         throw new Error("form data not found");
     }
 
-    const headers: IAppHeader = ctx.state.appHeaders;
+    const headers: IHeaderApp = ctx.state.appHeaders;
     const account: Account = ctx.session.user;
     const { success, errForm, errResp } = await linkViewModel.signUp(formData, account, headers);
 

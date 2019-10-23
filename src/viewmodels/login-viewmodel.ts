@@ -18,9 +18,10 @@ import {
 import {
     ICredentials,
     Account,
-    IAppHeader,
 } from "../models/reader";
-
+import {
+    IHeaderApp,
+} from "../models/header";
 import {
     accountRepo,
 } from "../repository/account";
@@ -62,7 +63,7 @@ class LoginViewModel {
         }
     }
 
-    async logIn(formData: ICredentials, app: IAppHeader): Promise<ILoginResult> {
+    async logIn(formData: ICredentials, app: IHeaderApp): Promise<ILoginResult> {
         const { values, errors } = await this.validate(formData);
 
         if (errors) {

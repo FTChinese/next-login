@@ -22,9 +22,10 @@ import {
 import {
     Account,
     IEmail,
-    IAppHeader,
 } from "../models/reader";
-
+import {
+    IHeaderApp,
+} from "../models/header";
 import {
     accountRepo,
 } from "../repository/account";
@@ -364,7 +365,7 @@ class AccountViewModel {
         };
     }
 
-    async requestVerification(account: Account, app: IAppHeader): Promise<IFetchResult<boolean>> {
+    async requestVerification(account: Account, app: IHeaderApp): Promise<IFetchResult<boolean>> {
         try {
             const ok = await accountRepo.requestVerification(account.id, app);
 

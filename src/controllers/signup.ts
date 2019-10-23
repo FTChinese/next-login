@@ -6,9 +6,9 @@ import {
 import {
     collectAppHeaders,
 } from "./middleware";
-import { 
-    IAppHeader,
-} from "../models/reader";
+import {
+    IHeaderApp,
+} from "../models/header";
 import {
     ISignUpFormData,
 } from "../viewmodels/validator";
@@ -40,7 +40,7 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
         throw new Error("form data not found");
     }
 
-    const headers: IAppHeader = ctx.state.appHeaders;
+    const headers: IHeaderApp = ctx.state.appHeaders;
 
     const { success, errForm, errResp } = await signUpViewModel.signUp(formData, headers);
 

@@ -1,7 +1,6 @@
 import Router from "koa-router";
 import render from "../util/render";
 import {
-    ITokenApiErrors,
     pwResetViewModel,
     IPwResetFormData,
 } from "../viewmodels/pw-reset-viewmodel";
@@ -9,9 +8,11 @@ import {
     collectAppHeaders,
 } from "./middleware";
 import { 
-    IAppHeader, 
     IEmail
 } from "../models/reader";
+import {
+    IHeaderApp,
+} from "../models/header";
 import { 
     entranceMap 
 } from "../config/sitemap";
@@ -48,7 +49,7 @@ router.get("/", async (ctx, next) => {
 router.post("/", collectAppHeaders(), async (ctx, next) => {
     const formData: IEmail = ctx.request.body;
 
-    const headers: IAppHeader = ctx.state.appHeaders;
+    const headers: IHeaderApp = ctx.state.appHeaders;
 
     const { success, formState, errResp } = await pwResetViewModel.requestLetter(formData, headers);
 

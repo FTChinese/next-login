@@ -25,11 +25,12 @@ import {
 import {
     IEmail,
     ICredentials,
-    IAppHeader,
     Account,
     Membership,
 } from "../models/reader";
-
+import {
+    IHeaderApp,
+} from "../models/header";
 import {
     accountRepo,
 } from "../repository/account";
@@ -199,7 +200,7 @@ class LinkViewModel {
         }
     }
 
-    async logIn(formData: ICredentials, app: IAppHeader): Promise<IAuthenticateResult> {
+    async logIn(formData: ICredentials, app: IHeaderApp): Promise<IAuthenticateResult> {
         const { values, errors } = await this.validateLogin(formData);
 
         if (errors) {
@@ -315,7 +316,7 @@ class LinkViewModel {
     async signUp(
         formData: ISignUpFormData, 
         account: Account, 
-        app: IAppHeader
+        app: IHeaderApp
     ): Promise<ISignUpResult> {
         const { values, errors } = await this.validateSignUp(formData);
 

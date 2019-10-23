@@ -18,9 +18,10 @@ import {
 } from "./api-response";
 import {
     Account,
-    IAppHeader,
 } from "../models/reader";
-
+import {
+    IHeaderApp,
+} from "../models/header";
 import {
     accountRepo,
 } from "../repository/account";
@@ -58,7 +59,7 @@ class SignUpViewModel {
         }
     }
 
-    async signUp(formData: ISignUpFormData, app: IAppHeader): Promise<ISignUpResult> {
+    async signUp(formData: ISignUpFormData, app: IHeaderApp): Promise<ISignUpResult> {
         const { values, errors } = await this.validate(formData);
 
         if (errors) {

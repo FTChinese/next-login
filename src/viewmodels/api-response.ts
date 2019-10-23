@@ -39,7 +39,7 @@ interface InvalidMsg {
     already_exists?: string;
 }
 
-const invalids: Dictionary<InvalidMsg> = {
+const invalids: Record<string, InvalidMsg> = {
     email: {
         missing_field: "邮箱不能为空",
         invalid: "不是有效的邮箱地址",
@@ -108,7 +108,7 @@ function isString(x: any): x is string {
     return typeof x == "string";
 }
 
-function isRequestError(e: SuperAgentError | Error): e is SuperAgentError {
+export function isRequestError(e: SuperAgentError | Error): e is SuperAgentError {
     return (<SuperAgentError>e).response !== undefined;
 }
 
@@ -130,8 +130,7 @@ export class APIError {
         }
 
         if (!isRequestError(e)) {
-            this.message = e.message;
-            return;
+            throw e;
         }
 
         // Only when the error is a SuperAgentError does it contains a response.

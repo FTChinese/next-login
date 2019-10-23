@@ -12,9 +12,11 @@ import {
 } from "./middleware";
 import { 
     ICredentials, 
-    IAppHeader,
     Account,
 } from "../models/reader";
+import {
+    IHeaderApp,
+} from "../models/header";
 import { 
     profileMap,
     accountMap,
@@ -64,7 +66,7 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
         throw new Error("form data not found");
     }
 
-    const headers: IAppHeader = ctx.state.appHeaders;
+    const headers: IHeaderApp = ctx.state.appHeaders;
     const { success, errForm, errResp } = await loginViewModel.logIn(formData, headers);
 
     if (!success) {
@@ -141,7 +143,7 @@ router.get("/wechat/callback", collectAppHeaders(), async(ctx, next) => {
         delete ctx.session.wx_oauth;
     };
 
-    const headers: IAppHeader = ctx.state.appHeaders;
+    const headers: IHeaderApp = ctx.state.appHeaders;
     const localAccount: Account | undefined = ctx.session.user;
 
     const { success, errQuery, errResp } = await wxLoginViewModel.getApiSession(query, headers, wxOAuthSess);

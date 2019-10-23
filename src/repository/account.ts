@@ -15,9 +15,11 @@ import {
     accountSerializer,
     IEmail,
     IPasswordReset,
-    IAppHeader,
     IPasswords,
 } from "../models/reader";
+import {
+    IHeaderApp,
+} from "../models/header";
 import { 
     WxSession
 } from "../models/wx-oauth";
@@ -44,7 +46,7 @@ class AccountRepo {
     /**
      * @description As the first step of login process, or verify password when linking accounts.
      */
-    async authenticate(c: ICredentials, app: IAppHeader): Promise<string> {
+    async authenticate(c: ICredentials, app: IHeaderApp): Promise<string> {
         const resp = await request
             .post(readerApi.login)
             .set(app)
@@ -81,7 +83,7 @@ class AccountRepo {
         }
     }
 
-    async createReader(c: ICredentials, app: IAppHeader): Promise<string> {
+    async createReader(c: ICredentials, app: IHeaderApp): Promise<string> {
         const resp = await request
             .post(readerApi.signup)
             .set(app)
@@ -96,7 +98,7 @@ class AccountRepo {
         throw new Error("Incorrect api response");
     }
 
-    async fetchWxSession(code: string, app: IAppHeader): Promise<WxSession> {
+    async fetchWxSession(code: string, app: IHeaderApp): Promise<WxSession> {
         const appId = viper.getConfig().wxapp.web_oauth.app_id;
 
         const resp = await request
@@ -119,7 +121,7 @@ class AccountRepo {
 
     // Create an account for a wechat-logged-in user,
     // and returns the account's uuid.
-    async wxSignUp(c: ICredentials, unionId: string, app: IAppHeader): Promise<string> {
+    async wxSignUp(c: ICredentials, unionId: string, app: IHeaderApp): Promise<string> {
         const resp = await request
             .post(readerApi.wxSignUp)
             .set(app)
@@ -135,7 +137,7 @@ class AccountRepo {
         throw new Error("Incorrect API response");
     }
 
-    async requestPwResetLetter(data: IEmail, app: IAppHeader): Promise<boolean> {
+    async requestPwResetLetter(data: IEmail, app: IHeaderApp): Promise<boolean> {
         const resp = await request
             .post(readerApi.passwordResetLetter)
             .set(app)
@@ -165,7 +167,7 @@ class AccountRepo {
         return resp.noContent;
     }
 
-    async requestVerification(id: string, app: IAppHeader): Promise<boolean> {
+    async requestVerification(id: string, app: IHeaderApp): Promise<boolean> {
         const resp = await request
             .get(readerApi.requestVerification)
             .set(app)

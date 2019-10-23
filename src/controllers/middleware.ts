@@ -18,13 +18,13 @@ import {
     Paging,
 } from "../models/pagination";
 import {
-    IAppHeader,
     accountSerializer,
 } from "../models/reader";
 import {
     entranceMap,
 } from "../config/sitemap";
 import render from "../util/render";
+import { IHeaderApp } from "../models/header";
 const pkg = require("../../package.json");
 
 // This is used to inject boostrap version into template so that it is easy to keep versions in html consistent with those in package.json.
@@ -152,14 +152,14 @@ export function noCache(): Middleware {
 declare module "koa" {
     interface Context {
         state: {
-            appHeaders: IAppHeader;
+            appHeaders: IHeaderApp;
         }
     }
 }
 
 export function collectAppHeaders(): Middleware {
     return async function(ctx, next) {
-        const headers: IAppHeader = {
+        const headers: IHeaderApp = {
             "X-Client-Type": "web",
             "X-Client-Version": pkg.version,
             "X-User-Ip": ctx.ip,

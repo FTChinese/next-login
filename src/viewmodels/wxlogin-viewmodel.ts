@@ -7,8 +7,10 @@ import {
 } from "../models/wx-oauth";
 import {
     Account,
-    IAppHeader,
 } from "../models/reader";
+import {
+    IHeaderApp,
+} from "../models/header";
 import {
     isExpired,
 } from "../util/time";
@@ -106,7 +108,7 @@ class WxLoginViewModel {
         };
     }
 
-    async getApiSession(params: ICallbackParams, app: IAppHeader, sess?: IOAuthSession): Promise<IOAuthResult> {
+    async getApiSession(params: ICallbackParams, app: IHeaderApp, sess?: IOAuthSession): Promise<IOAuthResult> {
         const { values, errors } = this.validate(params, sess);
         if (!values) {
             return {
