@@ -1,6 +1,6 @@
 {
   "name": "@ftchinese/next-user",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "User setting system",
   "main": "index.js",
   "bin": "index.js",
