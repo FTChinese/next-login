@@ -1,8 +1,9 @@
 import {
     ICallbackParams,
-    OAuthClient,
     IOAuthSession,
     WxSession,
+    WxOAuthUsage,
+    oauthClient,
 } from "../models/wx-oauth";
 import {
     Account,
@@ -40,14 +41,13 @@ class WxLoginViewModel {
     private expired = "状态已失效";
 
     // Build redirect url and the session data to be persisted on client-side.
-    codeRequest(account?: Account): IOAuthCodeRequest {
-        const client = new OAuthClient();
+    codeRequest(usage: WxOAuthUsage, sandbox: boolean): IOAuthCodeRequest {
 
-        const sess = client.generateSession(account)
+        const sess = oauthClient.generateSession(usage)
 
         return {
             session: sess,
-            redirectUrl: client.buildCodeUrl(sess.state),
+            redirectUrl: oauthClient.buildCodeUrl(sess.state, sandbox),
         };
     }
 
