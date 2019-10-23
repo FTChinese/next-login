@@ -270,12 +270,6 @@ export interface IClientApp {
     userAgent: string;
 }
 
-export interface IAppHeader {
-    "X-Client-Type": string;
-    "X-Client-Version": string;
-    "X-User-Ip": string;
-    "X-User-Agent": string;
-}
 // Form data for requesting password reset token,
 // or change email.
 export interface IEmail {
