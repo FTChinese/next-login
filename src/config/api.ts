@@ -82,12 +82,7 @@ class SubAPI {
     // The sandbox mode is used only to test new API features.
     // As long as Wechat does not change its API, we do not need to use the sandbox mode.
     wxRedirect(sandbox: boolean = false): string {
-
-        if (sandbox) {
-            return `${viper.getConfig().api_url.sub_sandbox}${this.wxRedirectPath}`;
-        }
-
-        return `${this.baseUrl}${this.wxRedirectPath}`;
+        return `${this.getBaseUrl(sandbox)}${this.wxRedirectPath}`;
     }
 
     // Send wechat OAuth2 code here
@@ -98,49 +93,3 @@ class SubAPI {
 
 export const readerApi = new ReaderAPI();
 export const subsApi = new SubAPI();
-
-// export const readerApi = {
-//     oauthCode:    `${nextApiBase}/oauth/code`,
-//     oauthToken:   `${nextApiBase}/oauth/token`,
-//     exists:       `${nextApiBase}/users/exists`,
-//     signup:       `${nextApiBase}/users/signup`,
-//     login:        `${nextApiBase}/users/login`,
-//     verifyEmail:  function (token: string): string {
-//         return `${nextApiBase}/users/verify/email/${token}`;
-//     },
-//     passwordResetLetter: `${nextApiBase}/users/password-reset/letter`,
-//     passwordResetToken: function (token: string): string {
-//         return `${nextApiBase}/users/password-reset/tokens/${token}`;
-//     },
-//     resetPassword:  `${nextApiBase}/users/password-reset`,
-//     account:        `${nextApiBase}/user/account/v2`,
-    
-//     profile:         `${nextApiBase}/user/profile`,
-//     email:          `${nextApiBase}/user/email`,
-//     requestVerification: `${nextApiBase}/user/email/request-verification`,
-//     name:           `${nextApiBase}/user/name`,
-//     mobile:         `${nextApiBase}/user/mobile`,
-//     password:       `${nextApiBase}/user/password`,
-//     wxAccount:    `${nextApiBase}/user/wx/account/v2`,
-//     wxSignUp:     `${nextApiBase}/user/wx/signup`,
-
-//     linking:       `${nextApiBase}/user/wx/link`,
-//     orders:         `${nextApiBase}/user/orders`,
-//     address:        `${nextApiBase}/user/address`,
-//     // newsletter: `${user}/newsletter`,
-//     starred:        `${nextApiBase}/user/starred`,
-// };
-
-// export const subsApi = {
-
-//     wxRedirect: "/wx/oauth/callback",
-
-//     // Send wechat OAuth2 code here
-//     wxLogin: `${subsApiBase}/wx/oauth/login`,
-  
-//     wxQueryOrder: function(orderId: string): string {
-//       return `${subsApiBase}/wxpay/query/${orderId}`;
-//     },
-    
-//     redeemGiftCard: `${subsApiBase}/gift-card/redeem`,
-// };
