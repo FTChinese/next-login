@@ -126,15 +126,9 @@ export function handleError(): Middleware {
       try {
         await next()
       } catch (e) {
-        debug(e);
-  
-        ctx.status = e.status || 500;
-  
-        ctx.state.status = ctx.status;
-        ctx.state.error = {
-          message: e.message,
-          stack: e.stack
-        }
+        log(e);
+
+        ctx.state.error = e;
   
         ctx.body = await render('error.html', ctx.state);
       }
