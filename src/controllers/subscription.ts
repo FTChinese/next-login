@@ -140,61 +140,47 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
 
     const account: Account = ctx.state.user;
 
-    try {
-        // The payment result does not contain `errResp` field.
-        const { formState, aliOrder, wxOrder } = await subViewModel.pay(
-            plan,
-            {
-                ...account.idHeaders,
-                ...ctx.state.appHeaders,
-            },
-            subViewModel.isMobile(ctx.header["user-agent"]),
-            sandbox,
-            payMethod,
+    // The payment result does not contain `errResp` field.
+    const { formState, aliOrder, wxOrder } = await subViewModel.pay(
+        plan,
+        {
+            ...account.idHeaders,
+            ...ctx.state.appHeaders,
+        },
+        subViewModel.isMobile(ctx.header["user-agent"]),
+        sandbox,
+        payMethod,
+    );
+
+    // Form error
+    if (formState && formState.error) {
+        const uiData = await subViewModel.buildPaymentUI(plan, sandbox, { formState });
+
+        Object.assign(
+            ctx.state, 
+            uiData,
         );
 
-        // Form error
-        if (formState && formState.error) {
-            const uiData = await subViewModel.buildPaymentUI(plan, sandbox, { formState });
+        return await next();
+    }
 
-            Object.assign(
-                ctx.state, 
-                uiData,
-            );
+    // Handle alipay
+    if (aliOrder) {
+        ctx.session.order = aliOrder;
+        return ctx.redirect(aliOrder.redirectUrl);
+    }
 
-            return await next();
-        }
-
-        // Handle alipay
-        if (aliOrder) {
-            ctx.session.order = aliOrder;
-            return ctx.redirect(aliOrder.redirectUrl);
-        }
-
+    
+    // Handle wxpay.
+    if (wxOrder) {
         const uiData = await subViewModel.buildPaymentUI(
             plan,
             sandbox,
             { wxOrder }
         )
-        // Handle wxpay.
-        if (wxOrder) {
-            Object.assign(
-                ctx.state,
-                uiData,
-            );
 
-            return await next();
-        }
-    } catch (e) {
-        const uiData = await subViewModel.buildPaymentUI(
-            plan, 
-            sandbox, 
-            { 
-                errResp: new APIError(e),
-            },
-        )
         Object.assign(
-            ctx.state, 
+            ctx.state,
             uiData,
         );
 
