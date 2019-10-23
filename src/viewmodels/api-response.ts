@@ -112,7 +112,7 @@ export function isRequestError(e: SuperAgentError | Error): e is SuperAgentError
     return (<SuperAgentError>e).response !== undefined;
 }
 
-export class APIError {
+export class APIError extends Error{
     message: string;
     error?: Unprocessable; // Fields for validation failure.
     code?: string;
@@ -125,11 +125,12 @@ export class APIError {
 
     constructor(e: SuperAgentError | Error | string) {
         if (isString(e)) {
-            this.message = e;
+            super(e)
             return;
         }
 
         if (!isRequestError(e)) {
+            log(e);
             throw e;
         }
 
@@ -144,8 +145,6 @@ export class APIError {
         // `response.body` field always existse.
         // If API responds not body, it is `{}`.
         const body: IErrorBody = resp.body;
-
-        log("Error response body: %O", body);
         
         if (body.message) {
             this.message = body.message;
@@ -160,6 +159,8 @@ export class APIError {
         this.notFound = resp.notFound;
         this.forbidden = resp.forbidden;
         this.unauthorized = resp.unauthorized;
+
+        log(this);
     }
 }
 
