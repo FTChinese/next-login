@@ -1,4 +1,5 @@
 import MobileDetect from "mobile-detect";
+import { toDataURL } from "qrcode";
 import {
     subsMap,
 } from "../config/sitemap";
@@ -10,7 +11,9 @@ import {
     accountRepo,
 } from "../repository/account";
 import {
-    UIBase, IListItem, IRadio, UIForm, IForm,
+    UIBase, 
+    IListItem, 
+    IForm,
 } from "./ui";
 import { 
     IFetchResult,
@@ -22,10 +25,25 @@ import {
     IPaywall,
 } from "../models/paywall";
 import { PaymentMethod } from "../models/enums";
-import { OrderBase, IAliCallback, IWxQueryResult } from "../models/order";
-import { subRepo } from "../repository/subscription";
-import { formatMoneyInCent } from "../util/formatter";
+import { 
+    OrderBase, 
+    IAliCallback, 
+    IWxQueryResult, 
+    AliOrder, 
+    WxOrder 
+} from "../models/order";
+import { 
+    subRepo 
+} from "../repository/subscription";
+import { 
+    formatMoneyInCent }
+     from "../util/formatter";
 import { iso8601ToCST } from "../util/formatter";
+import { 
+    IHeaderReaderId, 
+    IHeaderApp,
+    IHeaderWxAppId,
+} from "../models/header";
 
 interface UIMembership {
     tier: string;
@@ -69,10 +87,10 @@ interface IPayFormState {
     error?: string;
 }
 
-interface IWxPayResult {
+interface IPayResult extends IFetchResult<boolean> {
     formState?: IPayFormState;
-    errResp?: APIError;
-    qrData?: string;
+    aliOrder?: AliOrder;
+    wxOrder?: WxOrder;
 }
 
 interface UISuccess extends UIBase {
@@ -222,8 +240,8 @@ class SubViewModel {
     /**
      * @description UI to show payment methods.
      */
-    buildPaymentUI(plan: Plan, sandbox: boolean, result?: IWxPayResult): UIPayment {
-        const { formState, errResp, qrData } = result || {};
+    async buildPaymentUI(plan: Plan, sandbox: boolean, result?: IPayResult): Promise<UIPayment> {
+        const { formState, errResp, wxOrder } = result || {};
         const uiData: UIPayment = {
             errors: errResp ? {
                 message: errResp.message,
@@ -241,9 +259,11 @@ class SubViewModel {
             
         };
 
-        if (qrData) {
+        if (wxOrder) {
+            const dataUrl = await toDataURL(wxOrder.qrCodeUrl);
+
             uiData.qr = {
-                dataUrl: qrData,
+                dataUrl,
                 doneLink: subsMap.wxpayDone,
             };
 
@@ -290,6 +310,66 @@ class SubViewModel {
         const md = new MobileDetect(ua);
 
         return !!md.mobile();
+    }
+
+    async pay(
+        plan: Plan,
+        headers: IHeaderReaderId & IHeaderApp,
+        isMobile: boolean,
+        sandbox: boolean,
+        payMethod?: PaymentMethod, 
+    ): Promise<IPayResult> {
+        const { value, error} = this.validatePayMethod(payMethod);
+
+        if (error) {
+            return {
+                formState: {
+                    error,
+                },
+            };
+        }
+
+        switch (value) {
+            case "alipay": {
+                if (isMobile) {
+                    const aliOrder = await subRepo.aliMobilePay(
+                        plan,
+                        headers,
+                        sandbox,
+                    );
+
+                    return {
+                        aliOrder,
+                    };
+                }
+
+                const aliOrder = await subRepo.aliDesktopPay(
+                    plan,
+                    headers,
+                    sandbox,
+                );
+
+                return {
+                    aliOrder,
+                };
+            }
+
+            case "wechat": {
+                const wxOrder = await subRepo.wxDesktopPay(
+                    plan,
+                    headers,
+                    sandbox,
+                );
+
+                return {
+                    wxOrder,
+                }
+            }
+
+            default:
+                throw new Error("Unkown payment method");
+
+        }
     }
 
     async aliPayDone(account: Account, order: OrderBase, param: IAliCallback): Promise<IPayDoneResult> {

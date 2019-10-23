@@ -52,23 +52,29 @@ class SubAPI {
         ? viper.getConfig().api_url.subscription_v1
         : "http://localhost:8200";
 
-    private readonly baseUrlAliPay: string = `${this.baseUrl}/alipay`;
-    private readonly baseUrlWxPay: string = `${this.baseUrl}/wxpay`;
+    readonly sandboxBaseUrl: string = viper
+        .getConfig()
+        .api_url
+        .sub_sandbox;
 
-    aliPayDesktop(tier: Tier, cycle: Cycle): string {
-        return `${this.baseUrlAliPay}/desktop/${tier}/${cycle}`;
+    private getBaseUrl(sandbox: boolean): string {
+        return sandbox ? this.sandboxBaseUrl : this.baseUrl;
     }
 
-    aliPayMobile(tier: Tier, cycle: Cycle): string {
-        return `${this.baseUrlAliPay}/mobile/${tier}/${cycle}`;
+    aliPayDesktop(tier: Tier, cycle: Cycle, sandbox: boolean): string {
+        return `${this.getBaseUrl(sandbox)}/alipay/desktop/${tier}/${cycle}`;
     }
 
-    wxPayDesktop(tier: Tier, cycle: Cycle): string {
-        return `${this.baseUrlWxPay}/desktop/${tier}/${cycle}`;
+    aliPayMobile(tier: Tier, cycle: Cycle, sandbox: boolean): string {
+        return `${this.getBaseUrl(sandbox)}/alipay/mobile/${tier}/${cycle}`;
+    }
+
+    wxPayDesktop(tier: Tier, cycle: Cycle, sandbox: boolean): string {
+        return `${this.getBaseUrl(sandbox)}/wxpay/desktop/${tier}/${cycle}`;
     }
 
     wxQueryOrder(orderId: string): string {
-        return `${this.baseUrlWxPay}/query/${orderId}`;
+        return `${this.baseUrl}/wxpay/query/${orderId}`;
     }
 
     private readonly wxRedirectPath: string = "/wx/oauth/callback";
@@ -86,8 +92,6 @@ class SubAPI {
 
     // Send wechat OAuth2 code here
     readonly wxLogin: string        = `${this.baseUrl}/wx/oauth/login`;
-  
-    
     
     readonly redeemGiftCard: string = `${this.baseUrl}/gift-card/redeem`;
 }
