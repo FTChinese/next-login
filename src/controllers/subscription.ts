@@ -103,20 +103,21 @@ router.get("/pay/:tier/:cycle", async (ctx, next) => {
     const cycle: Cycle = ctx.params.cycle;
 
     const plan = scheduler.findPlan(tier, cycle);
-    const sandbox: string | undefined = ctx.request.query.sandbox;
+    const sandbox: boolean = toBoolean(ctx.request.query.sandbox);
 
     if (!plan) {
         ctx.status = 404;
         return;
     }
 
+    const uiData = await subViewModel.buildPaymentUI(plan, sandbox);
+
     Object.assign(
         ctx.state, 
-        subViewModel.buildPaymentUI(
-            plan, 
-            toBoolean(sandbox),
-        ),
+        uiData,
     );
+
+    log(ctx.state);
 
     ctx.body = await render("subscription/pay.html", ctx.state);
 });
@@ -156,13 +157,11 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
 
         // Form error
         if (formState && formState.error) {
+            const uiData = await subViewModel.buildPaymentUI(plan, sandbox, { formState });
+
             Object.assign(
                 ctx.state, 
-                subViewModel.buildPaymentUI(
-                    plan, 
-                    sandbox, 
-                    { formState },
-                )
+                uiData,
             );
 
             return await next();
@@ -174,30 +173,31 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
             return ctx.redirect(aliOrder.redirectUrl);
         }
 
+        const uiData = await subViewModel.buildPaymentUI(
+            plan,
+            sandbox,
+            { wxOrder }
+        )
         // Handle wxpay.
         if (wxOrder) {
             Object.assign(
                 ctx.state,
-                subViewModel.buildPaymentUI(
-                    plan,
-                    sandbox,
-                    { wxOrder},
-                ),
+                uiData,
             );
 
             return await next();
         }
     } catch (e) {
-
+        const uiData = await subViewModel.buildPaymentUI(
+            plan, 
+            sandbox, 
+            { 
+                errResp: new APIError(e),
+            },
+        )
         Object.assign(
             ctx.state, 
-            subViewModel.buildPaymentUI(
-                plan, 
-                sandbox, 
-                { 
-                    errResp: new APIError(e),
-                },
-            )
+            uiData,
         );
 
         return await next();
