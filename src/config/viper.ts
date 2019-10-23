@@ -17,19 +17,24 @@ export interface IWxPayApp extends IWxApp {
     api_key: string;
 }
 
-interface Env {
+interface Config {
     koa_session: {
         next_user: string;
     };
     wxapp: {
         web_pay: IWxPayApp;
         web_oauth: IWxApp;
-    },
+    };
     oauth_client: {
         fta_dev: IOAuthClient;
         fta_sandbox: IOAuthClient;
         fta_prod: IOAuthClient;
-    }
+    };
+    api_url: {
+        reader_v1: string;
+        subscription_v1: string;
+        sub_sandbox: string;
+    };
 }
 
 class Viper {
@@ -56,7 +61,7 @@ class Viper {
         return this;
     }
 
-    getConfig(): Env {
+    getConfig(): Config {
         return this.config;
     }
 }
