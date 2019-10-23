@@ -18,15 +18,17 @@
         </ul>
       </div>
 
-      {% if radio %}
+      {% if form %}
       <div class="card">
         <div class="card-header">请选择支付方式</div>
         <div class="card-body">
-          <form action="{% if sandbox %}?sandbox=true{% endif %}" method="post">
+          <form action="{% if form.action %}{{ form.action }}{% endif %}" method="post">
             
+            {% for radio in form.radios %}
             <div class="form-group">
               {% include "partials/radio.html" %}
             </div>
+            {% endfor %}
 
             <div class="mt-3">
               <button 
@@ -48,7 +50,7 @@
         <div class="mt-1">
             <small>微信 -> 发现 -> 扫一扫</small>
         </div>
-        <a href="{{ sitemap.wxpayDone }}">支付完成？</a>
+        <a href="{{ qr.doneLink }}">支付完成？</a>
         <p class="mt-2 text-muted">
           <small>注：由于微信支付技术上的限制，此处购买FT会员仅能支持扫码支付。如果您需要在移动设备上购买，请安装FT中文网APP。</small>
         </p>

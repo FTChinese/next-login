@@ -1,0 +1,21 @@
+<div class="d-flex justify-content-between">
+  <div>
+      {% if form.submitBtn %}
+      <button 
+          class="btn btn-primary"
+          type="submit"
+          data-disable-with="{{ form.submitBtn.disableWith }}">{{ form.submitBtn.text }}</button>
+      {% endif %}
+      
+      {% if form.cancelBtn %}
+      <a href="{{ form.cancelBtn.href }}" 
+        class="btn">{{ form.cancelBtn.text }}</a>
+      {% endif %}
+  </div>
+
+  {% if form.deleteBtn %}
+    <a href="{{form.deleteBtn.href}}"
+      class="btn btn-danger" 
+      data-toggle="modal">{{ form.deleteBtn.text }}</a>
+  {% endif %}
+</div>

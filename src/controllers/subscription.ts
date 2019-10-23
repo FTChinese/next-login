@@ -21,8 +21,13 @@ import {
 } from "../config/viper";
 import { scheduler } from "../models/paywall";
 import { subRepo } from "../repository/subscription";
-import { AliOrder, IAliCallback, orderSerializer, IWxQueryResult } from "../models/order";
+import { 
+    AliOrder, 
+    IAliCallback, 
+    orderSerializer 
+} from "../models/order";
 import { APIError } from "../viewmodels/api-response";
+import { toBoolean } from "../util/converter";
 
 const log = debug("user:subscription");
 const router = new Router();
@@ -90,23 +95,28 @@ router.get("/orders", async (ctx, next) => {
     ctx.body = await render("subscription/orders.html", ctx.state)
 });
 
-interface Env {
-    sandbox?: "true";
-}
-
+/**
+ * @description Show payment methods
+ */
 router.get("/pay/:tier/:cycle", async (ctx, next) => {
     const tier: Tier = ctx.params.tier;
     const cycle: Cycle = ctx.params.cycle;
 
     const plan = scheduler.findPlan(tier, cycle);
-    const query: Env = ctx.request.query;
+    const sandbox: string | undefined = ctx.request.query.sandbox;
 
     if (!plan) {
         ctx.status = 404;
         return;
     }
 
-    Object.assign(ctx.state, subViewModel.buildPaymentUI(plan, query.sandbox == "true"));
+    Object.assign(
+        ctx.state, 
+        subViewModel.buildPaymentUI(
+            plan, 
+            toBoolean(sandbox),
+        ),
+    );
 
     ctx.body = await render("subscription/pay.html", ctx.state);
 });
@@ -125,8 +135,7 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
         return;
     }
 
-    const query: Env = ctx.request.query;
-    const sandbox: boolean = query.sandbox == "true";
+    const sandbox: string | undefined = ctx.request.query.sandbox;
 
     const payMethod: PaymentMethod | undefined = ctx.request.body.payMethod;
 
@@ -136,7 +145,7 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
             ctx.state, 
             subViewModel.buildPaymentUI(
                 plan, 
-                sandbox, 
+                toBoolean(sandbox), 
                 { formState, },
             )
         );
@@ -186,7 +195,7 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
                     ctx.state, 
                     subViewModel.buildPaymentUI(
                         plan,
-                        sandbox,
+                        toBoolean(sandbox),
                         {
                             qrData: dataUrl,
                         },
@@ -196,6 +205,8 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
                 return await next();
         }
     } catch (e) {
+        log("Payment error: %O", e);
+        
         ctx.state.errors = {
             message: e.message,
         };
@@ -204,7 +215,7 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
             ctx.state,
             subViewModel.buildPaymentUI(
                 plan,
-                sandbox,
+                toBoolean(sandbox),
                 {
                     formState,
                     errResp: new APIError(e),

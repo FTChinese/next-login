@@ -10,7 +10,7 @@ import {
     accountRepo,
 } from "../repository/account";
 import {
-    UIBase, IListItem, IRadio,
+    UIBase, IListItem, IRadio, UIForm, IForm,
 } from "./ui";
 import { 
     IFetchResult,
@@ -56,8 +56,7 @@ interface UIQR {
 
 interface UIPayment extends UIBase {
     items: Array<IListItem>;
-    sandbox?: boolean;
-    radio?: IRadio;
+    form?: IForm;
     qr?: UIQR;
 }
 
@@ -220,8 +219,11 @@ class SubViewModel {
         };
     }
 
-    buildPaymentUI(plan: Plan, sandbox?: boolean, result?: IWxPayResult): UIPayment {
-        const { formState, errResp } = result || {};
+    /**
+     * @description UI to show payment methods.
+     */
+    buildPaymentUI(plan: Plan, sandbox: boolean, result?: IWxPayResult): UIPayment {
+        const { formState, errResp, qrData } = result || {};
         const uiData: UIPayment = {
             errors: errResp ? {
                 message: errResp.message,
@@ -239,43 +241,47 @@ class SubViewModel {
             
         };
 
-        if (result && result.qrData) {
+        if (qrData) {
             uiData.qr = {
-                dataUrl: result.qrData,
+                dataUrl: qrData,
                 doneLink: subsMap.wxpayDone,
             };
 
             return uiData;
         }
 
-        uiData.sandbox = sandbox;
-        uiData.radio = {
-            name: "payMethod",
-            inputs: [
+        uiData.form = {
+            action: sandbox ? "?sandbox=true" : undefined,
+            radios: [
                 {
-                    label: "支付宝",
-                    imageUrl: "http://www.ftacademy.cn/images/alipay-68x24.png",
-                    gap: 3,
-                    id: "alipay",
-                    value: "alipay",
-                    checked: formState 
-                        ? formState.value == "alipay" 
-                        : false,
-                },
-                {
-                    label: "微信支付",
-                    imageUrl: "http://www.ftacademy.cn/images/wxpay-113x24.png",
-                    gap: 3,
-                    id: "wechat",
-                    value: "wechat",
-                    checked: formState
-                        ? formState.value == "wechat"
-                        : false,
-                },
-            ],
-            required: true,
-            error: formState ? formState.error : undefined,
-        };
+                    name: "payMethod",
+                    inputs: [
+                        {
+                            label: "支付宝",
+                            imageUrl: "http://www.ftacademy.cn/images/alipay-68x24.png",
+                            gap: 3,
+                            id: "alipay",
+                            value: "alipay",
+                            checked: formState 
+                                ? formState.value == "alipay" 
+                                : false,
+                        },
+                        {
+                            label: "微信支付",
+                            imageUrl: "http://www.ftacademy.cn/images/wxpay-113x24.png",
+                            gap: 3,
+                            id: "wechat",
+                            value: "wechat",
+                            checked: formState
+                                ? formState.value == "wechat"
+                                : false,
+                        },
+                    ],
+                    required: true,
+                    error: formState ? formState.error : undefined,
+                }
+            ]
+        }
 
         return uiData;
     }
