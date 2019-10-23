@@ -7,7 +7,7 @@ import {
     Plan,
 } from "../models/paywall";
 import { 
-    subsApiBase, subsApi, KEY_APP_ID,
+    subsApi, KEY_APP_ID,
 } from "../config/api";
 import { 
     AliOrder, 
@@ -24,10 +24,9 @@ class Subscription {
     readonly aliReturnUrl: string = "http://next.ftchinese.com/user/subscription/done/ali";
 
     async aliDesktopPay(account: Account, plan: Plan, app: IAppHeader): Promise<AliOrder> {
-        const url = `${subsApiBase}/alipay/desktop/${plan.tier}/${plan.cycle}`;
 
         const resp = await request
-            .post(url)
+            .post(subsApi.aliPayDesktop(plan.tier, plan.cycle))
             .query({
                 return_url: this.aliReturnUrl,
             })
@@ -38,10 +37,9 @@ class Subscription {
     }
 
     async aliMobilePay(account: Account, plan: Plan, app: IAppHeader): Promise<AliOrder> {
-        const url = `${subsApiBase}/alipay/mobile/${plan.tier}/${plan.cycle}`;
 
         const resp = await request
-            .post(url)
+            .post(subsApi.aliPayMobile(plan.tier, plan.cycle))
             .query({
                 return_url: this.aliReturnUrl,
             })
@@ -52,10 +50,9 @@ class Subscription {
     }
 
     async wxDesktopPay(account: Account, plan: Plan, app: IAppHeader): Promise<WxOrder> {
-        const url = `${subsApiBase}/wxpay/desktop/${plan.tier}/${plan.cycle}`;
 
         const resp = await request
-            .post(url)
+            .post(subsApi.wxPayDesktop(plan.tier, plan.cycle))
             .set(account.idHeaders)
             .set(app);
 
