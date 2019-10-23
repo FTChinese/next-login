@@ -58,6 +58,22 @@ export interface ISelectOption {
     selected: boolean;
 }
 
+export interface ISubmitButton {
+    disableWith?: string;
+    text: string;
+}
+
+export interface IForm {
+    disabled?: boolean;
+    action?: string;
+    inputs?: Array<ITextInput>;
+    checkBoxes?: Array<ICheckBox>;
+    radios?: Array<IRadio>;
+    submitBtn?: ISubmitButton;
+    cancelBtn?: IAnchor;
+    deleteBtn?: IAnchor;
+}
+
 export interface IListItem {
     label: string;
     value?: string;
@@ -65,7 +81,7 @@ export interface IListItem {
     linkText?: string;
 }
 
-export interface UICard {
+export interface ICard {
     header?: string;
     list: Array<IListItem>;
 }
@@ -93,6 +109,10 @@ export interface IActionDone {
 export interface UIBase {
     errors?: IErrors;
     alert?: IAlert;
+}
+
+export interface UIForm extends UIBase {
+    form: IForm;
 }
 
 export interface UISingleInput extends UIBase {
