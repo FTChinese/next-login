@@ -10,6 +10,7 @@ import {
 import {
     DateTime,
 } from "luxon";
+import debug from "debug";
 import {
     Dictionary,
 } from "./data-types";
@@ -18,8 +19,6 @@ import {
     viper,
 } from "../config/viper";
 import {
-    subsApiBase,
-    subsSandboxBase,
     subsApi,
 } from "../config/api";
 import {
@@ -28,13 +27,12 @@ import {
 import {
     pool,
 } from "../util/random";
-import {
-    Account,
-} from "./reader";
+
 
 const chance = new Chance();
+const log = debug("user:wx-oauth");
 
-export interface ICodeRequestParams extends Dictionary<string> {
+interface ICodeRequestParams extends Dictionary<string> {
     appid: string;
     redirect_uri: string;
     response_type: "code";
@@ -60,45 +58,43 @@ export interface IOAuthSession {
     usage: WxOAuthUsage;
 }
 
-
-
+/**
+ * @description `OAuthClient` is used to create an OAuth code request to Wechat API.
+ */
 export class OAuthClient {
     private app: IWxApp = viper.getConfig().wxapp.web_oauth;
     private codeUrl: string = "https://open.weixin.qq.com/connect/qrconnect";
-    private subsApiBaseUrl: string;
 
-    // The sole purpose of sandbox is test whether API
-    // could be used as an itermediate transfer point.
-    constructor(sandbox: boolean = false) {
-        this.subsApiBaseUrl = sandbox
-            ? subsSandboxBase
-            : subsApiBase;
-    }
-
-    get callbackUrl(): string {
-        return `${this.subsApiBaseUrl}${subsApi.wxRedirect}`;
-    }
-
-    generateSession(account?: Account): IOAuthSession {
+    /**
+     * @description Generate session data to be used
+     * to verify callback parameters.
+     */
+    generateSession(usage: WxOAuthUsage): IOAuthSession {
         return {
             state: chance.string({
                 pool,
                 length: 12,
             }),
             created: unixNow(),
-            usage: account ? "link" : "login",
+            usage,
         };
     }
 
-    buildCodeUrl(state: string): string {
+    /**
+     * @description Create the url to request OAuth code.
+     * `sandbox` determines the callback url to use.
+     */
+    buildCodeUrl(state: string, sandbox: boolean): string {
         const params: ICodeRequestParams = {
             appid: this.app.app_id,
-            redirect_uri: this.callbackUrl,
+            redirect_uri: subsApi.wxRedirect(sandbox),
             response_type: "code",
             scope: "snsapi_login",
             state: state,
         }
 
+        log(`Sandbox: ${sandbox}. Redirect uri: ${params.redirect_uri}`);
+        
         const requestCodeUrl = new URL(this.codeUrl);
         requestCodeUrl.search = (new URLSearchParams(params)).toString();
         requestCodeUrl.hash = "wechat_redirect";
@@ -106,6 +102,8 @@ export class OAuthClient {
         return requestCodeUrl.href;
     }
 }
+
+export const oauthClient = new OAuthClient();
 
 @jsonObject
 export class WxSession {

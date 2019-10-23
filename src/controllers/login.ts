@@ -30,6 +30,7 @@ import {
     oauthServer,
     IOAuthSession as IFtcOAuthSession,
  } from "../models/ftc-oauth";
+import { toBoolean } from "../util/converter";
 
 const router = new Router();
 
@@ -85,12 +86,16 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
  * @description Handle wechat login request.
  * This will redirect user to wechat.
  * 
- * GET /login/wechat
+ * GET /login/wechat<?sandbox=true>
  */
 router.get("/wechat", async (ctx, next) => {
     const account: Account | undefined = ctx.session.user;
+    const sandbox: string | undefined = ctx.request.query.sandbox
 
-    const data = wxLoginViewModel.codeRequest(account);
+    const data = wxLoginViewModel.codeRequest(
+        account ? "link" : "login",
+        toBoolean(sandbox),
+    );
 
     // State that will be used later to validate callback query parameters.
     ctx.session.wx_oauth = data.session;
