@@ -7,7 +7,11 @@ export class Paging {
     private currentPage: number;
     private itemsPerPage: number;
 
-    private size: number
+    // The number of items shown on current page.
+    // If size < itemsPerPage, it indicates there
+    // are no more items and Next Page button
+    // won't be shown.
+    private size: number = 0;
 
     constructor(current: number = 1, perPage: number = 20) {
         this.currentPage = current;
@@ -19,19 +23,19 @@ export class Paging {
         return this;
     }
 
-    get previousPage(): number {
+    get previous(): number {
         return this.currentPage - 1;
     }
 
-    get nextPage(): number {
+    get next(): number {
         return this.currentPage + 1;
     }
 
-    showPrevious(): boolean {
+    get hasPrevious(): boolean {
         return this.currentPage > 1;
     }
 
-    showNext(): boolean {
+    get hasNext(): boolean {
         return this.size >= this.itemsPerPage;
     }
 
