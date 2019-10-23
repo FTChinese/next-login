@@ -26,7 +26,7 @@ import {
     IAliCallback, 
     orderSerializer 
 } from "../models/order";
-import { APIError } from "../viewmodels/api-response";
+import { APIError, isRequestError } from "../viewmodels/api-response";
 import { toBoolean } from "../util/converter";
 
 const log = debug("user:subscription");
@@ -135,96 +135,74 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
         return;
     }
 
-    const sandbox: string | undefined = ctx.request.query.sandbox;
+    const sandbox: boolean = toBoolean(ctx.request.query.sandbox);
 
     const payMethod: PaymentMethod | undefined = ctx.request.body.payMethod;
-
-    const formState = subViewModel.validatePayMethod(payMethod);
-    if (!formState.value) {
-        Object.assign(
-            ctx.state, 
-            subViewModel.buildPaymentUI(
-                plan, 
-                toBoolean(sandbox), 
-                { formState, },
-            )
-        );
-
-        return await next();
-    }
-
-    const isMobile = subViewModel.isMobile(ctx.header["user-agent"]);
 
     const account: Account = ctx.state.user;
 
     try {
-        switch (payMethod) {
-            case "alipay":
-                let aliOrder: AliOrder;
-                if (isMobile) {
-                    aliOrder = await subRepo.aliMobilePay(
-                        account,
-                        plan,
-                        ctx.state.appHeaders,
-                    );
+        // The payment result does not contain `errResp` field.
+        const { formState, aliOrder, wxOrder } = await subViewModel.pay(
+            plan,
+            {
+                ...account.idHeaders,
+                ...ctx.state.appHeaders,
+            },
+            subViewModel.isMobile(ctx.header["user-agent"]),
+            sandbox,
+            payMethod,
+        );
 
-                    
-                } else {
-                    aliOrder = await subRepo.aliDesktopPay(
-                        account,
-                        plan,
-                        ctx.state.appHeaders,
-                    );
-                }
-                ctx.redirect(aliOrder.redirectUrl);
-                ctx.session.order = aliOrder;
-                return;
+        // Form error
+        if (formState && formState.error) {
+            Object.assign(
+                ctx.state, 
+                subViewModel.buildPaymentUI(
+                    plan, 
+                    sandbox, 
+                    { formState },
+                )
+            );
 
-            case "wechat":
-                const wxOrder = await subRepo.wxDesktopPay(
-                    account,
+            return await next();
+        }
+
+        // Handle alipay
+        if (aliOrder) {
+            ctx.session.order = aliOrder;
+            return ctx.redirect(aliOrder.redirectUrl);
+        }
+
+        // Handle wxpay.
+        if (wxOrder) {
+            Object.assign(
+                ctx.state,
+                subViewModel.buildPaymentUI(
                     plan,
-                    ctx.state.appHeaders,
-                );
+                    sandbox,
+                    { wxOrder},
+                ),
+            );
 
-                log("Wechat order: %O", wxOrder);
-
-                const dataUrl = await toDataURL(wxOrder.qrCodeUrl);
-                
-                Object.assign(
-                    ctx.state, 
-                    subViewModel.buildPaymentUI(
-                        plan,
-                        toBoolean(sandbox),
-                        {
-                            qrData: dataUrl,
-                        },
-                    )
-                );
-
-                return await next();
+            return await next();
         }
     } catch (e) {
-        log("Payment error: %O", e);
-        
-        ctx.state.errors = {
-            message: e.message,
-        };
 
         Object.assign(
-            ctx.state,
+            ctx.state, 
             subViewModel.buildPaymentUI(
-                plan,
-                toBoolean(sandbox),
-                {
-                    formState,
+                plan, 
+                sandbox, 
+                { 
                     errResp: new APIError(e),
-                }
+                },
             )
         );
 
         return await next();
     }
+
 }, async (ctx, next) => {
     ctx.body = await render("subscription/pay.html", ctx.state);
 });
