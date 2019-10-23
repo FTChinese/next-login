@@ -117,8 +117,6 @@ router.get("/pay/:tier/:cycle", async (ctx, next) => {
         uiData,
     );
 
-    log(ctx.state);
-
     ctx.body = await render("subscription/pay.html", ctx.state);
 });
 
