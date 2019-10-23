@@ -1,21 +1,12 @@
 <div class="row justify-content-between">
   <div class="col-auto">
-    {% if paging.page > 1 %}
-      <a href="?page={{paging.page - 1}}">上一页</a>
+    {% if paging.hasPrevious %}
+      <a href="?page={{ paging.previous }}">Previous</a>
     {% endif %}
 
-    {% if paging.showPrevious() %}
-      <a href="?page={{paging.page - 1}}">上一页</a>
-    {% endif %}
-  </div>
-
-  <div class="col-auto">
-    {% if paging.listSize >= paging.per_page %}
-      <a href="?page={{ paging.previousPage }}">下一页</a>
-    {% endif %}
-
-    {% if paging.showNext() %}
-      <a href="?page={{ paging.nextPage }}">下一页</a>
+    {% if paging.hasNext %}
+      <a href="?page={{ paging.next }}">Next</a>
     {% endif %}
   </div>
 </div>
+
