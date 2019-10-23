@@ -8,7 +8,7 @@ import {
     UIMultiInputs,
     UIBase,
     ITextInput,
-    UICard,
+    ICard,
     IRadio,
     IListItem,
 } from "./ui";
@@ -74,7 +74,7 @@ interface ILinkResult extends IFetchResult<boolean>{
 }
 
 interface UIMerging extends UIBase {
-    cards: Array<UICard>;
+    cards: Array<ICard>;
     denyMerge?: string;
     form: {
         input: ITextInput;
@@ -95,7 +95,7 @@ interface IUnlinkResult extends IFetchResult<boolean> {
 }
 
 interface UIUnlink extends UIBase {
-    card: UICard;
+    card: ICard;
     form?: {
         header: string;
         radio: IRadio;
