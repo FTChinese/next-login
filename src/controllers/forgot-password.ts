@@ -24,6 +24,7 @@ const router = new Router();
  * @description Show input box to let user to enter email.
  */
 router.get("/", async (ctx, next) => {
+    // @ts-ignore
     const key: KeyPwReset = ctx.session.ok;
 
     const uiData = pwResetViewModel.buildEmailUI(
@@ -37,6 +38,7 @@ router.get("/", async (ctx, next) => {
 }, async (ctx, next) => {
     ctx.body = await render('forgot-password/enter-email.html', ctx.state);
 
+    // @ts-ignore
     delete ctx.session.ok;
 });
 
@@ -84,6 +86,8 @@ router.get("/:token", async (ctx, next) => {
     if (errResp) {
         if (errResp.notFound) {
             const key: KeyPwReset = "invalid_token";
+
+            // @ts-ignore
             ctx.session.ok = key;
             return ctx.redirect(entranceMap.passwordReset);
 
@@ -104,6 +108,8 @@ router.get("/:token", async (ctx, next) => {
     Object.assign(ctx.state, pwResetViewModel.buildPwResetUI(success.email));
 
     // In case the submit failure and this page need to be displayed again in POST.
+
+    // @ts-ignore
     ctx.session.email = success.email;
 
     await next();
@@ -123,6 +129,7 @@ router.post("/:token", async (ctx, next) => {
     const { success, errForm, errResp } = await pwResetViewModel.resetPassword(formData, token);
 
     if (!success) {
+        // @ts-ignore
         const email: string = ctx.session.email;
 
         const uiData = pwResetViewModel.buildPwResetUI(email, { errForm, errResp });
@@ -134,10 +141,12 @@ router.post("/:token", async (ctx, next) => {
 
     // Redirect.
     const key: KeyPwReset = "pw_reset";
+    // @ts-ignore
     ctx.session.ok = key;
 
     ctx.redirect(entranceMap.passwordReset);
 
+    // @ts-ignore
     delete ctx.session.email;
 
 }, async (ctx, next) => {

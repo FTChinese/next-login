@@ -52,13 +52,17 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
         return await next();
     }
 
+    // @ts-ignore
     ctx.session.user = success;
 
+    // @ts-ignore
     if (ctx.session.oauth) {
+        // @ts-ignore
         const oauthSession: IOAuthSession = ctx.session.oauth;
 
         ctx.redirect(oauthServer.buildAuthorizeUrl(oauthSession));
 
+        // @ts-ignore
         delete ctx.session.oauth;
         
         return;

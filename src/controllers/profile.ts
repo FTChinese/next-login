@@ -34,6 +34,8 @@ router.get("/", async (ctx, next) => {
     }
     
     // If this page is accessed from redirection after updating successfully.
+
+    // @ts-ignore
     const key: KeyUpdated | undefined = ctx.session.ok;
 
     // If current is an ftc account, or is linked,
@@ -46,10 +48,12 @@ router.get("/", async (ctx, next) => {
 }, async (ctx, next) => {
     ctx.body = await render("profile/profile.html", ctx.state);
 
+    // @ts-ignore
     delete ctx.session.ok;
 });
 
 router.get("/display-name", async (ctx, next) => {
+    // @ts-ignore
     const account: Account = ctx.session.user;
 
     const { success, errResp } = await profileViewModel.fetchProfile(account);
@@ -65,6 +69,7 @@ router.get("/display-name", async (ctx, next) => {
 });
 
 router.post("/display-name", async (ctx, next) => {
+    // @ts-ignore
     const account: Account = ctx.session.user;
 
     const formData: IName = ctx.request.body.profile;
@@ -84,6 +89,7 @@ router.post("/display-name", async (ctx, next) => {
 
     const key: KeyUpdated = "saved";
 
+    // @ts-ignore
     ctx.session.ok = key;
 
     return ctx.redirect(profileMap.base);
@@ -93,6 +99,7 @@ router.post("/display-name", async (ctx, next) => {
 });
 
 router.get("/mobile", async (ctx, next) => {
+    // @ts-ignore
     const account: Account = ctx.session.user;
 
     const { success, errResp } = await profileViewModel.fetchProfile(account);
@@ -108,6 +115,7 @@ router.get("/mobile", async (ctx, next) => {
 });
 
 router.post("/mobile", async (ctx, next) => {
+    // @ts-ignore
     const account: Account = ctx.session.user;
 
     const formData: IMobile = ctx.request.body.profile;
@@ -127,6 +135,7 @@ router.post("/mobile", async (ctx, next) => {
 
     const key: KeyUpdated = "saved";
 
+    // @ts-ignore
     ctx.session.ok = key;
 
     return ctx.redirect(profileMap.base);
@@ -135,6 +144,7 @@ router.post("/mobile", async (ctx, next) => {
 });
 
 router.get("/info", async (ctx, next) => {
+    // @ts-ignore
     const account: Account = ctx.session.user;
 
     const { success, errResp } = await profileViewModel.fetchProfile(account);
@@ -155,6 +165,7 @@ router.get("/info", async (ctx, next) => {
 });
 
 router.post("/info", async (ctx, next) => {
+    // @ts-ignore
     const account: Account = ctx.session.user;
     const formData: IProfileFormData | undefined = ctx.request.body.profile;
 
@@ -177,6 +188,7 @@ router.post("/info", async (ctx, next) => {
 
     const key: KeyUpdated = "saved";
 
+    // @ts-ignore
     ctx.session.ok = key;
 
     return ctx.redirect(profileMap.base);
@@ -186,6 +198,7 @@ router.post("/info", async (ctx, next) => {
 
 router.get("/address", async (ctx, next) => {
 
+    // @ts-ignore
     const account: Account = ctx.session.user;
 
     const { success, errResp } = await profileViewModel.fetchAddress(account);
@@ -201,6 +214,7 @@ router.get("/address", async (ctx, next) => {
 });
 
 router.post("/address", async (ctx, next) => {
+    // @ts-ignore
     const account: Account = ctx.session.user;
     const formData: IAddress | undefined = ctx.request.body.address;
 
@@ -223,6 +237,7 @@ router.post("/address", async (ctx, next) => {
     
     const key: KeyUpdated = "saved";
 
+    // @ts-ignore
     ctx.session.ok = key;
 
     return ctx.redirect(profileMap.base);

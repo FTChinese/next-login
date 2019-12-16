@@ -20,10 +20,12 @@ router.get("/", paging(10), async (ctx, next) => {
         return await next();
     }
 
+    // @ts-ignore
     if (ctx.session.error) {
         const uiData = await articleViewModel.buildUI(
             account,
             ctx.state.paging,
+            // @ts-ignore
             ctx.session.error,
         );
 
@@ -54,6 +56,7 @@ router.post("/:id/delete", async (ctx, next) => {
     const { success, errResp } = await articleViewModel.delete(account, id);
 
     if (errResp) {
+        // @ts-ignore
         ctx.session.error = errResp.message;
     }
 

@@ -47,6 +47,7 @@ router.get("/authorize", async (ctx, next) => {
 
     // If user is not logged-in yet, redirect user to login page.
     if (!account) {
+        // @ts-ignore
         ctx.session.oauth = oauthServer.createSession(values);
         return ctx.redirect(entranceMap.login);
     }

@@ -77,6 +77,7 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
         return await next();
     }
 
+    // @ts-ignore
     ctx.session.user = success;
     return ctx.redirect(profileMap.base);
     
@@ -91,6 +92,7 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
  * GET /login/wechat<?sandbox=true>
  */
 router.get("/wechat", async (ctx, next) => {
+    // @ts-ignore
     const account: Account | undefined = ctx.session.user;
     const sandbox: string | undefined = ctx.request.query.sandbox
 
@@ -100,6 +102,8 @@ router.get("/wechat", async (ctx, next) => {
     );
 
     // State that will be used later to validate callback query parameters.
+
+    // @ts-ignore
     ctx.session.wx_oauth = data.session;
 
     // Redirect to wechat api.
@@ -138,12 +142,15 @@ router.get("/wechat/test", collectAppHeaders(), async (ctx, next) => {
 router.get("/wechat/callback", collectAppHeaders(), async(ctx, next) => {
     const query: ICallbackParams = ctx.request.query;
 
+    // @ts-ignore
     const wxOAuthSess: IOAuthSession | undefined = ctx.session.wx_oauth;
     if (isProduction) {
+        // @ts-ignore
         delete ctx.session.wx_oauth;
     };
 
     const headers: IHeaderApp = ctx.state.appHeaders;
+    // @ts-ignore
     const localAccount: Account | undefined = ctx.session.user;
 
     const { success, errQuery, errResp } = await wxLoginViewModel.getApiSession(query, headers, wxOAuthSess);
@@ -171,6 +178,8 @@ router.get("/wechat/callback", collectAppHeaders(), async(ctx, next) => {
         }
 
         // Save unionId to `ctx.session.uid`.
+
+        // @ts-ignore
         ctx.session.uid = success.unionId;
         return ctx.redirect(accountMap.linkMerging);
     }
@@ -189,15 +198,20 @@ router.get("/wechat/callback", collectAppHeaders(), async(ctx, next) => {
         return await next();
     }
 
+    // @ts-ignore
     ctx.session.user = result.success;
 
     // This indicates user is trying to login to ftacademy, so redirect user to OAuth page.
     // Added by /authorize
+
+    // @ts-ignore
     if (ctx.session.oauth) {
+        // @ts-ignore
         const oauthSession: IFtcOAuthSession = ctx.session.oauth;
 
         ctx.redirect(oauthServer.buildAuthorizeUrl(oauthSession));
 
+        // @ts-ignore
         delete ctx.session.oauth;
         return;
     }

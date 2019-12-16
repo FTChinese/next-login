@@ -21,7 +21,7 @@ import {
     accountSerializer,
 } from "../models/reader";
 import {
-    entranceMap,
+    entranceMap, androidMap,
 } from "../config/sitemap";
 import render from "../util/render";
 import { IHeaderApp } from "../models/header";
@@ -43,6 +43,11 @@ export function env(): Middleware {
             bsVersion,
             bsNativeVersion,
         };
+
+        ctx.state.globalUrl = {
+            androidHome: androidMap.latest,
+            login: entranceMap.login,
+        }
 
         await next();
     };

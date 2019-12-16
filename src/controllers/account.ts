@@ -46,7 +46,7 @@ router.get("/", async (ctx, next) => {
         return await next();
     }
 
-    // Only exists if user perform update action.
+    // @ts-ignore
     const key: KeyUpdated | undefined = ctx.session.ok;
 
     const { success, errResp } = await accountViewModel.refresh(account);
@@ -69,6 +69,7 @@ router.get("/", async (ctx, next) => {
 
     Object.assign(ctx.state, uiData);
 
+    // @ts-ignore
     ctx.session.user = success;
 
     return await next();
@@ -76,6 +77,7 @@ router.get("/", async (ctx, next) => {
 }, async (ctx, next) => {
     ctx.body = await render("account/account.html", ctx.state);
 
+    // @ts-ignore
     delete ctx.session.ok;
 });
 
@@ -124,6 +126,7 @@ router.post("/email", async (ctx, next) => {
 
     const key: KeyUpdated = "saved";
 
+    // @ts-ignore
     ctx.session.ok = key;
 
     return ctx.redirect(accountMap.base);
@@ -165,6 +168,7 @@ router.post("/password", async (ctx, next) => {
     
     const key: KeyUpdated = "password_saved";
 
+    // @ts-ignore
     ctx.session.ok = key;
 
     return ctx.redirect(accountMap.base);
@@ -192,6 +196,7 @@ router.post("/request-verification", collectAppHeaders(), async (ctx, next) => {
 
     const key: KeyUpdated = "letter_sent";
 
+    // @ts-ignore
     ctx.session.ok = key;
 
     return ctx.redirect(accountMap.base);
@@ -228,6 +233,8 @@ router.post("/link/email", async (ctx, next) => {
 
     // Save the email to session so that user
     // does not need to re-enter the email after redirect.
+
+    // @ts-ignore
     ctx.session.email = formData.email.trim();
 
     if (success) {
@@ -245,6 +252,7 @@ router.post("/link/email", async (ctx, next) => {
  * @description If a wechat-user already has an ftc account, redirecto here and ask user to login.
  */
 router.get("/link/login", async (ctx, next) => {
+    // @ts-ignore
     const email = ctx.session.email;
 
     if (!email) {
@@ -262,6 +270,7 @@ router.get("/link/login", async (ctx, next) => {
     ctx.body = await render("account/login.html", ctx.state);
 
     if (isProduction) {
+        // @ts-ignore
         delete ctx.session.email;
     }
 });
@@ -290,6 +299,8 @@ collectAppHeaders(), async (ctx, next) => {
     }
 
     // Redirect user to merge account page.
+
+    // @ts-ignore
     ctx.session.uid = success;
     ctx.redirect(accountMap.linkMerging);
 
@@ -298,6 +309,7 @@ collectAppHeaders(), async (ctx, next) => {
 });
 
 router.get("/link/signup", async (ctx, next) => {
+    // @ts-ignore
     const email = ctx.session.email;
 
     if (!email) {
@@ -316,6 +328,7 @@ router.get("/link/signup", async (ctx, next) => {
     ctx.body = await render("account/signup.html", ctx.state);
 
     if (isProduction) {
+        // @ts-ignore
         delete ctx.session.email;
     }
 });
@@ -328,6 +341,7 @@ router.post("/link/signup", collectAppHeaders(), async (ctx, next) => {
     }
 
     const headers: IHeaderApp = ctx.state.appHeaders;
+    // @ts-ignore
     const account: Account = ctx.session.user;
     const { success, errForm, errResp } = await linkViewModel.signUp(formData, account, headers);
 
@@ -356,12 +370,16 @@ router.post("/link/signup", collectAppHeaders(), async (ctx, next) => {
  * `ctx.session.uid: string` is required.
  */
 router.get("/link/merge", async (ctx, next) => {
-
+    // @ts-ignore
     const account: Account = ctx.session.user;
 
     // Passed from `/login/callback` or `/account/link/login`
+
+    // @ts-ignore
     const targetId: string | undefined = ctx.session.uid;
     // Passed from POST error.
+
+    // @ts-ignore
     const errMsg: string | undefined = ctx.session.errMsg;
 
     if (!targetId) {
@@ -377,7 +395,9 @@ router.get("/link/merge", async (ctx, next) => {
     
     ctx.body = await render("account/merge.html", ctx.state);
 
+    // @ts-ignore
     delete ctx.session.uid;
+    // @ts-ignore
     delete ctx.session.errMsg;
 });
 
@@ -399,10 +419,13 @@ router.post("/link/merge", async (ctx, next) => {
     if (!success) {
         // Pass error message in redirection.
         if (errForm) {
+            // @ts-ignore
             ctx.session.errMsg = errForm.targetId;
         } else if (errResp) {
+            // @ts-ignore
             ctx.session.errMsg = errResp.message;
         }
+        // @ts-ignore
         ctx.session.uid = formData.targetId;
         return ctx.redirect(ctx.path);
     }

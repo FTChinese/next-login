@@ -55,6 +55,8 @@ router.get("/", async(ctx, next) => {
     }
 
     // Update session data.
+
+    // @ts-ignore
     ctx.session.user = success;
 
     // If current user has membership, show membership page.
@@ -166,6 +168,7 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
 
     // Handle alipay
     if (aliOrder) {
+        // @ts-ignore
         ctx.session.order = aliOrder;
         return ctx.redirect(aliOrder.redirectUrl);
     }
@@ -199,6 +202,8 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
 router.get("/done/ali", async (ctx, next) => {
     const account: Account = ctx.state.user;
     const query: IAliCallback = ctx.request.query;
+
+    // @ts-ignore
     const orderData = ctx.session.order;
 
     const order = orderSerializer.parse(orderData)!;
@@ -221,6 +226,7 @@ router.get("/done/ali", async (ctx, next) => {
         return await next();
     }
 
+    // @ts-ignore
     ctx.session.user = success;
     Object.assign(ctx.state, subViewModel.buildAliResultUI(
         order,
@@ -229,6 +235,7 @@ router.get("/done/ali", async (ctx, next) => {
     ));
     // For development, keep session to test ui.
     if (isProduction) {
+        // @ts-ignore
       delete ctx.session.order;
     }
 
@@ -239,6 +246,7 @@ router.get("/done/ali", async (ctx, next) => {
 
 router.get("/done/wx", async (ctx, next) => {
     const account: Account = ctx.state.user;
+    // @ts-ignore
     const orderData = ctx.session.order;
     const order = orderSerializer.parse(orderData)!;
 
@@ -265,6 +273,7 @@ router.get("/done/wx", async (ctx, next) => {
         return await next();
     }
 
+    // @ts-ignore
     ctx.session.user = success;
     Object.assign(ctx.state, subViewModel.buildWxResultUI(
         order,
@@ -272,6 +281,7 @@ router.get("/done/wx", async (ctx, next) => {
     ));
 
     if (isProduction) {
+        // @ts-ignore
         delete ctx.session.subs;
     }
 
