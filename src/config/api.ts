@@ -45,6 +45,8 @@ class ReaderAPI {
     readonly address: string                = `${this.baseUrlUser}/address`;
     // newsletter: `${user}/newsletter`,
     readonly starred: string                = `${this.baseUrlUser}/starred`;
+    readonly androidLatest                  = `${this.baseUrl}/apps/android/latest`;
+    readonly androidReleases                = `${this.baseUrl}/apps/android/releases`;
 }
 
 class SubAPI {
