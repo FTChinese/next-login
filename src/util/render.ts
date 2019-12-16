@@ -1,7 +1,9 @@
 import { resolve } from "path";
-import { configure, render } from "nunjucks"
+import { configure, render } from "nunjucks";
+import markdown from "nunjucks-markdown";
+import marked from "marked";
 
-configure(
+const env = configure(
     [
         resolve(__dirname, "../../views"),
         resolve(__dirname, "../../client"),
@@ -11,6 +13,13 @@ configure(
         watch: process.env.NODE_ENV == "development",
     },
 );
+
+marked.setOptions({
+    gfm: true,
+    breaks: true,
+});
+  
+markdown.register(env, marked);
 
 function promisifiedRender(name: string, context?: object): Promise<string> {
     return new Promise((resolve, reject) => {
