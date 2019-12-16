@@ -8,8 +8,6 @@ const config = viper.setConfigPath(process.env.HOME)
     .readInConfig()
     .getConfig();
 
-console.log(config);
-
 import { resolve } from "path";
 import Koa from "koa";
 import Router from "koa-router";
