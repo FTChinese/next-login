@@ -8,6 +8,8 @@ const config = viper.setConfigPath(process.env.HOME)
     .readInConfig()
     .getConfig();
 
+console.log(config);
+
 import { resolve } from "path";
 import Koa from "koa";
 import Router from "koa-router";
@@ -32,6 +34,7 @@ import account from "./controllers/account";
 import verification from "./controllers/verification";
 import subscription from "./controllers/subscription";
 import starred from "./controllers/starred";
+import android from "./controllers/android";
 
 import { 
     entranceMap,
@@ -89,6 +92,7 @@ router.use("/profile", checkSession(), profile);
 router.use("/account", checkSession(), account);
 router.use('/subscription', checkSession(), subscription);
 router.use("/starred", checkSession(), starred);
+router.use("/android", android);
 
 app.use(router.routes());
 

@@ -7,6 +7,11 @@ export interface IOAuthClient {
     client_secret: string;
 }
 
+export interface IAccessToken {
+    development: string;
+    production: string;
+}
+
 export interface IWxApp {
     app_id: string;
     secret: string;
@@ -15,6 +20,10 @@ export interface IWxApp {
 export interface IWxPayApp extends IWxApp {
     mch_id: string;
     api_key: string;
+}
+
+interface OAuthHeader {
+    Authorization: string
 }
 
 interface Config {
@@ -35,12 +44,21 @@ interface Config {
         subscription_v1: string;
         sub_sandbox: string;
     };
+    access_token: {
+        next_reader: IAccessToken;
+    };
 }
 
 class Viper {
     private filePath: string;
     private fileName: string;
     private config: any;
+    private isProduction: boolean
+    private accessToken: string
+
+    constructor(isProd: boolean) {
+        this.isProduction = isProd
+    }
 
     setConfigPath(p?: string): Viper {
         if (!p) {
@@ -64,8 +82,33 @@ class Viper {
     getConfig(): Config {
         return this.config;
     }
+
+    getAccessToken(): string {
+        if (this.accessToken) {
+            return this.accessToken;
+        }
+
+        const tokens = this.getConfig()
+            .access_token
+            .next_reader;
+
+        if (this.isProduction) {
+            this.accessToken = tokens.production;
+        } else {
+            this.accessToken = tokens.development
+        }
+
+        return this.accessToken;
+    }
+
+    getOAuthHeader(): OAuthHeader {
+        return {
+            "Authorization": `Bearer ${this.getAccessToken}`
+        };
+    }
 }
 
-export const viper = new Viper();
 export const isProduction = process.env.NODE_ENV == "production";
+export const viper = new Viper(isProduction);
+
 

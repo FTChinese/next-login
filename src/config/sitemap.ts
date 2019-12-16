@@ -42,8 +42,13 @@ export const subsMap = {
     wxpayDone:      `${prefix}/subscription/done/wx`,
     redeem:         `${prefix}/subscription/redeem`,
     aliReturnUrl:   `http://next.ftchinese.com/user/subscription/done/ali`,
-}
+};
 
 export const starredMap = {
     base: `${prefix}/starred`,
-}
+};
+
+export const androidMap = {
+    latest: `${prefix}/android/latest`,
+    releases: `${prefix}/android/releases`,
+};
