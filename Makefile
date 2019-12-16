@@ -38,3 +38,4 @@ build :
 
 deploy :
 	rsync -v ./$(BUILD_DIR)/@ftchinese/$(LINUX_BIN) node11:/home/node/next/
+	ssh tk11 supervisorctl restart $(BINARY)

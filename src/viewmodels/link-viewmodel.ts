@@ -200,6 +200,9 @@ class LinkViewModel {
         }
     }
 
+    /**
+     * @todo login returns account data directly.
+     */
     async logIn(formData: ICredentials, app: IHeaderApp): Promise<IAuthenticateResult> {
         const { values, errors } = await this.validateLogin(formData);
 
@@ -214,10 +217,10 @@ class LinkViewModel {
         }
 
         try {
-            const ftcId = await accountRepo.authenticate(values, app);
+            const account = await accountRepo.authenticate(values, app);
 
             return {
-                success: ftcId,
+                success: account.id,
             };
 
         } catch (e) {
