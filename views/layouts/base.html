@@ -24,9 +24,11 @@
 </head>
 <body>
   <header class="navbar o-header">
-    <div class="container">
+    <div class="container justify-content-between">
 
       <a class="navbar-brand" href="http://www.ftchinese.com" target="__blank">FT中文网</a>
+
+      {% block subBrand%}{% endblock %}
 
       {% if user %}
       <div class="dropdown d-none d-sm-block">
@@ -45,6 +47,8 @@
           <a class="dropdown-item" href="{{ user.logoutLink }}">退出</a>
         </div>
       </div>
+      {% else %}
+      <a href="{{ globalUrl.login }}">登录</a>
       {% endif %}
 
       {% block headerDrawer%}{% endblock %}
