@@ -1,12 +1,8 @@
 <div class="row justify-content-between">
-  <div class="col-auto">
-    {% if paging.hasPrevious %}
-      <a href="?page={{ paging.previous }}">Previous</a>
-    {% endif %}
-
-    {% if paging.hasNext %}
-      <a href="?page={{ paging.next }}">Next</a>
-    {% endif %}
-  </div>
+  
+    <a href="?page={{ paging.previous }}">{% if paging.hasPrevious %}上一页{% endif %}</a>
+  
+    <a href="?page={{ paging.next }}">{% if paging.hasNext %}下一页{% endif %}</a>
+  
 </div>
 
