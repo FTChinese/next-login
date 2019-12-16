@@ -3,6 +3,7 @@ import { IAuthorizeRequest } from "../models/ftc-oauth";
 import { Account } from "../models/reader";
 import { LoginMethod } from "../models/enums";
 import { readerApi } from "../config/api";
+import { oauth } from "../util/request";
 
 interface IReqBody {
     clientId: string;
@@ -29,6 +30,7 @@ class OAuthRepo {
 
         const resp = await request
             .post(readerApi.oauthCode)
+            .use(oauth)
             .send(data);
 
         const body: ICodeResp = resp.body;

@@ -14,6 +14,7 @@ import {
     IAddress,
     IProfileFormData,
 } from "../models/reader";
+import { oauth } from "../util/request";
 
 const addressSerializer = new TypedJSON(Address);
 const profileSeiralizer = new TypedJSON(Profile);
@@ -23,6 +24,7 @@ class ProfileRepo {
     async fetchProfile(ftcId: string): Promise<Profile> {
         const resp = await request
             .get(readerApi.profile)
+            .use(oauth)
             .set(KEY_USER_ID, ftcId);
 
         return profileSeiralizer.parse(resp.text)!;
@@ -31,6 +33,7 @@ class ProfileRepo {
     async fetchAddress(ftcId: string): Promise<Address> {
         const resp = await request
             .get(readerApi.address)
+            .use(oauth)
             .set(KEY_USER_ID, ftcId)
 
         return addressSerializer.parse(resp.text)!;
@@ -39,6 +42,7 @@ class ProfileRepo {
     async updateName(ftcId: string, data: IName): Promise<boolean> {
         const resp = await request
             .patch(readerApi.name)
+            .use(oauth)
             .set(KEY_USER_ID, ftcId)
             .send(data);
 
@@ -48,6 +52,7 @@ class ProfileRepo {
     async updateMobile(ftcId: string, data: IMobile): Promise<boolean> {
         const resp = await request
             .patch(readerApi.mobile)
+            .use(oauth)
             .set(KEY_USER_ID, ftcId)
             .send(data);
 
@@ -57,6 +62,7 @@ class ProfileRepo {
     async updateProfile(ftcId: string, data: IProfileFormData): Promise<boolean> {
         const resp = await request
             .patch(readerApi.profile)
+            .use(oauth)
             .set(KEY_USER_ID, ftcId)
             .send(data);
 
@@ -66,6 +72,7 @@ class ProfileRepo {
     async updateAddress(ftcId: string, address: IAddress): Promise<boolean> {
         const resp = await request
             .patch(readerApi.address)
+            .use(oauth)
             .set(KEY_USER_ID, ftcId)
             .send(address);
 
