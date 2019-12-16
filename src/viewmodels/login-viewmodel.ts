@@ -77,10 +77,7 @@ class LoginViewModel {
         }
 
         try {
-            const userId = await accountRepo.authenticate(values, app);
-
-
-            const account = await accountRepo.fetchFtcAccount(userId);
+            const account = await accountRepo.authenticate(values, app);
 
             return {
                 success: account,

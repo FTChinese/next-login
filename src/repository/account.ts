@@ -48,20 +48,16 @@ class AccountRepo {
     /**
      * @description As the first step of login process, or verify password when linking accounts.
      */
-    async authenticate(c: ICredentials, app: IHeaderApp): Promise<string> {
+    async authenticate(c: ICredentials, app: IHeaderApp): Promise<Account> {
+        console.log(c);
+        
         const resp = await request
             .post(readerApi.login)
             .use(oauth)
             .set(app)
             .send(c);
 
-        const body = resp.body;
-
-        if (body.id) {
-            return body.id;
-        }
-
-        throw new Error("Incorrect api response");
+        return accountSerializer.parse(resp.text)!;
     }
 
     async emailExists(email: string): Promise<boolean> {

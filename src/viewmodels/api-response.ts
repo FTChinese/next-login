@@ -130,10 +130,12 @@ export class APIError extends Error{
         }
 
         if (!isRequestError(e)) {
+            super(e.message)
             log(e);
             throw e;
         }
 
+        super(e.message);
         // Only when the error is a SuperAgentError does it contains a response.
         // Error passed to here might be anything. We
         // cannot assume it must be API errors.
