@@ -2,7 +2,6 @@ import {
     Response,
 } from "superagent";
 import debug from "debug";
-import { Dictionary } from "../models/data-types";
 
 const log = debug("user:api-error");
 
