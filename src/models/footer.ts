@@ -115,7 +115,7 @@ export const matrix = [
     "items": [
       {
         "text": "安卓",
-        "href": "http://app.ftchinese.com/androidmobile.html"
+        "href": "/android/latest"
       }
     ]
   }

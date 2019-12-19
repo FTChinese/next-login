@@ -36,6 +36,6 @@ run :
 build :
 	pkg --targets node12-linux-x64,node12-macos-x64 -c package.json --out-path $(BUILD_DIR) $(ENTRY)
 
-deploy :
+deploy : build
 	rsync -v ./$(BUILD_DIR)/@ftchinese/$(LINUX_BIN) tk11:/home/node/next/
 	ssh tk11 supervisorctl restart $(BINARY)
