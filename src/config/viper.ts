@@ -109,6 +109,9 @@ class Viper {
 }
 
 export const isProduction = process.env.NODE_ENV == "production";
-export const viper = new Viper(isProduction);
+export const viper = new Viper(isProduction)
+    .setConfigPath(process.env.HOME)
+    .setConfigName("config/api.toml")
+    .readInConfig();
 
 

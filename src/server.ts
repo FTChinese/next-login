@@ -3,10 +3,7 @@ import {
     viper,
 } from "./config/viper";
 
-const config = viper.setConfigPath(process.env.HOME)
-    .setConfigName("config/api.toml")
-    .readInConfig()
-    .getConfig();
+const config = viper.getConfig();
 
 import { resolve } from "path";
 import Koa from "koa";
