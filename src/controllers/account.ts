@@ -201,7 +201,7 @@ router.post("/request-verification", collectAppHeaders(), async (ctx, next) => {
 
     return ctx.redirect(accountMap.base);
 }, async (ctx, next) => {
-    ctx.body = await render("layout/two-cols.html", ctx.state);
+    ctx.body = await render("layouts/two-cols.html", ctx.state);
 });
 
 /**
