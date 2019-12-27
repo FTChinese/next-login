@@ -176,7 +176,7 @@ class AccountRepo {
 
     async requestVerification(id: string, app: IHeaderApp): Promise<boolean> {
         const resp = await request
-            .get(readerApi.requestVerification)
+            .post(readerApi.requestVerification)
             .use(oauth)
             .set(app)
             .set(KEY_USER_ID, id);
