@@ -308,6 +308,9 @@ collectAppHeaders(), async (ctx, next) => {
     ctx.body = await render("account/login.html", ctx.state);
 });
 
+/**
+ * @description A wechat-only user create a new ftc account.
+ */
 router.get("/link/signup", async (ctx, next) => {
     // @ts-ignore
     const email = ctx.session.email;
@@ -333,6 +336,9 @@ router.get("/link/signup", async (ctx, next) => {
     }
 });
 
+/**
+ * @description Create ftc account for wechat-only user.
+ */
 router.post("/link/signup", collectAppHeaders(), async (ctx, next) => {
     const formData: ISignUpFormData = ctx.request.body.credentials;
 
@@ -341,8 +347,7 @@ router.post("/link/signup", collectAppHeaders(), async (ctx, next) => {
     }
 
     const headers: IHeaderApp = ctx.state.appHeaders;
-    // @ts-ignore
-    const account: Account = ctx.session.user;
+    const account: Account = ctx.state.user;
     const { success, errForm, errResp } = await linkViewModel.signUp(formData, account, headers);
 
     if (!success) {
@@ -370,8 +375,7 @@ router.post("/link/signup", collectAppHeaders(), async (ctx, next) => {
  * `ctx.session.uid: string` is required.
  */
 router.get("/link/merge", async (ctx, next) => {
-    // @ts-ignore
-    const account: Account = ctx.session.user;
+    const account: Account = ctx.state.user;
 
     // Passed from `/login/callback` or `/account/link/login`
 

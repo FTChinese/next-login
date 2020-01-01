@@ -53,8 +53,7 @@ router.get("/", async (ctx, next) => {
 });
 
 router.get("/display-name", async (ctx, next) => {
-    // @ts-ignore
-    const account: Account = ctx.session.user;
+    const account: Account = ctx.state.user;
 
     const { success, errResp } = await profileViewModel.fetchProfile(account);
 
@@ -69,8 +68,7 @@ router.get("/display-name", async (ctx, next) => {
 });
 
 router.post("/display-name", async (ctx, next) => {
-    // @ts-ignore
-    const account: Account = ctx.session.user;
+    const account: Account = ctx.state.user;
 
     const formData: IName = ctx.request.body.profile;
 
@@ -99,8 +97,7 @@ router.post("/display-name", async (ctx, next) => {
 });
 
 router.get("/mobile", async (ctx, next) => {
-    // @ts-ignore
-    const account: Account = ctx.session.user;
+    const account: Account = ctx.state.user;
 
     const { success, errResp } = await profileViewModel.fetchProfile(account);
 
@@ -115,8 +112,7 @@ router.get("/mobile", async (ctx, next) => {
 });
 
 router.post("/mobile", async (ctx, next) => {
-    // @ts-ignore
-    const account: Account = ctx.session.user;
+    const account: Account = ctx.state.user;
 
     const formData: IMobile = ctx.request.body.profile;
 
@@ -144,8 +140,7 @@ router.post("/mobile", async (ctx, next) => {
 });
 
 router.get("/info", async (ctx, next) => {
-    // @ts-ignore
-    const account: Account = ctx.session.user;
+    const account: Account = ctx.state.user;
 
     const { success, errResp } = await profileViewModel.fetchProfile(account);
 
@@ -165,8 +160,7 @@ router.get("/info", async (ctx, next) => {
 });
 
 router.post("/info", async (ctx, next) => {
-    // @ts-ignore
-    const account: Account = ctx.session.user;
+    const account: Account = ctx.state.user;
     const formData: IProfileFormData | undefined = ctx.request.body.profile;
 
     if (!formData) {
@@ -198,8 +192,7 @@ router.post("/info", async (ctx, next) => {
 
 router.get("/address", async (ctx, next) => {
 
-    // @ts-ignore
-    const account: Account = ctx.session.user;
+    const account: Account = ctx.state.user;
 
     const { success, errResp } = await profileViewModel.fetchAddress(account);
 
@@ -214,8 +207,7 @@ router.get("/address", async (ctx, next) => {
 });
 
 router.post("/address", async (ctx, next) => {
-    // @ts-ignore
-    const account: Account = ctx.session.user;
+    const account: Account = ctx.state.user;
     const formData: IAddress | undefined = ctx.request.body.address;
 
     if (!formData) {

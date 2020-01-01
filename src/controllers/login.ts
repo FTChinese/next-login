@@ -92,8 +92,7 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
  * GET /login/wechat<?sandbox=true>
  */
 router.get("/wechat", async (ctx, next) => {
-    // @ts-ignore
-    const account: Account | undefined = ctx.session.user;
+    const account: Account | undefined = ctx.state.user;
     const sandbox: string | undefined = ctx.request.query.sandbox
 
     const data = wxLoginViewModel.codeRequest(
@@ -133,7 +132,7 @@ router.get("/wechat/test", collectAppHeaders(), async (ctx, next) => {
  * must be attempting to log in via wechat OAuth;
  * If user is accessing this page while already logged
  * in and log in method is not `wechat`, it indicates 
- * user is trying to bind to wechat account;
+ * user is trying to link to wechat account;
  * If user already logged-in and login method is 
  * `wechat`, deny access.
  * 
@@ -150,8 +149,7 @@ router.get("/wechat/callback", collectAppHeaders(), async(ctx, next) => {
     };
 
     const headers: IHeaderApp = ctx.state.appHeaders;
-    // @ts-ignore
-    const localAccount: Account | undefined = ctx.session.user;
+    const localAccount: Account | undefined = ctx.state.user;
 
     const { success, errQuery, errResp } = await wxLoginViewModel.getApiSession(query, headers, wxOAuthSess);
 

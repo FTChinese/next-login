@@ -10,8 +10,7 @@ const router = new Router();
 router.get("/email/:token", async (ctx, next) => {
     // @ts-ignore
     const token: string = ctx.param.token;
-    // @ts-ignore
-    const account: Account | undefined = ctx.session.user;
+    const account: Account | undefined = ctx.state.user;
 
     const { success, errResp } = await vrfViewModel.verifyEmail(token);
 

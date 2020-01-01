@@ -86,6 +86,8 @@ function isLoggedIn(session?: Session): Boolean {
  * `redirect` is used to prevent recursive redirect.
  * For example, if a non-login user is accessing
  * profile page, this user will be redirected to `/login`, which should not perform redirection to itself.
+ * Please pay attention ctx.session.user and ctx.state.user are totally different types,
+ * although they have the same object shape.
  */
 export function checkSession(redirect: boolean = true): Middleware {
     return async (ctx, next) => {
@@ -145,14 +147,6 @@ export function noCache(): Middleware {
         await next();
         ctx.set('Cache-Control', ['no-cache', 'no-store', 'must-revalidte']);
         ctx.set('Pragma', 'no-cache');
-    }
-}
-
-declare module "koa" {
-    interface Context {
-        state: {
-            appHeaders: IHeaderApp;
-        }
     }
 }
 
