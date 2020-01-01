@@ -22,4 +22,4 @@ deploy : clean ts pkg
 	ssh tk11 supervisorctl restart $(BINARY)
 
 clean :
-	rm -rf dist/**
+	rm -rf dist/** && rm -rf build/@ftchinese/**
