@@ -8,8 +8,7 @@ import { vrfViewModel } from "../viewmodels/vrf-viewmodel";
 const router = new Router();
 
 router.get("/email/:token", async (ctx, next) => {
-    // @ts-ignore
-    const token: string = ctx.param.token;
+    const token: string = ctx.params.token;
     const account: Account | undefined = ctx.state.user;
 
     const { success, errResp } = await vrfViewModel.verifyEmail(token);
