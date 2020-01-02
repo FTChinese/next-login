@@ -64,15 +64,6 @@ app.use(session({
 app.use(bodyParser());
 app.use(handleError());
 
-router.get("/__version", async (ctx) => {
-    console.log("Version");
-
-    ctx.body = {
-        "name": pkg.name,
-        "version": pkg.version,
-    };
-});
-
 router.use("/login", checkSession(false), login);
 router.use("/signup", checkSession(false), signUp);
 router.get("/logout", checkSession(false), async (ctx, next) => {
