@@ -27,7 +27,7 @@ import {
     viper 
 } from "../config/viper";
 import { AccountKind } from "../models/enums";
-import { oauth } from "../util/request";
+import { oauth, noCache } from "../util/request";
 
 const sessSerializer = new TypedJSON(WxSession);
 
@@ -40,6 +40,7 @@ class AccountRepo {
         const resp = await request
             .get(readerApi.account)
             .use(oauth)
+            .use(noCache)
             .set(KEY_USER_ID, id);
 
         return accountSerializer.parse(resp.text)!;
@@ -54,6 +55,7 @@ class AccountRepo {
         const resp = await request
             .post(readerApi.login)
             .use(oauth)
+            .use(noCache)
             .set(app)
             .send(c);
 
@@ -65,6 +67,7 @@ class AccountRepo {
             const resp = await request
                 .get(readerApi.exists)
                 .use(oauth)
+                .use(noCache)
                 .query({
                     k: "email",
                     v: email,
@@ -87,6 +90,7 @@ class AccountRepo {
         const resp = await request
             .post(readerApi.signup)
             .use(oauth)
+            .use(noCache)
             .set(app)
             .send(c);
 
@@ -105,6 +109,7 @@ class AccountRepo {
         const resp = await request
             .post(subsApi.wxLogin)
             .use(oauth)
+            .use(noCache)
             .set(app)
             .set(KEY_APP_ID, appId)
             .send({ code });
@@ -117,6 +122,7 @@ class AccountRepo {
         const resp = await request
             .get(readerApi.wxAccount)
             .use(oauth)
+            .use(noCache)
             .set(KEY_UNION_ID, unionId);
 
         return accountSerializer.parse(resp.text)!;
@@ -128,6 +134,7 @@ class AccountRepo {
         const resp = await request
             .post(readerApi.wxSignUp)
             .use(oauth)
+            .use(noCache)
             .set(app)
             .set(KEY_UNION_ID, unionId)
             .send(c);
@@ -145,6 +152,7 @@ class AccountRepo {
         const resp = await request
             .post(readerApi.passwordResetLetter)
             .use(oauth)
+            .use(noCache)
             .set(app)
             .send(data);
 
@@ -155,6 +163,7 @@ class AccountRepo {
         const resp = await request
             .get(readerApi.passwordResetToken(token))
             .use(oauth)
+            .use(noCache)
 
         const body = resp.body;
 
@@ -169,6 +178,7 @@ class AccountRepo {
         const resp = await request
             .post(readerApi.resetPassword)
             .use(oauth)
+            .use(noCache)
             .send(data);
 
         return resp.noContent;
@@ -178,6 +188,7 @@ class AccountRepo {
         const resp = await request
             .post(readerApi.requestVerification)
             .use(oauth)
+            .use(noCache)
             .set(app)
             .set(KEY_USER_ID, id);
 
@@ -187,7 +198,8 @@ class AccountRepo {
     async verifyEmail(token: string): Promise<boolean> {
         const resp = await request
             .put(readerApi.verifyEmail(token))
-            .use(oauth);
+            .use(oauth)
+            .use(noCache);
 
         return resp.noContent;
     }
@@ -196,6 +208,7 @@ class AccountRepo {
         const resp = await request
             .patch(readerApi.email)
             .use(oauth)
+            .use(noCache)
             .set(KEY_USER_ID, ftcId)
             .send(data);
 
@@ -206,6 +219,7 @@ class AccountRepo {
         const resp = await request
             .patch(readerApi.password)
             .use(oauth)
+            .use(noCache)
             .set(KEY_USER_ID, ftcId)
             .send(data);
 
@@ -213,7 +227,10 @@ class AccountRepo {
     }
 
     async link(account: Account, targetId: string): Promise<boolean> {
-        const req = request.put(readerApi.linking).use(oauth)
+        const req = request
+        .put(readerApi.linking)
+        .use(oauth)
+        .use(noCache)
         
         switch (account.loginMethod) {
             case "email":
@@ -237,6 +254,7 @@ class AccountRepo {
         const req = request
             .delete(readerApi.linking)
             .use(oauth)
+            .use(noCache)
             .set(KEY_UNION_ID, account.unionId!)
             .set(KEY_USER_ID, account.id);
 

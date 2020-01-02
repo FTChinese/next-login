@@ -14,7 +14,7 @@ import {
     IAddress,
     IProfileFormData,
 } from "../models/reader";
-import { oauth } from "../util/request";
+import { oauth, noCache } from "../util/request";
 
 const addressSerializer = new TypedJSON(Address);
 const profileSeiralizer = new TypedJSON(Profile);
@@ -25,6 +25,7 @@ class ProfileRepo {
         const resp = await request
             .get(readerApi.profile)
             .use(oauth)
+            .use(noCache)
             .set(KEY_USER_ID, ftcId);
 
         return profileSeiralizer.parse(resp.text)!;
@@ -34,6 +35,7 @@ class ProfileRepo {
         const resp = await request
             .get(readerApi.address)
             .use(oauth)
+            .use(noCache)
             .set(KEY_USER_ID, ftcId)
 
         return addressSerializer.parse(resp.text)!;
@@ -43,6 +45,7 @@ class ProfileRepo {
         const resp = await request
             .patch(readerApi.name)
             .use(oauth)
+            .use(noCache)
             .set(KEY_USER_ID, ftcId)
             .send(data);
 
@@ -53,6 +56,7 @@ class ProfileRepo {
         const resp = await request
             .patch(readerApi.mobile)
             .use(oauth)
+            .use(noCache)
             .set(KEY_USER_ID, ftcId)
             .send(data);
 
@@ -63,6 +67,7 @@ class ProfileRepo {
         const resp = await request
             .patch(readerApi.profile)
             .use(oauth)
+            .use(noCache)
             .set(KEY_USER_ID, ftcId)
             .send(data);
 
@@ -73,6 +78,7 @@ class ProfileRepo {
         const resp = await request
             .patch(readerApi.address)
             .use(oauth)
+            .use(noCache)
             .set(KEY_USER_ID, ftcId)
             .send(address);
 

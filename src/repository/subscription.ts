@@ -23,7 +23,7 @@ import {
     IHeaderApp,
     IHeaderWxAppId,
 } from "../models/header";
-import { oauth } from "../util/request";
+import { oauth, noCache } from "../util/request";
 
 class Subscription {
     readonly aliReturnUrl: string = "http://next.ftchinese.com/user/subscription/done/ali";
@@ -33,6 +33,7 @@ class Subscription {
         const resp = await request
             .post(subsApi.aliPayDesktop(plan.tier, plan.cycle, sandbox))
             .use(oauth)
+            .use(noCache)
             .query({
                 return_url: this.aliReturnUrl,
             })
@@ -52,6 +53,7 @@ class Subscription {
                 )
             )
             .use(oauth)
+            .use(noCache)
             .query({
                 return_url: this.aliReturnUrl,
             })
@@ -71,6 +73,7 @@ class Subscription {
                 )
             )
             .use(oauth)
+            .use(noCache)
             .set(headers);
 
         return wxOrderSerializer.parse(resp.text)!;
@@ -86,6 +89,7 @@ class Subscription {
         const resp = await request
             .get(subsApi.wxQueryOrder(orderId))
             .use(oauth)
+            .use(noCache)
             .set(headers);
 
         return resp.body as IWxQueryResult;
