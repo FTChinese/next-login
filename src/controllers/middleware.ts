@@ -91,7 +91,7 @@ function isLoggedIn(session?: Session): Boolean {
  */
 export function checkSession(redirect: boolean = true): Middleware {
     return async (ctx, next) => {
-        if (ctx.path == "/faviocon.ico") return;
+        if (ctx.path == "/favicon.ico") return;
 
         if (isLoggedIn(ctx.session)) {
 
@@ -164,5 +164,3 @@ export function collectAppHeaders(): Middleware {
         await next();
     }
 }
-
-
