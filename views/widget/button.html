@@ -1,0 +1,6 @@
+<button 
+  class="{{ button.classNames }}"
+  type="{{ button.type }}"
+  {% if button.disableWith %}
+    data-disable-with="{{ button.disableWith }}"
+  {% endif %}>{{ button.text }}</button>

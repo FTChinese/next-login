@@ -31,7 +31,7 @@ const pkg = require("../../package.json");
 const bsVersion = pkg.devDependencies.bootstrap.replace("^", "");
 const bsNativeVersion = pkg.devDependencies["bootstrap.native"].replace("^", "");
 
-const log = debug("by:middleware");
+const log = debug("user:middleware");
 
 export function env(): Middleware {
     return async (ctx, next) => {

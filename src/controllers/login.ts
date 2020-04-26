@@ -1,3 +1,4 @@
+import debug from "debug";
 import Router from "koa-router";
 import MobileDetect from "mobile-detect";
 import render from "../util/render";
@@ -5,13 +6,9 @@ import {
     isProduction,
 } from "../config/viper";
 import {
-    loginViewModel,
-} from "../viewmodels/login-viewmodel";
-import {
     collectAppHeaders,
 } from "./middleware";
 import { 
-    ICredentials, 
     Account,
 } from "../models/reader";
 import {
@@ -33,6 +30,10 @@ import {
     IOAuthSession as IFtcOAuthSession,
  } from "../models/ftc-oauth";
 import { toBoolean } from "../util/converter";
+import { LoginPage, CredentialBuilder, Credentials } from "../uibuilder/login";
+import { APIError } from "../viewmodels/api-response";
+
+const log = debug("user:login");
 
 const router = new Router();
 
@@ -41,7 +42,7 @@ const router = new Router();
  * Only show wechat login for desktop browsers.
  */
 router.get("/", async (ctx, next) => {
-    const uiData = loginViewModel.buildUI();
+    const uiData = new LoginPage(CredentialBuilder.default());
 
     Object.assign(ctx.state, uiData);
     
@@ -60,26 +61,37 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
      */
     let remeberMe: string = ctx.request.body.remeberMe;
 
-    const formData: ICredentials | undefined = ctx.request.body.credentials;
+    const formData: Credentials | undefined = ctx.request.body.credentials;
 
     if (!formData) {
         throw new Error("form data not found");
     }
+    const cb = new CredentialBuilder(formData);
 
-    const headers: IHeaderApp = ctx.state.appHeaders;
-    const { success, errForm, errResp } = await loginViewModel.logIn(formData, headers);
-
-    if (!success) {
-        const uiData = loginViewModel.buildUI(formData, { errForm, errResp });
-
+    const isValid = await cb.validate();
+    if (!isValid) {
+        const uiData = new LoginPage(cb);
         Object.assign(ctx.state, uiData);
 
         return await next();
     }
 
-    // @ts-ignore
-    ctx.session.user = success;
-    return ctx.redirect(profileMap.base);
+    const headers: IHeaderApp = ctx.state.appHeaders;
+
+    try {
+        const account = await cb.login(headers);
+
+        // @ts-ignore
+        ctx.session.user = account;
+        return ctx.redirect(profileMap.base);
+    } catch (e) {
+        const errResp = new APIError(e);
+        const uiData = (new LoginPage(cb)).withErrResp(errResp);
+
+        Object.assign(ctx.state, uiData);
+
+        return await next();
+    }
     
 }, async (ctx, next) => {
     ctx.body = await render("login.html", ctx.state);

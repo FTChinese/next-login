@@ -4,17 +4,16 @@
 <div class="mt-4">
   <h4 class="text-center">登录FT中文网</h4>
 
-  {% include "partials/alert-danger.html" %}
+  {% include "widget/flash.html" %}
+  <form method="{{form.method}}" id="loginForm">
 
-  <form method="post" id="loginForm">
-
-    {% for input in inputs %}
+    {% for control in form.controls %}
       <div class="form-group">
-        {% include "partials/text-input.html" %}
+        {% include "widget/form-control.html" %}
       </div>
     {% endfor %}
 
-    <div class="form-check clearfix">
+    <div class="form-check">
       <input class="form-check-input"
         id="rememberMe"
         type="checkbox"
@@ -23,16 +22,18 @@
         checked>
       <label for="rememberMe">记住我</label>
 
-      <a class="float-right" href="{{ pwResetLink }}">忘记密码?</a>
     </div>
 
-    <button
-      class="btn btn-block btn-primary" 
-      data-disable-with="正在登录..."
-      type="submit">登录</button>
+    {% if form.submitBtn %}
+      {% set button = form.submitBtn %}
+      {% include "widget/button.html" %}
+    {% endif %}
   </form>
 
-  <p class="text-center pt-3">还没有FT中文网账号? <a href="{{ signUpLink }}">创建</a></p>
+  <div class="d-flex justify-content-between mt-3">
+    <a href="{{ pwResetLink }}">忘记密码?</a>
+    <a href="{{ signUpLink }}">新建账号</a>
+  </div>
 
   {% if not isMobile %}
   <div class="text-center mt-5">

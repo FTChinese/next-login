@@ -1,0 +1,19 @@
+{% if control.label %}
+  <label class="form-label" for="{{control.attrs.id}}">{{control.label}}</label>
+{% endif %}
+  <input class="form-control"
+    {% for k, v in control.attrs %}
+      {% if v === true %}
+        {{k}}
+      {% else %}
+        {{k}}="{{v}}"
+      {% endif %}
+    {% endfor %} />
+
+{% if control.desc %}
+  <small class="form-text text-muted">{{control.desc}}</small>
+{% endif %}
+
+{% if control.error %}
+  <div class="form-errortext">{{control.error}}</div>
+{% endif %}

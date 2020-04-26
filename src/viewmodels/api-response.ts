@@ -59,9 +59,6 @@ const invalids: Record<string, InvalidMsg> = {
 }
 
 // Define SuperAgent error response.
-// Coulnd never figure out the messy API design of
-// SuperAgent.
-// Why those js-maniacs cannot define data types clearly and riggedly?
 export interface SuperAgentError extends Error {
     status: number;
     response: Response; // Network failures, timeouts, and other errors that produce no response will contain no err.status or err.response fields.
@@ -117,12 +114,14 @@ export class APIError extends Error{
     code?: string;
     param?: string;
     
-    status?: number;
+    status?: number; // Raw http status code.
     notFound?: boolean;
     forbidden?: boolean;
     unauthorized?: boolean;
+    unprocessable?: Unprocessable;
 
     constructor(e: SuperAgentError | Error | string) {
+        console.log(e);
         if (isString(e)) {
             super(e)
             return;
@@ -130,8 +129,7 @@ export class APIError extends Error{
 
         if (!isRequestError(e)) {
             super(e.message)
-            log(e);
-            throw e;
+            return;
         }
 
         super(e.message);
@@ -154,6 +152,7 @@ export class APIError extends Error{
         // If the error is a 422 Entity Unprocessable.
         if (body.error) {
             this.error = new Unprocessable(body.error.field, body.error.code);
+            this.unprocessable = new Unprocessable(body.error.field, body.error.code)
         }
 
         this.status = resp.status;
@@ -169,3 +168,4 @@ export interface IFetchResult<T> {
     success?: T;
     errResp?: APIError;
 }
+

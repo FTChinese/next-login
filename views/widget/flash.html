@@ -1,0 +1,10 @@
+{% if flash %}
+<div class="alert alert-{{flash.kind}}{% if flash.dismissible %} alert-dismissible{% endif %} fade show mt-3" role="alert">
+  <span>{{ flash.message }}</span>
+  {% if flash.dismissible %}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  {% endif %}
+</div>
+{% endif %}
