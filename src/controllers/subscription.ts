@@ -1,6 +1,5 @@
 import Router from "koa-router";
 import debug from "debug";
-import { toDataURL } from "qrcode";
 import render from "../util/render";
 import {
     collectAppHeaders,
@@ -20,13 +19,10 @@ import {
     isProduction,
 } from "../config/viper";
 import { scheduler } from "../models/paywall";
-import { subRepo } from "../repository/subscription";
 import { 
-    AliOrder, 
     IAliCallback, 
     orderSerializer 
 } from "../models/order";
-import { APIError, isRequestError } from "../viewmodels/api-response";
 import { toBoolean } from "../util/converter";
 
 const log = debug("user:subscription");

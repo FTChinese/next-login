@@ -7,7 +7,7 @@ import { loginSchema, joiOptions } from "../viewmodels/validator";
 import { accountRepo } from "../repository/account";
 import { IHeaderApp } from "../models/header";
 import { Account } from "../models/reader";
-import { ErrorParser } from "../viewmodels/api-response";
+import { APIError } from "../viewmodels/api-response";
 
 export interface Credentials {
     email: string;
@@ -97,7 +97,7 @@ export class LoginPage {
                         name: "credentials[password]",
                         placeholder: "密码",
                         maxlength: 64,
-                        // required: true,
+                        required: true,
                     },
                     error: c.errors ? c.errors.get("password") : undefined,
                 }
@@ -114,7 +114,7 @@ export class LoginPage {
         this.wxLoginLink = entranceMap.wxLogin
     }
 
-    withErrResp(errResp: ErrorParser): LoginPage {
+    withErrResp(errResp: APIError): LoginPage {
         if (errResp.notFound || errResp.forbidden) {
             this.flash = Flash.danger(msgInvalidCredentials);
             return this;

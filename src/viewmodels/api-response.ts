@@ -1,5 +1,6 @@
 import {
     Response,
+    ResponseError,
 } from "superagent";
 import debug from "debug";
 
@@ -104,8 +105,8 @@ function isString(x: any): x is string {
     return typeof x == "string";
 }
 
-export function isRequestError(e: SuperAgentError | Error): e is SuperAgentError {
-    return (<SuperAgentError>e).response !== undefined;
+export function isResponseError(e: SuperAgentError | Error): e is ResponseError {
+    return (<ResponseError>e).response !== undefined;
 }
 
 export class APIError extends Error{
@@ -127,7 +128,7 @@ export class APIError extends Error{
             return;
         }
 
-        if (!isRequestError(e)) {
+        if (!isResponseError(e)) {
             super(e.message)
             return;
         }
