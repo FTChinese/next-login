@@ -1,11 +1,13 @@
 import { Tier, Cycle, Gender, PaymentMethod } from "./enums";
 import { getProperty } from "./index-types";
-import { Dictionary } from "express-serve-static-core";
+import { Dictionary } from "./data-types";
 
-const paymentMethods = {
+const paymentMethods: Record<PaymentMethod, string> = {
     "wechat": "微信支付",
     "alipay": "支付宝",
     "stripe": "Stripe",
+    "apple": "App Store",
+    "b2b": "B2B",
 };
 
 export function localizePayMethod(pm: PaymentMethod): string {
