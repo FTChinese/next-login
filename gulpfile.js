@@ -7,10 +7,10 @@ const sourcemaps = require('gulp-sourcemaps');
 
 const tsProject = ts.createProject("./client/tsconfig.json");
 
-const tsOutDir = "build/js";
-const jsInputFile = "build/js/main.js";
-const jsOutFile = "build/dev/script/main.js";
-const cssOutDir = "build/dev/style";
+const tsOutDir = "build/ts-out";
+const jsInputFile = "build/ts-out/main.js";
+const jsOutFile = "build/script/main.js";
+const cssOutDir = "build/style";
 
 /**
  * @description Compile TypeScript to ES5

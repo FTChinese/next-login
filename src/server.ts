@@ -49,7 +49,7 @@ if (process.env.NODE_ENV != "production") {
     );
     app.use(
         serve(
-            resolve(__dirname, "../build/dev")
+            resolve(__dirname, "../build")
         )
     );
 }

@@ -2,8 +2,8 @@ const { inlineSource } = require("inline-source");
 const path = require("path");
 const fs = require("fs").promises;
 
-const script =`<script inline src="build/production/main.js"></script>`
-const style = `<link inline rel="stylesheet" href="build/production/main.css">`
+const script =`<script inline src="build/script/main.js"></script>`
+const style = `<link inline rel="stylesheet" href="build/style/main.css">`
 
 async function inlineJs() {
   const html = await inlineSource(script);
