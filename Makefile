@@ -8,7 +8,16 @@ ENTRY := dist/server.js
 
 .PHONY: ts run pkg deploy clean
 
-ts :
+start :
+	$(cmd_prefix)/nodemon --ext ts --ignore dist/ --exec ${cmd_prefix}/ts-node src/server.ts
+
+watchts :
+	$(cmd_prefix)/tsc -w
+
+watchnode :
+	${cmd_prefix}/nodemon --ext js  --ignore src/ dist/server.js
+
+build :
 	$(cmd_prefix)/tsc
 
 run :
