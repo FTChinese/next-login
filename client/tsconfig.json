@@ -1,7 +1,6 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "outDir": "../build",
     "target": "es5",
     "module": "es6",
     "downlevelIteration": true,
