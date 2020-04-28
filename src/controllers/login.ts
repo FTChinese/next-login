@@ -30,7 +30,7 @@ import {
     IOAuthSession as IFtcOAuthSession,
  } from "../models/ftc-oauth";
 import { toBoolean } from "../util/converter";
-import { LoginPage, CredentialBuilder, Credentials } from "../uibuilder/login";
+import { LoginPage, CredentialBuilder, Credentials } from "../pages/login";
 import { APIError } from "../viewmodels/api-response";
 
 const log = debug("user:login");
