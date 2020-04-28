@@ -123,7 +123,7 @@ const footerMatrix = [
 ];
 </script>
 
-<div class="row">
+
   {#each footerMatrix as col}
     <div class="col-6 col-md-3 col-lg-2">
 
@@ -136,5 +136,5 @@ const footerMatrix = [
 
     </div>
 	{/each}
-</div>
+
 
