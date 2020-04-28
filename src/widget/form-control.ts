@@ -25,18 +25,20 @@ class ControlError {
 }
 
 export class ControlGroup {
-  readonly label?: LabelOptions;
   readonly controlType: ControlType;
   readonly field: FormWidget;
+
+  readonly label?: LabelOptions;
   readonly desc?: ControlDesc;
   error?: ControlError
   
   constructor (opts: ControlOptions) {
+    this.controlType = opts.controlType;
+    this.field = opts.field;
+
     if (opts.label) {
       this.label = opts.label
     }
-
-    this.field = opts.field;
 
     if (opts.desc) {
       this.desc = new ControlDesc(opts.desc);
@@ -79,8 +81,7 @@ export class ControlGroup {
   render(): string {
     return `<div class="${this.wrapperClassName}">
     ${this.buildLabelAndField()}
-    ${this.desc?.render()}
-    ${this.error?.render()}
+    ${this.desc ? this.desc.render() : ''}${this.error ? this.error.render() : ''}
     </div>`
   }
 }
