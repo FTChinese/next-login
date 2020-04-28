@@ -14,7 +14,7 @@
   <title>{% block title %}用户中心{% endblock %} - FT中文网</title>
   
   {% if env.isProduction %}
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
   {% include "assets/style.html" %}
   {% else %}
   <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.css">
@@ -103,21 +103,9 @@
       </div>
     </div>
   </footer>
-
-  {#
-  <a href="{{ sitemap.feedback }}" class="feedback">
-    <span>建议反馈</span>
-  </a>
-  #}
-
-  <div class="global-spinner">
-    <div class="spinner-border" role="status" aria-hidden="true">
-      <span class="sr-only">加载中...</span>
-    </div>
-  </div>
   
   {% if env.isProduction %}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/2.0.23/bootstrap-native-v4.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/2.0.27/bootstrap-native-v4.min.js"></script>
   {% include "assets/script.html" %}
 
   {% else %}
