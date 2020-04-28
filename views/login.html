@@ -8,9 +8,7 @@
   <form method="{{form.method}}" id="loginForm">
 
     {% for control in form.controls %}
-      <div class="form-group">
-        {% include "widget/form-control.html" %}
-      </div>
+      {{ conrol.render() | safe }}
     {% endfor %}
 
     <div class="form-check">

@@ -1,6 +1,6 @@
-import { FormControl } from "./form-field";
 import { Button } from "./button";
 import { Link } from "./link";
+import { ControlGroup } from "./form-control";
 
 type Method = "post" | "get";
 
@@ -8,7 +8,7 @@ export interface Form {
     disabled: boolean;
     method: Method;
     action: string;
-    controls: FormControl[];
+    controls: ControlGroup[];
     submitBtn: Button;
     cacelBtn?: Link;
     deleteBtn?: Link;
@@ -18,7 +18,7 @@ export class FormBuilder implements Form {
     disabled: boolean;
     method: Method;
     action: string;
-    controls: FormControl[];
+    controls: ControlGroup[];
     submitBtn: Button;
     cacelBtn?: Link | undefined;
     deleteBtn?: Link | undefined;
@@ -37,7 +37,7 @@ export class FormBuilder implements Form {
         for (let i = 0; i < this.controls.length; i++) {
             const currentControl = this.controls[i];
 
-            currentControl.error = errors.get(currentControl.attrs.name)
+            currentControl.setError(errors.get(currentControl.field.name));
         }
 
         return this;

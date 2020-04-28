@@ -1,3 +1,5 @@
+import { FieldSharedAttrs } from "./widget";
+
 export class Attributes {
     private attrs: Map<string, string[]> = new Map();
 
@@ -46,5 +48,37 @@ export class Attributes {
             return `${name}="${value.join(' ')}"`;
         })
         .join(' ');
+    }
+
+    static formField(f: FieldSharedAttrs): Attributes {
+      const attrs = (new Attributes())
+        .set("id", f.id)
+        .set("name", f.name);
+      
+      if (f.disabled) {
+        attrs.setBoolean("disabled");
+      }
+    
+      if (f.maxlength) {
+        attrs.set("maxlength", `${f.maxlength}`);
+      }
+    
+      if (f.minlength) {
+        attrs.set("minlength", `${f.minlength}`);
+      }
+    
+      if (f.placeholder) {
+        attrs.set("placeholder", `${f.placeholder}`);
+      }
+    
+      if (f.readonly) {
+        attrs.setBoolean("readonly");
+      }
+    
+      if (f.required) {
+        attrs.setBoolean("required");
+      }
+    
+      return attrs;
     }
 }
