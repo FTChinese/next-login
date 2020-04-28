@@ -54,7 +54,7 @@ export class Attributes {
         .join(' ');
     }
 
-    static formField(f: FieldSharedAttrs): Attributes {
+    static fieldSharedAttrs(f: FieldSharedAttrs): Attributes {
       const attrs = (new Attributes())
         .set("id", f.id)
         .set("name", f.name);
