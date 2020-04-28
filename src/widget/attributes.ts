@@ -24,6 +24,10 @@ export class Attributes {
         return this.set("class", value);
     }
 
+    addClassName(value: string): Attributes {
+      return this.add("class", value);
+    }
+    
     setBoolean(name: string): Attributes {
         this.attrs.set(name, [""]);
         return this;

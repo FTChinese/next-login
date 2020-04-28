@@ -4,7 +4,8 @@
 <div class="mt-4">
   <h4 class="text-center">登录FT中文网</h4>
 
-  {% include "widget/flash.html" %}
+  {% if flash %}{{ flash.render() | safe }}{% endif %}
+  
   <form method="{{form.method}}" id="loginForm">
 
     {% for control in form.controls %}
