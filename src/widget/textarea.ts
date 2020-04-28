@@ -22,7 +22,7 @@ export class TextArea implements FormWidget {
     this.name = opts.name;
     this.value = opts.value;
 
-    this.attrs = Attributes.formField(opts);
+    this.attrs = Attributes.fieldSharedAttrs(opts);
 
     if (opts.cols) {
       this.attrs.set("cols", `${opts.cols}`);
