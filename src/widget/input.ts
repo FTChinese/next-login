@@ -15,8 +15,19 @@ export class TextInput implements FormWidget {
     this.name = opts.name;
     this.value = opts.value;
 
-    this.attrs = Attributes.formField(opts);
-    this.attrs.set("type", opts.type);
+    this.attrs = Attributes.fieldSharedAttrs(opts)
+      .set("type", opts.type);
+
+    switch (opts.type) {
+      case "checkbox":
+      case "radio":
+        this.attrs.setClassNames("form-check-input");
+        break;
+
+      default:
+        this.attrs.setClassNames("form-control");
+        break;
+    }
 
     if (opts.value) {
       this.attrs.set("value", `${opts.value}`);
@@ -40,6 +51,6 @@ export class TextInput implements FormWidget {
   }
 
   render(): string {
-    return `<input class="form-control" ${this.attrs.build()} />`
+    return `<input ${this.attrs.build()} />`
   }
 }
