@@ -9,24 +9,10 @@
   <form method="{{form.method}}" id="loginForm">
 
     {% for control in form.controls %}
-      {{ conrol.render() | safe }}
+      {{ control.render() | safe }}
     {% endfor %}
 
-    <div class="form-check">
-      <input class="form-check-input"
-        id="rememberMe"
-        type="checkbox"
-        name="rememberMe"
-        value="true"
-        checked>
-      <label for="rememberMe">记住我</label>
-
-    </div>
-
-    {% if form.submitBtn %}
-      {% set button = form.submitBtn %}
-      {% include "widget/button.html" %}
-    {% endif %}
+    {{ form.submitBtn.render() | safe }}
   </form>
 
   <div class="d-flex justify-content-between mt-3">
