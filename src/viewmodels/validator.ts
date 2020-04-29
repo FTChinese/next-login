@@ -4,6 +4,7 @@ import {
     ref,
     ValidationErrorItem,
     ValidationOptions,
+    ValidationError,
 } from "@hapi/joi"
 import { 
     ICredentials 
@@ -18,6 +19,17 @@ export function buildJoiErrors(details: ValidationErrorItem[]): object {
     }
 
     return errors;
+}
+
+export function reduceJoiErrors(e: ValidationError): Map<string, string> {
+  const o: Map<string, string> = new Map();
+
+  for (const item of e.details) {
+    const key = item.path.join("_");
+    o.set(key, item.message);
+  }
+
+  return o;
 }
 
 export interface IFormState<T> {
