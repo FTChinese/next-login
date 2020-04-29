@@ -4,7 +4,7 @@ import { ControlGroup } from "./form-control";
 
 type Method = "post" | "get";
 
-export interface Form {
+export interface FormOptions {
     disabled: boolean;
     method: Method;
     action: string;
@@ -14,7 +14,7 @@ export interface Form {
     deleteBtn?: Link;
 }
 
-export class FormBuilder implements Form {
+export class Form implements FormOptions {
     disabled: boolean;
     method: Method;
     action: string;
@@ -23,17 +23,17 @@ export class FormBuilder implements Form {
     cacelBtn?: Link | undefined;
     deleteBtn?: Link | undefined;
 
-    constructor(form: Form) {
-        this.disabled = form.disabled;
-        this.method = form.method;
-        this.action = form.action;
-        this.controls = form.controls;
-        this.submitBtn = form.submitBtn;
-        this.cacelBtn = form.cacelBtn;
-        this.deleteBtn = form.deleteBtn;
+    constructor(opts: FormOptions) {
+        this.disabled = opts.disabled;
+        this.method = opts.method;
+        this.action = opts.action;
+        this.controls = opts.controls;
+        this.submitBtn = opts.submitBtn;
+        this.cacelBtn = opts.cacelBtn;
+        this.deleteBtn = opts.deleteBtn;
     }
     
-    withErrors(errors: Map<string, string>): FormBuilder {
+    withErrors(errors: Map<string, string>): Form {
         for (let i = 0; i < this.controls.length; i++) {
             const currentControl = this.controls[i];
 
