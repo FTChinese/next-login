@@ -20,11 +20,11 @@ import {
     buildJoiErrors,
     IFormState,
     ISignUpFormData,
-} from "./validator";
+} from "../pages/validator";
 
 import {
-    IEmail,
-    ICredentials,
+    EmailData,
+    Credentials,
     Account,
     Membership,
 } from "../models/reader";
@@ -45,12 +45,12 @@ import { AccountKind } from "../models/enums";
 const log = debug("user:link-viewmodel");
 
 interface IEmailExistsResult extends IFetchResult<boolean> {
-    errForm?: IEmail;
+    errForm?: EmailData;
 }
 
 // Authentication result if user already has an ftc account.
 interface IAuthenticateResult extends IFetchResult<string> {
-    errForm?: ICredentials;
+    errForm?: Credentials;
 }
 
 interface ISignUpResult extends IFetchResult<string> {
@@ -106,9 +106,9 @@ interface UIUnlink extends UIBase {
 class LinkViewModel {
     private readonly msgInvalidCredentials = "邮箱或密码错误";
     
-    async validateEmail(data: IEmail): Promise<IFormState<IEmail>> {
+    async validateEmail(data: EmailData): Promise<IFormState<EmailData>> {
         try {
-            const result = await validate<IEmail>(data, emailSchema);
+            const result = await validate<EmailData>(data, emailSchema);
 
             return {
                 values: result,
@@ -117,12 +117,12 @@ class LinkViewModel {
             const ex: ValidationError = e;
 
             return {
-                errors: buildJoiErrors(ex.details) as IEmail,
+                errors: buildJoiErrors(ex.details) as EmailData,
             };
         }
     }
 
-    async checkEmail(formData: IEmail): Promise<IEmailExistsResult> {
+    async checkEmail(formData: EmailData): Promise<IEmailExistsResult> {
         const { values, errors } = await this.validateEmail(formData);
 
         if (errors) {
@@ -158,7 +158,7 @@ class LinkViewModel {
         }
     }
 
-    buildEmailUI(formData?: IEmail, result?: IEmailExistsResult): UISingleInput {
+    buildEmailUI(formData?: EmailData, result?: IEmailExistsResult): UISingleInput {
         const uiData: UISingleInput = {
             input: {
                 label: "",
@@ -184,9 +184,9 @@ class LinkViewModel {
         return uiData;
     }
 
-    async validateLogin(formData: ICredentials): Promise<IFormState<ICredentials>> {
+    async validateLogin(formData: Credentials): Promise<IFormState<Credentials>> {
         try {
-            const result = await validate<ICredentials>(formData, loginSchema);
+            const result = await validate<Credentials>(formData, loginSchema);
 
             return {
                 values: result,
@@ -195,7 +195,7 @@ class LinkViewModel {
             const ex: ValidationError = e;
 
             return {
-                errors: buildJoiErrors(ex.details) as ICredentials,
+                errors: buildJoiErrors(ex.details) as Credentials,
             };
         }
     }
@@ -203,7 +203,7 @@ class LinkViewModel {
     /**
      * @todo login returns account data directly.
      */
-    async logIn(formData: ICredentials, app: IHeaderApp): Promise<IAuthenticateResult> {
+    async logIn(formData: Credentials, app: IHeaderApp): Promise<IAuthenticateResult> {
         const { values, errors } = await this.validateLogin(formData);
 
         if (errors) {
@@ -245,7 +245,7 @@ class LinkViewModel {
         }
     }
 
-    buildLoginUI(formData?: ICredentials, result?: IAuthenticateResult): UILogin {
+    buildLoginUI(formData?: Credentials, result?: IAuthenticateResult): UILogin {
         if (formData && formData.email) {
             formData.email = formData.email.trim();
         }

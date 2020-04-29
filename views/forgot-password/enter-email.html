@@ -4,8 +4,7 @@
 <div class="mt-4">
   <h4 class="text-center">找回密码</h4>
 
-  {# Show invalid token message #}
-  {% include "partials/alert-danger.html" %}
+  {% if flash %}{{ flash.render() | safe }}{% endif %}
 
   {# Show message after password reset letter is sent, or password is reset. #}
 
@@ -16,20 +15,17 @@
     {% endif %}
   {% endif %}
 
-  {% if input %}
+  {% if form %}
   <form method="post">
 
-      <div class="form-group">
-        {% include "partials/text-input.html" %}
-      </div>
+    {% for control in form.controls %}
+      {{ control.render() | safe }}
+    {% endfor %}
 
-    <button 
-      class="btn btn-block btn-primary" 
-      type="submit"
-      data-disable-with="正在发送...">发送邮件</button>
+    {{ form.submitBtn.render() | safe }}
 
   </form>
-{% endif %}
+  {% endif %}
 
 </div>
   

@@ -7,7 +7,7 @@ import {
     ValidationError,
 } from "@hapi/joi"
 import { 
-    ICredentials 
+    Credentials 
 } from "../models/reader";
 
 export function buildJoiErrors(details: ValidationErrorItem[]): object {
@@ -130,7 +130,7 @@ export const signUpSchema = passwordsSchema.keys({
     email,
 });
 
-export interface ISignUpFormData extends ICredentials {
+export interface ISignUpFormData extends Credentials {
     confirmPassword: string;
 }
 

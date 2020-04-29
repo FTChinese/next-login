@@ -9,7 +9,7 @@ import {
   collectAppHeaders,
 } from "./middleware";
 import {
-  Account,
+  Account, Credentials,
 } from "../models/reader";
 import {
   IHeaderApp,
@@ -30,8 +30,7 @@ import {
   IOAuthSession as IFtcOAuthSession,
 } from "../models/ftc-oauth";
 import { toBoolean } from "../util/converter";
-import { LoginPage, CredentialBuilder, Credentials } from "../pages/login";
-import { APIError } from "../viewmodels/api-response";
+import { LoginPage, CredentialBuilder } from "../pages/login";
 
 const log = debug("user:login");
 

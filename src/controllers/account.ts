@@ -6,8 +6,8 @@ import {
 import {  
 
     Account,
-    IEmail,
-    ICredentials,
+    EmailData,
+    Credentials,
 } from "../models/reader";
 import {
     IHeaderApp,
@@ -27,7 +27,7 @@ import {
 } from "../viewmodels/link-viewmodel";
 import {
     ISignUpFormData,
-} from "../viewmodels/validator";
+} from "../pages/validator";
 import { 
     isProduction,
 } from "../config/viper";
@@ -109,7 +109,7 @@ router.post("/email", async (ctx, next) => {
         return;
     }
 
-    const formData: IEmail = ctx.request.body;
+    const formData: EmailData = ctx.request.body;
 
     const { success, errForm, errResp } = await accountViewModel.updateEmail(account, formData);
 
@@ -216,7 +216,7 @@ router.get("/link/email", async (ctx, next) => {
 });
 
 router.post("/link/email", async (ctx, next) => {
-    const formData: IEmail = ctx.request.body;
+    const formData: EmailData = ctx.request.body;
 
     const { success, errForm, errResp } = await linkViewModel.checkEmail(formData);
 
@@ -277,7 +277,7 @@ router.get("/link/login", async (ctx, next) => {
 
 router.post("/link/login", 
 collectAppHeaders(), async (ctx, next) => {
-    const formData: ICredentials | undefined = ctx.request.body.credentials;
+    const formData: Credentials | undefined = ctx.request.body.credentials;
 
     if (!formData) {
         throw new Error("form data not found");

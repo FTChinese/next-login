@@ -18,10 +18,10 @@ import {
     passwordUpdatingSchema,
     buildJoiErrors,
     IFormState,
-} from "./validator";
+} from "../pages/validator";
 import {
     Account,
-    IEmail,
+    EmailData,
 } from "../models/reader";
 import {
     IHeaderApp,
@@ -48,7 +48,7 @@ interface UIAccount extends UIBase {
 }
 
 interface IUpdateEmailResult extends IFetchResult<boolean> {
-    errForm?: IEmail;
+    errForm?: EmailData;
 }
 
 export interface IPasswordsFormData {
@@ -148,9 +148,9 @@ class AccountViewModel {
     /**
      * @description Update email.
      */
-    async validateEmail(data: IEmail): Promise<IFormState<IEmail>> {
+    async validateEmail(data: EmailData): Promise<IFormState<EmailData>> {
         try {
-            const result = await validate<IEmail>(data, emailSchema);
+            const result = await validate<EmailData>(data, emailSchema);
 
             return {
                 values: result,
@@ -159,12 +159,12 @@ class AccountViewModel {
             const ex: ValidationError = e;
 
             return {
-                errors: buildJoiErrors(ex.details) as IEmail,
+                errors: buildJoiErrors(ex.details) as EmailData,
             };
         }
     }
 
-    async updateEmail(account: Account, formData: IEmail): Promise<IUpdateEmailResult> {
+    async updateEmail(account: Account, formData: EmailData): Promise<IUpdateEmailResult> {
         const { values, errors } = await this.validateEmail(formData);
 
         if (errors) {
@@ -213,7 +213,7 @@ class AccountViewModel {
      * For GET use `Account` to compose this `formData`;
      * For POSt just use the submitted form data.
      */
-    buildEmailUI(formData?: IEmail, result?: IUpdateEmailResult): UISingleInput {
+    buildEmailUI(formData?: EmailData, result?: IUpdateEmailResult): UISingleInput {
 
         const { errForm, errResp } = result || {};
 

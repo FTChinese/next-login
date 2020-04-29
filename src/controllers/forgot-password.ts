@@ -1,14 +1,10 @@
 import Router from "koa-router";
 import render from "../util/render";
 import {
-    pwResetViewModel,
-    IPwResetFormData,
-} from "../viewmodels/pw-reset-viewmodel";
-import {
     collectAppHeaders,
 } from "./middleware";
 import { 
-    IEmail
+    EmailData
 } from "../models/reader";
 import {
     IHeaderApp,
@@ -16,7 +12,9 @@ import {
 import { 
     entranceMap 
 } from "../config/sitemap";
-import { KeyPwReset } from "../viewmodels/redirection";
+import { RequestPwResetPage, KeyDone } from "../pages/request-pw-reset";
+import { EmailBuilder } from "../pages/request-pw-reset";
+import { ResetPwBuilder, ResetPasswordPage, PwResetData } from "../pages/reset-password";
 
 const router = new Router();
 
@@ -27,13 +25,14 @@ router.get("/", async (ctx, next) => {
     // @ts-ignore
     const key: KeyPwReset = ctx.session.ok;
 
-    const uiData = pwResetViewModel.buildEmailUI(
-        undefined,
-        key,
-    );
-
-    Object.assign(ctx.state, uiData);
-
+    if (key) {
+      const uiData = RequestPwResetPage.afterRedirect(key);
+      Object.assign(ctx.state, uiData);
+    } else {
+      const uiData = new RequestPwResetPage(EmailBuilder.default());
+      Object.assign(ctx.state, uiData);
+    }
+    
     return await next();
 }, async (ctx, next) => {
     ctx.body = await render('forgot-password/enter-email.html', ctx.state);
@@ -49,29 +48,39 @@ router.get("/", async (ctx, next) => {
  * is sent.
  */
 router.post("/", collectAppHeaders(), async (ctx, next) => {
-    const formData: IEmail = ctx.request.body;
+    const formData: EmailData = ctx.request.body;
 
     const headers: IHeaderApp = ctx.state.appHeaders;
 
-    const { success, formState, errResp } = await pwResetViewModel.requestLetter(formData, headers);
-
-    if (!success) {
-        const uiData = pwResetViewModel.buildEmailUI({ formState, errResp });
-
-        Object.assign(ctx.state, uiData);
-        ctx.body = await render('forgot-password/enter-email.html', ctx.state);
-
-        return;
+    const emailBuilder = new EmailBuilder(formData);
+    const isValid = await emailBuilder.validate();
+    if (!isValid) {
+      const uiData = new RequestPwResetPage(emailBuilder);
+      Object.assign(ctx.state, uiData);
+      return await next();
     }
 
-    const key: KeyPwReset = "letter_sent";
+    const ok = await emailBuilder.requestLetter(headers);
+
+    if (!ok) {
+        const uiData = new RequestPwResetPage(emailBuilder);
+
+        Object.assign(ctx.state, uiData);
+
+        return await next();
+    }
+
+    const key: KeyDone = "letter_sent";
+    // @ts-ignore
     ctx.session.ok = key;
 
     ctx.redirect(ctx.path);
+}, async (ctx, next) => {
+  ctx.body = await render('forgot-password/enter-email.html', ctx.state);
 });
 
 /**
- * @description Hanle user click of password reset link.
+ * @description Handle user click of password reset link.
  * Extract the token from url and ask API to verify
  * whehter the token is valid.
  * If the token is invalid, redirect back to /password-reset
@@ -81,31 +90,19 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
 router.get("/:token", async (ctx, next) => {
     const token: string = ctx.params.token;
 
-    const { success, errResp } = await pwResetViewModel.verifyToken(token);
+    const builder = ResetPwBuilder.default();
 
-    if (errResp) {
-        if (errResp.notFound) {
-            const key: KeyPwReset = "invalid_token";
+    const apiErr = await builder.verifyToken(token);
 
-            // @ts-ignore
-            ctx.session.ok = key;
-            return ctx.redirect(entranceMap.passwordReset);
+    if (apiErr && apiErr.notFound) {
+      const key: KeyDone = "invalid_token";
 
-        }
-
-        Object.assign(ctx.state, pwResetViewModel.buildPwResetUI(
-            "",
-            { errResp },
-        ));
-
-        return await next();
+      // @ts-ignore
+      ctx.session.ok = key;
+      return ctx.redirect(entranceMap.passwordReset);
     }
 
-    if (!success) {
-        throw new Error("API response error");
-    }
-
-    Object.assign(ctx.state, pwResetViewModel.buildPwResetUI(success.email));
+    Object.assign(ctx.state, new ResetPasswordPage(builder));
 
     // In case the submit failure and this page need to be displayed again in POST.
 
@@ -120,27 +117,33 @@ router.get("/:token", async (ctx, next) => {
 router.post("/:token", async (ctx, next) => {
     const token = ctx.params.token;
 
-    const formData: IPwResetFormData | undefined = ctx.request.body.credentials;
+    const formData: PwResetData | undefined = ctx.request.body.credentials;
 
     if (!formData) {
         throw new Error("form data not found");
     }
 
-    const { success, errForm, errResp } = await pwResetViewModel.resetPassword(formData, token);
+    const builder = new ResetPwBuilder(formData);
+    // @ts-ignore
+    builder.email = ctx.session.email;
 
-    if (!success) {
-        // @ts-ignore
-        const email: string = ctx.session.email;
+    const isValid = await builder.validate();
+    if (!isValid) {
+      
+      const uiData = new ResetPasswordPage(builder);
+      Object.assign(ctx.state, uiData);
+      return await next();
+    }
 
-        const uiData = pwResetViewModel.buildPwResetUI(email, { errForm, errResp });
-
-        Object.assign(ctx.state, uiData);
-
-        return await next();
+    const ok = await builder.resetPassword(token);
+    if (!ok) {
+      const uiData = new ResetPasswordPage(builder);
+      Object.assign(ctx.state, uiData);
+      return await next();
     }
 
     // Redirect.
-    const key: KeyPwReset = "pw_reset";
+    const key: KeyDone = "pw_reset";
     // @ts-ignore
     ctx.session.ok = key;
 

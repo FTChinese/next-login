@@ -6,26 +6,19 @@ import { ControlGroup } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
 import { TextInput } from "../widget/input";
 import { entranceMap } from "../config/sitemap";
-import { loginSchema, joiOptions, reduceJoiErrors } from "../viewmodels/validator";
+import { loginSchema, joiOptions } from "./validator";
 import { accountRepo } from "../repository/account";
 import { IHeaderApp } from "../models/header";
-import { Account } from "../models/reader";
+import { Account, Credentials } from "../models/reader";
 import { APIError } from "../viewmodels/api-response";
-
-export interface Credentials {
-  email: string;
-  password: string;
-}
+import { DataBuilder } from "./data-builder";
 
 const msgInvalidCredentials = "邮箱或密码错误";
 
-export class CredentialBuilder {
-  errors: Map<string, string> = new Map(); // Hold validator error for each form field. Key is field's name attribute.
-  flashMsg?: string; // Hold message for API non-422 error.
-  readonly data: Credentials; // The original form data.
+export class CredentialBuilder extends DataBuilder<Credentials> {
 
   constructor(c: Credentials) {
-    this.data = c;
+    super(c);
   }
 
   async validate(): Promise<boolean> {
@@ -40,7 +33,7 @@ export class CredentialBuilder {
 
       return true;
     } catch (e) {
-      this.errors = reduceJoiErrors(e as ValidationError);
+      this.reduceJoiErrors(e as ValidationError);
       return false;
     }
   }

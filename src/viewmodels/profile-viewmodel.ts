@@ -23,7 +23,7 @@ import {
     addressSchema,
     buildJoiErrors,
     IFormState,
-} from "./validator";
+} from "../pages/validator";
 import {
     Account,
     Profile,

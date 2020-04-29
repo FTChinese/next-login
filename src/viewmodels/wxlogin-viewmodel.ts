@@ -18,7 +18,7 @@ import { entranceMap, accountMap } from "../config/sitemap";
 import { accountRepo } from "../repository/account";
 import { UIBase } from "./ui";
 import { IFetchResult, APIError } from "./api-response";
-import { IFormState } from "./validator";
+import { IFormState } from "../pages/validator";
 
 interface IOAuthCodeRequest {
     session: IOAuthSession,

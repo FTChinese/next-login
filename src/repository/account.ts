@@ -10,10 +10,10 @@ import {
     KEY_APP_ID,
 } from "../config/api";
 import { 
-    ICredentials, 
+    Credentials, 
     Account,
     accountSerializer,
-    IEmail,
+    EmailData,
     IPasswordReset,
     IPasswords,
 } from "../models/reader";
@@ -49,7 +49,7 @@ class AccountRepo {
     /**
      * @description As the first step of login process, or verify password when linking accounts.
      */
-    async authenticate(c: ICredentials, app: IHeaderApp): Promise<Account> {
+    async authenticate(c: Credentials, app: IHeaderApp): Promise<Account> {
         console.log(c);
         
         const resp = await request
@@ -86,7 +86,7 @@ class AccountRepo {
         }
     }
 
-    async createReader(c: ICredentials, app: IHeaderApp): Promise<string> {
+    async createReader(c: Credentials, app: IHeaderApp): Promise<string> {
         const resp = await request
             .post(readerApi.signup)
             .use(oauth)
@@ -130,7 +130,7 @@ class AccountRepo {
 
     // Create an account for a wechat-logged-in user,
     // and returns the account's uuid.
-    async wxSignUp(c: ICredentials, unionId: string, app: IHeaderApp): Promise<string> {
+    async wxSignUp(c: Credentials, unionId: string, app: IHeaderApp): Promise<string> {
         const resp = await request
             .post(readerApi.wxSignUp)
             .use(oauth)
@@ -148,7 +148,7 @@ class AccountRepo {
         throw new Error("Incorrect API response");
     }
 
-    async requestPwResetLetter(data: IEmail, app: IHeaderApp): Promise<boolean> {
+    async requestPwResetLetter(data: EmailData, app: IHeaderApp): Promise<boolean> {
         const resp = await request
             .post(readerApi.passwordResetLetter)
             .use(oauth)
@@ -159,7 +159,7 @@ class AccountRepo {
         return resp.noContent;
     }
 
-    async verifyPwResetToken(token: string): Promise<IEmail> {
+    async verifyPwResetToken(token: string): Promise<EmailData> {
         const resp = await request
             .get(readerApi.passwordResetToken(token))
             .use(oauth)
@@ -204,7 +204,7 @@ class AccountRepo {
         return resp.noContent;
     }
 
-    async updateEmail(ftcId: string, data: IEmail): Promise<boolean> {
+    async updateEmail(ftcId: string, data: EmailData): Promise<boolean> {
         const resp = await request
             .patch(readerApi.email)
             .use(oauth)
