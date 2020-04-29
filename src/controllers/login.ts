@@ -3,32 +3,32 @@ import Router from "koa-router";
 import MobileDetect from "mobile-detect";
 import render from "../util/render";
 import {
-    isProduction,
+  isProduction,
 } from "../config/viper";
 import {
-    collectAppHeaders,
+  collectAppHeaders,
 } from "./middleware";
-import { 
-    Account,
+import {
+  Account,
 } from "../models/reader";
 import {
-    IHeaderApp,
+  IHeaderApp,
 } from "../models/header";
-import { 
-    profileMap,
-    accountMap,
+import {
+  profileMap,
+  accountMap,
 } from "../config/sitemap";
-import { 
-    wxLoginViewModel 
+import {
+  wxLoginViewModel
 } from "../viewmodels/wxlogin-viewmodel";
-import { 
-    ICallbackParams, IOAuthSession, 
+import {
+  ICallbackParams, IOAuthSession,
 } from "../models/wx-oauth";
 import { accountRepo } from "../repository/account";
-import { 
-    oauthServer,
-    IOAuthSession as IFtcOAuthSession,
- } from "../models/ftc-oauth";
+import {
+  oauthServer,
+  IOAuthSession as IFtcOAuthSession,
+} from "../models/ftc-oauth";
 import { toBoolean } from "../util/converter";
 import { LoginPage, CredentialBuilder, Credentials } from "../pages/login";
 import { APIError } from "../viewmodels/api-response";
@@ -42,59 +42,55 @@ const router = new Router();
  * Only show wechat login for desktop browsers.
  */
 router.get("/", async (ctx, next) => {
-    const uiData = new LoginPage(CredentialBuilder.default());
+  const uiData = new LoginPage(CredentialBuilder.default());
 
-    Object.assign(ctx.state, uiData);
-    
-    const md = new MobileDetect(ctx.header["user-agent"]);
-    ctx.state.isMobile = !!md.mobile();
+  Object.assign(ctx.state, uiData);
 
-    ctx.body = await render("login.html", ctx.state);
+  const md = new MobileDetect(ctx.header["user-agent"]);
+  ctx.state.isMobile = !!md.mobile();
+
+  ctx.body = await render("login.html", ctx.state);
 });
 
 /**
  * @description Handle login form data.
  */
 router.post("/", collectAppHeaders(), async (ctx, next) => {
-    /**
-     * @todo Keep session longer
-     */
-    let remeberMe: string = ctx.request.body.remeberMe;
+  /**
+   * @todo Keep session longer
+   */
+  let remeberMe: string = ctx.request.body.remeberMe;
 
-    const formData: Credentials | undefined = ctx.request.body.credentials;
+  const formData: Credentials | undefined = ctx.request.body.credentials;
 
-    if (!formData) {
-        throw new Error("form data not found");
-    }
-    const cb = new CredentialBuilder(formData);
+  if (!formData) {
+    throw new Error("form data not found");
+  }
+  const cb = new CredentialBuilder(formData);
 
-    const isValid = await cb.validate();
-    if (!isValid) {
-        const uiData = new LoginPage(cb);
-        Object.assign(ctx.state, uiData);
+  const isValid = await cb.validate();
+  if (!isValid) {
+    const uiData = new LoginPage(cb);
+    Object.assign(ctx.state, uiData);
 
-        return await next();
-    }
+    return await next();
+  }
 
-    const headers: IHeaderApp = ctx.state.appHeaders;
+  const headers: IHeaderApp = ctx.state.appHeaders;
+  const account = await cb.login(headers);
 
-    try {
-        const account = await cb.login(headers);
+  if (account) {
+    // @ts-ignore
+    ctx.session.user = account;
+    return ctx.redirect(profileMap.base);
+  }
 
-        // @ts-ignore
-        ctx.session.user = account;
-        return ctx.redirect(profileMap.base);
-    } catch (e) {
-        const errResp = new APIError(e);
-        const uiData = (new LoginPage(cb)).withErrResp(errResp);
+  const uiData = new LoginPage(cb);
+  Object.assign(ctx.state, uiData);
 
-        Object.assign(ctx.state, uiData);
-
-        return await next();
-    }
-    
+  return await next();
 }, async (ctx, next) => {
-    ctx.body = await render("login.html", ctx.state);
+  ctx.body = await render("login.html", ctx.state);
 });
 
 /**
@@ -104,36 +100,36 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
  * GET /login/wechat<?sandbox=true>
  */
 router.get("/wechat", async (ctx, next) => {
-    const account: Account | undefined = ctx.state.user;
-    const sandbox: string | undefined = ctx.request.query.sandbox
+  const account: Account | undefined = ctx.state.user;
+  const sandbox: string | undefined = ctx.request.query.sandbox
 
-    const data = wxLoginViewModel.codeRequest(
-        account ? "link" : "login",
-        toBoolean(sandbox),
-    );
+  const data = wxLoginViewModel.codeRequest(
+    account ? "link" : "login",
+    toBoolean(sandbox),
+  );
 
-    // State that will be used later to validate callback query parameters.
+  // State that will be used later to validate callback query parameters.
 
-    // @ts-ignore
-    ctx.session.wx_oauth = data.session;
+  // @ts-ignore
+  ctx.session.wx_oauth = data.session;
 
-    // Redirect to wechat api.
-    ctx.redirect(data.redirectUrl);
+  // Redirect to wechat api.
+  ctx.redirect(data.redirectUrl);
 });
 
 router.get("/wechat/test", collectAppHeaders(), async (ctx, next) => {
-    if (isProduction) {
-        ctx.status = 404;
-        return;
-    }
+  if (isProduction) {
+    ctx.status = 404;
+    return;
+  }
 
-    const account = await accountRepo.fetchWxAccount("tvSxA7L6cgl8nwkrScm_yRzZoVTy");
+  const account = await accountRepo.fetchWxAccount("tvSxA7L6cgl8nwkrScm_yRzZoVTy");
 
-    console.log(account);
+  console.log(account);
 
-    ctx.session.user = account;
+  ctx.session.user = account;
 
-    ctx.redirect(profileMap.base);
+  ctx.redirect(profileMap.base);
 });
 
 /**
@@ -150,85 +146,85 @@ router.get("/wechat/test", collectAppHeaders(), async (ctx, next) => {
  * 
  * GET /login/wechat/callback?code=xxx&state=xxx
  */
-router.get("/wechat/callback", collectAppHeaders(), async(ctx, next) => {
-    const query: ICallbackParams = ctx.request.query;
+router.get("/wechat/callback", collectAppHeaders(), async (ctx, next) => {
+  const query: ICallbackParams = ctx.request.query;
+
+  // @ts-ignore
+  const wxOAuthSess: IOAuthSession | undefined = ctx.session.wx_oauth;
+  if (isProduction) {
+    // @ts-ignore
+    delete ctx.session.wx_oauth;
+  };
+
+  const headers: IHeaderApp = ctx.state.appHeaders;
+  const localAccount: Account | undefined = ctx.state.user;
+
+  const { success, errQuery, errResp } = await wxLoginViewModel.getApiSession(query, headers, wxOAuthSess);
+
+  if (!success) {
+    const uiData = wxLoginViewModel.buildUI(
+      { errQuery, errResp },
+      localAccount,
+    );
+
+    Object.assign(ctx.state, uiData);
+
+    return await next();
+  }
+
+  if (!wxOAuthSess) {
+    throw new Error("wechat oauth session not found");
+  }
+
+  if (wxOAuthSess.usage == "link") {
+
+    if (!localAccount || localAccount.loginMethod == "wechat") {
+      ctx.status = 404;
+      return;
+    }
+
+    // Save unionId to `ctx.session.uid`.
 
     // @ts-ignore
-    const wxOAuthSess: IOAuthSession | undefined = ctx.session.wx_oauth;
-    if (isProduction) {
-        // @ts-ignore
-        delete ctx.session.wx_oauth;
-    };
+    ctx.session.uid = success.unionId;
+    return ctx.redirect(accountMap.linkMerging);
+  }
 
-    const headers: IHeaderApp = ctx.state.appHeaders;
-    const localAccount: Account | undefined = ctx.state.user;
+  const result = await wxLoginViewModel.getAccount(success);
 
-    const { success, errQuery, errResp } = await wxLoginViewModel.getApiSession(query, headers, wxOAuthSess);
+  // Show API request errors.
+  if (!result.success) {
+    const uiData = wxLoginViewModel.buildUI(
+      { errResp },
+      localAccount,
+    );
 
-    if (!success) {
-        const uiData = wxLoginViewModel.buildUI(
-            { errQuery, errResp},
-            localAccount,
-        );
+    Object.assign(ctx.state, uiData);
 
-        Object.assign(ctx.state, uiData);
+    return await next();
+  }
 
-        return await next();
-    }
+  // @ts-ignore
+  ctx.session.user = result.success;
 
-    if (!wxOAuthSess) {
-        throw new Error("wechat oauth session not found");
-    }
+  // This indicates user is trying to login to ftacademy, so redirect user to OAuth page.
+  // Added by /authorize
 
-    if (wxOAuthSess.usage == "link") {
-        
-        if (!localAccount || localAccount.loginMethod == "wechat") {
-            ctx.status = 404;
-            return;
-        }
+  // @ts-ignore
+  if (ctx.session.oauth) {
+    // @ts-ignore
+    const oauthSession: IFtcOAuthSession = ctx.session.oauth;
 
-        // Save unionId to `ctx.session.uid`.
-
-        // @ts-ignore
-        ctx.session.uid = success.unionId;
-        return ctx.redirect(accountMap.linkMerging);
-    }
-
-    const result = await wxLoginViewModel.getAccount(success);
-    
-    // Show API request errors.
-    if (!result.success) {
-        const uiData = wxLoginViewModel.buildUI(
-            { errResp },
-            localAccount,
-        );
-
-        Object.assign(ctx.state, uiData);
-
-        return await next();
-    }
+    ctx.redirect(oauthServer.buildAuthorizeUrl(oauthSession));
 
     // @ts-ignore
-    ctx.session.user = result.success;
+    delete ctx.session.oauth;
+    return;
+  }
 
-    // This indicates user is trying to login to ftacademy, so redirect user to OAuth page.
-    // Added by /authorize
-
-    // @ts-ignore
-    if (ctx.session.oauth) {
-        // @ts-ignore
-        const oauthSession: IFtcOAuthSession = ctx.session.oauth;
-
-        ctx.redirect(oauthServer.buildAuthorizeUrl(oauthSession));
-
-        // @ts-ignore
-        delete ctx.session.oauth;
-        return;
-    }
-
-    ctx.redirect(profileMap.base);
+  ctx.redirect(profileMap.base);
 }, async (ctx, next) => {
-    ctx.body = await render("wx-oauth.html", ctx.state);
+  ctx.body = await render("wx-oauth.html", ctx.state);
 });
 
 export default router.routes();

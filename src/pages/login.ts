@@ -1,31 +1,30 @@
 import { validate, ValidationError } from "@hapi/joi";
 import { Flash } from "../widget/flash";
-import { FormBuilder } from "../widget/form";
+import { Form } from "../widget/form";
 import { Button } from "../widget/button";
+import { ControlGroup } from "../widget/form-control";
+import { ControlType } from "../widget/widget";
+import { TextInput } from "../widget/input";
 import { entranceMap } from "../config/sitemap";
-import { loginSchema, joiOptions } from "../viewmodels/validator";
+import { loginSchema, joiOptions, reduceJoiErrors } from "../viewmodels/validator";
 import { accountRepo } from "../repository/account";
 import { IHeaderApp } from "../models/header";
 import { Account } from "../models/reader";
 import { APIError } from "../viewmodels/api-response";
-import { ControlGroup } from "../widget/form-control";
-import { ControlType } from "../widget/widget";
-import { TextInput } from "../widget/input";
 
 export interface Credentials {
   email: string;
   password: string;
 }
 
-export class CredentialBuilder implements Credentials {
-  email: string;
-  password: string;
-  errors: Map<string, string> = new Map();
-  readonly data: Credentials;
+const msgInvalidCredentials = "邮箱或密码错误";
+
+export class CredentialBuilder {
+  errors: Map<string, string> = new Map(); // Hold validator error for each form field. Key is field's name attribute.
+  flashMsg?: string; // Hold message for API non-422 error.
+  readonly data: Credentials; // The original form data.
 
   constructor(c: Credentials) {
-    this.email = c.email;
-    this.password = c.password;
     this.data = c;
   }
 
@@ -41,18 +40,33 @@ export class CredentialBuilder implements Credentials {
 
       return true;
     } catch (e) {
-      const ex: ValidationError = e;
-
-      for (const item of ex.details) {
-        const key = item.path.join("_");
-        this.errors.set(key, item.message);
-      }
+      this.errors = reduceJoiErrors(e as ValidationError);
       return false;
     }
   }
 
-  login(app: IHeaderApp): Promise<Account> {
-    return accountRepo.authenticate(this.data, app);
+  async login(app: IHeaderApp): Promise<Account | null> {
+    try {
+      const account = await accountRepo.authenticate(this.data, app);
+
+      return account;
+    } catch (e) {
+      const errResp = new APIError(e);
+
+      if (errResp.notFound || errResp.forbidden) {
+        this.flashMsg = msgInvalidCredentials;
+        return null;
+      }
+  
+      if (errResp.unprocessable) {
+        this.errors = errResp.unprocessable.toMap();
+        return null
+      }
+
+      this.flashMsg = errResp.message;
+
+      return null;
+    }
   }
 
   static default(): CredentialBuilder {
@@ -63,69 +77,78 @@ export class CredentialBuilder implements Credentials {
   }
 }
 
-const msgInvalidCredentials = "邮箱或密码错误";
+export function buildCredentialControls(data: Credentials, errors: Map<string, string>): ControlGroup[] {
+  return [
+    new ControlGroup({
+      label: {
+        text: "邮箱",
+      },
+      controlType: ControlType.Text,
+      field: new TextInput({
+        id: "email",
+        type: "email",
+        name: "credentials[email]",
+        value: data.email,
+        placeholder: "电子邮箱",
+        maxlength: 32,
+        required: true,
+      }),
+      error: errors.get("email"),
+    }),
+    new ControlGroup({
+      label: {
+        text: "密码",
+      },
+      controlType: ControlType.Text,
+      field: new TextInput({
+        id: "password",
+        type: "password",
+        name: "credentials[password]",
+        placeholder: "密码",
+        maxlength: 32,
+        required: true,
+      }),
+      error: errors.get("password"),
+    }),
+  ];
+}
 
 export class LoginPage {
-  flash?: Flash | undefined;
-  form: FormBuilder;
+  flash?: Flash | undefined; // Only exists when API returns a non-validation error.
+  form: Form;
   pwResetLink: string;
   signUpLink: string;
   wxLoginLink: string;
   wxIcon: string;
 
   constructor(c: CredentialBuilder) {
-    this.flash = undefined;
-    this.form = new FormBuilder({
+    if (c.flashMsg) {
+      this.flash = Flash.danger(c.flashMsg);
+    }
+
+    const controls = buildCredentialControls(c.data, c.errors);
+    controls.push(
+      new ControlGroup({
+        label: {
+          text: "记住我",
+          suffix: true,
+        },
+        controlType: ControlType.Checkbox,
+        field: new TextInput({
+          id: "rememberMe",
+          type: "checkbox",
+          name: "rememberMe",
+          value: "true",
+          checked: true,
+        }) 
+      }),
+    );
+    
+    this.form = new Form({
       disabled: false,
       method: "post",
       action: "",
-      controls: [
-        new ControlGroup({
-          label: {
-            text: "邮箱",
-          },
-          controlType: ControlType.Text,
-          field: new TextInput({
-            id: "email",
-            type: "email",
-            name: "credentials[email]",
-            value: c.email,
-            placeholder: "电子邮箱",
-            maxlength: 32,
-            required: true,
-          }),
-          error: c.errors?.get("email"),
-        }),
-        new ControlGroup({
-          label: {
-            text: "密码",
-          },
-          controlType: ControlType.Text,
-          field: new TextInput({
-            id: "password",
-            type: "password" as const,
-            name: "credentials[password]",
-            placeholder: "密码",
-            maxlength: 64,
-            required: true,
-          }),
-          error: c.errors?.get("password"),
-        }),
-        new ControlGroup({
-          label: {
-            text: "记住我",
-            suffix: true,
-          },
-          controlType: ControlType.Checkbox,
-          field: new TextInput({
-            id: "rememberMe",
-            type: "checkbox",
-            name: "rememberMe",
-            value: "true",
-            checked: true,
-          }) 
-        })
-      ],
+      controls,
       submitBtn: Button.primary()
         .setBlock()
         .setName("登录")
@@ -136,21 +159,5 @@ export class LoginPage {
     this.wxIcon =
       "https://open.weixin.qq.com/zh_CN/htmledition/res/assets/res-design-download/icon32_wx_button.png";
     this.wxLoginLink = entranceMap.wxLogin;
-  }
-
-  withErrResp(errResp: APIError): LoginPage {
-    if (errResp.notFound || errResp.forbidden) {
-      this.flash = Flash.danger(msgInvalidCredentials);
-      return this;
-    }
-
-    if (errResp.unprocessable) {
-      this.form.withErrors(errResp.unprocessable.toMap());
-      return this;
-    }
-
-    this.flash = Flash.danger(errResp.message);
-
-    return this;
   }
 }
