@@ -47,8 +47,6 @@
           <a class="dropdown-item" href="{{ user.logoutLink }}">退出</a>
         </div>
       </div>
-      {% else %}
-      <a href="{{ globalUrl.login }}">登录</a>
       {% endif %}
 
       {% block headerDrawer%}{% endblock %}
