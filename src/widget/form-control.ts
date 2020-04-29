@@ -29,7 +29,7 @@ export class ControlGroup {
   readonly field: FormWidget;
 
   readonly label?: LabelOptions;
-  readonly desc?: ControlDesc;
+  desc?: ControlDesc;
   error?: ControlError
   
   constructor (opts: ControlOptions) {
@@ -53,6 +53,10 @@ export class ControlGroup {
     if (msg) {
       this.error = new ControlError(msg);
     }
+  }
+
+  setDesc(desc: string) {
+    this.desc = new ControlDesc(desc);
   }
 
   buildLabelAndField(): string {

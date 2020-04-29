@@ -4,21 +4,14 @@
 <div class="mt-4">
   <h4 class="text-center">创建FT中文网账号</h4>
 
-  {# Show too many requests error #}
-  {% include "partials/alert-danger.html" %}
-
+  {%if flash %}{{ flash.render() | safe }}{% endif %}
   <form method="post">
   
-    {% for input in inputs %}
-      <div class="form-group">
-        {% include "partials/text-input.html" %}
-      </div>
+    {% for control in form.controls %}
+      {{ control.render() | safe }}
     {% endfor %}
   
-    <button
-      class="btn btn-block btn-primary"
-      type="submit"
-      data-disable-with="正在注册...">注册</button>
+    {{ form.submitBtn.render() | safe }}
   
   </form>
   <p class="text-center"><small class="">注册即代表您同意FT中文网<a href="http://www.ftchinese.com/m/corp/service.html" target="_blank">《用户注册协议》</a></small></p>
@@ -26,5 +19,4 @@
   <p class="text-center">已有账号？<a href="{{ loginLink }}">登录</a></p>
 </div>
 
-<!-- <button type="button" class="btn btn-secondary btn-block">下载FT中文网APP</button> -->
 {% endblock %}
