@@ -2,9 +2,9 @@ import { Flash } from "../widget/flash";
 import { Form } from "../widget/form";
 import { Button } from "../widget/button";
 import { entranceMap } from "../config/sitemap";
-import { ControlGroup } from "../widget/form-control";
+import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
-import { TextInput } from "../widget/input";
+import { TextInputElement } from "../widget/text-input";
 import { buildCredentialControls } from "./login";
 import { Account, Credentials } from "../models/reader";
 import { joiOptions, reduceJoiErrors } from "./validator";
@@ -95,12 +95,12 @@ export class SignUpPage {
     controls[0].setDesc("用于登录FT中文网");
     controls[1].setDesc("最少8个字符");
     controls.push(
-      new ControlGroup({
+      new FormControl({
         label: {
           text: "确认密码"
         },
         controlType: ControlType.Text,
-        field: new TextInput({
+        field: new TextInputElement({
           id: "confirmPassword",
           type: "password",
           name: "credentials[confirmPassword]",

@@ -4,9 +4,9 @@ import { DataBuilder } from "./data-builder";
 import { validate, ValidationError } from "@hapi/joi";
 import { passwordsSchema } from "./validator";
 import { joiOptions } from "./validator";
-import { ControlGroup } from "../widget/form-control";
+import { FormControl } from "../widget/form-control";
 import { Button } from "../widget/button";
-import { TextInput } from "../widget/input";
+import { TextInputElement } from "../widget/text-input";
 import { ControlType } from "../widget/widget";
 import { accountRepo } from "../repository/account";
 import { APIError } from "../viewmodels/api-response";
@@ -94,12 +94,12 @@ export class ResetPasswordPage {
       method: "post",
       action: "",
       controls: [
-        new ControlGroup({
+        new FormControl({
           label: {
             text: "密码"
           },
           controlType: ControlType.Text,
-          field: new TextInput({
+          field: new TextInputElement({
             id: "password",
             type: "password",
             name: "credentials[password]",
@@ -109,12 +109,12 @@ export class ResetPasswordPage {
           }),
           error: b.errors.get("password"),
         }),
-        new ControlGroup({
+        new FormControl({
           label: {
             text: "再次输入确认"
           },
           controlType: ControlType.Text,
-          field: new TextInput({
+          field: new TextInputElement({
             id: "confirmPassword",
             type: "password",
             name: "credentials[confirmPassword]",

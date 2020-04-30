@@ -295,7 +295,7 @@ export interface IPasswords {
   newPassword: string;
 }
 
-export interface IProfileFormData {
+export interface ProfileFormData {
   familyName?: string;
   givenName?: string;
   gender?: string;
@@ -303,7 +303,7 @@ export interface IProfileFormData {
 }
 
 @jsonObject
-export class Profile {
+export class Profile implements ProfileFormData {
   @jsonMember
   id: string;
 

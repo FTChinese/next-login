@@ -12,14 +12,14 @@ import {
     IMobile,
     Address,
     IAddress,
-    IProfileFormData,
+    ProfileFormData,
 } from "../models/reader";
 import { oauth, noCache } from "../util/request";
 
 const addressSerializer = new TypedJSON(Address);
 const profileSeiralizer = new TypedJSON(Profile);
 
-class ProfileRepo {
+class ProfileService {
 
     async fetchProfile(ftcId: string): Promise<Profile> {
         const resp = await request
@@ -63,7 +63,7 @@ class ProfileRepo {
         return resp.noContent;
     }
 
-    async updateProfile(ftcId: string, data: IProfileFormData): Promise<boolean> {
+    async updateProfile(ftcId: string, data: ProfileFormData): Promise<boolean> {
         const resp = await request
             .patch(readerApi.profile)
             .use(oauth)
@@ -86,4 +86,4 @@ class ProfileRepo {
     }
 }
 
-export const profileRepo = new ProfileRepo();
+export const profileService = new ProfileService();

@@ -2,9 +2,9 @@ import { validate, ValidationError } from "@hapi/joi";
 import { Flash } from "../widget/flash";
 import { Form } from "../widget/form";
 import { Button } from "../widget/button";
-import { ControlGroup } from "../widget/form-control";
+import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
-import { TextInput } from "../widget/input";
+import { TextInputElement } from "../widget/text-input";
 import { entranceMap } from "../config/sitemap";
 import { loginSchema, joiOptions } from "./validator";
 import { accountRepo } from "../repository/account";
@@ -12,6 +12,7 @@ import { IHeaderApp } from "../models/header";
 import { Account, Credentials } from "../models/reader";
 import { APIError } from "../viewmodels/api-response";
 import { DataBuilder } from "./data-builder";
+import { CheckboxInputElement } from "../widget/radio-input";
 
 const msgInvalidCredentials = "邮箱或密码错误";
 
@@ -70,14 +71,14 @@ export class CredentialBuilder extends DataBuilder<Credentials> {
   }
 }
 
-export function buildCredentialControls(data: Credentials, errors: Map<string, string>): ControlGroup[] {
+export function buildCredentialControls(data: Credentials, errors: Map<string, string>): FormControl[] {
   return [
-    new ControlGroup({
+    new FormControl({
       label: {
         text: "邮箱",
       },
       controlType: ControlType.Text,
-      field: new TextInput({
+      field: new TextInputElement({
         id: "email",
         type: "email",
         name: "credentials[email]",
@@ -88,12 +89,12 @@ export function buildCredentialControls(data: Credentials, errors: Map<string, s
       }),
       error: errors.get("email"),
     }),
-    new ControlGroup({
+    new FormControl({
       label: {
         text: "密码",
       },
       controlType: ControlType.Text,
-      field: new TextInput({
+      field: new TextInputElement({
         id: "password",
         type: "password",
         name: "credentials[password]",
@@ -121,17 +122,15 @@ export class LoginPage {
 
     const controls = buildCredentialControls(c.data, c.errors);
     controls.push(
-      new ControlGroup({
+      new FormControl({
         label: {
           text: "记住我",
           suffix: true,
         },
         controlType: ControlType.Checkbox,
-        field: new TextInput({
+        field: new CheckboxInputElement({
           id: "rememberMe",
-          type: "checkbox",
           name: "rememberMe",
-          value: "true",
           checked: true,
         }) 
       }),

@@ -1,10 +1,6 @@
-import { Attributes } from "./attributes";
+import { InputElement } from "./element";
 
-export interface Widget {
-  render(): string
-}
-
-export interface FormWidget extends Widget {
+export interface FormWidget {
   readonly id: string;
   readonly name: string;
 }
@@ -34,9 +30,8 @@ export interface TextAreaOptions extends FieldSharedAttrs {
   value?: string;
 }
 
-export interface InputOptions extends FieldSharedAttrs {
+export interface TextInputOptions extends FieldSharedAttrs {
   type: 
-    | "checkbox"
     | "date"
     | "email"
     | "file"
@@ -45,7 +40,6 @@ export interface InputOptions extends FieldSharedAttrs {
     | "month"
     | "number"
     | "password"
-    | "radio"
     | "range"
     | "search"
     | "tel"
@@ -56,10 +50,19 @@ export interface InputOptions extends FieldSharedAttrs {
 
   value?: string | number;
 
-  checked?: boolean;
   max?: number;
   min?: number;
   pattern?: string;
+}
+
+export interface RadioInputOptions extends FieldSharedAttrs {
+  value: string;
+
+  checked?: boolean;
+}
+
+export interface CheckboxInputOptions extends FieldSharedAttrs {
+  checked?: boolean
 }
 
 export enum ControlType {
@@ -69,9 +72,10 @@ export enum ControlType {
 }
 
 export interface ControlOptions {
+  wrapperClass?: string;
   label?: LabelOptions;
   controlType: ControlType;
-  field: FormWidget;
+  field: InputElement;
   desc?: string;
   error?: string;
 }

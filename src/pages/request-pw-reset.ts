@@ -7,9 +7,9 @@ import { accountRepo } from "../repository/account";
 import { APIError } from "../viewmodels/api-response";
 import { Flash } from "../widget/flash";
 import { Form } from "../widget/form";
-import { TextInput } from "../widget/input";
+import { TextInputElement } from "../widget/text-input";
 import { ControlType } from "../widget/widget";
-import { ControlGroup } from "../widget/form-control";
+import { FormControl } from "../widget/form-control";
 import { Button } from "../widget/button";
 import { Link } from "../widget/link";
 import { entranceMap } from "../config/sitemap";
@@ -103,9 +103,9 @@ export class RequestPwResetPage {
       method: "post",
       action: "",
       controls: [
-        new ControlGroup({
+        new FormControl({
           controlType: ControlType.Text,
-          field: new TextInput({
+          field: new TextInputElement({
             id: "email",
             type: "email",
             name: "email",
