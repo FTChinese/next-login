@@ -1,5 +1,4 @@
 import { TextInputOptions } from "./widget";
-import { Attributes } from "./attributes";
 import { InputElement } from "./element";
 
 export class TextInputElement extends InputElement {
@@ -14,25 +13,25 @@ export class TextInputElement extends InputElement {
     this.name = opts.name;
     this.value = opts.value;
 
+    this.addClass("form-control");
     // Add all shared attributes of any field.
-    this.attrs = Attributes.fieldSharedAttrs(opts)
-      .set("type", opts.type)
-      .setClassNames("form-control");
-
+    this.addSharedAttributes(opts);
+    this.setAttribute("type", opts.type)
+    
     if (opts.value) {
-      this.attrs.set("value", `${opts.value}`);
+      this.setAttribute("value", `${opts.value}`);
     }
 
     if (opts.max) {
-      this.attrs.set("max", `${opts.max}`);
+      this.setAttribute("max", `${opts.max}`);
     }
 
     if (opts.min) {
-      this.attrs.set("min", `${opts.min}`);
+      this.setAttribute("min", `${opts.min}`);
     }
 
     if (opts.pattern) {
-      this.attrs.set("pattern", opts.pattern);
+      this.setAttribute("pattern", opts.pattern);
     }
   }
 }

@@ -1,6 +1,5 @@
 import { InputElement } from "./element";
 import { RadioInputOptions, CheckboxInputOptions } from "./widget";
-import { Attributes } from "./attributes";
 
 export class RadioInputElement extends InputElement {
   constructor(opts: RadioInputOptions) {
@@ -9,13 +8,13 @@ export class RadioInputElement extends InputElement {
     this.id = opts.id;
     this.name = opts.name;
 
-    this.attrs = Attributes.fieldSharedAttrs(opts)
-      .set("type", "radio")
-      .set("value", opts.value)
-      .setClassNames("form-check-input");
+    this.addSharedAttributes(opts);
+    this.setAttribute("type", "radio");
+    this.setAttribute("value", opts.value);
+    this.addClass("form-check-input");
 
     if (opts.checked) {
-      this.attrs.setBoolean("checked");
+      this.setAttribute("checked", "");
     }
   }
 }
@@ -26,13 +25,13 @@ export class CheckboxInputElement extends InputElement {
     this.id = opts.id;
     this.name = opts.name;
 
-    this.attrs = Attributes.fieldSharedAttrs(opts)
-      .set("type", "checkbox")
-      .set("value", "true")
-      .setClassNames("form-check-input");
+    this.addSharedAttributes(opts);
+    this.setAttribute("type", "checkbox");
+    this.setAttribute("value", "true");
+    this.addClass("form-check-input");
 
     if (opts.checked) {
-      this.attrs.setBoolean("checked");
+      this.setAttribute("checked", "");
     }
   }
 }

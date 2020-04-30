@@ -1,4 +1,4 @@
-import { Attributes } from "./attributes";
+import { Element } from "./element";
 
 type BtnType = "button" | "submit";
 type BtnStyle = "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "light" | "dark" | "link";
@@ -8,26 +8,30 @@ type BtnSize = "sm" | "lg" | "block";
  * @description Build a button's appearance.
  * Using Bootstrap class: btn btn-primary/btn-outline-primary btn-block
  */
-export class Button {
-  private text: string = "";
-  private type: BtnType = "submit";
-  private disableWith?: string;
+export class Button extends Element {
+
   private style?: BtnStyle;
   private size?: BtnSize;
   private outline?: boolean;
 
+  constructor() {
+    super("button");
+    this.setAttribute("type", "submit");
+    this.addClass("btn");
+  }
+
   setName(s: string): Button {
-    this.text = s;
+    this.textContent = s;
     return this;
   }
 
   setDisableWith(s: string): Button {
-    this.disableWith = s;
+    this.setAttribute("data-disable-with", s);
     return this;
   }
 
   setType(t: BtnType): Button {
-    this.type = t;
+    this.setAttribute("type", t);
     return this;
   }
 
@@ -47,25 +51,18 @@ export class Button {
   }
 
   render(): string {
-    const attrs = (new Attributes())
-      .set("type", this.type)
-      .addClassName("btn");
-
+    
     // A string like: btn-outline-primary or btn-primary
     if (this.style) {
-      attrs.addClassName(`btn${this.outline ? '-outline' : '-'}${this.style}`)
+      this.addClass(`btn${this.outline ? '-outline' : '-'}${this.style}`)
     }
 
     // A string like btn-block
     if (this.size) {
-      attrs.addClassName(`btn-${this.size}`);
+      this.addClass(`btn-${this.size}`);
     }
 
-    if (this.disableWith) {
-      attrs.set("data-disable-with", this.disableWith)
-    }
-
-    return `<button ${attrs.build()}>${this.text}</button>`;
+    return super.render();
   }
 
   static primary(): Button {
@@ -76,5 +73,26 @@ export class Button {
   static secondary(): Button {
     return new Button()
       .setStyle("secondary");
+  }
+
+  /**
+   * <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+   */
+  static dismiss(): Button {
+    const b = new Button()
+      .setType("button");
+    
+    b.addClass("close")
+      .setAttribute("data-disimiss", "alert")
+      .setAttribute("aria-label", "Close")
+      .appendChild(
+        (new Element("span"))
+          .setAttribute("aria-hidden", "true")
+          .withText("&times;")
+      );
+    
+    return b;
   }
 }

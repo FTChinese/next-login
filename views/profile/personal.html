@@ -10,18 +10,28 @@
   {% if form %}
   <form method="post">
     <div class="form-row">
-      {{ form.familyName.render() | safe }}
-      {{ form.givenName.render() | safe }}
+      <div class="form-group col-md-6">
+        {{ form.familyName.render() | safe }}
+      </div>
+      <div class="form-group col-md-6">
+        {{ form.givenName.render() | safe }}
+      </div>
     </div>
 
     <div class="form-group">
       <label class="form-label">性别</label>
-      {{ form.genderMale.render() | safe }}
-      {{ form.genderFemale.render() | safe }}
+      <div class="form-check">
+        {{ form.genderMale.render() | safe }}
+      </div>
+      <div class="form-check">
+        {{ form.genderFemale.render() | safe }}
+      </div>
     </div>
 
-    {{ form.birthday.render() | safe }}
-
+    <div class="form-group">
+      {{ form.birthday.render() | safe }}
+    </div>
+    
     {{ form.submitBtn.render() | safe }}
   </form>
   {% endif %}

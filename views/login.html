@@ -9,7 +9,9 @@
   <form method="{{form.method}}" id="loginForm">
 
     {% for control in form.controls %}
-      {{ control.render() | safe }}
+      <div class="form-group">
+        {{ control.render() | safe }}
+      </div>
     {% endfor %}
 
     {{ form.submitBtn.render() | safe }}

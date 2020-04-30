@@ -1,6 +1,5 @@
-import { FormWidget, LabelOptions, ControlOptions, ControlType } from "./widget";
+import { ControlOptions, ControlType } from "./widget";
 import { Element, InputElement } from "./element";
-import { Attributes } from "./attributes";
 
 class ControlDesc {
   readonly desc: string;
@@ -31,7 +30,6 @@ function isCheck(controlType: ControlType): boolean {
 }
 
 export class FormControl {
-  readonly wrapper: Element;
   // Determing containing div class names:
   // form-check for checkbox and radio,
   // form-group otherwise.
@@ -48,26 +46,14 @@ export class FormControl {
   constructor (opts: ControlOptions) {
     const isCheckOrRadio = isCheck(opts.controlType);
 
-    this.wrapper = (new Element("div"))
-      .withAttributes(
-        (new Attributes())
-          .setClassNames(`${isCheckOrRadio ? 'form-check' : 'form-group'}`)
-      );
-
-    if (opts.wrapperClass) {
-      this.wrapper.attrs?.addClassName(opts.wrapperClass);
-    }
-
     this.field = opts.field;
 
     if (opts.label) {
       this.label = (new Element("label"))
         .withText(opts.label.text)
-        .withAttributes(
-          (new Attributes())
-            .set("for", opts.field.id)
-            .setClassNames(`${isCheckOrRadio ? 'form-check-label' : 'form-label'}`)
-        );
+        .setAttribute("for", opts.field.id)
+        .addClass(`${isCheckOrRadio ? 'form-check-label' : 'form-label'}`);
+
       this.suffixLabel = opts.label.suffix || false;
     }
 
@@ -82,9 +68,7 @@ export class FormControl {
 
   setDesc(desc: string): FormControl {
     this.desc = (new Element("small"))
-      .withAttributes(new Attributes()
-        .setClassNames("form-text text-muted")
-      )
+      .addClass("form-text text-muted")
       .withText(desc);
 
     return this;
@@ -92,34 +76,34 @@ export class FormControl {
 
   setError(errMsg: string): FormControl {
     this.error = (new Element("div"))
-      .withAttributes(new Attributes()
-        .setClassNames("form-errortext")
-      )
+      .addClass("form-errortext")
       .withText(errMsg);
     return this;
   }
 
   render(): string {
+    const elems: Element[] = [];
+
     if (this.label) {
       if (this.suffixLabel) {
-        this.wrapper.appendChild(this.field);
-        this.wrapper.appendChild(this.label)
+        elems.push(this.field);
+        elems.push(this.label)
       } else {
-        this.wrapper.appendChild(this.label)
-        this.wrapper.appendChild(this.field);
+        elems.push(this.label)
+        elems.push(this.field);
       }
     } else {
-      this.wrapper.appendChild(this.field);
+      elems.push(this.field);
     }
 
     if (this.desc) {
-      this.wrapper.appendChild(this.desc);
+      elems.push(this.desc);
     }
 
     if (this.error) {
-      this.wrapper.appendChild(this.error);
+      elems.push(this.error);
     }
 
-    return this.wrapper.render();
+    return elems.map(elem => elem.render()).join("");
   }
 }

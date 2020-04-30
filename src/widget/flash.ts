@@ -1,23 +1,19 @@
-import { Attributes } from "./attributes";
+import { Element } from "./element";
+import { Button } from "./button";
 
 type FlashKind = "success" | "danger";
 
-const dismisBtn = `
-<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-    <span aria-hidden="true">&times;</span>
-</button>`;
-
-export class Flash {
+export class Flash extends Element{
     message: string = "";
     kind: FlashKind;
     dismissible: boolean = true;
-    readonly attrs: Attributes;
 
     constructor(msg: string) {
-        this.message = msg;
-        this.attrs = (new Attributes)
-          .setClassNames("alert fade show mt-3")
-          .set("role", "alert");
+      super("div");
+      this.message = msg;
+      this.addClass("alert fade show mt-3")
+        .setAttribute("role", "alert")
+        .appendChild((new Element("span")).withText(msg));
     }
 
     setSuccess(): Flash {
@@ -32,29 +28,21 @@ export class Flash {
 
     setDismissible(dismiss: boolean): Flash {
         this.dismissible = dismiss;
+        
         return this;
     }
 
-    private renderDismissible(): string {
-      return `
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>`;
-    }
-
     render(): string {
-      this.attrs.addClassName(`alert-${this.kind}`);
+      this.addClass(`alert-${this.kind}`);
 
       if (this.dismissible) {
-        this.attrs.addClassName("alert-dismissible")
+        this.addClass("alert-dismissible");
+        this.appendChild(Button.dismiss());
       }
-      
-      return `
-      <div ${this.attrs.build()}>
-        <span>${this.message}</span>
-        ${this.dismissible ? this.renderDismissible() : ""}
-      </div>`
+
+      return super.render();
     }
+
     static danger(msg: string): Flash {
         return new Flash(msg).setDanger();
     }

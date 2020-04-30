@@ -1,4 +1,3 @@
-import { Attributes } from "./attributes";
 import { FieldSharedAttrs } from "./widget";
 import { InputElement } from "./element";
 
@@ -22,18 +21,18 @@ export class TextArea extends InputElement {
       this.textContent = opts.value;
     }
 
-    this.attrs = Attributes.fieldSharedAttrs(opts);
+    this.addSharedAttributes(opts);
 
     if (opts.cols) {
-      this.attrs.set("cols", `${opts.cols}`);
+      this.setAttribute("cols", `${opts.cols}`);
     }
 
     if (opts.rows) {
-      this.attrs.set("rows", `${opts.rows}`);
+      this.setAttribute("rows", `${opts.rows}`);
     }
 
     if (opts.wrap) {
-      this.attrs.set("wrap", `${opts.wrap}`);
+      this.setAttribute("wrap", `${opts.wrap}`);
     }
   }
 }
