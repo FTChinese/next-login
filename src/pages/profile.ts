@@ -73,7 +73,6 @@ export class ProfileInfoPage {
 
     this.form = {
       familyName: new FormControl({
-        wrapperClass: "col-md-6",
         label: {
           text: "姓"
         },
@@ -88,7 +87,6 @@ export class ProfileInfoPage {
       }),
 
       givenName: new FormControl({
-        wrapperClass: "col-md-6",
         label: {
           text: "名",
         },
@@ -114,7 +112,6 @@ export class ProfileInfoPage {
           value: "M",
           checked: b.data.gender === "M",
         }),
-        error: b.errors.get("gender"),
       }),
 
       genderFemale: new FormControl({

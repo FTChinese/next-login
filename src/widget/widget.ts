@@ -72,7 +72,6 @@ export enum ControlType {
 }
 
 export interface ControlOptions {
-  wrapperClass?: string;
   label?: LabelOptions;
   controlType: ControlType;
   field: InputElement;
