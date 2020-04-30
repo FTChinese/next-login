@@ -1,12 +1,11 @@
 import { validate, ValidationError } from "@hapi/joi";
 import debug from "debug";
-import { UIBase, ITextInput, IRadio, UISingleInput } from "./ui";
+import { UIBase, ITextInput, UISingleInput } from "./ui";
 import { KeyUpdated, getMsgUpdated } from "./redirection";
 import { APIError, IFetchResult } from "./api-response";
 import {
   userNameSchema,
   mobileSchema,
-  profileSchema,
   addressSchema,
   buildJoiErrors,
   IFormState,
@@ -14,7 +13,6 @@ import {
 import {
   Account,
   Profile,
-  ProfileFormData,
   Address,
   IName,
   IMobile,
@@ -36,10 +34,6 @@ interface IUpdateNameResult extends IFetchResult<boolean> {
 
 interface IUpdateMobileResult extends IFetchResult<boolean> {
   errForm?: IMobile;
-}
-
-interface IUpdateInfoResult extends IFetchResult<boolean> {
-  errForm?: ProfileFormData;
 }
 
 interface IUpdateAddressResult extends IFetchResult<boolean> {
