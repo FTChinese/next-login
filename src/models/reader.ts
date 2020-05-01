@@ -347,22 +347,6 @@ export class Profile implements ProfileFormData {
 
     return localizeGender(this.gender);
   }
-
-  get updateNameLink(): string {
-    return profileMap.displayName;
-  }
-
-  get updateMobileLink(): string {
-    return profileMap.mobile;
-  }
-
-  get updateInfoLink(): string {
-    return profileMap.personal;
-  }
-
-  get updateAddressLink(): string {
-    return profileMap.address;
-  }
 }
 
 @jsonObject

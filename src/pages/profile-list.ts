@@ -1,15 +1,14 @@
 import { validate, ValidationError } from "@hapi/joi";
 import debug from "debug";
-import { UIBase, ITextInput, UISingleInput } from "./ui";
-import { KeyUpdated, getMsgUpdated } from "./redirection";
-import { APIError, IFetchResult } from "./api-response";
+import { UIBase, ITextInput, UISingleInput } from "../viewmodels/ui";
+import { APIError, IFetchResult } from "../viewmodels/api-response";
 import {
   userNameSchema,
   mobileSchema,
   addressSchema,
   buildJoiErrors,
   IFormState,
-} from "../pages/validator";
+} from "./validator";
 import {
   Account,
   Profile,
@@ -20,13 +19,10 @@ import {
 } from "../models/reader";
 
 import { profileService } from "../repository/profile";
+import { Flash } from "../widget/flash";
+import { profileMap } from "../config/sitemap";
 
 const log = debug("user:profile-viewmodel");
-
-interface UIProfile extends UIBase {
-  profile?: Profile;
-  address?: Address;
-}
 
 interface IUpdateNameResult extends IFetchResult<boolean> {
   errForm?: IName;
@@ -48,48 +44,78 @@ interface UIAddress extends UIBase {
   formRows?: Array<Array<IFormGroup>>;
 }
 
-class ProfileViewModel {
-  async fetchProfile(account: Account): Promise<IFetchResult<Profile>> {
-    try {
-      const profile = await profileService.fetchProfile(account.id);
+interface ProfilePage {
+  flash?: Flash;
+  profile?: Profile;
+  address?: Address;
+  links: {
+    displayName: string;
+    mobile: string;
+    personal: string;
+    address: string;
+  };
+}
 
-      return {
-        success: profile,
-      };
+export type KeyUpdated = "saved" | "email_changed" | "letter_sent" | "password_saved";
+
+export class ProfilePageBuilder {
+  flashMsg?: string
+  profile?: Profile;
+  address?: Address;
+
+  async fetchData(account: Account): Promise<boolean> {
+    try {
+      const [profile, address] = await Promise.all([
+        profileService.fetchProfile(account.id),
+        profileService.fetchAddress(account.id),
+      ]);
+
+      this.profile = profile;
+      this.address = address;
+      return true;
     } catch (e) {
-      return {
-        errResp: new APIError(e),
-      };
+      const errResp = new APIError(e);
+      if (errResp.notFound) {
+        this.flashMsg = "未找到数据，请稍后再试";
+        return false;
+      }
+
+      this.flashMsg = errResp.message;
+      return false;
     }
   }
 
-  async fetchAddress(account: Account): Promise<IFetchResult<Address>> {
-    try {
-      const addr = await profileService.fetchAddress(account.id);
+  build(done?: KeyUpdated): ProfilePage {
 
-      return {
-        success: addr,
-      };
-    } catch (e) {
-      return {
-        errResp: new APIError(e),
-      };
+    let flash: Flash | undefined;
+    if (done) {
+      switch (done) {
+        case "saved":
+          flash = Flash.success("保存成功！");
+          break;
+
+        case "password_saved":
+          flash = Flash.success("密码修改成功");
+          break;
+
+        case "email_changed":
+          flash = Flash.success("邮箱已更新，验证邮件已经发送到您的新邮箱，请及时验证");
+          break;
+
+        case "letter_sent":
+          flash = Flash.success("验证邮件已发送");
+          break;
+
+      }
+    } else if (this.flashMsg) {
+      flash = Flash.danger(this.flashMsg);
     }
-  }
-
-  async buildProfileUI(
-    account: Account,
-    done?: KeyUpdated
-  ): Promise<UIProfile> {
-    const [profile, address] = await Promise.all([
-      profileService.fetchProfile(account.id),
-      profileService.fetchAddress(account.id),
-    ]);
-
+    
     return {
-      alert: done ? { message: getMsgUpdated(done) } : undefined,
-      profile,
-      address,
+      flash: flash,
+      profile: this.profile,
+      address: this.address,
+      links: profileMap,
     };
   }
 
@@ -423,4 +449,4 @@ class ProfileViewModel {
   }
 }
 
-export const profileViewModel = new ProfileViewModel();
+export const profileViewModel = new ProfilePageBuilder();
