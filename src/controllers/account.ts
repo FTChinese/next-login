@@ -17,7 +17,7 @@ import {
 } from "../config/sitemap";
 import { 
     KeyUpdated,
-} from "../viewmodels/redirection";
+} from "../pages/redirection";
 import {
     accountViewModel,
     IPasswordsFormData,

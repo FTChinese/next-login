@@ -8,7 +8,7 @@ import {
   IMobile,
   IAddress,
 } from "../models/reader";
-import { profileViewModel, ProfilePageBuilder } from "../pages/profile-list";
+import { ProfilePageBuilder } from "../pages/profile-list";
 import { KeyUpdated } from "../pages/profile-list";
 import { profileMap } from "../config/sitemap";
 import { profileService } from "../repository/profile";

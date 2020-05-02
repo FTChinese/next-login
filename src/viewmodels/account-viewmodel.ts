@@ -34,7 +34,7 @@ import {
   accountMap,
   entranceMap,
 } from "../config/sitemap";
-import { KeyUpdated, getMsgUpdated } from "./redirection";
+import { KeyUpdated, getMsgUpdated } from "../pages/redirection";
 
 const log = debug("user:profile-viewmodel");
 
