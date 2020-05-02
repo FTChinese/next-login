@@ -8,7 +8,7 @@ import {
     Membership,
 } from "../models/reader";
 import {
-    accountRepo,
+    accountService,
 } from "../repository/account";
 import {
     UIBase, 
@@ -18,7 +18,7 @@ import {
 import { 
     IFetchResult,
     APIError,
-} from "./api-response";
+} from "../repository/api-response";
 import { 
     Banner,
     Plan,
@@ -114,7 +114,7 @@ class SubViewModel {
         try {
             switch (account.loginMethod) {
                 case "email": {
-                    const acnt = await accountRepo.fetchFtcAccount(account.id);
+                    const acnt = await accountService.fetchFtcAccount(account.id);
 
                     return {
                         success: acnt,
@@ -123,7 +123,7 @@ class SubViewModel {
                     
     
                 case "wechat": {
-                    const acnt = await accountRepo.fetchWxAccount(account.unionId!);
+                    const acnt = await accountService.fetchWxAccount(account.unionId!);
 
                     return {
                         success: acnt,

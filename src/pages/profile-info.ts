@@ -9,7 +9,7 @@ import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
 import { Button } from "../widget/button";
 import { profileService } from "../repository/profile";
-import { APIError } from "../viewmodels/api-response";
+import { APIError } from "../repository/api-response";
 
 export class ProfileInfoBuilder extends DataBuilder<ProfileFormData> {
 

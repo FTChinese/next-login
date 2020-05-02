@@ -3,8 +3,8 @@ import { EmailData } from "../models/reader";
 import { joiOptions, emailSchema } from "./validator";
 import { validate, ValidationError } from "@hapi/joi";
 import { IHeaderApp } from "../models/header";
-import { accountRepo } from "../repository/account";
-import { APIError } from "../viewmodels/api-response";
+import { accountService } from "../repository/account";
+import { APIError } from "../repository/api-response";
 import { Flash } from "../widget/flash";
 import { Form } from "../widget/form";
 import { TextInputElement } from "../widget/text-input";
@@ -39,7 +39,7 @@ export class EmailBuilder extends DataBuilder<EmailData>{
   async requestLetter(app: IHeaderApp): Promise<boolean> {
 
     try {
-      const ok = await accountRepo.requestPwResetLetter(this.data, app)
+      const ok = await accountService.requestPwResetLetter(this.data, app)
 
       return ok;
     } catch (e) {

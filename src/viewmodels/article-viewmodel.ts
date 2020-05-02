@@ -3,7 +3,7 @@ import { Article } from "../models/bookmarks";
 import { Paging } from "../models/pagination";
 import { Account } from "../models/reader";
 import { articleRepo } from "../repository/article";
-import { IFetchResult, APIError } from "./api-response";
+import { IFetchResult, APIError } from "../repository/api-response";
 
 interface UIStarred extends UIBase {
     articles: Array<Article>;

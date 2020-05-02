@@ -18,7 +18,7 @@ import {
 import { 
     APIError, 
     IFetchResult 
-} from "./api-response";
+} from "../repository/api-response";
 import { 
     Dictionary 
 } from "../models/data-types";

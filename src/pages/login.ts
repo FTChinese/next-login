@@ -7,10 +7,10 @@ import { ControlType } from "../widget/widget";
 import { TextInputElement } from "../widget/text-input";
 import { entranceMap } from "../config/sitemap";
 import { loginSchema, joiOptions } from "./validator";
-import { accountRepo } from "../repository/account";
+import { accountService } from "../repository/account";
 import { IHeaderApp } from "../models/header";
 import { Account, Credentials } from "../models/reader";
-import { APIError } from "../viewmodels/api-response";
+import { APIError } from "../repository/api-response";
 import { DataBuilder } from "./data-builder";
 import { CheckboxInputElement } from "../widget/radio-input";
 
@@ -41,7 +41,7 @@ export class CredentialBuilder extends DataBuilder<Credentials> {
 
   async login(app: IHeaderApp): Promise<Account | null> {
     try {
-      const account = await accountRepo.authenticate(this.data, app);
+      const account = await accountService.authenticate(this.data, app);
 
       return account;
     } catch (e) {

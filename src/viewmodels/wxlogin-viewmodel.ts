@@ -15,9 +15,9 @@ import {
     isExpired,
 } from "../util/time";
 import { entranceMap, accountMap } from "../config/sitemap";
-import { accountRepo } from "../repository/account";
+import { accountService } from "../repository/account";
 import { UIBase } from "./ui";
-import { IFetchResult, APIError } from "./api-response";
+import { IFetchResult, APIError } from "../repository/api-response";
 import { IFormState } from "../pages/validator";
 
 interface IOAuthCodeRequest {
@@ -117,7 +117,7 @@ class WxLoginViewModel {
         }
 
         try {
-            const wxSession = await accountRepo.fetchWxSession(values.code!, app);
+            const wxSession = await accountService.fetchWxSession(values.code!, app);
             return {
                 success: wxSession,
             };
@@ -141,7 +141,7 @@ class WxLoginViewModel {
     async getAccount(wxSession: WxSession): Promise<IFetchResult<Account>> {
         try {
 
-            const account = await accountRepo.fetchWxAccount(wxSession.unionId);
+            const account = await accountService.fetchWxAccount(wxSession.unionId);
     
             return {
                 success: account,

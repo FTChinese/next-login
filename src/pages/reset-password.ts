@@ -8,8 +8,8 @@ import { FormControl } from "../widget/form-control";
 import { Button } from "../widget/button";
 import { TextInputElement } from "../widget/text-input";
 import { ControlType } from "../widget/widget";
-import { accountRepo } from "../repository/account";
-import { APIError } from "../viewmodels/api-response";
+import { accountService } from "../repository/account";
+import { APIError } from "../repository/api-response";
 
 export interface PwResetData {
   password: string;
@@ -26,7 +26,7 @@ export class ResetPwBuilder extends DataBuilder<PwResetData> {
 
   async verifyToken(token: string): Promise<APIError | null> {
     try {
-      const result = await accountRepo.verifyPwResetToken(token);
+      const result = await accountService.verifyPwResetToken(token);
       this.email = result.email;
 
       return null;
@@ -51,7 +51,7 @@ export class ResetPwBuilder extends DataBuilder<PwResetData> {
 
   async resetPassword(token: string): Promise<boolean> {
     try {
-      const ok = await accountRepo.resetPassword({
+      const ok = await accountService.resetPassword({
         password: this.data.password,
         token: token,
       });

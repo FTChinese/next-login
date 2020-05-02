@@ -1,36 +1,36 @@
 import Router from "koa-router";
 import render from "../util/render";
 import {
-    collectAppHeaders,
+  collectAppHeaders,
 } from "./middleware";
-import {  
-
-    Account,
-    EmailData,
-    Credentials,
+import {
+  Account,
+  EmailData,
+  Credentials,
 } from "../models/reader";
 import {
-    IHeaderApp,
+  IHeaderApp,
 } from "../models/header";
-import { 
-    accountMap 
+import {
+  accountMap
 } from "../config/sitemap";
-import { 
-    KeyUpdated,
+import {
+  KeyUpdated,
 } from "../pages/redirection";
 import {
-    accountViewModel,
-    IPasswordsFormData,
-} from "../viewmodels/account-viewmodel";
+  IPasswordsFormData, AccountPageBuilder,
+} from "../pages/account-page";
 import {
-    linkViewModel, ILinkingFormData, IUnlinkFormData,
+  linkViewModel, ILinkingFormData, IUnlinkFormData,
 } from "../viewmodels/link-viewmodel";
 import {
-    ISignUpFormData,
+  ISignUpFormData,
 } from "../pages/validator";
-import { 
-    isProduction,
+import {
+  isProduction,
 } from "../config/viper";
+import { UpdateEmailBuilder } from "../pages/update-email";
+import { UpdatePasswordBuilder } from "../pages/update-password";
 
 const router = new Router();
 
@@ -40,247 +40,237 @@ const router = new Router();
  * or if a wechat-user signed up successfully.
  */
 router.get("/", async (ctx, next) => {
-    const account: Account = ctx.state.user;
+  const account: Account = ctx.state.user;
 
-    if (account.isWxOnly()) {
-        return await next();
-    }
-
-    // @ts-ignore
-    const key: KeyUpdated | undefined = ctx.session.ok;
-
-    const { success, errResp } = await accountViewModel.refresh(account);
-
-    if (!success) {
-        Object.assign(
-            ctx.state, 
-            accountViewModel.buildAccountUI(
-                { errResp },
-                key,
-            ),
-        );
-
-        return await next();
-    }
-
-    const uiData = await accountViewModel.buildAccountUI({
-        success,
-    }, key);
-
-    Object.assign(ctx.state, uiData);
-
-    // @ts-ignore
-    ctx.session.user = success;
-
+  if (account.isWxOnly()) {
     return await next();
+  }
+
+  // @ts-ignore
+  const key: KeyUpdated | undefined = ctx.session.ok;
+
+  const builder = new AccountPageBuilder(account);
+
+  await builder.refresh();
+
+  const uiData = builder.build(key);
+
+  Object.assign(ctx.state, uiData);
+
+  // @ts-ignore
+  ctx.session.user = builder.account;
+
+  return await next();
 
 }, async (ctx, next) => {
-    ctx.body = await render("account/account.html", ctx.state);
+  ctx.body = await render("account/account.html", ctx.state);
 
-    // @ts-ignore
-    delete ctx.session.ok;
+  // @ts-ignore
+  delete ctx.session.ok;
 });
 
 router.get("/email", async (ctx, next) => {
-    const account: Account = ctx.state.user;
+  const account: Account = ctx.state.user;
 
-    if (account.isWxOnly()) {
-        ctx.status = 404;
-        return;
-    }
+  if (account.isWxOnly()) {
+    ctx.status = 404;
+    return;
+  }
 
-    const { success, errResp } = await accountViewModel.refresh(account);
+  const builder = new UpdateEmailBuilder(account);
+  const uiData = await builder.build();
+  Object.assign(ctx.state, uiData);
 
-    const uiData = await accountViewModel.buildEmailUI(
-        success ? { email: success.email } : undefined,
-        { errResp},
-    );
-
-    Object.assign(ctx.state, uiData);
-
-    ctx.body = await render("account/update-email.html", ctx.state);
+  ctx.body = await render("profile/single-input.html", ctx.state);
 });
 
 router.post("/email", async (ctx, next) => {
-    const account: Account = ctx.state.user;
+  const account: Account = ctx.state.user;
 
-    if (account.isWxOnly()) {
-        ctx.status = 404;
-        return;
-    }
+  if (account.isWxOnly()) {
+    ctx.status = 404;
+    return;
+  }
 
-    const formData: EmailData = ctx.request.body;
+  const formData: EmailData = ctx.request.body;
+  const builder = new UpdateEmailBuilder(account);
 
-    const { success, errForm, errResp } = await accountViewModel.updateEmail(account, formData);
+  const isValid = await builder.validate(formData);
+  if (!isValid) {
+    const uiData = builder.build();
+    Object.assign(ctx.state, uiData);
+    return await next();
+  }
 
-    if (!success) {
-        const uiData = await accountViewModel.buildEmailUI(
-            formData,
-            { errForm, errResp },
-        );
+  const ok = await builder.update();
+  if (!ok) {
+    const uiData = builder.build();
+    Object.assign(ctx.state, uiData);
+    return await next();
+  }
 
-        Object.assign(ctx.state, uiData);
+  const key: KeyUpdated = "saved";
 
-        return await next();
-    }
+  // @ts-ignore
+  ctx.session.ok = key;
+  // @ts-ignore
+  ctx.session.user = builder.updatedAccount;
 
-    const key: KeyUpdated = "saved";
-
-    // @ts-ignore
-    ctx.session.ok = key;
-
-    return ctx.redirect(accountMap.base);
+  return ctx.redirect(accountMap.base);
 
 }, async (ctx, next) => {
-    ctx.body = await render("account/update-email.html", ctx.state);
+  ctx.body = await render("profile/single-input.html", ctx.state);
 });
 
 router.get("/password", async (ctx, next) => {
+  const account: Account = ctx.state.user;
 
-    const uiData = accountViewModel.buildPasswordsUI();
+  const uiData = (new UpdatePasswordBuilder(account)).build();
 
-    Object.assign(ctx.state, uiData);
+  Object.assign(ctx.state, uiData);
 
-    ctx.body = await render("account/password.html", ctx.state);
+  ctx.body = await render("profile/single-input.html", ctx.state);
 });
 
 router.post("/password", async (ctx, next) => {
-    const account: Account = ctx.state.user;
+  const account: Account = ctx.state.user;
 
-    if (account.isWxOnly()) {
-        ctx.status = 404;
-        return;
-    }
+  if (account.isWxOnly()) {
+    ctx.status = 404;
+    return;
+  }
 
-    const formData: IPasswordsFormData = ctx.request.body;
+  const formData: IPasswordsFormData = ctx.request.body;
 
-    const { success, errForm, errResp } = await accountViewModel.updatePassword(account, formData);
+  const builder = new UpdatePasswordBuilder(account);
+  const isValid = await builder.validate(formData);
+  if (!isValid) {
+    const uiData = builder.build();
+    Object.assign(ctx.state, uiData);
+    return await next();
+  }
 
-    if (!success) {
-        const uiData = accountViewModel.buildPasswordsUI(
-            { errForm, errResp }
-        );
+  const ok = await builder.update();
+  if (!ok) {
+    const uiData = builder.build();
+    Object.assign(ctx.state, uiData);
+    return await next();
+  }
 
-        Object.assign(ctx.state, uiData);
+  const key: KeyUpdated = "password_saved";
 
-        return await next();
-    }
-    
-    const key: KeyUpdated = "password_saved";
+  // @ts-ignore
+  ctx.session.ok = key;
 
-    // @ts-ignore
-    ctx.session.ok = key;
-
-    return ctx.redirect(accountMap.base);
+  return ctx.redirect(accountMap.base);
 }, async (ctx, next) => {
-    ctx.body = await render("account/password.html", ctx.state);
+  ctx.body = await render("profile/single-input.html", ctx.state);
 });
 
 router.post("/request-verification", collectAppHeaders(), async (ctx, next) => {
-    const account: Account = ctx.state.user;
+  const account: Account = ctx.state.user;
 
-    if (account.isWxOnly()) {
-        ctx.status = 404;
-        return;
-    }
+  if (account.isWxOnly()) {
+    ctx.status = 404;
+    return;
+  }
 
-    const { success, errResp } = await accountViewModel.requestVerification(account, ctx.state.appHeaders);
+  const builder = new AccountPageBuilder(account);
+  const ok = await builder.requestVerification(ctx.state.appHeaders);
 
-    if (!success) {
-        ctx.state.errors = {
-            message: errResp ? errResp.message : "Request failed",
-        }
+  if (!ok) {
+    const uiData = builder.build();
+    Object.assign(ctx.state, uiData);
+    return await next();
+  }
 
-        return await next();
-    }
+  const key: KeyUpdated = "letter_sent";
 
-    const key: KeyUpdated = "letter_sent";
+  // @ts-ignore
+  ctx.session.ok = key;
 
-    // @ts-ignore
-    ctx.session.ok = key;
-
-    return ctx.redirect(accountMap.base);
+  return ctx.redirect(accountMap.base);
 }, async (ctx, next) => {
-    ctx.body = await render("layouts/two-cols.html", ctx.state);
+  ctx.body = await render("layouts/two-cols.html", ctx.state);
 });
 
 /**
  * @description Let a wechat-only account to enter email to check whether it has an ftc account.
  */
 router.get("/link/email", async (ctx, next) => {
-    const uiData = linkViewModel.buildEmailUI();
+  const uiData = linkViewModel.buildEmailUI();
 
-    Object.assign(ctx.state, uiData);
+  Object.assign(ctx.state, uiData);
 
-    ctx.body = await render("account/email-exists.html", ctx.state);
+  ctx.body = await render("account/email-exists.html", ctx.state);
 });
 
 router.post("/link/email", async (ctx, next) => {
-    const formData: EmailData = ctx.request.body;
+  const formData: EmailData = ctx.request.body;
 
-    const { success, errForm, errResp } = await linkViewModel.checkEmail(formData);
+  const { success, errForm, errResp } = await linkViewModel.checkEmail(formData);
 
-    if (errForm || errResp) {
-        const uiData = linkViewModel.buildEmailUI(
-            formData,
-            { errForm, errResp },
-        );
+  if (errForm || errResp) {
+    const uiData = linkViewModel.buildEmailUI(
+      formData,
+      { errForm, errResp },
+    );
 
-        Object.assign(ctx.state, uiData);
+    Object.assign(ctx.state, uiData);
 
-        return await next();
-    }
+    return await next();
+  }
 
-    // Save the email to session so that user
-    // does not need to re-enter the email after redirect.
+  // Save the email to session so that user
+  // does not need to re-enter the email after redirect.
 
-    // @ts-ignore
-    ctx.session.email = formData.email.trim();
+  // @ts-ignore
+  ctx.session.email = formData.email.trim();
 
-    if (success) {
-        ctx.redirect(accountMap.linkFtcLogin);
-    } else {
-        ctx.redirect(accountMap.linkSignUp);
-    }
+  if (success) {
+    ctx.redirect(accountMap.linkFtcLogin);
+  } else {
+    ctx.redirect(accountMap.linkSignUp);
+  }
 
-    return;
+  return;
 }, async (ctx, next) => {
-    ctx.body = await render("account/email-exists.html", ctx.state);
+  ctx.body = await render("account/email-exists.html", ctx.state);
 });
 
 /**
  * @description If a wechat-user already has an ftc account, redirecto here and ask user to login.
  */
 router.get("/link/login", async (ctx, next) => {
+  // @ts-ignore
+  const email = ctx.session.email;
+
+  if (!email) {
+    ctx.status = 404;
+    return;
+  }
+
+  const uiData = linkViewModel.buildLoginUI({
+    email,
+    password: "",
+  });
+
+  Object.assign(ctx.state, uiData);
+
+  ctx.body = await render("account/login.html", ctx.state);
+
+  if (isProduction) {
     // @ts-ignore
-    const email = ctx.session.email;
-
-    if (!email) {
-        ctx.status = 404;
-        return;
-    }
-
-    const uiData = linkViewModel.buildLoginUI({
-        email,
-        password: "",
-    });
-
-    Object.assign(ctx.state, uiData);
-
-    ctx.body = await render("account/login.html", ctx.state);
-
-    if (isProduction) {
-        // @ts-ignore
-        delete ctx.session.email;
-    }
+    delete ctx.session.email;
+  }
 });
 
-router.post("/link/login", 
-collectAppHeaders(), async (ctx, next) => {
+router.post("/link/login",
+  collectAppHeaders(), async (ctx, next) => {
     const formData: Credentials | undefined = ctx.request.body.credentials;
 
     if (!formData) {
-        throw new Error("form data not found");
+      throw new Error("form data not found");
     }
 
     const headers: IHeaderApp = ctx.state.appHeaders;
@@ -288,14 +278,14 @@ collectAppHeaders(), async (ctx, next) => {
     const { success, errForm, errResp } = await linkViewModel.logIn(formData, headers)
 
     if (!success) {
-        const uiData = linkViewModel.buildLoginUI(
-            formData,
-            { errForm, errResp },
-        );
+      const uiData = linkViewModel.buildLoginUI(
+        formData,
+        { errForm, errResp },
+      );
 
-        Object.assign(ctx.state, uiData);
+      Object.assign(ctx.state, uiData);
 
-        return await next();
+      return await next();
     }
 
     // Redirect user to merge account page.
@@ -304,69 +294,69 @@ collectAppHeaders(), async (ctx, next) => {
     ctx.session.uid = success;
     ctx.redirect(accountMap.linkMerging);
 
-}, async (ctx, next) => {
+  }, async (ctx, next) => {
     ctx.body = await render("account/login.html", ctx.state);
-});
+  });
 
 /**
  * @description A wechat-only user create a new ftc account.
  */
 router.get("/link/signup", async (ctx, next) => {
+  // @ts-ignore
+  const email = ctx.session.email;
+
+  if (!email) {
+    ctx.status = 404;
+    return;
+  }
+
+  const uiData = linkViewModel.buildSignUpUI({
+    email,
+    password: "",
+    confirmPassword: "",
+  });
+
+  Object.assign(ctx.state, uiData);
+
+  ctx.body = await render("account/signup.html", ctx.state);
+
+  if (isProduction) {
     // @ts-ignore
-    const email = ctx.session.email;
-
-    if (!email) {
-        ctx.status = 404;
-        return;
-    }
-
-    const uiData = linkViewModel.buildSignUpUI({
-        email,
-        password: "",
-        confirmPassword: "",
-    });
-
-    Object.assign(ctx.state, uiData);
-
-    ctx.body = await render("account/signup.html", ctx.state);
-
-    if (isProduction) {
-        // @ts-ignore
-        delete ctx.session.email;
-    }
+    delete ctx.session.email;
+  }
 });
 
 /**
  * @description Create ftc account for wechat-only user.
  */
 router.post("/link/signup", collectAppHeaders(), async (ctx, next) => {
-    const formData: ISignUpFormData = ctx.request.body.credentials;
+  const formData: ISignUpFormData = ctx.request.body.credentials;
 
-    if (!formData) {
-        throw new Error("form data not found");
-    }
+  if (!formData) {
+    throw new Error("form data not found");
+  }
 
-    const headers: IHeaderApp = ctx.state.appHeaders;
-    const account: Account = ctx.state.user;
-    const { success, errForm, errResp } = await linkViewModel.signUp(formData, account, headers);
+  const headers: IHeaderApp = ctx.state.appHeaders;
+  const account: Account = ctx.state.user;
+  const { success, errForm, errResp } = await linkViewModel.signUp(formData, account, headers);
 
-    if (!success) {
-        const uiData = linkViewModel.buildSignUpUI(
-            formData,
-            { errForm, errResp },
-        );
+  if (!success) {
+    const uiData = linkViewModel.buildSignUpUI(
+      formData,
+      { errForm, errResp },
+    );
 
-        Object.assign(ctx.state, uiData);
+    Object.assign(ctx.state, uiData);
 
-        return await next();
-    }
+    return await next();
+  }
 
-    // If wechat user is signed up, redirect to
-    // account page since signup process also links account.
-    return ctx.redirect(accountMap.base);
+  // If wechat user is signed up, redirect to
+  // account page since signup process also links account.
+  return ctx.redirect(accountMap.base);
 
 }, async (ctx, next) => {
-    ctx.body = await render("account/signup.html", ctx.state);
+  ctx.body = await render("account/signup.html", ctx.state);
 });
 
 /**
@@ -375,106 +365,106 @@ router.post("/link/signup", collectAppHeaders(), async (ctx, next) => {
  * `ctx.session.uid: string` is required.
  */
 router.get("/link/merge", async (ctx, next) => {
-    const account: Account = ctx.state.user;
+  const account: Account = ctx.state.user;
 
-    // Passed from `/login/callback` or `/account/link/login`
+  // Passed from `/login/callback` or `/account/link/login`
 
-    // @ts-ignore
-    const targetId: string | undefined = ctx.session.uid;
-    // Passed from POST error.
+  // @ts-ignore
+  const targetId: string | undefined = ctx.session.uid;
+  // Passed from POST error.
 
-    // @ts-ignore
-    const errMsg: string | undefined = ctx.session.errMsg;
+  // @ts-ignore
+  const errMsg: string | undefined = ctx.session.errMsg;
 
-    if (!targetId) {
-        ctx.status = 404;
-        return;
-    }
+  if (!targetId) {
+    ctx.status = 404;
+    return;
+  }
 
-    const accounts = await linkViewModel.fetchAccountToLink(account, targetId);
+  const accounts = await linkViewModel.fetchAccountToLink(account, targetId);
 
-    const uiData = linkViewModel.buildMergeUI(accounts, { targetId }, errMsg);
+  const uiData = linkViewModel.buildMergeUI(accounts, { targetId }, errMsg);
 
-    Object.assign(ctx.state, uiData);
-    
-    ctx.body = await render("account/merge.html", ctx.state);
+  Object.assign(ctx.state, uiData);
 
-    // @ts-ignore
-    delete ctx.session.uid;
-    // @ts-ignore
-    delete ctx.session.errMsg;
+  ctx.body = await render("account/merge.html", ctx.state);
+
+  // @ts-ignore
+  delete ctx.session.uid;
+  // @ts-ignore
+  delete ctx.session.errMsg;
 });
 
 router.post("/link/merge", async (ctx, next) => {
-    const account: Account = ctx.state.user;
+  const account: Account = ctx.state.user;
 
-    if (account.isLinked()) {
-        ctx.status = 404;
-        return;
+  if (account.isLinked()) {
+    ctx.status = 404;
+    return;
+  }
+
+  const formData: ILinkingFormData = ctx.request.body;
+
+  const { success, errForm, errResp } = await linkViewModel.mergeAccount(
+    account,
+    formData,
+  );
+
+  if (!success) {
+    // Pass error message in redirection.
+    if (errForm) {
+      // @ts-ignore
+      ctx.session.errMsg = errForm.targetId;
+    } else if (errResp) {
+      // @ts-ignore
+      ctx.session.errMsg = errResp.message;
     }
+    // @ts-ignore
+    ctx.session.uid = formData.targetId;
+    return ctx.redirect(ctx.path);
+  }
 
-    const formData: ILinkingFormData = ctx.request.body;
-
-    const { success, errForm, errResp } = await linkViewModel.mergeAccount(
-        account,
-        formData,
-    );
-
-    if (!success) {
-        // Pass error message in redirection.
-        if (errForm) {
-            // @ts-ignore
-            ctx.session.errMsg = errForm.targetId;
-        } else if (errResp) {
-            // @ts-ignore
-            ctx.session.errMsg = errResp.message;
-        }
-        // @ts-ignore
-        ctx.session.uid = formData.targetId;
-        return ctx.redirect(ctx.path);
-    }
-
-    ctx.redirect(accountMap.base);
+  ctx.redirect(accountMap.base);
 });
 
 router.get("/unlink", async (ctx, next) => {
-    const account: Account = ctx.state.user;
+  const account: Account = ctx.state.user;
 
-    if (!account.isLinked()) {
-        ctx.status = 404;
-        return;
-    }
+  if (!account.isLinked()) {
+    ctx.status = 404;
+    return;
+  }
 
-    Object.assign(ctx.state, linkViewModel.buildUnlinkUI(account));
+  Object.assign(ctx.state, linkViewModel.buildUnlinkUI(account));
 
-    ctx.body = await render("account/unlink.html", ctx.state);
+  ctx.body = await render("account/unlink.html", ctx.state);
 });
 
 router.post("/unlink", async (ctx, next) => {
-    const account: Account = ctx.state.user;
+  const account: Account = ctx.state.user;
 
-    if (!account.isLinked()) {
-        ctx.status = 404;
-        return;
-    }
+  if (!account.isLinked()) {
+    ctx.status = 404;
+    return;
+  }
 
-    const formData: IUnlinkFormData = ctx.request.body;
+  const formData: IUnlinkFormData = ctx.request.body;
 
-    const { success, formState, errResp } = await linkViewModel.sever(account, formData);
+  const { success, formState, errResp } = await linkViewModel.sever(account, formData);
 
-    if (!success) {
-        Object.assign(ctx.state, linkViewModel.buildUnlinkUI(
-            account,
-            { formState, errResp },
-        ));
+  if (!success) {
+    Object.assign(ctx.state, linkViewModel.buildUnlinkUI(
+      account,
+      { formState, errResp },
+    ));
 
-        return await next();
-    }
+    return await next();
+  }
 
-    ctx.redirect(accountMap.base);
+  ctx.redirect(accountMap.base);
 
 }, async (ctx, next) => {
-    ctx.body = await render("account/unlink.html", ctx.state);
+  ctx.body = await render("account/unlink.html", ctx.state);
 });
 
 export default router.routes();

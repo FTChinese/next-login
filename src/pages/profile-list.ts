@@ -1,7 +1,7 @@
 import { validate, ValidationError } from "@hapi/joi";
 import debug from "debug";
 import { UIBase, ITextInput, UISingleInput } from "../viewmodels/ui";
-import { APIError, IFetchResult } from "../viewmodels/api-response";
+import { APIError, IFetchResult } from "../repository/api-response";
 import {
   userNameSchema,
   mobileSchema,

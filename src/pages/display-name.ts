@@ -1,6 +1,6 @@
 import { Profile, IName, Account } from "../models/reader";
 import { profileService } from "../repository/profile";
-import { APIError } from "../viewmodels/api-response";
+import { APIError } from "../repository/api-response";
 import { validate } from "@hapi/joi";
 import { userNameSchema, joiOptions, reduceJoiErrors } from "./validator";
 import { Flash } from "../widget/flash";

@@ -1,6 +1,6 @@
 import { Profile, IName, Account, IMobile, Address, IAddress } from "../models/reader";
 import { profileService } from "../repository/profile";
-import { APIError } from "../viewmodels/api-response";
+import { APIError } from "../repository/api-response";
 import { validate } from "@hapi/joi";
 import { joiOptions, reduceJoiErrors, addressSchema } from "./validator";
 import { Flash } from "../widget/flash";

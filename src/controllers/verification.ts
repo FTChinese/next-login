@@ -3,7 +3,7 @@ import render from "../util/render";
 import {  
     Account,
 } from "../models/reader";
-import { vrfViewModel } from "../viewmodels/vrf-viewmodel";
+import { EmailVerifiedBuilder } from "../pages/email-verified";
 
 const router = new Router();
 
@@ -11,17 +11,15 @@ router.get("/email/:token", async (ctx, next) => {
     const token: string = ctx.params.token;
     const account: Account | undefined = ctx.state.user;
 
-    const { success, errResp } = await vrfViewModel.verifyEmail(token);
+    const builder = new EmailVerifiedBuilder(account);
+    const ok = await builder.verify(token);
 
-    if (success && account) {
+    if (ok && account) {
         // @ts-ignore
         ctx.session.user = account.withVerified();
     }
 
-    const uiData = vrfViewModel.buildUI(
-        { success, errResp },
-        !!account,
-    );
+    const uiData = builder.build
 
     Object.assign(ctx.state, uiData);
 

@@ -31,7 +31,7 @@ import { oauth, noCache } from "../util/request";
 
 const sessSerializer = new TypedJSON(WxSession);
 
-class AccountRepo {
+class AccountService {
 
     /**
      * @description Fetch an ftc account by uuid.
@@ -268,4 +268,4 @@ class AccountRepo {
     }
 }
 
-export const accountRepo = new AccountRepo();
+export const accountService = new AccountService();

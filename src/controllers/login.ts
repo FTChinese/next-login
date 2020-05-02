@@ -24,7 +24,7 @@ import {
 import {
   ICallbackParams, IOAuthSession,
 } from "../models/wx-oauth";
-import { accountRepo } from "../repository/account";
+import { accountService } from "../repository/account";
 import {
   oauthServer,
   IOAuthSession as IFtcOAuthSession,
@@ -122,7 +122,7 @@ router.get("/wechat/test", collectAppHeaders(), async (ctx, next) => {
     return;
   }
 
-  const account = await accountRepo.fetchWxAccount("tvSxA7L6cgl8nwkrScm_yRzZoVTy");
+  const account = await accountService.fetchWxAccount("tvSxA7L6cgl8nwkrScm_yRzZoVTy");
 
   console.log(account);
 

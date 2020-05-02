@@ -11,8 +11,8 @@ import { joiOptions, reduceJoiErrors } from "./validator";
 import { signUpSchema } from "./validator";
 import { validate, ValidationError } from "@hapi/joi";
 import { IHeaderApp } from "../models/header";
-import { APIError } from "../viewmodels/api-response";
-import { accountRepo } from "../repository/account";
+import { APIError } from "../repository/api-response";
+import { accountService } from "../repository/account";
 
 export interface SignUpData extends Credentials {
   confirmPassword: string;
@@ -44,12 +44,12 @@ export class SignUpBuilder {
 
   async create(app: IHeaderApp): Promise<Account | null> {
     try {
-      const userId = await accountRepo.createReader({
+      const userId = await accountService.createReader({
         email: this.data.email,
         password: this.data.password,
       }, app);
 
-      const account = await accountRepo.fetchFtcAccount(userId);
+      const account = await accountService.fetchFtcAccount(userId);
 
       return account;
     } catch (e) {

@@ -32,11 +32,11 @@ import {
     IHeaderApp,
 } from "../models/header";
 import {
-    accountRepo,
+    accountService,
 } from "../repository/account";
 import { 
     APIError, IFetchResult,
-} from "./api-response";
+} from "../repository/api-response";
 import { 
     entranceMap,
 } from "../config/sitemap";
@@ -136,7 +136,7 @@ class LinkViewModel {
         }
 
         try {
-            const ok = await accountRepo.emailExists(formData.email)
+            const ok = await accountService.emailExists(formData.email)
 
             return {
                 success: ok,
@@ -217,7 +217,7 @@ class LinkViewModel {
         }
 
         try {
-            const account = await accountRepo.authenticate(values, app);
+            const account = await accountService.authenticate(values, app);
 
             return {
                 success: account.id,
@@ -338,7 +338,7 @@ class LinkViewModel {
         }
 
         try {
-            const ftcId = await accountRepo.wxSignUp(
+            const ftcId = await accountService.wxSignUp(
                 {
                     email: values.email,
                     password: values.password,
@@ -431,7 +431,7 @@ class LinkViewModel {
     async fetchAccountToLink(account: Account, targetId: string): Promise<ILinkingAccounts> {
         switch (account.loginMethod) {
             case "email": {
-                const wxAccount = await accountRepo.fetchWxAccount(targetId);
+                const wxAccount = await accountService.fetchWxAccount(targetId);
 
                 return {
                     ftc: account,
@@ -440,7 +440,7 @@ class LinkViewModel {
             }
 
             case "wechat": {
-                const ftcAccount = await accountRepo.fetchFtcAccount(targetId);
+                const ftcAccount = await accountService.fetchFtcAccount(targetId);
 
                 return {
                     ftc: ftcAccount,
@@ -534,7 +534,7 @@ class LinkViewModel {
 
     async mergeAccount(account: Account, formData: ILinkingFormData): Promise<ILinkResult> {
         try {
-            const ok = await accountRepo.link(account, formData.targetId);
+            const ok = await accountService.link(account, formData.targetId);
 
             return {
                 success: ok,
@@ -590,7 +590,7 @@ class LinkViewModel {
         }
 
         try {
-            const ok = await accountRepo.unlink(account, value);
+            const ok = await accountService.unlink(account, value);
 
             return {
                 success: ok,

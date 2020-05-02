@@ -9,13 +9,13 @@ import {
   IAddress,
 } from "../models/reader";
 import { ProfilePageBuilder } from "../pages/profile-list";
-import { KeyUpdated } from "../pages/profile-list";
 import { profileMap } from "../config/sitemap";
 import { profileService } from "../repository/profile";
 import { ProfileInfoBuilder, ProfileInfoPage } from "../pages/profile-info";
 import { DisplayNameBuilder } from "../pages/display-name";
-import { MobileBuilder } from "../pages/modile";
+import { MobileBuilder } from "../pages/mobile";
 import { AddressBuilder } from "../pages/address";
+import { KeyUpdated } from "../pages/redirection";
 
 const router = new Router();
 const log = debug("user:profile");
