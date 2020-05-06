@@ -67,7 +67,7 @@ export class Button extends Element {
 
   static primary(): Button {
     return new Button()
-      .setStyle("primary")
+      .setStyle("primary");
   }
 
   static secondary(): Button {
