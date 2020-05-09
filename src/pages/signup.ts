@@ -14,6 +14,12 @@ import { IHeaderApp } from "../models/header";
 import { APIError } from "../repository/api-response";
 import { accountService } from "../repository/account";
 
+export interface SignUpPage {
+  flash?: Flash;
+  form: Form;
+  loginLink: string;
+}
+
 export interface SignUpData extends Credentials {
   confirmPassword: string;
 }
@@ -23,17 +29,17 @@ const msgTooManyRequests: string = "您创建账号过于频繁，请稍后再�
 export class SignUpBuilder {
   errors: Map<string, string> = new Map();
   flashMsg?: string;
-  readonly data: SignUpData;
+  data: SignUpData = {
+    email: '',
+    password: '',
+    confirmPassword: ''
+  };
 
-  constructor(data: SignUpData) {
-    this.data = data;
-  }
-
-  async validate(): Promise<boolean> {
+  async validate(data: SignUpData): Promise<boolean> {
     try {
-      const result = await validate<SignUpData>(this.data, signUpSchema, joiOptions);
+      const result = await validate<SignUpData>(data, signUpSchema, joiOptions);
 
-      Object.assign(this.data, result);
+      this.data = result;
 
       return true;
     } catch (e) {
@@ -72,28 +78,11 @@ export class SignUpBuilder {
     }
   }
 
-  static default(): SignUpBuilder {
-    return new SignUpBuilder({
-      email: "",
-      password: "",
-      confirmPassword: "",
-    });
-  }
-}
-
-export class SignUpPage {
-  flash?: Flash;
-  form: Form;
-  loginLink: string;
-
-  constructor(s: SignUpBuilder) {
-    if (s.flashMsg) {
-      this.flash = Flash.danger(s.flashMsg);
-    }
-
-    const controls = buildCredentialControls(s.data, s.errors);
+  build(): SignUpPage {
+    const controls = buildCredentialControls(this.data, this.errors);
     controls[0].setDesc("用于登录FT中文网");
     controls[1].setDesc("最少8个字符");
+
     controls.push(
       new FormControl({
         label: {
@@ -108,20 +97,25 @@ export class SignUpPage {
           maxlength: 32,
           required: true,
         }),
-        error: s.errors.get("confirmPassword"),
+        error: this.errors.get("confirmPassword"),
       }),
     );
 
-    this.form = new Form({
-      disabled: false,
-      method: "post",
-      action: "",
-      controls: controls,
-      submitBtn: Button.primary()
-        .setBlock()
-        .setName("注册")
-        .setDisableWith("正在注册...")
-    });
-    this.loginLink = entranceMap.login;
+    return {
+      flash: this.flashMsg ? Flash.danger(this.flashMsg) : undefined,
+      form: new Form({
+        disabled: false,
+        method: "post",
+        action: "",
+        controls: controls,
+        submitBtn: Button.primary()
+          .setBlock()
+          .setName("注册")
+          .setDisableWith("正在注册...")
+      }),
+      loginLink: entranceMap.login,
+    };
   }
 }
+
+
