@@ -1,15 +1,13 @@
-import { Profile, IName, Account, IMobile, Address, IAddress } from "../models/reader";
+import { Account, Address, IAddress } from "../models/reader";
 import { profileService } from "../repository/profile";
 import { APIError } from "../repository/api-response";
 import { validate } from "@hapi/joi";
 import { joiOptions, reduceJoiErrors, addressSchema } from "./validator";
 import { Flash } from "../widget/flash";
-import { Form } from "../widget/form";
 import { Button } from "../widget/button";
 import { FormControl } from "../widget/form-control";
 import { TextInputElement } from "../widget/text-input";
 import { ControlType } from "../widget/widget";
-import { FormOnlyPage } from "./data-builder";
 
 interface AddressPage {
   flash?: Flash;
