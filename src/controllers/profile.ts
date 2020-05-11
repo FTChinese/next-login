@@ -139,28 +139,17 @@ router.post("/mobile", async (ctx, next) => {
 router.get("/info", async (ctx, next) => {
   const account: Account = ctx.state.user;
 
-  try {
-    const profile = await profileService.fetchProfile(account.id);
+  const builder = new ProfileInfoBuilder();
+  await builder.fetchProfile(account);
 
-    const builder = new ProfileInfoBuilder(profile);
+  const uiData = builder.build();
 
-    const uiData = new ProfileInfoPage(builder);
+  Object.assign(ctx.state, uiData);
 
-    Object.assign(ctx.state, uiData);
-
-    return ctx.body = await render("profile/personal.html", ctx.state);
-  } catch (e) {
-    const uiData = new ProfileInfoBuilder(e.message);
-
-    Object.assign(ctx.state, uiData);
-
-    return ctx.body = await render("profile/personal.html", ctx.state);
-  }
+ ctx.body = await render("profile/personal.html", ctx.state);
 });
 
-router.post(
-  "/info",
-  async (ctx, next) => {
+router.post("/info", async (ctx, next) => {
     const account: Account = ctx.state.user;
     const formData: ProfileFormData | undefined = ctx.request.body.profile;
 
@@ -168,18 +157,18 @@ router.post(
       throw new Error("form data not found to update profile");
     }
 
-    const builder = new ProfileInfoBuilder(formData);
+    const builder = new ProfileInfoBuilder();
 
-    const isValid = await builder.validate();
+    const isValid = await builder.validate(formData);
     if (!isValid) {
-      const uiData = new ProfileInfoPage(builder);
+      const uiData = builder.build();
       Object.assign(ctx.state, uiData);
       return await next();
     }
 
     const ok = await builder.update(account);
     if (!ok) {
-      const uiData = new ProfileInfoPage(builder);
+      const uiData = builder.build();
       Object.assign(ctx.state, uiData);
       return await next();
     }

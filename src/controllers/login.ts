@@ -41,7 +41,7 @@ const router = new Router();
  * Only show wechat login for desktop browsers.
  */
 router.get("/", async (ctx, next) => {
-  const uiData = new LoginPage(CredentialBuilder.default());
+  const uiData = (new CredentialBuilder()).build();
 
   Object.assign(ctx.state, uiData);
 
@@ -65,29 +65,30 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
   if (!formData) {
     throw new Error("form data not found");
   }
-  const cb = new CredentialBuilder(formData);
+  const builder = new CredentialBuilder();
 
-  const isValid = await cb.validate();
+  const isValid = await builder.validate(formData);
   if (!isValid) {
-    const uiData = new LoginPage(cb);
+    const uiData = builder.build();
     Object.assign(ctx.state, uiData);
 
     return await next();
   }
 
   const headers: IHeaderApp = ctx.state.appHeaders;
-  const account = await cb.login(headers);
+  const account = await builder.login(headers);
 
-  if (account) {
-    // @ts-ignore
-    ctx.session.user = account;
-    return ctx.redirect(profileMap.base);
+  if (!account) {
+    const uiData = builder.build;
+    Object.assign(ctx.state, uiData);
+
+    return await next();
   }
 
-  const uiData = new LoginPage(cb);
-  Object.assign(ctx.state, uiData);
+  // @ts-ignore
+  ctx.session.user = account;
+  return ctx.redirect(profileMap.base);
 
-  return await next();
 }, async (ctx, next) => {
   ctx.body = await render("login.html", ctx.state);
 });

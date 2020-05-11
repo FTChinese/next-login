@@ -18,7 +18,7 @@ const router = new Router();
  * @description Show signup page.
  */
 router.get("/", async (ctx, next) => {
-  const uiData = new SignUpPage(SignUpBuilder.default());
+  const uiData = (new SignUpBuilder()).build();
 
   Object.assign(ctx.state, uiData);
 
@@ -37,17 +37,17 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
 
   const headers: IHeaderApp = ctx.state.appHeaders;
 
-  const suBuilder = new SignUpBuilder(formData);
-  const isValid = await suBuilder.validate();
+  const builder = new SignUpBuilder();
+  const isValid = await builder.validate(formData);
   if (!isValid) {
-    const uiData = new SignUpPage(suBuilder);
+    const uiData = builder.build();
     Object.assign(ctx.state, uiData);
     return await next();
   }
 
-  const account = await suBuilder.create(headers);
+  const account = await builder.create(headers);
   if (!account) {
-    const uiData = new SignUpPage(suBuilder);
+    const uiData = builder.build();
 
     Object.assign(ctx.state, uiData);
 

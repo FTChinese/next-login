@@ -1,10 +1,5 @@
 import {
-  UIBase,
-  IListItem,
-} from "../viewmodels/ui";
-import {
   APIError,
-  IFetchResult,
 } from "../repository/api-response";
 import {
   Account,
