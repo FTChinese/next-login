@@ -1,5 +1,4 @@
 import {
-    validate,
     ValidationError,
 } from "@hapi/joi";
 import debug from "debug";
@@ -20,6 +19,7 @@ import {
     buildJoiErrors,
     IFormState,
     ISignUpFormData,
+    joiOptions,
 } from "../pages/validator";
 
 import {
@@ -108,7 +108,7 @@ class LinkViewModel {
     
     async validateEmail(data: EmailData): Promise<IFormState<EmailData>> {
         try {
-            const result = await validate<EmailData>(data, emailSchema);
+            const result = await emailSchema.validateAsync(data, joiOptions);
 
             return {
                 values: result,
@@ -186,7 +186,7 @@ class LinkViewModel {
 
     async validateLogin(formData: Credentials): Promise<IFormState<Credentials>> {
         try {
-            const result = await validate<Credentials>(formData, loginSchema);
+            const result = await loginSchema.validateAsync(formData, joiOptions);
 
             return {
                 values: result,
@@ -302,7 +302,7 @@ class LinkViewModel {
 
     async validateSignUp(formData: ISignUpFormData): Promise<IFormState<ISignUpFormData>> {
         try {
-            const result = await validate<ISignUpFormData>(formData, signUpSchema);
+            const result = await signUpSchema.validateAsync(formData, joiOptions);
 
             return {
                 values: result,
