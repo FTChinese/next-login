@@ -1,8 +1,7 @@
-import { Profile, IName, Account, IMobile } from "../models/reader";
+import { Profile, Account, IMobile } from "../models/reader";
 import { profileService } from "../repository/profile";
 import { APIError } from "../repository/api-response";
-import { validate } from "@hapi/joi";
-import { userNameSchema, joiOptions, reduceJoiErrors, mobileSchema } from "./validator";
+import { joiOptions, reduceJoiErrors, mobileSchema } from "./validator";
 import { Flash } from "../widget/flash";
 import { Form } from "../widget/form";
 import { Button } from "../widget/button";
@@ -37,7 +36,7 @@ export class MobileBuilder {
 
   async validate(data: IMobile): Promise<boolean> {
     try {
-      const result = await validate<IMobile>(data, mobileSchema, joiOptions);
+      const result = await mobileSchema.validateAsync(data, joiOptions);
 
       Object.assign(this.profile, result);
 

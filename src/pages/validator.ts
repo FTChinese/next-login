@@ -39,73 +39,83 @@ export interface IFormState<T> {
 
 export const joiOptions: ValidationOptions = {
     abortEarly: false,
-    language: {
-        any: {
-          unknown: '!!不允许输入该值',
-          invalid: '!!包含无效的值',
-          empty: '!!不能为空',
-          required: '!!必填项',
-          allowOnly: '!!只能输入 {{valids}}',
-          default: 'threw an error when running default method'
-        },
-        boolean: {
-          base: '!!必须是布尔值'
-        },
-        number: {
-          base: '!!必须是数字',
-          unsafe: 'must be a safe number',
-          min: '!!必须大于等于 {{limit}}',
-          max: '!!必须小于等于 {{limit}}',
-          less: '!!必须小于 {{limit}}',
-          greater: '!!必须大于 {{limit}}',
-          integer: '!!必须是整数',
-          negative: '!!只能是负数',
-          positive: '!!只能是正数',
-          precision: '!!小数不能超过 {{limit}} 位',
-          ref: 'references "{{ref}}" which is not a number',
-          multiple: 'must be a multiple of {{multiple}}',
-          port: '!!必须是有效的端口'
-        },
-        string: {
-          base: '!!必须是字符串',
-          min: "!!不得少于{{limit}}个字符",
-          max: "!!不得超过{{limit}}个字符",
-          length: '!!长度不能超过 {{limit}}',
-          alphanum: '!!只能包含字母数字',
-          token: '!!只能包含字母、数字或下划线',
-          regex: {
-            base: 'with value "{{!value}}" fails to match the required pattern: {{pattern}}',
-            name: 'with value "{{!value}}" fails to match the {{name}} pattern',
-            invert: {
-                base: 'with value "{{!value}}" matches the inverted pattern: {{pattern}}',
-                name: 'with value "{{!value}}" matches the inverted {{name}} pattern'
-            }
-          },
-          email: '!!必须是有效的邮箱地址',
-          uri: '!!必须是有效的URI',
-          uriRelativeOnly: 'must be a valid relative uri',
-          uriCustomScheme: 'must be a valid uri with a scheme matching the {{scheme}} pattern',
-          isoDate: 'must be a valid ISO 8601 date',
-          guid: 'must be a valid GUID',
-          hex: 'must only contain hexadecimal characters',
-          hexAlign: 'hex decoded representation must be byte aligned',
-          base64: 'must be a valid base64 string',
-          dataUri: 'must be a valid dataUri string',
-          hostname: 'must be a valid hostname',
-          normalize: 'must be unicode normalized in the {{form}} form',
-          lowercase: '!!只能包含小写字母',
-          uppercase: '!!只能包含大写字母',
-          trim: '!!开头结尾不能有空格',
-          creditCard: 'must be a credit card',
-          ref: 'references "{{ref}}" which is not a number',
-          ip: 'must be a valid ip address with a {{cidr}} CIDR',
-          ipVersion: 'must be a valid ip address of one of the following versions {{version}} with a {{cidr}} CIDR'
-        },
+    messages: {
+      'any.custom': '{{#label}} failed custom validation because {{#error.message}}',
+      'any.default': '{{#label}} threw an error when running default method',
+      'any.failover': '{{#label}} threw an error when running failover method',
+      'any.invalid': '{{#label}} contains an invalid value',
+      'any.only': '{{#label}} must be {if(#valids.length == 1, "", "one of ")}{{#valids}}',
+      'any.ref': '{{#label}} {{#arg}} references "{{#ref}}" which {{#reason}}',
+      'any.required': '{{#label}} is required',
+      'any.unknown': '{{#label}} is not allowed',
+      'boolean.base': '{{#label}} must be a boolean',
+      'string.alphanum': '{{#label}} must only contain alpha-numeric characters',
+      'string.base': '{{#label}} must be a string',
+      'string.base64': '{{#label}} must be a valid base64 string',
+      'string.creditCard': '{{#label}} must be a credit card',
+      'string.dataUri': '{{#label}} must be a valid dataUri string',
+      'string.domain': '{{#label}} must contain a valid domain name',
+      'string.email': '{{#label}} must be a valid email',
+      'string.empty': '{{#label}} is not allowed to be empty',
+      'string.guid': '{{#label}} must be a valid GUID',
+      'string.hex': '{{#label}} must only contain hexadecimal characters',
+      'string.hexAlign': '{{#label}} hex decoded representation must be byte aligned',
+      'string.hostname': '{{#label}} must be a valid hostname',
+      'string.ip': '{{#label}} must be a valid ip address with a {{#cidr}} CIDR',
+      'string.ipVersion': '{{#label}} must be a valid ip address of one of the following versions {{#version}} with a {{#cidr}} CIDR',
+      'string.isoDate': '{{#label}} must be in iso format',
+      'string.isoDuration': '{{#label}} must be a valid ISO 8601 duration',
+      'string.length': '{{#label}} length must be {{#limit}} characters long',
+      'string.lowercase': '{{#label}} must only contain lowercase characters',
+      'string.max': '{{#label}} length must be less than or equal to {{#limit}} characters long',
+      'string.min': '{{#label}} length must be at least {{#limit}} characters long',
+      'string.normalize': '{{#label}} must be unicode normalized in the {{#form}} form',
+      'string.token': '{{#label}} must only contain alpha-numeric and underscore characters',
+      'string.pattern.base': '{{#label}} with value "{[.]}" fails to match the required pattern: {{#regex}}',
+      'string.pattern.name': '{{#label}} with value "{[.]}" fails to match the {{#name}} pattern',
+      'string.pattern.invert.base': '{{#label}} with value "{[.]}" matches the inverted pattern: {{#regex}}',
+      'string.pattern.invert.name': '{{#label}} with value "{[.]}" matches the inverted {{#name}} pattern',
+      'string.trim': '{{#label}} must not have leading or trailing whitespace',
+      'string.uri': '{{#label}} must be a valid uri',
+      'string.uriCustomScheme': '{{#label}} must be a valid uri with a scheme matching the {{#scheme}} pattern',
+      'string.uriRelativeOnly': '{{#label}} must be a valid relative uri',
+      'string.uppercase': '{{#label}} must only contain uppercase characters',
+      'number.base': '{{#label}} must be a number',
+      'number.greater': '{{#label}} must be greater than {{#limit}}',
+      'number.infinity': '{{#label}} cannot be infinity',
+      'number.integer': '{{#label}} must be an integer',
+      'number.less': '{{#label}} must be less than {{#limit}}',
+      'number.max': '{{#label}} must be less than or equal to {{#limit}}',
+      'number.min': '{{#label}} must be larger than or equal to {{#limit}}',
+      'number.multiple': '{{#label}} must be a multiple of {{#multiple}}',
+      'number.negative': '{{#label}} must be a negative number',
+      'number.port': '{{#label}} must be a valid port',
+      'number.positive': '{{#label}} must be a positive number',
+      'number.precision': '{{#label}} must have no more than {{#limit}} decimal places',
+      'number.unsafe': '{{#label}} must be a safe number',
+      'date.base': '{{#label}} must be a valid date',
+      'date.format': '{{#label}} must be in {msg("date.format." + #format) || #format} format',
+      'date.greater': '{{#label}} must be greater than "{{#limit}}"',
+      'date.less': '{{#label}} must be less than "{{#limit}}"',
+      'date.max': '{{#label}} must be less than or equal to "{{#limit}}"',
+      'date.min': '{{#label}} must be larger than or equal to "{{#limit}}"',
+
+      // Messages used in date.format
+
+      'date.format.iso': 'ISO 8601 date',
+      'date.format.javascript': 'timestamp or number of milliseconds',
+      'date.format.unix': 'timestamp or number of seconds'
     }
 }
 
-const email = string().trim().email().required();
-const password = string().trim().min(8).max(64).required();
+const email = string().trim().email().required().messages({
+  'string.email': '请输入有效的邮箱地址',
+  'any.required': '邮箱为必填项'
+});
+const password = string().trim().min(8).max(64).required().messages({
+  'string.min': '不能少于8个字符',
+  'string.max': '不能超过64个字符'
+});
 
 export const emailSchema = object().keys({
     email,
@@ -136,7 +146,7 @@ export interface ISignUpFormData extends Credentials {
 
 export const passwordUpdatingSchema = passwordsSchema.keys({
     // Legacy password.
-    oldPassword: string().trim().required(),
+    oldPassword: string().trim().required().message('请填写当前密码'),
 });
 
 export const userNameSchema = object().keys({

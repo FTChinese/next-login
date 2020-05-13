@@ -1,6 +1,6 @@
 import { Account, EmailData } from "../models/reader";
 import { FormOnlyPage } from "./data-builder";
-import { validate, ValidationError } from "@hapi/joi";
+import { ValidationError } from "@hapi/joi";
 import { emailSchema, joiOptions, reduceJoiErrors } from "./validator";
 import { accountService } from "../repository/account";
 import { APIError } from "../repository/api-response";
@@ -28,7 +28,7 @@ export class UpdateEmailBuilder {
   }
   async validate(data: EmailData): Promise<boolean> {
     try {
-      const result = await validate<EmailData>(data, emailSchema, joiOptions);
+      const result = await emailSchema.validateAsync(data, joiOptions);
 
       this.formData = result;
       return true;

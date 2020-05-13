@@ -6,7 +6,7 @@ import { TextInputElement } from "../widget/text-input";
 import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
 import { IPasswordsFormData } from "./account-page";
-import { validate, ValidationError } from "@hapi/joi";
+import { ValidationError } from "@hapi/joi";
 import { passwordUpdatingSchema, joiOptions, reduceJoiErrors } from "./validator";
 import { accountService } from "../repository/account";
 import { APIError } from "../repository/api-response";
@@ -95,7 +95,7 @@ export class UpdatePasswordBuilder {
 
   async validate(data: IPasswordsFormData): Promise<boolean> {
     try {
-      const result = await validate<IPasswordsFormData>(data, passwordUpdatingSchema, joiOptions);
+      const result = await passwordUpdatingSchema.validateAsync(data, joiOptions);
 
       this.passwords = result;
 

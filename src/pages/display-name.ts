@@ -1,7 +1,6 @@
 import { Profile, IName, Account } from "../models/reader";
 import { profileService } from "../repository/profile";
 import { APIError } from "../repository/api-response";
-import { validate } from "@hapi/joi";
 import { userNameSchema, joiOptions, reduceJoiErrors } from "./validator";
 import { Flash } from "../widget/flash";
 import { Form } from "../widget/form";
@@ -37,7 +36,7 @@ export class DisplayNameBuilder {
 
   async validate(data: IName): Promise<boolean> {
     try {
-      const result = await validate<IName>(data, userNameSchema, joiOptions);
+      const result = await userNameSchema.validateAsync(data, joiOptions);
 
       Object.assign(this.profile, result);
 

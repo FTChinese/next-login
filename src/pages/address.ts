@@ -1,7 +1,6 @@
 import { Account, Address, IAddress } from "../models/reader";
 import { profileService } from "../repository/profile";
 import { APIError } from "../repository/api-response";
-import { validate } from "@hapi/joi";
 import { joiOptions, reduceJoiErrors, addressSchema } from "./validator";
 import { Flash } from "../widget/flash";
 import { Button } from "../widget/button";
@@ -48,7 +47,7 @@ export class AddressBuilder {
 
   async validate(data: IAddress): Promise<boolean> {
     try {
-      const result = await validate<IAddress>(data, addressSchema, joiOptions);
+      const result = await addressSchema.validateAsync(data, joiOptions);
 
       Object.assign(this.address, result);
 

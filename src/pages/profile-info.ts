@@ -2,7 +2,7 @@ import { Flash } from "../widget/flash";
 import { TextInputElement } from "../widget/text-input";
 import { RadioInputElement } from "../widget/radio-input";
 import { ProfileFormData, Account, Profile } from "../models/reader";
-import { validate, ValidationError } from "@hapi/joi";
+import { ValidationError } from "@hapi/joi";
 import { profileSchema, joiOptions, reduceJoiErrors } from "./validator";
 import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
@@ -51,7 +51,7 @@ export class ProfileInfoBuilder {
   // Validate form data.
   async validate(data: ProfileFormData): Promise<boolean> {
     try {
-      const result = await validate<ProfileFormData>(data, profileSchema, joiOptions);
+      const result = await profileSchema.validateAsync(data, joiOptions);
 
       this.formData = result;
 

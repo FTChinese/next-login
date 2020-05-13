@@ -1,7 +1,7 @@
 import { Flash } from "../widget/flash";
 import { Form } from "../widget/form";
 import { DataBuilder } from "./data-builder";
-import { validate, ValidationError } from "@hapi/joi";
+import { ValidationError } from "@hapi/joi";
 import { passwordsSchema } from "./validator";
 import { joiOptions } from "./validator";
 import { FormControl } from "../widget/form-control";
@@ -38,7 +38,7 @@ export class ResetPwBuilder extends DataBuilder<PwResetData> {
 
   async validate(): Promise<boolean> {
     try {
-      const result = await validate<PwResetData>(this.data, passwordsSchema, joiOptions)
+      const result = await passwordsSchema.validateAsync(this.data, joiOptions)
 
       Object.assign(this.data, result);
 

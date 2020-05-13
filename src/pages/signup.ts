@@ -9,7 +9,7 @@ import { buildCredentialControls } from "./login";
 import { Account, Credentials } from "../models/reader";
 import { joiOptions, reduceJoiErrors } from "./validator";
 import { signUpSchema } from "./validator";
-import { validate, ValidationError } from "@hapi/joi";
+import { ValidationError } from "@hapi/joi";
 import { IHeaderApp } from "../models/header";
 import { APIError } from "../repository/api-response";
 import { accountService } from "../repository/account";
@@ -37,7 +37,7 @@ export class SignUpBuilder {
 
   async validate(data: SignUpData): Promise<boolean> {
     try {
-      const result = await validate<SignUpData>(data, signUpSchema, joiOptions);
+      const result = await signUpSchema.validateAsync(data, joiOptions);
 
       this.data = result;
 

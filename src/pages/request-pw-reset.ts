@@ -1,7 +1,7 @@
 import { DataBuilder } from "./data-builder";
 import { EmailData } from "../models/reader";
 import { joiOptions, emailSchema } from "./validator";
-import { validate, ValidationError } from "@hapi/joi";
+import { ValidationError } from "@hapi/joi";
 import { IHeaderApp } from "../models/header";
 import { accountService } from "../repository/account";
 import { APIError } from "../repository/api-response";
@@ -24,7 +24,7 @@ export class EmailBuilder extends DataBuilder<EmailData>{
 
   async validate(): Promise<boolean> {
     try {
-      const result = await validate<EmailData>(this.data, emailSchema, joiOptions);
+      const result = await emailSchema.validateAsync(this.data, joiOptions);
 
       Object.assign(this.data, result);
 

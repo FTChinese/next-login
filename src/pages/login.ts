@@ -1,4 +1,4 @@
-import { validate, ValidationError } from "@hapi/joi";
+import { ValidationError } from "@hapi/joi";
 import { Flash } from "../widget/flash";
 import { Form } from "../widget/form";
 import { Button } from "../widget/button";
@@ -35,9 +35,8 @@ export class CredentialBuilder {
 
   async validate(c: Credentials): Promise<boolean> {
     try {
-      const result = await validate<Credentials>(
+      const result = await loginSchema.validateAsync(
         c,
-        loginSchema,
         joiOptions
       );
 
