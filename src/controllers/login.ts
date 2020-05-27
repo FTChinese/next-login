@@ -87,6 +87,15 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
 
   // @ts-ignore
   ctx.session.user = account;
+
+  ctx.cookies.set("USER_ID", account.id);
+  ctx.cookies.set("USER_ID_FT", account.id);
+  ctx.cookies.set("USER_NAME", account.userName || "");
+  ctx.cookies.set("USER_NAME_FT", account.userName || "");
+  ctx.cookies.set("paywall", account.membership.tier || "");
+  ctx.cookies.set("paywall_expire",);
+
+
   return ctx.redirect(profileMap.base);
 
 }, async (ctx, next) => {
