@@ -8,7 +8,7 @@ import { Button } from "../widget/button";
 import { FormControl } from "../widget/form-control";
 import { TextInputElement } from "../widget/text-input";
 import { ControlType } from "../widget/widget";
-import { FormOnlyPage } from "./data-builder";
+import { FormPage } from "./form-page";
 
 export class MobileBuilder {
   flashMsg?: string;
@@ -72,8 +72,8 @@ export class MobileBuilder {
     }
   }
 
-  build(): FormOnlyPage {
-    const page: FormOnlyPage = {
+  build(): FormPage {
+    const page: FormPage = {
       heading: "手机号码",
     }
 

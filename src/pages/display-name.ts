@@ -8,7 +8,7 @@ import { Button } from "../widget/button";
 import { FormControl } from "../widget/form-control";
 import { TextInputElement } from "../widget/text-input";
 import { ControlType } from "../widget/widget";
-import { FormOnlyPage } from "./data-builder";
+import { FormPage } from "./form-page";
 
 export class DisplayNameBuilder {
   flashMsg?: string;
@@ -72,7 +72,7 @@ export class DisplayNameBuilder {
     }
   }
 
-  build(): FormOnlyPage {
+  build(): FormPage {
     return {
       heading: "用户名",
       flash: this.flashMsg

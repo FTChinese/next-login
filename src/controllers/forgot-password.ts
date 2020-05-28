@@ -12,9 +12,9 @@ import {
 import { 
     entranceMap 
 } from "../config/sitemap";
-import { RequestPwResetPage, KeyDone } from "../pages/request-pw-reset";
+import { KeyDone } from "../pages/request-pw-reset";
 import { EmailBuilder } from "../pages/request-pw-reset";
-import { ResetPwBuilder, ResetPasswordPage, PwResetData } from "../pages/reset-password";
+import { ResetPwBuilder, PwResetData } from "../pages/reset-password";
 
 const router = new Router();
 
@@ -22,23 +22,18 @@ const router = new Router();
  * @description Show input box to let user to enter email.
  */
 router.get("/", async (ctx, next) => {
-    // @ts-ignore
-    const key: KeyPwReset = ctx.session.ok;
+  // @ts-ignore
+  const key: KeyPwReset | undefined = ctx.session.ok;
 
-    if (key) {
-      const uiData = RequestPwResetPage.afterRedirect(key);
-      Object.assign(ctx.state, uiData);
-    } else {
-      const uiData = new RequestPwResetPage(EmailBuilder.default());
-      Object.assign(ctx.state, uiData);
-    }
-    
-    return await next();
+  const uiData = (new EmailBuilder()).build(key);
+    Object.assign(ctx.state, uiData);
+  
+  return await next();
 }, async (ctx, next) => {
-    ctx.body = await render('forgot-password/enter-email.html', ctx.state);
+  ctx.body = await render('forgot-password.html', ctx.state);
 
-    // @ts-ignore
-    delete ctx.session.ok;
+  // @ts-ignore
+  delete ctx.session.ok;
 });
 
 /**
@@ -52,10 +47,10 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
 
     const headers: IHeaderApp = ctx.state.appHeaders;
 
-    const emailBuilder = new EmailBuilder(formData);
-    const isValid = await emailBuilder.validate();
+    const emailBuilder = new EmailBuilder();
+    const isValid = await emailBuilder.validate(formData);
     if (!isValid) {
-      const uiData = new RequestPwResetPage(emailBuilder);
+      const uiData = emailBuilder.build();
       Object.assign(ctx.state, uiData);
       return await next();
     }
@@ -63,7 +58,7 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
     const ok = await emailBuilder.requestLetter(headers);
 
     if (!ok) {
-        const uiData = new RequestPwResetPage(emailBuilder);
+        const uiData = emailBuilder.build();
 
         Object.assign(ctx.state, uiData);
 
@@ -76,7 +71,7 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
 
     ctx.redirect(ctx.path);
 }, async (ctx, next) => {
-  ctx.body = await render('forgot-password/enter-email.html', ctx.state);
+  ctx.body = await render('forgot-password.html', ctx.state);
 });
 
 /**
@@ -90,28 +85,29 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
 router.get("/:token", async (ctx, next) => {
     const token: string = ctx.params.token;
 
-    const builder = ResetPwBuilder.default();
+    const builder = new ResetPwBuilder();
 
-    const apiErr = await builder.verifyToken(token);
+    const redirectKey = await builder.verifyToken(token);
 
-    if (apiErr && apiErr.notFound) {
-      const key: KeyDone = "invalid_token";
-
+    if (redirectKey) {
       // @ts-ignore
-      ctx.session.ok = key;
+      ctx.session.ok = redirectKey;
       return ctx.redirect(entranceMap.passwordReset);
     }
 
-    Object.assign(ctx.state, new ResetPasswordPage(builder));
+    Object.assign(ctx.state, builder.build());
 
     // In case the submit failure and this page need to be displayed again in POST.
 
-    // @ts-ignore
-    ctx.session.email = success.email;
-
+    
+    if (builder.email) {
+      // @ts-ignore
+      ctx.session.email = builder.email;
+    }
+    
     await next();
 }, async (ctx, next) => {
-    ctx.body = await render("forgot-password/new-password.html", ctx.state);
+    ctx.body = await render("forgot-password.html", ctx.state);
 });
 
 router.post("/:token", async (ctx, next) => {
@@ -123,21 +119,21 @@ router.post("/:token", async (ctx, next) => {
         throw new Error("form data not found");
     }
 
-    const builder = new ResetPwBuilder(formData);
-    // @ts-ignore
-    builder.email = ctx.session.email;
+    const builder = new ResetPwBuilder();
+    
 
-    const isValid = await builder.validate();
+    const isValid = await builder.validate(formData);
     if (!isValid) {
-      
-      const uiData = new ResetPasswordPage(builder);
+      // @ts-ignore
+      builder.email = ctx.session.email;
+      const uiData = builder.build();
       Object.assign(ctx.state, uiData);
       return await next();
     }
 
     const ok = await builder.resetPassword(token);
     if (!ok) {
-      const uiData = new ResetPasswordPage(builder);
+      const uiData = builder.build();
       Object.assign(ctx.state, uiData);
       return await next();
     }
@@ -153,7 +149,7 @@ router.post("/:token", async (ctx, next) => {
     delete ctx.session.email;
 
 }, async (ctx, next) => {
-    ctx.body = await render("forgot-password/new-password.html", ctx.state);
+    ctx.body = await render("forgot-password.html", ctx.state);
 });
 
 export default router.routes();

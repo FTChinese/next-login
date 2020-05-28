@@ -1,4 +1,3 @@
-import { IFetchResult, APIError } from "../repository/api-response";
 import { AndroidRelease } from "../models/android";
 import { androidRepo } from "../repository/app-release";
 import { UIBase } from "./ui";

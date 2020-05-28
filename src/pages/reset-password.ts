@@ -1,8 +1,7 @@
 import { Flash } from "../widget/flash";
 import { Form } from "../widget/form";
-import { DataBuilder } from "./data-builder";
 import { ValidationError } from "@hapi/joi";
-import { passwordsSchema } from "./validator";
+import { passwordsSchema, reduceJoiErrors } from "./validator";
 import { joiOptions } from "./validator";
 import { FormControl } from "../widget/form-control";
 import { Button } from "../widget/button";
@@ -10,41 +9,67 @@ import { TextInputElement } from "../widget/text-input";
 import { ControlType } from "../widget/widget";
 import { accountService } from "../repository/account";
 import { APIError } from "../repository/api-response";
+import { KeyDone } from "./request-pw-reset";
+import { FormPage } from "./form-page";
 
 export interface PwResetData {
   password: string;
   confirmPassword: string;
 }
 
-export class ResetPwBuilder extends DataBuilder<PwResetData> {
+export interface ResetPasswordPage {
+  heading: string;
+  flash?: Flash;
+  form?: Form;
+}
+
+export class ResetPwBuilder {
+
+  private errors: Map<string, string> = new Map(); // Hold validator error for each form field. Key is field's name attribute.
+  private flashMsg?: string; // Hold message for API non-422 error.
+  private formData: PwResetData = {
+    password: '',
+    confirmPassword: ''
+  };
 
   email: string;
+  private showForm = true;
 
-  constructor(data: PwResetData) {
-    super(data);
-  }
-
-  async verifyToken(token: string): Promise<APIError | null> {
+  async verifyToken(token: string): Promise<KeyDone | null> {
     try {
       const result = await accountService.verifyPwResetToken(token);
       this.email = result.email;
 
       return null;
     } catch (e) {
-      this.flashMsg = e.message;
-      return new APIError(e);
+      const errResp = new APIError(e);
+
+      if (errResp.notFound) {
+        return "invalid_token";
+      }
+
+      this.showForm = false;
+
+      if (errResp.unprocessable) {
+        this.errors = errResp.unprocessable.toMap();
+        return null;
+      }
+
+      this.flashMsg = errResp.message;
+
+      return null;
     }
   }
 
-  async validate(): Promise<boolean> {
+  async validate(data: PwResetData): Promise<boolean> {
     try {
-      const result = await passwordsSchema.validateAsync(this.data, joiOptions)
+      const result = await passwordsSchema.validateAsync(data, joiOptions)
 
-      Object.assign(this.data, result);
+      this.formData = result
 
       return true;
     } catch (e) {
-      this.reduceJoiErrors(e as ValidationError);
+      this.errors = reduceJoiErrors(e as ValidationError);
       return false;
     }
   }
@@ -52,7 +77,7 @@ export class ResetPwBuilder extends DataBuilder<PwResetData> {
   async resetPassword(token: string): Promise<boolean> {
     try {
       const ok = await accountService.resetPassword({
-        password: this.data.password,
+        password: this.formData.password,
         token: token,
       });
 
@@ -70,66 +95,53 @@ export class ResetPwBuilder extends DataBuilder<PwResetData> {
     }
   }
 
-  static default(): ResetPwBuilder {
-    return new ResetPwBuilder({
-      password: "",
-      confirmPassword: "",
-    });
-  }
-}
-
-export class ResetPasswordPage {
-  heading: string;
-  flash?: Flash;
-  form: Form;
-
-  constructor(b: ResetPwBuilder) {
-    this.heading = `更改 ${b.email} 的密码`
-    if (b.flashMsg) {
-      this.flash = Flash.danger(b.flashMsg);
+  build(): FormPage {
+    return {
+      heading: this.email ? `更改 ${this.email} 的密码` : "更改密码",
+      flash: this.flashMsg ? Flash.danger(this.flashMsg) : undefined,
+      form: this.showForm ? new Form({
+        disabled: false,
+        method: "post",
+        action: "",
+        controls: [
+          new FormControl({
+            label: {
+              text: "密码"
+            },
+            controlType: ControlType.Text,
+            field: new TextInputElement({
+              id: "password",
+              type: "password",
+              name: "credentials[password]",
+              required: true,
+              minlength: 8,
+              maxlength: 64,
+            }),
+            error: this.errors.get("password"),
+          }),
+          new FormControl({
+            label: {
+              text: "再次输入确认"
+            },
+            controlType: ControlType.Text,
+            field: new TextInputElement({
+              id: "confirmPassword",
+              type: "password",
+              name: "credentials[confirmPassword]",
+              required: true,
+              minlength: 8,
+              maxlength: 64,
+            }),
+            desc: "请确保两次输入的密码一致",
+            error: this.errors.get("confirmPassword"),
+          })
+        ],
+        submitBtn: Button.primary()
+          .setBlock()
+          .setName("重置密码")
+          .setDisableWith("保存新密码..."),
+      }) : undefined,
     }
-
-    this.form = new Form({
-      disabled: false,
-      method: "post",
-      action: "",
-      controls: [
-        new FormControl({
-          label: {
-            text: "密码"
-          },
-          controlType: ControlType.Text,
-          field: new TextInputElement({
-            id: "password",
-            type: "password",
-            name: "credentials[password]",
-            required: true,
-            minlength: 8,
-            maxlength: 64,
-          }),
-          error: b.errors.get("password"),
-        }),
-        new FormControl({
-          label: {
-            text: "再次输入确认"
-          },
-          controlType: ControlType.Text,
-          field: new TextInputElement({
-            id: "confirmPassword",
-            type: "password",
-            name: "credentials[confirmPassword]",
-            required: true,
-            minlength: 8,
-            maxlength: 64,
-          }),
-          desc: "请确保两次输入的密码一致",
-          error: b.errors.get("confirmPassword"),
-        })
-      ],
-      submitBtn: Button.primary()
-        .setBlock()
-        .setName("重置密码")
-        .setDisableWith("保存新密码..."),
-    });
   }
 }
+
