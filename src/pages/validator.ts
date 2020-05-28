@@ -146,7 +146,7 @@ export interface ISignUpFormData extends Credentials {
 
 export const passwordUpdatingSchema = passwordsSchema.keys({
     // Legacy password.
-    oldPassword: string().trim().required().message('请填写当前密码'),
+    oldPassword: string().trim().required(),
 });
 
 export const userNameSchema = object().keys({
@@ -160,7 +160,7 @@ export const mobileSchema = object().keys({
 export const profileSchema = object().keys({
     familyName: string().trim().empty('').max(64).default(null),
     givenName: string().trim().empty('').max(64).default(null),
-    gender: string().empty('').valid(["M", "F"]).default(null),
+    gender: string().empty('').valid("M", "F").default(null),
     birthday: string().empty('').max(10).default(null),
 });
 

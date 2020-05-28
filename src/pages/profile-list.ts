@@ -1,21 +1,9 @@
-import { validate, ValidationError } from "@hapi/joi";
 import debug from "debug";
-import { UIBase, ITextInput, UISingleInput } from "../viewmodels/ui";
-import { APIError, IFetchResult } from "../repository/api-response";
-import {
-  userNameSchema,
-  mobileSchema,
-  addressSchema,
-  buildJoiErrors,
-  IFormState,
-} from "./validator";
+import { APIError } from "../repository/api-response";
 import {
   Account,
   Profile,
   Address,
-  IName,
-  IMobile,
-  IAddress,
 } from "../models/reader";
 
 import { profileService } from "../repository/profile";
@@ -24,26 +12,6 @@ import { profileMap } from "../config/sitemap";
 import { KeyUpdated, getMsgUpdated } from "./redirection";
 
 const log = debug("user:profile-viewmodel");
-
-interface IUpdateNameResult extends IFetchResult<boolean> {
-  errForm?: IName;
-}
-
-interface IUpdateMobileResult extends IFetchResult<boolean> {
-  errForm?: IMobile;
-}
-
-interface IUpdateAddressResult extends IFetchResult<boolean> {
-  errForm?: IAddress;
-}
-
-interface IFormGroup extends ITextInput {
-  col?: number;
-}
-
-interface UIAddress extends UIBase {
-  formRows?: Array<Array<IFormGroup>>;
-}
 
 interface ProfilePage {
   flash?: Flash;
