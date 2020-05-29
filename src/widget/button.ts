@@ -74,25 +74,4 @@ export class Button extends Element {
     return new Button()
       .setStyle("secondary");
   }
-
-  /**
-   * <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-   */
-  static dismiss(): Button {
-    const b = new Button()
-      .setType("button");
-    
-    b.addClass("close")
-      .setAttribute("data-disimiss", "alert")
-      .setAttribute("aria-label", "Close")
-      .appendChild(
-        (new Element("span"))
-          .setAttribute("aria-hidden", "true")
-          .withText("&times;")
-      );
-    
-    return b;
-  }
 }
