@@ -1,4 +1,4 @@
-import { Account, Address, IAddress } from "../models/reader";
+import { Account, Address } from "../models/reader";
 import { profileService } from "../repository/profile";
 import { APIError } from "../repository/api-response";
 import { joiOptions, reduceJoiErrors, addressSchema } from "./validator";
@@ -7,6 +7,7 @@ import { Button } from "../widget/button";
 import { FormControl } from "../widget/form-control";
 import { TextInputElement } from "../widget/text-input";
 import { ControlType } from "../widget/widget";
+import { ValidationError } from "@hapi/joi";
 
 interface AddressPage {
   flash?: Flash;
@@ -25,7 +26,7 @@ export class AddressBuilder {
   flashMsg?: string;
   errors: Map<string, string> = new Map();
   address?: Address;
-
+  
   async fetch(account: Account): Promise<boolean> {
     try {
       const address = await profileService.fetchAddress(account.id);
@@ -45,16 +46,16 @@ export class AddressBuilder {
     }
   }
 
-  async validate(data: IAddress): Promise<boolean> {
+  async validate(data: Address): Promise<boolean> {
     try {
       const result = await addressSchema.validateAsync(data, joiOptions);
 
-      Object.assign(this.address, result);
+      this.address = result;
 
       return true;
     } catch (e) {
 
-      this.errors = reduceJoiErrors(e)
+      this.errors = reduceJoiErrors(e as ValidationError);
 
       return false;
     }
@@ -73,7 +74,7 @@ export class AddressBuilder {
       const errResp = new APIError(e);
 
       if (errResp.unprocessable) {
-        this.errors = errResp.unprocessable.toMap()
+        this.errors = errResp.controlErrs
 
         return false;
       }
@@ -110,6 +111,7 @@ export class AddressBuilder {
         }),
         error: this.errors.get("country"),
       }),
+      
       province: new FormControl({
         label: {
           text: "省/直辖市",
@@ -122,7 +124,9 @@ export class AddressBuilder {
           value: this.address?.province,
         }),
         error: this.errors.get("province"),
+        extraWrapperClass: "col-md-4"
       }),
+
       city: new FormControl({
         label: {
           text: "市",
@@ -135,7 +139,9 @@ export class AddressBuilder {
           value: this.address?.city,
         }),
         error: this.errors.get("city"),
+        extraWrapperClass: "col-md-4"
       }),
+
       district: new FormControl({
         label: {
           text: "区/县",
@@ -148,7 +154,9 @@ export class AddressBuilder {
           value: this.address?.district,
         }),
         error: this.errors.get("district"),
+        extraWrapperClass: "col-md-4"
       }),
+
       street: new FormControl({
         label: {
           text: "街道",
@@ -161,7 +169,9 @@ export class AddressBuilder {
           value: this.address?.street,
         }),
         error: this.errors.get("street"),
+        extraWrapperClass: "col-md-10"
       }),
+
       postcode: new FormControl({
         label: {
           text: "邮编",
@@ -174,7 +184,9 @@ export class AddressBuilder {
           value: this.address?.postcode,
         }),
         error: this.errors.get("postcode"),
+        extraWrapperClass: "col-md-2"
       }),
+
       submitBtn: Button.primary()
         .setName("保存")
         .setDisableWith("正在保存..."),

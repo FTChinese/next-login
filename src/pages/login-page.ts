@@ -66,7 +66,7 @@ export class CredentialBuilder {
       }
   
       if (errResp.unprocessable) {
-        this.errors = errResp.unprocessable.toMap();
+        this.errors = errResp.controlErrs;
         return null
       }
 

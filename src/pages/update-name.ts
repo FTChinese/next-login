@@ -1,4 +1,4 @@
-import { Profile, IName, Account } from "../models/reader";
+import { Profile, Account } from "../models/reader";
 import { profileService } from "../repository/profile";
 import { APIError } from "../repository/api-response";
 import { userNameSchema, joiOptions, reduceJoiErrors } from "./validator";
@@ -9,17 +9,36 @@ import { FormControl } from "../widget/form-control";
 import { TextInputElement } from "../widget/text-input";
 import { ControlType } from "../widget/widget";
 import { FormPage } from "./form-page";
+import debug from "debug";
+import { NameForm } from "../models/form-data";
+
+const log = debug("user:display-name");
 
 export class DisplayNameBuilder {
   flashMsg?: string;
   errors: Map<string, string> = new Map();
   profile?: Profile
+  formData?: NameForm
+
+  get userName(): string {
+    if (this.formData) {
+      return this.formData.userName;
+    }
+
+    if (this.profile) {
+      return this.profile.userName || '';
+    }
+
+    return '';
+  }
 
   async fetchProfile(account: Account): Promise<boolean> {
     try {
       const p = await profileService.fetchProfile(account.id);
 
       this.profile = p;
+
+      log("Profile: %O", p);
 
       return true;
     } catch (e) {
@@ -34,11 +53,11 @@ export class DisplayNameBuilder {
     }
   }
 
-  async validate(data: IName): Promise<boolean> {
+  async validate(data: NameForm): Promise<boolean> {
     try {
       const result = await userNameSchema.validateAsync(data, joiOptions);
 
-      Object.assign(this.profile, result);
+      this.formData = result
 
       return true;
     } catch (e) {
@@ -50,19 +69,21 @@ export class DisplayNameBuilder {
   }
 
   async update(account: Account): Promise<boolean> {
-    if (!this.profile?.userName) {
-      throw new Error("userName does not exist");
+    if (!this.formData) {
+      throw new Error("form data does not exist");
     }
 
     try {
-      const ok = await profileService.updateName(account.id, {userName: this.profile.userName});
+      const ok = await profileService.updateName(account.id, this.formData);
 
       return ok;
     } catch (e) {
+      log("Error when udpating username: %O", e);
+
       const errResp = new APIError(e);
 
       if (errResp.unprocessable) {
-        this.errors = errResp.unprocessable.toMap()
+        this.errors = errResp.controlErrs;
 
         return false;
       }
@@ -73,6 +94,7 @@ export class DisplayNameBuilder {
   }
 
   build(): FormPage {
+    
     return {
       heading: "用户名",
       flash: this.flashMsg
@@ -88,12 +110,12 @@ export class DisplayNameBuilder {
             field: new TextInputElement({
               id: "name",
               type: "text",
-              name: "profile[userName]",
-              value: this.profile?.userName,
+              name: "userName",
+              value: this.userName,
               maxlength: 32,
             }),
             desc: "32字符以内",
-            error: this.errors.get("displayName"),
+            error: this.errors.get("userName"),
           })
         ],
         submitBtn: Button.primary()

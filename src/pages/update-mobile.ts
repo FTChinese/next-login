@@ -1,4 +1,4 @@
-import { Profile, Account, IMobile } from "../models/reader";
+import { Profile, Account } from "../models/reader";
 import { profileService } from "../repository/profile";
 import { APIError } from "../repository/api-response";
 import { joiOptions, reduceJoiErrors, mobileSchema } from "./validator";
@@ -9,11 +9,25 @@ import { FormControl } from "../widget/form-control";
 import { TextInputElement } from "../widget/text-input";
 import { ControlType } from "../widget/widget";
 import { FormPage } from "./form-page";
+import { MobileForm } from "../models/form-data";
 
 export class MobileBuilder {
   flashMsg?: string;
   errors: Map<string, string> = new Map();
-  profile?: Profile
+  profile?: Profile;
+  formData?: MobileForm;
+
+  get mobileNumber(): string {
+    if (this.formData) {
+      return this.formData.mobile;
+    }
+
+    if (this.profile) {
+      return this.profile.mobile || '';
+    }
+
+    return '';
+  }
 
   async fetchProfile(account: Account): Promise<boolean> {
     try {
@@ -34,11 +48,11 @@ export class MobileBuilder {
     }
   }
 
-  async validate(data: IMobile): Promise<boolean> {
+  async validate(data: MobileForm): Promise<boolean> {
     try {
       const result = await mobileSchema.validateAsync(data, joiOptions);
 
-      Object.assign(this.profile, result);
+      this.formData = result;
 
       return true;
     } catch (e) {
@@ -50,19 +64,19 @@ export class MobileBuilder {
   }
 
   async update(account: Account): Promise<boolean> {
-    if (!this.profile?.mobile) {
+    if (!this.formData) {
       throw new Error("mobile number does not exist");
     }
 
     try {
-      const ok = await profileService.updateMobile(account.id, {mobile: this.profile.mobile});
+      const ok = await profileService.updateMobile(account.id, this.formData);
 
       return ok;
     } catch (e) {
       const errResp = new APIError(e);
 
       if (errResp.unprocessable) {
-        this.errors = errResp.unprocessable.toMap()
+        this.errors = errResp.controlErrs;
 
         return false;
       }
@@ -73,42 +87,33 @@ export class MobileBuilder {
   }
 
   build(): FormPage {
-    const page: FormPage = {
+    
+    return {
       heading: "手机号码",
-    }
-
-    if (this.flashMsg) {
-      page.flash = Flash.danger(this.flashMsg);
-    }
-
-    // For GET, if fetching user data failed, does not display the form.
-    // The flash field should have value.
-    if (!this.profile) {
-      return page;
-    }
-
-    page.form = new Form({
-      disabled: false,
-      method: "post",
-      action: "",
-      controls: [
-        new FormControl({
-          controlType: ControlType.Text,
-          field: new TextInputElement({
-            id: "name",
-            type: "text",
-            name: "profile[mobile]",
-            value: this.profile?.userName,
-            maxlength: 11,
-          }),
-          error: this.errors.get("mobile"),
-        })
-      ],
-      submitBtn: Button.primary()
-        .setName("保存")
-        .setDisableWith("正在保存..."),
-    });
-
-    return page;
+      flash: this.flashMsg
+        ? Flash.danger(this.flashMsg)
+        : undefined,
+      form: new Form({
+        disabled: false,
+        method: "post",
+        action: "",
+        controls: [
+          new FormControl({
+            controlType: ControlType.Text,
+            field: new TextInputElement({
+              id: "name",
+              type: "text",
+              name: "mobile",
+              value: this.mobileNumber,
+              maxlength: 11,
+            }),
+            error: this.errors.get("mobile"),
+          })
+        ],
+        submitBtn: Button.primary()
+          .setName("保存")
+          .setDisableWith("正在保存..."),
+      }),
+    };
   }
 }

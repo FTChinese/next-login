@@ -1,16 +1,21 @@
 import { Flash } from "../widget/flash";
 import { TextInputElement } from "../widget/text-input";
 import { RadioInputElement } from "../widget/radio-input";
-import { ProfileFormData, Account, Profile } from "../models/reader";
-import { ValidationError } from "@hapi/joi";
-import { profileSchema, joiOptions, reduceJoiErrors } from "./validator";
 import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
 import { Button } from "../widget/button";
+
+import { ValidationError } from "@hapi/joi";
+import { profileSchema, joiOptions, reduceJoiErrors } from "./validator";
 import { profileService } from "../repository/profile";
 import { APIError } from "../repository/api-response";
+import { ProfileFormData } from "../models/form-data";
+import { Account, Profile } from "../models/reader";
+import debug from "debug";
 
-export interface ProfileInfoPage {
+const log = debug("user:update-personal-info");
+
+export interface PersonalInfoPage {
   flash?: Flash;
   form?: {
     familyName: FormControl;
@@ -22,18 +27,20 @@ export interface ProfileInfoPage {
   }
 }
 
-export class ProfileInfoBuilder {
+export class PersonalInfoBuilder {
 
   errors: Map<string, string> = new Map(); // Hold validator error for each form field. Key is field's name attribute.
   flashMsg?: string; // Hold message for API non-422 error.
-  profile: Profile;
-  formData: ProfileFormData;
+  profile?: Profile;
+  formData?: ProfileFormData;
 
   async fetchProfile(account: Account): Promise<boolean> {
     try {
       const p = await profileService.fetchProfile(account.id);
 
       this.profile = p;
+
+      log("Profile: %O", p);
 
       return true;
     } catch (e) {
@@ -63,6 +70,10 @@ export class ProfileInfoBuilder {
   }
 
   async update(account: Account): Promise<boolean> {
+    if (!this.formData) {
+      throw new Error("form data does not exist");
+    }
+
     try {
       const ok = await profileService.updateProfile(account.id, this.formData);
 
@@ -71,7 +82,7 @@ export class ProfileInfoBuilder {
       const errResp = new APIError(e);
 
       if (errResp.unprocessable) {
-        this.errors = errResp.unprocessable.toMap();
+        this.errors = errResp.controlErrs;
         return false;
       }
 
@@ -80,8 +91,10 @@ export class ProfileInfoBuilder {
     }
   }
 
-  build(): ProfileInfoPage {
-    const page: ProfileInfoPage = {
+  build(): PersonalInfoPage {
+    
+
+    const page: PersonalInfoPage = {
       flash: this.flashMsg
         ? Flash.danger(this.flashMsg)
         : undefined
@@ -95,6 +108,8 @@ export class ProfileInfoBuilder {
       this.formData = this.profile;
     }
 
+    log("formData: %O", this.formData)
+
     page.form = {
       familyName: new FormControl({
         label: {
@@ -105,9 +120,10 @@ export class ProfileInfoBuilder {
           id: "familyName",
           name: "profile[familyName]",
           type: "text",
-          value: this.formData.familyName,
+          value: this.formData?.familyName,
         }),
         error: this.errors.get("familyName"),
+        extraWrapperClass: "col-md-6"
       }),
 
       givenName: new FormControl({
@@ -119,9 +135,10 @@ export class ProfileInfoBuilder {
           type: "text",
           id: "givenName",
           name: "profile[givenName]",
-          value: this.formData.givenName,
+          value: this.formData?.givenName,
         }),
         error: this.errors.get("givenName"),
+        extraWrapperClass: "col-md-6"
       }),
 
       genderMale: new FormControl({
@@ -134,7 +151,7 @@ export class ProfileInfoBuilder {
           id: "genderM",
           name: "profile[gender]",
           value: "M",
-          checked: this.formData.gender === "M",
+          checked: this.formData?.gender === "M",
         }),
       }),
 
@@ -148,7 +165,7 @@ export class ProfileInfoBuilder {
           id: "genderF",
           name: "profile[gender]",
           value: "F",
-          checked: this.formData.gender === "F",
+          checked: this.formData?.gender === "F",
         }),
         error: this.errors.get("gender"),
       }),
@@ -162,7 +179,7 @@ export class ProfileInfoBuilder {
           id: "birthday",
           type: "date",
           name: "profile[birthday]",
-          value: this.formData.birhtday,
+          value: this.formData?.birthday,
         }),
         error: this.errors.get("birthday"),
       }),
