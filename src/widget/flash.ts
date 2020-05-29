@@ -11,7 +11,7 @@ export class Flash extends Element{
     constructor(msg: string) {
       super("div");
       this.message = msg;
-      this.addClass("alert fade show mt-3")
+      this
         .setAttribute("role", "alert")
         .appendChild((new Element("span")).withText(msg));
     }
@@ -33,12 +33,17 @@ export class Flash extends Element{
     }
 
     render(): string {
-      this.addClass(`alert-${this.kind}`);
+      
+      this
+        .addClass("alert")
+        .addClass(`alert-${this.kind}`);
 
       if (this.dismissible) {
         this.addClass("alert-dismissible");
-        this.appendChild(Button.dismiss());
+        this.appendChild(Flash.dismissBtn());
       }
+
+      this.addClass("fade show mt-3");
 
       return super.render();
     }
@@ -49,5 +54,23 @@ export class Flash extends Element{
 
     static success(msg: string): Flash {
         return new Flash(msg).setSuccess();
+    }
+
+    /**
+     * <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+    */
+    static dismissBtn(): Element {
+      return (new Element("button"))
+        .addClass("close")
+        .setAttribute("type", "button")
+        .setAttribute("data-dismiss", "alert")
+        .setAttribute("aria-label", "Close")
+        .appendChild(
+          (new Element("span"))
+            .setAttribute("aria-hidden", "true")
+            .withText("&times;")
+        );
     }
 }
