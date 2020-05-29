@@ -30,7 +30,7 @@ import {
   IOAuthSession as IFtcOAuthSession,
 } from "../models/ftc-oauth";
 import { toBoolean } from "../util/converter";
-import { LoginPage, CredentialBuilder } from "../pages/login";
+import { CredentialBuilder } from "../pages/login-page";
 
 const log = debug("user:login");
 
@@ -79,7 +79,7 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
   const account = await builder.login(headers);
 
   if (!account) {
-    const uiData = builder.build;
+    const uiData = builder.build();
     Object.assign(ctx.state, uiData);
 
     return await next();
@@ -93,7 +93,7 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
   ctx.cookies.set("USER_NAME", account.userName || "");
   ctx.cookies.set("USER_NAME_FT", account.userName || "");
   ctx.cookies.set("paywall", account.membership.tier || "");
-  ctx.cookies.set("paywall_expire",);
+  ctx.cookies.set("paywall_expire", `${account.membership.expireSeconds}`);
 
 
   return ctx.redirect(profileMap.base);
