@@ -77,4 +77,5 @@ export interface ControlOptions {
   field: InputElement;
   desc?: string;
   error?: string;
+  extraWrapperClass?: string;
 }
