@@ -5,7 +5,6 @@ import {
 } from "./middleware";
 import {
   Account,
-  EmailData,
   Credentials,
 } from "../models/reader";
 import {
@@ -31,6 +30,7 @@ import {
 } from "../config/viper";
 import { UpdateEmailBuilder } from "../pages/update-email";
 import { UpdatePasswordBuilder } from "../pages/update-password";
+import { EmailData } from "../models/form-data";
 
 const router = new Router();
 
@@ -191,7 +191,7 @@ router.post("/request-verification", collectAppHeaders(), async (ctx, next) => {
 
   return ctx.redirect(accountMap.base);
 }, async (ctx, next) => {
-  ctx.body = await render("layouts/two-cols.html", ctx.state);
+  ctx.body = await render("layouts/content.html", ctx.state);
 });
 
 /**
