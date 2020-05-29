@@ -57,6 +57,9 @@ const invalids: Record<string, InvalidMsg> = {
         missing_field: "新密码不能为空",
         invalid: "新密无效",
     },
+    userName: {
+      already_exists: "该用户名已被使用",
+    }
 }
 
 // Define SuperAgent error response.
@@ -65,40 +68,14 @@ export interface SuperAgentError extends Error {
     response: Response; // Network failures, timeouts, and other errors that produce no response will contain no err.status or err.response fields.
 }
 
-type ErrCode = "missing" | "missing_field" | "invalid" | "already_exists";
-
-interface IErrorBody {
-    message?: string,
-    error?: {
-        field: string;
-        code: ErrCode;
-    }
+interface Unprocessable {
+  field: string;
+  code: "missing" | "missing_field" | "invalid" | "already_exists";
 }
 
-class Unprocessable {
-    field: string;
-    code: ErrCode;
-
-    constructor(field: string, code: ErrCode) {
-        this.field = field;
-        this.code = code;
-    }
-
-    get key(): string {
-        return `${this.field}_${this.code}`;
-    }
-
-    toMap(): Map<string, string> {
-        if (invalids.hasOwnProperty(this.field)) {
-            return new Map([
-                [this.field, invalids[this.field][this.code] || ""]
-            ])
-        }
-
-        return new Map([
-            [this.field, ""],
-        ]);
-    }
+interface ApiErrorPayload {
+    message?: string;
+    error?: Unprocessable;
 }
 
 function isString(x: any): x is string {
@@ -111,7 +88,6 @@ export function isResponseError(e: SuperAgentError | Error): e is ResponseError 
 
 export class APIError extends Error{
     message: string;
-    error?: Unprocessable; // Fields for validation failure.
     code?: string;
     param?: string;
     
@@ -144,24 +120,33 @@ export class APIError extends Error{
 
         // `response.body` field always existse.
         // If API responds not body, it is `{}`.
-        const body: IErrorBody = resp.body;
+        const body: ApiErrorPayload = resp.body;
         
         if (body.message) {
             this.message = body.message;
         }
 
-        // If the error is a 422 Entity Unprocessable.
-        if (body.error) {
-            this.error = new Unprocessable(body.error.field, body.error.code);
-            this.unprocessable = new Unprocessable(body.error.field, body.error.code)
-        }
-
+        this.unprocessable = body.error
         this.status = resp.status;
         this.notFound = resp.notFound;
         this.forbidden = resp.forbidden;
         this.unauthorized = resp.unauthorized;
 
         log(this);
+    }
+
+    get controlErrs(): Map<string, string> {
+      if (!this.unprocessable) {
+        return new Map();
+      }
+
+      const msg = invalids.hasOwnProperty(this.unprocessable.field)
+        ? (invalids[this.unprocessable.field][this.unprocessable.code] || this.message)
+        : this.message;
+      
+      return new Map([
+        [this.unprocessable.field, msg]
+      ]);
     }
 }
 
