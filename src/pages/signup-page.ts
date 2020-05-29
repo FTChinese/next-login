@@ -5,7 +5,7 @@ import { entranceMap } from "../config/sitemap";
 import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
 import { TextInputElement } from "../widget/text-input";
-import { buildCredentialControls } from "./login";
+import { buildCredentialControls } from "./login-page";
 import { Account, Credentials } from "../models/reader";
 import { joiOptions, reduceJoiErrors } from "./validator";
 import { signUpSchema } from "./validator";
@@ -67,7 +67,7 @@ export class SignUpBuilder {
       }
 
       if (errResp.unprocessable) {
-        this.errors = errResp.unprocessable.toMap();
+        this.errors = errResp.controlErrs;
 
         return null;
       }
