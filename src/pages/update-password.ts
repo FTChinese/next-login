@@ -134,8 +134,7 @@ export class UpdatePasswordBuilder {
       if (errResp.unprocessable) {
         // field: "oldPassword" | "newPassword"
         // code: "missing_fied" | "invalid"
-        // This generates 
-        this.errors = errResp.unprocessable.toMap();
+        this.errors = errResp.controlErrs;
 
         return false;
       }

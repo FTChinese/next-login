@@ -51,7 +51,7 @@ export class ResetPwBuilder {
       this.showForm = false;
 
       if (errResp.unprocessable) {
-        this.errors = errResp.unprocessable.toMap();
+        this.errors = errResp.controlErrs;
         return null;
       }
 
@@ -86,7 +86,7 @@ export class ResetPwBuilder {
       const errResp = new APIError(e);
 
       if (errResp.unprocessable) {
-        this.errors = errResp.unprocessable.toMap();
+        this.errors = errResp.controlErrs;
         return false;
       }
 
