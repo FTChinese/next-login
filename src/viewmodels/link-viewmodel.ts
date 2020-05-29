@@ -23,7 +23,6 @@ import {
 } from "../pages/validator";
 
 import {
-    EmailData,
     Credentials,
     Account,
     Membership,
@@ -41,6 +40,7 @@ import {
     entranceMap,
 } from "../config/sitemap";
 import { AccountKind } from "../models/enums";
+import { EmailData } from "../models/form-data";
 
 const log = debug("user:link-viewmodel");
 
@@ -143,8 +143,8 @@ class LinkViewModel {
             };
         } catch (e) {
             const errResp = new APIError(e);
-            if (errResp.error) {
-                const o = errResp.error.toMap();
+            if (errResp.unprocessable) {
+                const o = errResp.controlErrs;
                 return {
                     errForm: {
                         email: o.get("email") || ""
@@ -228,8 +228,8 @@ class LinkViewModel {
 
             log("%O", e);
 
-            if (errResp.error) {
-                const o = errResp.error.toMap();
+            if (errResp.unprocessable) {
+                const o = errResp.controlErrs;
 
                 return {
                     errForm: {
@@ -353,8 +353,8 @@ class LinkViewModel {
         } catch (e) {
             const errResp = new APIError(e);
 
-            if (errResp.error) {
-                const o = errResp.error.toMap();
+            if (errResp.unprocessable) {
+                const o = errResp.controlErrs;
 
                 return {
                     errForm: {

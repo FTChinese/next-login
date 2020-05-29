@@ -223,11 +223,12 @@ class OAuthViewModel {
                 };
             }
 
-            if (errResp.error) {
+            if (errResp.unprocessable) {
+              const key = errResp.unprocessable.field + "_" + errResp.unprocessable.code
                 return {
                     errParam: {
                         error: "invalid_request",
-                        error_description: this.apiErrMsg[errResp.error.key],
+                        error_description: this.apiErrMsg[key],
                         shouldRedirect: false,
                     }
                 }
