@@ -3,9 +3,6 @@ import render from "../util/render";
 import {
     collectAppHeaders,
 } from "./middleware";
-import { 
-    EmailData
-} from "../models/reader";
 import {
     IHeaderApp,
 } from "../models/header";
@@ -15,6 +12,7 @@ import {
 import { KeyDone } from "../pages/request-pw-reset";
 import { EmailBuilder } from "../pages/request-pw-reset";
 import { ResetPwBuilder, PwResetData } from "../pages/reset-password";
+import { EmailData } from "../models/form-data";
 
 const router = new Router();
 
