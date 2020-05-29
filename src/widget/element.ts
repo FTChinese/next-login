@@ -60,6 +60,16 @@ export class Element {
     .join(' ');
   }
 
+  private renderChildren(): string {
+    if (this.children) {
+      return this.children.map(elem => elem.render()).join('');
+    } else if (this.textContent) {
+      return this.textContent;
+    }
+
+    return "";
+  }
+
   render(): string {
 
     let str = `<${this.tagName}`
