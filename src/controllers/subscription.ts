@@ -42,7 +42,7 @@ router.get("/", async(ctx, next) => {
 
         Object.assign(ctx.state, uiData);
 
-        ctx.body = await render("layouts/two-cols.html", ctx.state);
+        ctx.body = await render("layouts/content.html", ctx.state);
         return;
     }
 
