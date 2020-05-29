@@ -25,7 +25,7 @@ import {
 } from "../config/viper";
 import { AccountKind } from "../models/enums";
 import { oauth, noCache } from "../util/request";
-import { IPasswords, IPasswordReset, EmailData } from "../models/form-data";
+import { Passwords, PasswordResetter, EmailData } from "../models/form-data";
 
 const sessSerializer = new TypedJSON(WxSession);
 
@@ -172,7 +172,7 @@ class AccountService {
         throw new Error("incorrect api response");
     }
 
-    async resetPassword(data: IPasswordReset): Promise<boolean> {
+    async resetPassword(data: PasswordResetter): Promise<boolean> {
         const resp = await request
             .post(readerApi.resetPassword)
             .use(oauth)
@@ -213,7 +213,7 @@ class AccountService {
         return resp.noContent;
     }
 
-    async updatePassword(ftcId: string, data: IPasswords): Promise<boolean> {
+    async updatePassword(ftcId: string, data: Passwords): Promise<boolean> {
         const resp = await request
             .patch(readerApi.password)
             .use(oauth)

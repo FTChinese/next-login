@@ -17,12 +17,6 @@ import {
 import { KeyUpdated, getMsgUpdated } from "./redirection";
 import { Flash } from "../widget/flash";
 
-export interface IPasswordsFormData {
-  oldPassword: string;
-  password: string;
-  confirmPassword: string;
-}
-
 interface AccountPage {
   flash?: Flash;
   link: {

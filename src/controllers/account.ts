@@ -17,7 +17,7 @@ import {
   KeyUpdated,
 } from "../pages/redirection";
 import {
-  IPasswordsFormData, AccountPageBuilder,
+  AccountPageBuilder,
 } from "../pages/account-page";
 import {
   linkViewModel, ILinkingFormData, IUnlinkFormData,
@@ -30,7 +30,7 @@ import {
 } from "../config/viper";
 import { UpdateEmailBuilder } from "../pages/update-email";
 import { UpdatePasswordBuilder } from "../pages/update-password";
-import { EmailData } from "../models/form-data";
+import { EmailData, PasswordsFormData } from "../models/form-data";
 
 const router = new Router();
 
@@ -140,7 +140,7 @@ router.post("/password", async (ctx, next) => {
     return;
   }
 
-  const formData: IPasswordsFormData = ctx.request.body;
+  const formData: PasswordsFormData = ctx.request.body;
 
   const builder = new UpdatePasswordBuilder(account);
   const isValid = await builder.validate(formData);

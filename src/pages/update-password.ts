@@ -5,12 +5,12 @@ import { Button } from "../widget/button";
 import { TextInputElement } from "../widget/text-input";
 import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
-import { IPasswordsFormData } from "./account-page";
 import { ValidationError } from "@hapi/joi";
 import { passwordUpdatingSchema, joiOptions, reduceJoiErrors } from "./validator";
 import { accountService } from "../repository/account";
 import { APIError } from "../repository/api-response";
 import { Account } from "../models/reader";
+import { PasswordsFormData } from "../models/form-data";
 
 interface PasswordPage {
   heading: string;
@@ -23,7 +23,7 @@ export class UpdatePasswordBuilder {
   flashMsg?: string;
   errors: Map<string, string> = new Map();
   account: Account;
-  passwords?: IPasswordsFormData;
+  passwords?: PasswordsFormData;
 
   constructor (account: Account) {
     this.account = account;
@@ -93,7 +93,7 @@ export class UpdatePasswordBuilder {
     }
   }
 
-  async validate(data: IPasswordsFormData): Promise<boolean> {
+  async validate(data: PasswordsFormData): Promise<boolean> {
     try {
       const result = await passwordUpdatingSchema.validateAsync(data, joiOptions);
 

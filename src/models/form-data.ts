@@ -13,15 +13,21 @@ export interface ProfileFormData {
   birthday?: string;
 }
 
-export interface IPasswords {
+export interface Passwords {
   oldPassword: string;
   newPassword: string;
 }
 
 // Data converted from `IPwResetFormData` and passed to API
-export interface IPasswordReset {
+export interface PasswordResetter {
   token: string;
   password: string;
+}
+
+export interface PasswordsFormData {
+  oldPassword: string;
+  password: string;
+  confirmPassword: string;
 }
 
 // Form data for requesting password reset token,
