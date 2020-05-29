@@ -10,7 +10,7 @@ import {
   profileMap
 } from "../config/sitemap";
 import { IOAuthSession, oauthServer } from "../models/ftc-oauth";
-import { SignUpPage, SignUpBuilder, SignUpData } from "../pages/signup";
+import { SignUpBuilder, SignUpData } from "../pages/signup-page";
 
 const router = new Router();
 
