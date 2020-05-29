@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  {% set iconUrl = "http://interactive.ftchinese.com/favicons" %}
   <link rel="apple-touch-icon" sizes="180x180" href="{{iconUrl}}/apple-touch-icon-180x180.png">
   <link rel="apple-touch-icon" sizes="152x152" href="{{iconUrl}}/apple-touch-icon-152x152.png">
   <link rel="apple-touch-icon" sizes="120x120" href="{{iconUrl}}/apple-touch-icon-120x120.png">
@@ -14,7 +13,7 @@
   <title>{% block title %}用户中心{% endblock %} - FT中文网</title>
   
   {% if env.isProduction %}
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/{{env.bsVersion}}/css/bootstrap.min.css" rel="stylesheet">
   {% include "assets/style.html" %}
   {% else %}
   <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.css">
@@ -30,25 +29,6 @@
 
       {% block subBrand%}{% endblock %}
 
-      {% if user %}
-      <div class="dropdown d-none d-sm-block">
-        <a class="dropdown-toggle" 
-          href="#" 
-          role="button" 
-          data-toggle="dropdown" 
-          aria-haspopup="true" 
-          aria-expanded="false">
-          设置
-        </a>
-
-        <div class="dropdown-menu dropdown-menu-right">
-          <a class="dropdown-item" href="{{ user.settingsLink }}">{{ user.getDisplayName() }}</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="{{ user.logoutLink }}">退出</a>
-        </div>
-      </div>
-      {% endif %}
-
       {% block headerDrawer%}{% endblock %}
     </div>
   </header>
@@ -57,16 +37,6 @@
 
   <main class="page-content" role="main">
     <div class="container">
-      
-      {% if errors %}
-        <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
-          <span>{{errors.message}}</span>
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-      {% endif %}
-
       {% block main %}{% endblock %}
     </div>
   </main>
@@ -103,7 +73,7 @@
   </footer>
   
   {% if env.isProduction %}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/2.0.27/bootstrap-native-v4.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/{{env.bsNativeVersion}}/bootstrap-native-v4.min.js"></script>
   {% include "assets/script.html" %}
 
   {% else %}
