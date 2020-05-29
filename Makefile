@@ -24,7 +24,7 @@ run :
 	NODE_ENV=production ./$(BUILD_DIR)/@ftchinese/$(MAC_BIN)
 
 pkg :
-	pkg --targets node13-linux-x64,node13-macos-x64 -c package.json --out-path $(BUILD_DIR) $(ENTRY)
+	pkg --targets node14-linux-x64,node14-macos-x64 -c package.json --out-path $(BUILD_DIR) $(ENTRY)
 
 deploy : clean build pkg
 	rsync -v ./$(BUILD_DIR)/@ftchinese/$(LINUX_BIN) tk11:/home/node/next/
