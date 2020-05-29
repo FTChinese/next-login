@@ -1,89 +1,73 @@
 import request from "superagent";
-import {
-    TypedJSON,
-} from "typedjson";
-import {
-    readerApi,
-    KEY_USER_ID,
-} from "../config/api";
-import { 
-    Profile,
-    IName,
-    IMobile,
-    Address,
-    IAddress,
-    ProfileFormData,
-} from "../models/reader";
+import { readerApi, KEY_USER_ID } from "../config/api";
+import { Profile, Address } from "../models/reader";
 import { oauth, noCache } from "../util/request";
-
-const addressSerializer = new TypedJSON(Address);
-const profileSeiralizer = new TypedJSON(Profile);
+import { NameForm, MobileForm, ProfileFormData } from "../models/form-data";
 
 class ProfileService {
+  async fetchProfile(ftcId: string): Promise<Profile> {
+    const resp = await request
+      .get(readerApi.profile)
+      .use(oauth)
+      .use(noCache)
+      .set(KEY_USER_ID, ftcId);
 
-    async fetchProfile(ftcId: string): Promise<Profile> {
-        const resp = await request
-            .get(readerApi.profile)
-            .use(oauth)
-            .use(noCache)
-            .set(KEY_USER_ID, ftcId);
+    return resp.body;
+  }
 
-        return profileSeiralizer.parse(resp.text)!;
-    }
+  async fetchAddress(ftcId: string): Promise<Address> {
+    const resp = await request
+      .get(readerApi.address)
+      .use(oauth)
+      .use(noCache)
+      .set(KEY_USER_ID, ftcId);
 
-    async fetchAddress(ftcId: string): Promise<Address> {
-        const resp = await request
-            .get(readerApi.address)
-            .use(oauth)
-            .use(noCache)
-            .set(KEY_USER_ID, ftcId)
+    return resp.body;
+  }
 
-        return addressSerializer.parse(resp.text)!;
-    }
+  async updateName(ftcId: string, data: NameForm): Promise<boolean> {
+    const resp = await request
+      .patch(readerApi.name)
+      .use(oauth)
+      .use(noCache)
+      .set(KEY_USER_ID, ftcId)
+      .send(data);
 
-    async updateName(ftcId: string, data: IName): Promise<boolean> {
-        const resp = await request
-            .patch(readerApi.name)
-            .use(oauth)
-            .use(noCache)
-            .set(KEY_USER_ID, ftcId)
-            .send(data);
+    return resp.noContent;
+  }
 
-        return resp.noContent;
-    }
+  async updateMobile(ftcId: string, data: MobileForm): Promise<boolean> {
+    const resp = await request
+      .patch(readerApi.mobile)
+      .use(oauth)
+      .use(noCache)
+      .set(KEY_USER_ID, ftcId)
+      .send(data);
 
-    async updateMobile(ftcId: string, data: IMobile): Promise<boolean> {
-        const resp = await request
-            .patch(readerApi.mobile)
-            .use(oauth)
-            .use(noCache)
-            .set(KEY_USER_ID, ftcId)
-            .send(data);
+    return resp.noContent;
+  }
 
-        return resp.noContent;
-    }
+  async updateProfile(ftcId: string, data: ProfileFormData): Promise<boolean> {
+    const resp = await request
+      .patch(readerApi.profile)
+      .use(oauth)
+      .use(noCache)
+      .set(KEY_USER_ID, ftcId)
+      .send(data);
 
-    async updateProfile(ftcId: string, data: ProfileFormData): Promise<boolean> {
-        const resp = await request
-            .patch(readerApi.profile)
-            .use(oauth)
-            .use(noCache)
-            .set(KEY_USER_ID, ftcId)
-            .send(data);
+    return resp.noContent;
+  }
 
-        return resp.noContent;
-    }
+  async updateAddress(ftcId: string, address: Address): Promise<boolean> {
+    const resp = await request
+      .patch(readerApi.address)
+      .use(oauth)
+      .use(noCache)
+      .set(KEY_USER_ID, ftcId)
+      .send(address);
 
-    async updateAddress(ftcId: string, address: IAddress): Promise<boolean> {
-        const resp = await request
-            .patch(readerApi.address)
-            .use(oauth)
-            .use(noCache)
-            .set(KEY_USER_ID, ftcId)
-            .send(address);
-
-        return resp.noContent;
-    }
+    return resp.noContent;
+  }
 }
 
 export const profileService = new ProfileService();

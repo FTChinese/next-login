@@ -3,19 +3,16 @@ import Router from "koa-router";
 import render from "../util/render";
 import {
   Account,
-  ProfileFormData,
-  IName,
-  IMobile,
-  IAddress,
+  Address,
 } from "../models/reader";
 import { ProfilePageBuilder } from "../pages/profile-list";
 import { profileMap } from "../config/sitemap";
-import { profileService } from "../repository/profile";
-import { ProfileInfoBuilder, ProfileInfoPage } from "../pages/profile-info";
-import { DisplayNameBuilder } from "../pages/display-name";
-import { MobileBuilder } from "../pages/mobile";
-import { AddressBuilder } from "../pages/address";
+import { PersonalInfoBuilder } from "../pages/update-personal-info";
+import { DisplayNameBuilder } from "../pages/update-name";
+import { MobileBuilder } from "../pages/update-mobile";
+import { AddressBuilder } from "../pages/update-address";
 import { KeyUpdated } from "../pages/redirection";
+import { NameForm, MobileForm, ProfileFormData } from "../models/form-data";
 
 const router = new Router();
 const log = debug("user:profile");
@@ -66,18 +63,18 @@ router.get("/display-name", async (ctx, next) => {
 router.post("/display-name", async (ctx, next) => {
   const account: Account = ctx.state.user;
 
-  const formData: IName = ctx.request.body.profile;
+  const formData: NameForm = ctx.request.body;
 
   const builder = new DisplayNameBuilder();
 
-  const isValid = builder.validate(formData);
+  const isValid = await builder.validate(formData);
   if (!isValid) {
     const uiData = builder.build();
     Object.assign(ctx.state, uiData);
     return await next();
   }
 
-  const ok = builder.update(account);
+  const ok = await builder.update(account);
   if (!ok) {
     const uiData = builder.build();
     Object.assign(ctx.state, uiData);
@@ -85,11 +82,14 @@ router.post("/display-name", async (ctx, next) => {
   }
   const key: KeyUpdated = "saved";
 
+  account.userName = builder.formData?.userName;
+
+  // @ts-ignore
+  ctx.session.user = account;
   // @ts-ignore
   ctx.session.ok = key;
   return ctx.redirect(profileMap.base);
-},
-  async (ctx, next) => {
+}, async (ctx, next) => {
     ctx.body = await render("profile/single-input.html", ctx.state);
   }
 );
@@ -109,7 +109,7 @@ router.get("/mobile", async (ctx, next) => {
 router.post("/mobile", async (ctx, next) => {
   const account: Account = ctx.state.user;
 
-  const formData: IMobile = ctx.request.body.profile;
+  const formData: MobileForm = ctx.request.body;
 
   const builder = new MobileBuilder();
   const isValid = await builder.validate(formData);
@@ -139,7 +139,7 @@ router.post("/mobile", async (ctx, next) => {
 router.get("/info", async (ctx, next) => {
   const account: Account = ctx.state.user;
 
-  const builder = new ProfileInfoBuilder();
+  const builder = new PersonalInfoBuilder();
   await builder.fetchProfile(account);
 
   const uiData = builder.build();
@@ -157,7 +157,7 @@ router.post("/info", async (ctx, next) => {
       throw new Error("form data not found to update profile");
     }
 
-    const builder = new ProfileInfoBuilder();
+    const builder = new PersonalInfoBuilder();
 
     const isValid = await builder.validate(formData);
     if (!isValid) {
@@ -201,7 +201,7 @@ router.get("/address", async (ctx, next) => {
 
 router.post("/address", async (ctx, next) => {
     const account: Account = ctx.state.user;
-    const formData: IAddress | undefined = ctx.request.body.address;
+    const formData: Address | undefined = ctx.request.body.address;
 
     if (!formData) {
       throw new Error("form data to upate address not found");

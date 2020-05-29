@@ -13,9 +13,6 @@ import {
     Credentials, 
     Account,
     accountSerializer,
-    EmailData,
-    IPasswordReset,
-    IPasswords,
 } from "../models/reader";
 import {
     IHeaderApp,
@@ -28,6 +25,7 @@ import {
 } from "../config/viper";
 import { AccountKind } from "../models/enums";
 import { oauth, noCache } from "../util/request";
+import { IPasswords, IPasswordReset, EmailData } from "../models/form-data";
 
 const sessSerializer = new TypedJSON(WxSession);
 

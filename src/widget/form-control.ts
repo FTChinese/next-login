@@ -1,35 +1,12 @@
 import { ControlOptions, ControlType } from "./widget";
 import { Element, InputElement } from "./element";
 
-class ControlDesc {
-  readonly desc: string;
-
-  constructor (desc: string) {
-    this.desc = desc;
-  }
-  
-  render(): string {
-    return `<small class="form-text text-muted">${this.desc}</small>`;
-  }
-}
-
-class ControlError {
-  readonly msg: string;
-
-  constructor (msg: string) {
-    this.msg = msg;
-  }
-
-  render(): string {
-    return `<div class="form-errortext">${this.msg}</div>` 
-  }
-}
-
 function isCheck(controlType: ControlType): boolean {
   return (controlType === ControlType.Checkbox) || (controlType === ControlType.Radio);
 }
 
 export class FormControl {
+  readonly wrapper: Element;
   // Determing containing div class names:
   // form-check for checkbox and radio,
   // form-group otherwise.
@@ -44,15 +21,27 @@ export class FormControl {
   private error?: Element
   
   constructor (opts: ControlOptions) {
-    const isCheckOrRadio = isCheck(opts.controlType);
-
+    this.controlType = opts.controlType;
     this.field = opts.field;
+
+    const isCheckOrRadio = isCheck(opts.controlType);
+    
+    this.wrapper = (new Element("div"))
+      .addClass(isCheckOrRadio
+        ? "form-check"
+        : "form-group");
+      
+    if (opts.extraWrapperClass) {
+      this.wrapper.addClass(opts.extraWrapperClass);
+    }
 
     if (opts.label) {
       this.label = (new Element("label"))
         .withText(opts.label.text)
         .setAttribute("for", opts.field.id)
-        .addClass(`${isCheckOrRadio ? 'form-check-label' : 'form-label'}`);
+        .addClass(isCheckOrRadio 
+          ? 'form-check-label' 
+          : 'form-label');
 
       this.suffixLabel = opts.label.suffix || false;
     }
@@ -82,28 +71,29 @@ export class FormControl {
   }
 
   render(): string {
-    const elems: Element[] = [];
 
     if (this.label) {
       if (this.suffixLabel) {
-        elems.push(this.field);
-        elems.push(this.label)
+        this.wrapper
+          .appendChild(this.field)
+          .appendChild(this.label)
       } else {
-        elems.push(this.label)
-        elems.push(this.field);
+        this.wrapper
+          .appendChild(this.label)
+          .appendChild(this.field);
       }
     } else {
-      elems.push(this.field);
+      this.wrapper.appendChild(this.field)
     }
 
     if (this.desc) {
-      elems.push(this.desc);
+      this.wrapper.appendChild(this.desc);
     }
 
     if (this.error) {
-      elems.push(this.error);
+      this.wrapper.appendChild(this.error);
     }
 
-    return elems.map(elem => elem.render()).join("");
+    return this.wrapper.render();
   }
 }

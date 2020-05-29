@@ -7,14 +7,11 @@ import {
   DateTime,
 } from "luxon";
 import {
-  localizeGender,
   localizeTier,
   localizeCycle,
 } from "./localization";
 import {
-  profileMap,
   accountMap,
-  entranceMap,
   subsMap,
 } from "../config/sitemap";
 import {
@@ -22,11 +19,11 @@ import {
   PaymentMethod,
   Tier,
   Cycle,
-  Gender,
   Platform,
   SubStatus,
 } from "./enums";
 import { KEY_UNION_ID, KEY_USER_ID } from "../config/api";
+import { ProfileFormData } from "./form-data";
 
 export interface Credentials {
   email: string;
@@ -127,6 +124,14 @@ export class Membership {
 
     return `${subsMap.pay}/${this.tier}/${this.cycle}`;
   }
+
+  get expireSeconds(): number {
+    if (!this.expireDate) {
+      return 0;
+    }
+
+    return DateTime.fromISO(this.expireDate).toSeconds();
+  }
 }
 
 export interface IAccountId {
@@ -205,22 +210,6 @@ export class Account {
     return !!(this.id && this.unionId);
   }
 
-  nagVerifyEmail(): boolean {
-    return this.isFtcOnly() && (!this.isVerified);
-  }
-
-  get requestVerificationLink(): string {
-    return accountMap.requestVerification;
-  }
-
-  get settingsLink(): string {
-    return profileMap.base;
-  }
-
-  get logoutLink(): string {
-    return entranceMap.logout;
-  }
-
   get linkFtc(): string {
     return accountMap.linkEmail;
   }
@@ -270,107 +259,23 @@ export interface IClientApp {
   userAgent: string;
 }
 
-// Form data for requesting password reset token,
-// or change email.
-export interface EmailData {
-  email: string;
-}
-
-// Data converted from `IPwResetFormData` and passed to API
-export interface IPasswordReset {
-  token: string;
-  password: string;
-}
-
-export interface IName {
-  userName: string;
-}
-
-export interface IMobile {
-  mobile: string;
-}
-
-export interface IPasswords {
-  oldPassword: string;
-  newPassword: string;
-}
-
-export interface ProfileFormData {
-  familyName?: string;
-  givenName?: string;
-  gender?: string;
-  birhtday?: string;
-}
-
-@jsonObject
-export class Profile implements ProfileFormData {
-  @jsonMember
+export interface Profile extends ProfileFormData {
   id: string;
-
-  @jsonMember
   email: string;
-
-  @jsonMember
   userName?: string;
-
-  @jsonMember
   mobile?: string;
-
-  @jsonMember
   avatarUrl?: string;
-
-  @jsonMember
-  gender?: Gender;
-
-  @jsonMember
-  familyName?: string;
-
-  @jsonMember
-  givenName?: string;
-
-  @jsonMember
-  birthday?: string;
-
-  @jsonMember
   telephone?: string;
-
-  @jsonMember
   createdAt?: string;
-
-  @jsonMember
   updatedAt?: string;
-
-  get genderCN(): string {
-    if (!this.gender) {
-      return "";
-    }
-
-    return localizeGender(this.gender);
-  }
 }
 
-@jsonObject
-export class Address {
-
-  @jsonMember
+export interface Address {
   country?: string;
-
-  @jsonMember
   province?: string;
-
-  @jsonMember
   city?: string;
-
-  @jsonMember
   district?: string;
-
-  @jsonMember
   street?: string;
-
-  @jsonMember
   postcode?: string;
 }
 
-export interface IAddress extends Address {
-
-}

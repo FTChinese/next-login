@@ -68,6 +68,19 @@ export class AccountPageBuilder {
     }
   }
 
+  async requestVerification(app: IHeaderApp): Promise<boolean> {
+    try {
+      const ok = await accountService.requestVerification(this.account.id, app);
+
+      return ok;
+    } catch (e) {
+      const errResp = new APIError(e);
+      this.flashMsg = errResp.message;
+
+      return false;
+    }
+  }
+
   build(done?: KeyUpdated): AccountPage {
     const page: AccountPage = {
       link: {
@@ -92,19 +105,6 @@ export class AccountPageBuilder {
     }
     
     return page;
-  }
-
-  async requestVerification(app: IHeaderApp): Promise<boolean> {
-    try {
-      const ok = await accountService.requestVerification(this.account.id, app);
-
-      return ok;
-    } catch (e) {
-      const errResp = new APIError(e);
-      this.flashMsg = errResp.message;
-
-      return false;
-    }
   }
 }
 

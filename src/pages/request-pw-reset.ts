@@ -1,4 +1,3 @@
-import { EmailData } from "../models/reader";
 import { joiOptions, emailSchema, reduceJoiErrors } from "./validator";
 import { ValidationError } from "@hapi/joi";
 import { IHeaderApp } from "../models/header";
@@ -13,6 +12,7 @@ import { Button } from "../widget/button";
 import { Link } from "../widget/link";
 import { entranceMap } from "../config/sitemap";
 import { FormPage } from "./form-page";
+import { EmailData } from "../models/form-data";
 
 // Describes the UI structure after an action is done.
 interface DoneAction {
@@ -67,7 +67,7 @@ export class EmailBuilder {
       }
 
       if (errResp.unprocessable) {
-        this.errors = errResp.unprocessable.toMap();
+        this.errors = errResp.controlErrs;
         return false;
       }
 

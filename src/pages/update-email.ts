@@ -1,4 +1,4 @@
-import { Account, EmailData } from "../models/reader";
+import { Account } from "../models/reader";
 import { FormPage } from "./form-page";
 import { ValidationError } from "@hapi/joi";
 import { emailSchema, joiOptions, reduceJoiErrors } from "./validator";
@@ -10,6 +10,7 @@ import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
 import { TextInputElement } from "../widget/text-input";
 import { Button } from "../widget/button";
+import { EmailData } from "../models/form-data";
 
 export class UpdateEmailBuilder {
   flashMsg?: string;
@@ -63,7 +64,7 @@ export class UpdateEmailBuilder {
       if (errResp.unprocessable) {
         // error.field: "email"
         // error.code: "missing_field" | "invalid"
-        this.errors = errResp.unprocessable.toMap();
+        this.errors = errResp.controlErrs;
 
         return false;
       }

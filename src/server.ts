@@ -17,7 +17,6 @@ const pkg = require("../package.json");
 import {
     env,
     checkSession,
-    nav,
     handleError,
 } from "./controllers/middleware";
 import login from "./controllers/login";
@@ -55,7 +54,6 @@ if (process.env.NODE_ENV != "production") {
 }
 
 app.use(env());
-app.use(nav());
 app.use(logger());
 app.use(session({
     key: "_ftc:next",
