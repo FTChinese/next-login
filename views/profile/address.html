@@ -1,4 +1,4 @@
-{% extends "layouts/two-cols.html" %} 
+{% extends "layouts/content.html" %} 
 
 {% block content %}
 
@@ -7,27 +7,17 @@
 
     {% if form %}
     <form method="post">
-      <div class="form-group">
-        {{ form.country.render() | safe }}
+      
+      {{ form.country.render() | safe }}
+
+      <div class="form-row">
+        {{ form.province.render() | safe }}
+        {{ form.city.render() | safe }}
+        {{ form.district.render() | safe }}
       </div>
       <div class="form-row">
-        <div class="form-group col-md-4">
-          {{ form.province.render() | safe }}
-        </div>
-        <div class="form-group col-md-4">
-          {{ form.city.render() | safe }}
-        </div>
-        <div class="form-group col-md-4">
-          {{ form.district.render() | safe }}
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group col-md-10">
-          {{ form.street.render() | safe }}
-        </div>
-        <div class="form-group col-md-2">
-          {{ form.postcode.render() | safe }}
-        </div>
+        {{ form.street.render() | safe }}
+        {{ form.postcode.render() | safe }}
       </div>
       
       {{ form.submitBtn.render() | safe }}

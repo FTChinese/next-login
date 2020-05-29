@@ -9,12 +9,12 @@
   <form method="{{form.method}}" id="loginForm">
 
     {% for control in form.controls %}
-      <div class="form-group">
-        {{ control.render() | safe }}
-      </div>
+      {{ control.render() | safe }}
     {% endfor %}
 
-    {{ form.submitBtn.render() | safe }}
+    <div class="mt-3">
+      {{ form.submitBtn.render() | safe }}
+    </div>
   </form>
 
   <div class="d-flex justify-content-between mt-3">

@@ -14,26 +14,16 @@
 {% endblock %}
 
 {% block topBanner %}
-  {% if user and user.nagVerifyEmail() %}
-    <div class="alert alert-primary mb-0" role="alert">
-      <div class="container">
-        <span>请验证您的登录邮箱。没有收到验证邮件？</span>
-        <form
-          class="d-inline"
-          action="{{ user.requestVerificationLink }}"
-          method="post">
-          <button
-            type="submit"
-            data-disable-with="正在发送..."
-            class="btn btn-link p-0">重新发送</button>
-        </form>
-      </div>
-    </div>
+  {% if requestVerificationAction %}
+    {% include "partials/request-verification.html" %}
   {% endif %}
 {% endblock %}
 
 {% block main %}
-
+  {% if flash %}
+    {{ flash.render() | safe }}
+  {% endif %}
+  
   <div class="row">
     <div class="col-sm-3">
       <div id="o-header-drawer" class="collapse d-sm-block o-header__drawer">
@@ -52,10 +42,12 @@
         </div>
         
         <nav class="nav flex-column">
-          <a class="nav-link d-block d-sm-none" href="{{sitemap.profile}}">{{ user.getDisplayName() }}</a>
 
           {% for item in sideNav %}
-            <a class="nav-link{% if item.active %} active{% endif %}{% if item.desktop %} d-none d-sm-block{% endif %}" href="{{item.href}}">{{item.text}}</a>
+            <a class="nav-link{% if item.active %} active{% endif %}" 
+              href="{{item.href}}">
+              {{item.text}}
+            </a>
           {% endfor %}
 
           <a class="nav-link d-block d-sm-none" href="{{sitemap.logout}}">退出</a>

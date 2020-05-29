@@ -1,4 +1,4 @@
-{% extends "layouts/two-cols.html" %} 
+{% extends "layouts/content.html" %} 
 
 {% block content %}
 
@@ -9,9 +9,7 @@
   <form method="post">
 
     {% for control in form.controls %}
-      <div class="form-group">
-        {{ control.render() | safe }}
-      </div>
+      {{ control.render() | safe }}
     {% endfor %}
     
     {{ form.submitBtn.render() | safe }}

@@ -1,0 +1,14 @@
+<div class="alert alert-primary mb-0" role="alert">
+  <div class="container">
+    <span>请验证您的登录邮箱。没有收到验证邮件？</span>
+    <form
+      class="d-inline"
+      action="{{ requestVerificationAction }}"
+      method="post">
+      <button
+        type="submit"
+        data-disable-with="正在发送..."
+        class="btn btn-link p-0">重新发送</button>
+    </form>
+  </div>
+</div>
