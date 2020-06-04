@@ -23,7 +23,13 @@ router.get("/", async (ctx, next) => {
   // @ts-ignore
   const key: KeyPwReset | undefined = ctx.session.ok;
 
-  const uiData = (new EmailBuilder()).build(key);
+  console.log("url: %s", ctx.url);
+  console.log("originalUrl: %s", ctx.originalUrl);
+  console.log("origin: %s", ctx.origin);
+  console.log("href: %s", ctx.href);
+  console.log("URL: %s", ctx.URL);
+  
+  const uiData = (new EmailBuilder(ctx.href)).build(key);
     Object.assign(ctx.state, uiData);
   
   return await next();
@@ -45,7 +51,7 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
 
     const headers: IHeaderApp = ctx.state.appHeaders;
 
-    const emailBuilder = new EmailBuilder();
+    const emailBuilder = new EmailBuilder(ctx.href);
     const isValid = await emailBuilder.validate(formData);
     if (!isValid) {
       const uiData = emailBuilder.build();

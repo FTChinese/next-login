@@ -25,7 +25,8 @@ import {
 } from "../config/viper";
 import { AccountKind } from "../models/enums";
 import { oauth, noCache } from "../util/request";
-import { Passwords, PasswordResetter, EmailData } from "../models/form-data";
+import { Passwords, PasswordResetter, EmailData, PwResetLetter } from "../models/form-data";
+import { PwResetData } from "../pages/reset-password";
 
 const sessSerializer = new TypedJSON(WxSession);
 
@@ -146,7 +147,7 @@ class AccountService {
         throw new Error("Incorrect API response");
     }
 
-    async requestPwResetLetter(data: EmailData, app: IHeaderApp): Promise<boolean> {
+    async requestPwResetLetter(data: PwResetLetter, app: IHeaderApp): Promise<boolean> {
         const resp = await request
             .post(readerApi.passwordResetLetter)
             .use(oauth)

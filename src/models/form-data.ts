@@ -35,3 +35,7 @@ export interface PasswordsFormData {
 export interface EmailData {
   email: string;
 }
+
+export type PwResetLetter = EmailData & {
+  sourceUrl: string;
+}

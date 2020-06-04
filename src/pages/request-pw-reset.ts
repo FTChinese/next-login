@@ -37,6 +37,7 @@ export class EmailBuilder {
     email: ''
   };
 
+  constructor(readonly sourceUrl: string) {}
 
   async validate(data: EmailData): Promise<boolean> {
     try {
@@ -55,7 +56,10 @@ export class EmailBuilder {
   async requestLetter(app: IHeaderApp): Promise<boolean> {
 
     try {
-      const ok = await accountService.requestPwResetLetter(this.formData, app)
+      const ok = await accountService.requestPwResetLetter({
+        sourceUrl: this.sourceUrl,
+        ...this.formData
+      }, app)
 
       return ok;
     } catch (e) {
