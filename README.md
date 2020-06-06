@@ -21,13 +21,16 @@ Add attribute `data-disable-with="<Loading...>"` to the `<button>` element insid
 * GET `/logout`
 
 ## Signup
+
 * GET `/signup` Show sign up page.
 * POST `/signup` Accept credentials.
 
 ## Verify email
+
 * `GET /verify/email/:token` Email verification link.
 
 ## Forgot password
+
 * `GET /password-reset` Ask user to enter email
 * `POST /password-reset` Use the email user entered to create a letter.
 * `GET /password-reset/:token` Verify password reset link and show reset password page.
@@ -125,6 +128,7 @@ Position | base64 | base64url
 (pad) | `=` | removed
 
 To get the binary data in Node.js:
+
 ```js
 const str = 'your-token-string';
 // 1. Turn to base 64 encoding:
@@ -138,6 +142,7 @@ cosnt buf = Buffer.from(base64Str, 'base64');
 In Golang, standard libary actually provides variables to manipulate base64 and base64url encoding and decoding. Base64 equivalent is `StdEncoding` and base64url is `RawURLEncoding`.
 
 MySQL schema:
+
 ```sql
 access_token VARBINARY(66),
 refresh_token VARBINARY(66),

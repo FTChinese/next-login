@@ -19,10 +19,10 @@ import {
   accountMap,
 } from "../config/sitemap";
 import {
-  wxLoginViewModel
-} from "../viewmodels/wxlogin-viewmodel";
+  WxCallbackBuilder
+} from "../pages/wxlogin-page";
 import {
-  ICallbackParams, IOAuthSession,
+  CallbackParams, OAuthSession, OAuthClient,
 } from "../models/wx-oauth";
 import { accountService } from "../repository/account";
 import {
@@ -107,23 +107,53 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
  * This will redirect user to wechat.
  * 
  * GET /login/wechat<?sandbox=true>
+ * 
+ * Wechat login API: https://developers.weixin.qq.com/doc/oplatform/Website_App/WeChat_Login/Wechat_Login.html
+ * 
+ * Implement the 1st step:
+ * 第一步：请求CODE
+ * 第三方使用网站应用授权登录前请注意已获取相应网页授权作用域（scope=snsapi_login），
+ * 可以通过在PC端打开以下链接
+ * 
+ * ```
+ * https://open.weixin.qq.com/connect/qrconnect?appid=<APPID>&redirect_uri=<REDIRECT_URI>&response_type=code&scope=<SCOPE>&state=<STATE>#wechat_redirect
+ * ```
+ * 
+ * Request parameters:
+ * 
+ * `appId: string`. Required. Your app's unique identifier.
+ * `redirect_url: string`. Required. Url-encoded callback url on your site.
+ * `response_type: code`
+ * `scope: snsapi_login`
+ * `state: string` Opitonal but recommened. Returned as is.
+ * 
+ * Response:
+ * 
+ * * 用户允许授权后，将会重定向到redirect_uri的网址上，并且带上`code`和`state`参数
+ * 
+ * ```
+ * redirect_uri?code=<CODE>&state=<STATE>
+ * ```
+ * 
+ * * 若用户禁止授权，则重定向后不会带上code参数，仅会带上state参数
+ * 
+ * ```
+ * redirect_uri?state=<STATE>
+ * ```
  */
 router.get("/wechat", async (ctx, next) => {
   const account: Account | undefined = ctx.state.user;
   const sandbox: string | undefined = ctx.request.query.sandbox
 
-  const data = wxLoginViewModel.codeRequest(
-    account ? "link" : "login",
-    toBoolean(sandbox),
-  );
+  const reqData = (new OAuthClient(account ? "link" : "login")).buildCodeRequest();
 
   // State that will be used later to validate callback query parameters.
 
   // @ts-ignore
-  ctx.session.wx_oauth = data.session;
+  ctx.session.wx_oauth = reqData.session;
 
   // Redirect to wechat api.
-  ctx.redirect(data.redirectUrl);
+  ctx.redirect(reqData.oauthUrl);
 });
 
 router.get("/wechat/test", collectAppHeaders(), async (ctx, next) => {
@@ -154,12 +184,44 @@ router.get("/wechat/test", collectAppHeaders(), async (ctx, next) => {
  * `wechat`, deny access.
  * 
  * GET /login/wechat/callback?code=xxx&state=xxx
+ * 
+ * We do not implment step 2 and step 3 of the OAuth flow here.
+ * Rather, they are put on API and this app simply validate the callback and
+ * delegate the code to API. After receiving the WxSession instance returned
+ * from API, the login process completes.
+ * 
+ * 第二步：通过code获取access_token.
+ * 
+ * ```
+ * https://api.weixin.qq.com/sns/oauth2/access_token?appid=<APPID>&secret=<SECRET>&code=<CODE>&grant_type=authorization_code
+ * ```
+ * 
+ * Request parameters:
+ * `appid: string`. Required. Your app's unique identifier.
+ * `secret: string`. Required. AppSecret.
+ * `code: string`. Required. The OAuth code aquired in the the 1st step.
+ * `grant_type: authorization_code`.
+ * 
+ * Response:
+ * 
+ * ```json
+ * {
+ *  "access_token":"ACCESS_TOKEN",
+ *  "expires_in":7200,
+ *  "refresh_token":"REFRESH_TOKEN",
+ *  "openid":"OPENID",
+ *  "scope":"SCOPE",
+ *  "unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
+ * }
+ * ```
+ * 
+ * The 3rd step, 第三步：通过access_token调用接口, is implemented by API.
  */
 router.get("/wechat/callback", collectAppHeaders(), async (ctx, next) => {
-  const query: ICallbackParams = ctx.request.query;
+  const query: CallbackParams = ctx.request.query;
 
   // @ts-ignore
-  const wxOAuthSess: IOAuthSession | undefined = ctx.session.wx_oauth;
+  const wxOAuthSess: OAuthSession | undefined = ctx.session.wx_oauth;
   if (isProduction) {
     // @ts-ignore
     delete ctx.session.wx_oauth;
@@ -168,13 +230,21 @@ router.get("/wechat/callback", collectAppHeaders(), async (ctx, next) => {
   const headers: IHeaderApp = ctx.state.appHeaders;
   const localAccount: Account | undefined = ctx.state.user;
 
-  const { success, errQuery, errResp } = await wxLoginViewModel.getApiSession(query, headers, wxOAuthSess);
+  const builder = new WxCallbackBuilder(localAccount);
+  const isValid = builder.validate(query, wxOAuthSess);
 
-  if (!success) {
-    const uiData = wxLoginViewModel.buildUI(
-      { errQuery, errResp },
-      localAccount,
-    );
+  if (!isValid) {
+    const uiData = builder.buildUI();
+
+    Object.assign(ctx.state, uiData);
+
+    return await next();
+  }
+
+  const wxSession = await builder.getApiSession(headers);
+
+  if (!wxSession) {
+    const uiData = builder.buildUI();
 
     Object.assign(ctx.state, uiData);
 
@@ -185,6 +255,7 @@ router.get("/wechat/callback", collectAppHeaders(), async (ctx, next) => {
     throw new Error("wechat oauth session not found");
   }
 
+  // The wechat login is used for linking accounts.
   if (wxOAuthSess.usage == "link") {
 
     if (!localAccount || localAccount.loginMethod == "wechat") {
@@ -195,18 +266,15 @@ router.get("/wechat/callback", collectAppHeaders(), async (ctx, next) => {
     // Save unionId to `ctx.session.uid`.
 
     // @ts-ignore
-    ctx.session.uid = success.unionId;
+    ctx.session.uid = wxSession.unionId;
     return ctx.redirect(accountMap.linkMerging);
   }
 
-  const result = await wxLoginViewModel.getAccount(success);
+  const wxAccount = await builder.getAccount(wxSession.unionId);
 
   // Show API request errors.
-  if (!result.success) {
-    const uiData = wxLoginViewModel.buildUI(
-      { errResp },
-      localAccount,
-    );
+  if (!wxAccount) {
+    const uiData = builder.buildUI();
 
     Object.assign(ctx.state, uiData);
 
@@ -214,22 +282,7 @@ router.get("/wechat/callback", collectAppHeaders(), async (ctx, next) => {
   }
 
   // @ts-ignore
-  ctx.session.user = result.success;
-
-  // This indicates user is trying to login to ftacademy, so redirect user to OAuth page.
-  // Added by /authorize
-
-  // @ts-ignore
-  if (ctx.session.oauth) {
-    // @ts-ignore
-    const oauthSession: IFtcOAuthSession = ctx.session.oauth;
-
-    ctx.redirect(oauthServer.buildAuthorizeUrl(oauthSession));
-
-    // @ts-ignore
-    delete ctx.session.oauth;
-    return;
-  }
+  ctx.session.user = wxAccount;
 
   ctx.redirect(profileMap.base);
 }, async (ctx, next) => {

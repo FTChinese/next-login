@@ -32,22 +32,23 @@ import {
 const chance = new Chance();
 const log = debug("user:wx-oauth");
 
-interface ICodeRequestParams extends Dictionary<string> {
-    appid: string;
-    redirect_uri: string;
+// The purpose of initiating wechat
+// oauth workflow.
+// Since Wechat OAuth redirect to the same URL, we need to distinguish
+// between wheter the authorization attempt is login or link accounts.
+export type WxOAuthUsage = "login" | "link";
+
+/**
+ * @description CodeRequestParams defines the data struture used to
+ * build query paramter to request an OAuth code.
+ */
+interface CodeRequestParams extends Dictionary<string> {
+    appid: string; // Your app's unique identifier
+    redirect_uri: string; // Url-encoded callback url on your site
     response_type: "code";
     scope: "snsapi_login";
     state: string;
 }
-
-export interface ICallbackParams {
-    code?: string; // Won't exist if user denied authorization.
-    state?: string;
-}
-
-// The purpose of initiating wechat
-// oauth workflow.
-export type WxOAuthUsage = "login" | "link";
 
 /**
  * @description Client-side session data.
@@ -57,9 +58,26 @@ export type WxOAuthUsage = "login" | "link";
  * we can retrieve to validate the redirected parameters.
  */
 export interface OAuthSession {
-    state: string;
-    created: number;
-    usage: WxOAuthUsage;
+  state: string;
+  created: number;
+  usage: WxOAuthUsage;
+}
+
+/**
+ * @description CodeRequest contains the data to request an OAuth code.
+ */
+interface CodeRequest {
+  session: OAuthSession; // The session data should be persisted on client so that later we could use it to verify query parameter after OAuth redirection.
+  oauthUrl: string; // The complete URL to go to request OAuth code.
+}
+
+/**
+ * @description CallbackParams is the query parameter
+ * in OAuth redirect url.
+ */
+export interface CallbackParams {
+    code?: string; // Won't exist if user denied authorization.
+    state?: string;
 }
 
 /**
@@ -67,48 +85,58 @@ export interface OAuthSession {
  */
 export class OAuthClient {
     private app: IWxApp = viper.getConfig().wxapp.web_oauth;
-    private codeUrl: string = "https://open.weixin.qq.com/connect/qrconnect";
+    private baseUrl = new URL("https://open.weixin.qq.com/connect/qrconnect");
+    private state = chance.string({
+      pool,
+      length: 12,
+    });
 
-    /**
-     * @description Generate session data to be used
-     * to verify callback parameters.
-     */
-    generateSession(usage: WxOAuthUsage): OAuthSession {
-        return {
-            state: chance.string({
-                pool,
-                length: 12,
-            }),
-            created: unixNow(),
-            usage,
-        };
+    constructor(readonly usage: WxOAuthUsage) {
+      this.baseUrl.hash = "wechat_redirect";
+    }
+
+    buildCodeRequest(): CodeRequest {
+      return {
+        session: {
+          state: chance.string({
+              pool,
+              length: 12,
+          }),
+          created: unixNow(),
+          usage: this.usage,
+        },
+        oauthUrl: this.buildCodeUrl(),
+      }
     }
 
     /**
      * @description Create the url to request OAuth code.
      * `sandbox` determines the callback url to use.
      */
-    buildCodeUrl(state: string, sandbox: boolean): string {
-        const params: ICodeRequestParams = {
+    private buildCodeUrl(): string {
+        const params: CodeRequestParams = {
             appid: this.app.app_id,
-            redirect_uri: subsApi.wxRedirect(sandbox),
+            redirect_uri: subsApi.wxRedirect(),
             response_type: "code",
             scope: "snsapi_login",
-            state: state,
+            state: this.state,
         }
-
-        log(`Sandbox: ${sandbox}. Redirect uri: ${params.redirect_uri}`);
         
-        const requestCodeUrl = new URL(this.codeUrl);
-        requestCodeUrl.search = (new URLSearchParams(params)).toString();
-        requestCodeUrl.hash = "wechat_redirect";
+        this.baseUrl.search = (new URLSearchParams(params)).toString();
 
-        return requestCodeUrl.href;
+        return this.baseUrl.href;
     }
 }
 
-export const oauthClient = new OAuthClient();
-
+/**
+ * @description WxSession represents a Wechat user's login session.
+ * After the step 1 of Wechat OAuth, as described on
+ * https://developers.weixin.qq.com/doc/oplatform/Website_App/WeChat_Login/Wechat_Login.html,
+ * finished, this app asks the API to perform the step 2 and step 3 of
+ * of the OAuth workflow, and the API returns a WxSession.
+ * The client could then use WxSession.id to ask API to refresh its access token,
+ * and use unionId to get a unified FTC account data.
+ */
 @jsonObject
 export class WxSession {
     @jsonMember
@@ -119,7 +147,6 @@ export class WxSession {
 
     @jsonMember
     createdAt: string;
-
 
     isExpired(): boolean {
         const created = DateTime.fromISO(this.createdAt);

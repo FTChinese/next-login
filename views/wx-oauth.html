@@ -4,8 +4,14 @@
 
 <div class="jumbotron">
   <h1>微信授权失败</h1>
-  {% if reason %}
+
+  {% if flash %}{{ flash.render() | safe }}{% endif %}
+
+  {% if reason.state %}
     <p>{{ reason.state }}</p>
+  {% endif %}
+  
+  {% if reason.code %}
     <p>{{ reason.code }}</p>
   {% endif %}
   
