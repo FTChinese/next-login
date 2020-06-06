@@ -1,5 +1,5 @@
 import request from "superagent";
-import { AndroidRelease, androidSerializer } from "../models/android";
+import { AndroidRelease } from "../models/android";
 import { readerApi } from "../config/api";
 import { IPagination } from "../models/pagination";
 import { oauth } from "../util/request";
@@ -10,7 +10,7 @@ class AppRelease {
             .get(readerApi.androidLatest)
             .use(oauth)
 
-        return androidSerializer.parse(resp.text)!;
+        return resp.body;
     }
 
     async list(paging: IPagination): Promise<Array<AndroidRelease>> {
@@ -19,7 +19,7 @@ class AppRelease {
             .use(oauth)
             .query(paging);
 
-        return androidSerializer.parseAsArray(resp.text)!;
+        return resp.body;
     }
 }
 
