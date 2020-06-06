@@ -1,66 +1,66 @@
 import Router from "koa-router";
 import render from "../util/render";
 import {
-    paging,
+  paging,
 } from "./middleware";
 import {
-    Account,
+  Account,
 } from "../models/reader";
-import {
-    articleViewModel,
-} from "../viewmodels/article-viewmodel";
 import { starredMap } from "../config/sitemap";
+import { StarredPageBuilder } from "./starred-page";
 
 const router = new Router();
 
 router.get("/", paging(10), async (ctx, next) => {
-    const account: Account = ctx.state.user;
+  const account: Account = ctx.state.user;
 
-    if (account.isWxOnly()) {
-        return await next();
-    }
+  if (account.isWxOnly()) {
+    return await next();
+  }
 
-    // @ts-ignore
-    if (ctx.session.error) {
-        const uiData = await articleViewModel.buildUI(
-            account,
-            ctx.state.paging,
-            // @ts-ignore
-            ctx.session.error,
-        );
-
-        Object.assign(ctx.state, uiData);
-
-        return await next();
-    }
-
-    const uiData = await articleViewModel.buildUI(account, ctx.state.paging);
+  const builder = new StarredPageBuilder(account);
+  // @ts-ignore
+  if (ctx.session.error) {
+    const uiData = await builder.buildUI(
+      ctx.state.paging,
+      // @ts-ignore
+      ctx.session.error,
+    );
 
     Object.assign(ctx.state, uiData);
 
     return await next();
+  }
+
+  const uiData = await builder.buildUI(ctx.state.paging);
+
+  Object.assign(ctx.state, uiData);
+
+  return await next();
 }, async (ctx, next) => {
-    ctx.body = await render("starred.html", ctx.state);
+  ctx.body = await render("starred.html", ctx.state);
 });
 
 router.post("/:id/delete", async (ctx, next) => {
-    const account: Account = ctx.state.user;
+  const account: Account = ctx.state.user;
 
-    if (account.isWxOnly()) {
-        ctx.status = 404;
-        return;
-    }
+  if (account.isWxOnly()) {
+    ctx.status = 404;
+    return;
+  }
 
-    const id: string = ctx.params.id;
+  const builder = new StarredPageBuilder(account);
 
-    const { success, errResp } = await articleViewModel.delete(account, id);
+  const id: string = ctx.params.id;
 
-    if (errResp) {
-        // @ts-ignore
-        ctx.session.error = errResp.message;
-    }
+  const errResp = await builder.delete(id);
 
-    ctx.redirect(starredMap.base)
+  if (errResp) {
+    // @ts-ignore
+    ctx.session.error = errResp.message;
+  }
+
+  ctx.redirect(starredMap.base)
 });
 
 export default router.routes();
