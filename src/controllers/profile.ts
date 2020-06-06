@@ -41,6 +41,8 @@ router.get("/", async (ctx, next) => {
 
   Object.assign(ctx.state, uiData);
 
+  await next();
+}, async (ctx, next) => {
   ctx.body = await render("profile/profile.html", ctx.state);
 
   // @ts-ignore
