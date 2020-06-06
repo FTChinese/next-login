@@ -18,6 +18,7 @@ import {
     env,
     checkSession,
     handleError,
+    noCache,
 } from "./controllers/middleware";
 import login from "./controllers/login";
 import oauth2 from "./controllers/oauth2";
@@ -60,6 +61,7 @@ app.use(session({
     renew: true,
 }, app));
 app.use(bodyParser());
+app.use(noCache());
 app.use(handleError());
 
 router.use("/login", checkSession(false), login);
