@@ -51,8 +51,12 @@ export type WxOAuthUsage = "login" | "link";
 
 /**
  * @description Client-side session data.
+ * When redirecting user to Wechat login page, we need to create
+ * the `state` parameter and validate it after redirection.
+ * The `state` and its creation time is stored in session so that
+ * we can retrieve to validate the redirected parameters.
  */
-export interface IOAuthSession {
+export interface OAuthSession {
     state: string;
     created: number;
     usage: WxOAuthUsage;
@@ -69,7 +73,7 @@ export class OAuthClient {
      * @description Generate session data to be used
      * to verify callback parameters.
      */
-    generateSession(usage: WxOAuthUsage): IOAuthSession {
+    generateSession(usage: WxOAuthUsage): OAuthSession {
         return {
             state: chance.string({
                 pool,

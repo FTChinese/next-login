@@ -1,6 +1,6 @@
 import {
     ICallbackParams,
-    IOAuthSession,
+    OAuthSession,
     WxSession,
     WxOAuthUsage,
     oauthClient,
@@ -21,7 +21,7 @@ import { IFetchResult, APIError } from "../repository/api-response";
 import { IFormState } from "../pages/validator";
 
 interface IOAuthCodeRequest {
-    session: IOAuthSession,
+    session: OAuthSession,
     redirectUrl: string;
 }
 
@@ -57,7 +57,7 @@ class WxLoginViewModel {
      * @description Validate callback data.
      * Treat the query parameter as form inputs.
      */
-    validate(params: ICallbackParams, sess?: IOAuthSession): IFormState<ICallbackParams> {
+    validate(params: ICallbackParams, sess?: OAuthSession): IFormState<ICallbackParams> {
         
         if (!sess) {
             return {
@@ -108,7 +108,7 @@ class WxLoginViewModel {
         };
     }
 
-    async getApiSession(params: ICallbackParams, app: IHeaderApp, sess?: IOAuthSession): Promise<IOAuthResult> {
+    async getApiSession(params: ICallbackParams, app: IHeaderApp, sess?: OAuthSession): Promise<IOAuthResult> {
         const { values, errors } = this.validate(params, sess);
         if (!values) {
             return {
