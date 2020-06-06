@@ -1,23 +1,27 @@
 import Router from "koa-router";
 import render from "../util/render";
 import { paging } from "./middleware";
-import { androidViewModel } from "../viewmodels/android-viewmodel";
+import { AndroidPageBuilder } from "../pages/android-page";
 const router = new Router();
 
-router.get("/latest", async(ctx, next) => {
-    const uiData = await androidViewModel.latest();
+router.get("/latest", async (ctx, next) => {
+  const builder = new AndroidPageBuilder();
+  
+  const uiData = await builder.latest();
 
-    Object.assign(ctx.state, uiData);
+  Object.assign(ctx.state, uiData);
 
-    ctx.body = await render("android/latest.html", ctx.state);
+  ctx.body = await render("android/latest.html", ctx.state);
 });
 
 router.get("/releases", paging(10), async (ctx, next) => {
-    const uiData = await androidViewModel.allReleases(ctx.state.paging);
+  const builder = new AndroidPageBuilder();
 
-    Object.assign(ctx.state, uiData);
+  const uiData = await builder.allReleases(ctx.state.paging);
 
-    ctx.body = await render("android/list.html", ctx.state);
+  Object.assign(ctx.state, uiData);
+
+  ctx.body = await render("android/list.html", ctx.state);
 });
 
 export default router.routes();
