@@ -10,7 +10,7 @@
 
   <hr class="my-4">
 
-  <p>发布时间：{{ latest.releaseTimeCST() }}</p>
+  <p>发布时间：{{ latest | toCST }}</p>
 
   <p class="text-muted">更新日志</p>
   {% markdown %}

@@ -16,7 +16,7 @@
       <a class="btn btn-block btn-primary" href="{{release.apkUrl}}">点击下载 {{release.versionName}}</a>
     </div>
 
-    <p class="text-muted mt-3">发布时间：{{ release.releaseTimeCST() }}</p>
+    <p class="text-muted mt-3">发布时间：{{ release | toCST }}</p>
 
     <div class="pb-2 pt-2">
       <p class="text-muted">更新日志</p>
