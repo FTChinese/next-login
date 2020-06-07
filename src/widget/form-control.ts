@@ -1,5 +1,6 @@
 import { ControlOptions, ControlType } from "./widget";
 import { Element, InputElement } from "./element";
+import { Label } from "./label";
 
 function isCheck(controlType: ControlType): boolean {
   return (controlType === ControlType.Checkbox) || (controlType === ControlType.Radio);
@@ -14,9 +15,7 @@ export class FormControl {
   // The field element like input, textarea, select.
   readonly field: InputElement;
 
-  private suffixLabel = false;
-
-  readonly label?: Element;
+  readonly label?: Label;
   private desc?: Element;
   private error?: Element
   
@@ -36,14 +35,13 @@ export class FormControl {
     }
 
     if (opts.label) {
-      this.label = (new Element("label"))
-        .withText(opts.label.text)
+      this.label = (new Label(opts.label));
+      
+      this.label
         .setAttribute("for", opts.field.id)
         .addClass(isCheckOrRadio 
           ? 'form-check-label' 
           : 'form-label');
-
-      this.suffixLabel = opts.label.suffix || false;
     }
 
     if (opts.desc) {
@@ -73,7 +71,7 @@ export class FormControl {
   render(): string {
 
     if (this.label) {
-      if (this.suffixLabel) {
+      if (this.label.suffix) {
         this.wrapper
           .appendChild(this.field)
           .appendChild(this.label)

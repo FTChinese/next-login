@@ -8,13 +8,14 @@
         <div class="card-header">订阅FT会员</div>
         <ul class="list-group list-group-flush">
 
-          {% for item in items %}
           <li class="list-group-item d-flex justify-content-between">
-            <span>{{ item.label }}</span>
-            <span>{{ item.value }}</span>
+            <span>会员类型:</span>
+            <span>{{ plan.tier | localizeTier }}/{{ plan.cycle | localizeCycle }}</span>
           </li>
-          {% endfor %}
-
+          <li class="list-group-item d-flex justify-content-between">
+            <span>支付金额:</span>
+            <span>{{ plan.price | toCurrency }}</span>
+          </li>
         </ul>
       </div>
 
@@ -22,19 +23,14 @@
       <div class="card">
         <div class="card-header">请选择支付方式</div>
         <div class="card-body">
-          <form action="{% if form.action %}{{ form.action }}{% endif %}" method="post">
+          <form action="{{ form.action }}" method="{{form.method}}">
             
-            {% for radio in form.radios %}
-            <div class="form-group">
-              {% include "partials/radio.html" %}
-            </div>
+            {% for control in form.controls %}
+              {{ control.render() | safe }}
             {% endfor %}
 
             <div class="mt-3">
-              <button 
-                type="submit"
-                data-disable-with="提交..."
-                class="btn btn-primary btn-block">支付</button>
+              {{ form.submitBtn.render() | safe }}
             </div>
             
           </form>

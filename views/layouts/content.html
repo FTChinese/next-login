@@ -20,9 +20,7 @@
 {% endblock %}
 
 {% block main %}
-  {% if flash %}
-    {{ flash.render() | safe }}
-  {% endif %}
+  
   
   <div class="row">
     <div class="col-sm-3">
@@ -57,8 +55,11 @@
     </div>
 
     <div class="col-sm-9">
-      {% include "partials/alert-success.html" %}
       
+      {% if flash %}
+        {{ flash.render() | safe }}
+      {% endif %}
+
       {% block content %}{% endblock %}
     </div>
   </div>

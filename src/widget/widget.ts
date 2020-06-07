@@ -1,10 +1,5 @@
 import { InputElement } from "./element";
 
-export interface FormWidget {
-  readonly id: string;
-  readonly name: string;
-}
-
 export interface FieldSharedAttrs {
   id: string;
   name: string;
@@ -19,6 +14,7 @@ export interface FieldSharedAttrs {
 
 export interface LabelOptions {
   text: string;
+  imageUrl?: string;
   suffix?: boolean; // Should label placed after input element? Default false.
 }
 

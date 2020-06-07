@@ -14,62 +14,32 @@ import {
     localizeCycle,
 } from "./localization";
 
-@jsonObject
-export class OrderBase {
-    @jsonMember
+export interface OrderBase {
     id: string;
-
-    @jsonMember
     price: number;
-
-    @jsonMember
     amount: number;
-
-    @jsonMember
     tier: Tier;
-
-    @jsonMember
     cycle: Cycle;
-
-    @jsonMember
     cycleCount: number;
-
-    @jsonMember
     extraDays: number;
-
-    @jsonMember
     usageType: OrderType;
-
-    @jsonMember
     payMethod: PaymentMethod;
-
-    @jsonMember
     createdAt: string;
-
-    get productName(): string {
-        return `${localizeTier(this.tier)}/${localizeCycle(this.cycle)}`;
-    }
 }
 
-export const orderSerializer = new TypedJSON(OrderBase);
+export function formatPlanName(tier: Tier, cycle: Cycle): string {
+  return `${localizeTier(tier)}/${localizeCycle(cycle)}`;
+}
 
-@jsonObject
-export class AliOrder extends OrderBase {
-    @jsonMember
+export interface AliOrder extends OrderBase {
     redirectUrl: string;
 }
 
-export const aliOrderSerializer = new TypedJSON(AliOrder);
-
 // We could only use wechat pay in desktop browser
 // for this app.
-@jsonObject
-export class WxOrder extends OrderBase {
-    @jsonMember
+export interface WxOrder extends OrderBase {
     qrCodeUrl: string;
 }
-
-export const wxOrderSerializer = new TypedJSON(WxOrder);
 
 export interface IAliCallback {
     charset: string;
