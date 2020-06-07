@@ -42,28 +42,28 @@ export class Wechat {
 @jsonObject
 export class Membership {
   @jsonMember
-  id?: string;
+  id: string | null;
 
   @jsonMember
-  tier?: Tier;
+  tier: Tier | null;
 
   @jsonMember
-  cycle?: Cycle;
+  cycle: Cycle | null;
 
   @jsonMember
-  expireDate?: string;
+  expireDate: string | null;
 
   @jsonMember
-  payMethod?: PaymentMethod;
+  payMethod: PaymentMethod | null;
 
   @jsonMember
-  autoRenew?: boolean;
+  autoRenew: boolean;
 
   @jsonMember
-  status?: SubStatus;
+  status: SubStatus | null;
 
   @jsonMember
-  vip?: boolean;
+  vip: boolean;
 
   get tierCN(): string {
     if (!this.tier) {
@@ -248,6 +248,20 @@ export class Account {
 
     return headers;
   }
+}
+
+export function buildIdHeaders(account: Account): IdHeaders {
+  const headers: IdHeaders = {};
+
+  if (account.id) {
+    headers[KEY_USER_ID] = account.id;
+  }
+
+  if (account.unionId) {
+    headers[KEY_UNION_ID] = account.unionId;
+  }
+
+  return headers;
 }
 
 export const accountSerializer = new TypedJSON(Account);
