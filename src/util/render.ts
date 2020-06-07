@@ -3,6 +3,8 @@ import { configure, render } from "nunjucks";
 import makrdown from "nunjucks-markdown";
 import marked from "marked";
 import { formatMoney, iso8601ToCST } from "./formatter";
+import { Tier, Cycle, PaymentMethod } from "../models/enums";
+import { tiersCN, cyclesCN, paymentMethodsCN, currencySymbols } from "../models/localization";
 
 const env = configure(
   [resolve(__dirname, "../../views"), resolve(__dirname, "../../client")],
@@ -18,6 +20,22 @@ env.addFilter("toCurrency", function(num: number) {
 
 env.addFilter("toCST", (str: string) => {
   return iso8601ToCST(str);
+});
+
+env.addFilter("localizeTier", (tier: Tier) => {
+  return tiersCN[tier];
+});
+
+env.addFilter("localizeCycle", (cycle: Cycle) => {
+  return cyclesCN[cycle];
+});
+
+env.addFilter("localizePayMethod", (method: PaymentMethod) => {
+  return paymentMethodsCN[method];
+});
+
+env.addFilter("currency", (c: string) => {
+  return currencySymbols[c];
 });
 
 marked.setOptions({
