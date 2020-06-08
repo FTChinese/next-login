@@ -22,8 +22,7 @@ import {
 import { toBoolean } from "../util/converter";
 import { MembershipPageBuilder } from "../pages/membership-page";
 import { PaymentPageBuilder, isMobile } from "../pages/payment-page";
-import { PayResultBuilder } from "../pages/pay-reseult";
-import { buildJoiErrors } from "../pages/validator";
+import { AlipayResultBuilder, WxpayResultBuilder } from "../pages/pay-reseult-page";
 
 const log = debug("user:subscription");
 const router = new Router();
@@ -121,7 +120,6 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
   const sandbox: boolean = toBoolean(ctx.request.query.sandbox);
   const payMethod: PaymentMethod | undefined = ctx.request.body.payMethod;
   
-
   const builder = new PaymentPageBuilder(plan, account, sandbox);
 
   const isValid = builder.validate(payMethod);
@@ -184,13 +182,17 @@ router.get("/done/ali", async (ctx, next) => {
   const query: IAliCallback = ctx.request.query;
 
   // @ts-ignore
-  const order: AliOrder = ctx.session.order;
+  const order: AliOrder | undefined = ctx.session.order;
 
-  const builder = new PayResultBuilder(account);
+  if (!order) {
+    throw new Error("Order data missing in this session!");
+  }
 
-  const isValid = builder.validateAli(order, query);
+  const builder = new AlipayResultBuilder(account, order);
+
+  const isValid = builder.validate(query);
   if (!isValid) {
-    const uiData = builder.buildAli(order, query)
+    const uiData = builder.build()
     Object.assign(ctx.state, uiData);
 
     return await next();
@@ -198,7 +200,7 @@ router.get("/done/ali", async (ctx, next) => {
 
   const newAccount = await builder.refresh()
   if (!newAccount) {
-    const uiData = builder.buildAli(order, query);
+    const uiData = builder.build();
     Object.assign(ctx.state, uiData);
     return await next();
   }
@@ -206,7 +208,7 @@ router.get("/done/ali", async (ctx, next) => {
   // @ts-ignore
   ctx.session.user = newAccount;
 
-  const uiDate = builder.buildAli(order, query);
+  const uiDate = builder.build();
   Object.assign(ctx.state, uiDate);
 
   // For development, keep session to test ui.
@@ -223,7 +225,11 @@ router.get("/done/ali", async (ctx, next) => {
 router.get("/done/wx", async (ctx, next) => {
   const account: Account = ctx.state.user;
   // @ts-ignore
-  const order: WxOrder = ctx.session.order;
+  const order: WxOrder | undefined = ctx.session.order;
+
+  if (!order) {
+    throw new Error("Order data missing in this session!");
+  }
 
   // To test UI.
   // const queryResult: IWxQueryResult = {
@@ -235,16 +241,12 @@ router.get("/done/wx", async (ctx, next) => {
   //     "paidAt": "2019-03-06T07:21:18Z"
   // };
 
-  const builder = new PayResultBuilder(account);
+  const builder = new WxpayResultBuilder(account, order);
 
-  const wxQueryResult = await builder.validateWx(order.id)
+  const isValid = await builder.validate()
 
-  if (!wxQueryResult) {
-    const uiData = builder.buildWx(
-      order,
-      wxQueryResult,
-    );
-
+  if (!isValid) {
+    const uiData = builder.build();
     Object.assign(ctx.state, uiData);
 
     return await next();
@@ -252,8 +254,7 @@ router.get("/done/wx", async (ctx, next) => {
 
   const newAccount = await builder.refresh();
   if (!newAccount) {
-    const uiData = builder.buildWx(order, wxQueryResult);
-
+    const uiData = builder.build();
     Object.assign(ctx.state, uiData);
 
     return await next();
@@ -262,8 +263,7 @@ router.get("/done/wx", async (ctx, next) => {
   // @ts-ignore
   ctx.session.user = newAccount;
 
-  const uiDate = builder.buildWx(order, wxQueryResult);
-
+  const uiDate = builder.build();
   Object.assign(ctx.state, uiDate);
 
   if (isProduction) {

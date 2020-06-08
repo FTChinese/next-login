@@ -16,12 +16,12 @@ interface PayResultPage {
   backLink: string;
 }
 
-export class PayResultBuilder {
+class PayResultBuilder {
   
   flashMsg?: string;
 
   constructor(
-    private account: Account,
+    protected account: Account,
   ) {}
 
   async refresh(): Promise<Account | null> {
@@ -33,95 +33,124 @@ export class PayResultBuilder {
       return null;
     }
   }
+}
 
-  validateAli(order: AliOrder, param: IAliCallback): boolean {
-    if (order.id != param.out_trade_no) {
+export class AlipayResultBuilder extends PayResultBuilder{
+
+  param?: IAliCallback;
+
+  constructor(
+    account: Account,
+    private order: AliOrder,
+  ){
+    super(account);
+
+  }
+
+  validate(param: IAliCallback): boolean {
+    if (this.order.id != param.out_trade_no) {
       this.flashMsg = "订单号不匹配";
       return false;
     }
 
+    this.param = param;
     return true;
   }
 
-  buildAli(order: AliOrder, param: IAliCallback): PayResultPage {
+  build(): PayResultPage {
     return {
       flash: this.flashMsg 
         ? Flash.danger(this.flashMsg)
         : undefined,
-      product: formatPlanName(order.tier, order.cycle),
+      product: formatPlanName(this.order.tier, this.order.cycle),
       caption: "支付宝支付结果",
-      rows: this.flashMsg
-        ? undefined
-        : [
+      rows: this.param
+        ? 
+        [
           {
             label: "订单号",
-            value: param.out_trade_no,
+            value: this.param.out_trade_no,
           },
           {
             label: "金额",
-            value: param.total_amount,
+            value: this.param.total_amount,
           },
           {
             label: "支付宝交易号",
-            value: param.trade_no
+            value: this.param.trade_no
           },
           {
             label: "支付时间",
-            value: param.timestamp,
+            value: this.param.timestamp,
           },
-        ],
+        ]
+        : undefined,
       backLink: subsMap.base,
     }
   }
+}
 
-  async validateWx(orderId: string): Promise<IWxQueryResult | null> {
+
+export class WxpayResultBuilder extends PayResultBuilder {
+
+  queryResult?: IWxQueryResult;
+
+  constructor(
+    account: Account,
+    readonly order: WxOrder,
+  ) {
+    super(account);
+  }
+
+  async validate(): Promise<boolean> {
     try {
-      const result = await subRepo.wxOrderQuery(this.account, orderId);
+      const result = await subRepo.wxOrderQuery(this.account, this.order.id);
 
       if (result.paymentState !== "SUCCESS") {
         this.flashMsg = result.paymentStateDesc;
-        return null;
+        return false;
       }
 
-      return result;
+      this.queryResult = result;
+      return true;
     } catch (e) {
       const errResp = new APIError(e);
       this.flashMsg = errResp.message;
 
-      return null;
+      return false;
     }
   }
 
-  buildWx(order: WxOrder, queryResult: IWxQueryResult | null): PayResultPage {
+  build(): PayResultPage {
     return {
       flash: this.flashMsg
         ? Flash.danger(this.flashMsg)
         : undefined,
       
-      product: formatPlanName(order.tier, order.cycle),
+      product: formatPlanName(this.order.tier, this.order.cycle),
       caption: "微信支付结果",
-      rows: queryResult
+      rows: this.queryResult
         ? 
         [
           {
             label: "订单号",
-            value: queryResult.ftcOrderId,
+            value: this.queryResult.ftcOrderId,
           },
           {
             label: "支付状态",
-            value: queryResult.paymentStateDesc,
+            value: this.queryResult.paymentStateDesc,
           },
           {
             label: "金额",
-            value: formatMoneyInCent(queryResult.totalFee),
+            value: formatMoneyInCent(this.queryResult.totalFee),
           },
           {
             label: "微信交易号",
-            value: queryResult.transactionId
+            value: this.queryResult.transactionId
           },
           {
             label: "支付时间",
-            value: iso8601ToCST(queryResult.paidAt),
+            value: iso8601ToCST(this.queryResult.paidAt),
           },
         ] : undefined,
       backLink: subsMap.base,
