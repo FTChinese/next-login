@@ -1,5 +1,5 @@
-import { Credentials } from "./reader";
 import { AccountKind } from "./enums";
+import { Credentials } from "./request-data";
 
 export type SignUpForm = Credentials & {
   confirmPassword: string;
@@ -26,10 +26,7 @@ export interface Passwords {
 }
 
 // Data converted from `IPwResetFormData` and passed to API
-export interface PasswordResetter {
-  token: string;
-  password: string;
-}
+
 
 export interface PasswordsFormData {
   oldPassword: string;
@@ -41,10 +38,6 @@ export interface PasswordsFormData {
 // or change email.
 export interface EmailData {
   email: string;
-}
-
-export type PwResetLetter = EmailData & {
-  sourceUrl: string;
 }
 
 export interface LinkingFormData {

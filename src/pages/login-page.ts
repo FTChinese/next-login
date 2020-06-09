@@ -9,11 +9,10 @@ import { entranceMap } from "../config/sitemap";
 import { loginSchema, joiOptions, reduceJoiErrors, textLen } from "./validator";
 import { accountService } from "../repository/account";
 import { IHeaderApp } from "../models/header";
-import { Account, Credentials } from "../models/reader";
+import { Account } from "../models/reader";
 import { APIError, errMsg } from "../models/api-response";
 import { CheckboxInputElement } from "../widget/radio-input";
-
-const msgInvalidCredentials = "邮箱或密码错误";
+import { Credentials } from "../models/request-data";
 
 export interface LoginPage {
   flash?: Flash | undefined; // Only exists when API returns a non-validation error.

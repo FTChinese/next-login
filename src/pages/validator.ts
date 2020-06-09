@@ -6,9 +6,6 @@ import {
     ValidationOptions,
     ValidationError,
 } from "@hapi/joi"
-import { 
-    Credentials 
-} from "../models/reader";
 
 export function buildJoiErrors(details: ValidationErrorItem[]): object {
     const errors: {[index: string]: string} = {};

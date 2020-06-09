@@ -9,12 +9,13 @@ import { Button } from "../widget/button";
 import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
 import { TextInputElement } from "../widget/text-input";
-import { Credentials, Account } from "../models/reader";
+import { Account } from "../models/reader";
 import { entranceMap, accountMap } from "../config/sitemap";
 import { IHeaderApp } from "../models/header";
 import { ListItem } from "../widget/list";
 import { localizeTier } from "../models/localization";
 import { Link } from "../widget/link";
+import { Credentials } from "../models/request-data";
 
 class LinkEmailPage {
   pageTitle: string; // Override global pageTitle.

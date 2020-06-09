@@ -1,7 +1,7 @@
 import Router from "koa-router";
 import render from "../util/render";
 import { collectAppHeaders } from "./middleware";
-import { Account, Credentials } from "../models/reader";
+import { Account } from "../models/reader";
 import { IHeaderApp } from "../models/header";
 import { accountMap } from "../config/sitemap";
 import { KeyUpdated } from "../pages/redirection";
@@ -13,6 +13,7 @@ import { EmailData, PasswordsFormData, SignUpForm, LinkingFormData, UnlinkFormDa
 import { LinkEmailPageBuilder, LinkLoginPageBuilder, WxSignUpPageBuilder, MergePageBuilder } from "../pages/link-page";
 import { accountService } from "../repository/account";
 import { UnlinkPageBuilder } from "../pages/unlink-page";
+import { Credentials } from "../models/request-data";
 
 const router = new Router();
 
@@ -54,6 +55,7 @@ router.get(
   }
 );
 
+/** Show update email page */
 router.get("/email", async (ctx, next) => {
   const account: Account = ctx.state.user;
 
@@ -69,6 +71,7 @@ router.get("/email", async (ctx, next) => {
   ctx.body = await render("profile/single-input.html", ctx.state);
 });
 
+/** Update email */
 router.post(
   "/email",
   async (ctx, next) => {
@@ -159,6 +162,7 @@ router.post(
   }
 );
 
+/** Requrest email verification letter */
 router.post(
   "/request-verification",
   collectAppHeaders(),

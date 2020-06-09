@@ -9,7 +9,7 @@ import {
   collectAppHeaders,
 } from "./middleware";
 import {
-  Account, Credentials,
+  Account,
 } from "../models/reader";
 import {
   IHeaderApp,
@@ -31,6 +31,7 @@ import {
 } from "../models/ftc-oauth";
 import { toBoolean } from "../util/converter";
 import { CredentialBuilder } from "../pages/login-page";
+import { Credentials } from "../models/request-data";
 
 const log = debug("user:login");
 

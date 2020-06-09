@@ -40,21 +40,10 @@ export class AccountPageBuilder {
 
   async refresh(): Promise<boolean> {
     try {
-      switch (this.account.loginMethod) {
-        case "email": {
-          const acnt = await accountService.fetchFtcAccount(this.account.id);
-          this.account = acnt;
+      
+      this.account = await accountService.refreshAccount(this.account);
 
-          return true;
-        }
-
-        case "wechat": {
-          const acnt = await accountService.fetchWxAccount(this.account.unionId!);
-          this.account = acnt;
-          
-          return true;
-        }
-      }
+      return true;
     } catch (e) {
       const errResp = new APIError(e);
       this.flashMsg = errResp.message;

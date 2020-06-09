@@ -25,10 +25,7 @@ import {
 import { KEY_UNION_ID, KEY_USER_ID } from "../config/api";
 import { ProfileFormData } from "./form-data";
 
-export interface Credentials {
-  email: string;
-  password: string;
-}
+
 
 @jsonObject
 export class Wechat {

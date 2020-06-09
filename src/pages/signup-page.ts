@@ -6,7 +6,7 @@ import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
 import { TextInputElement } from "../widget/text-input";
 import { buildCredentialControls } from "./login-page";
-import { Account, Credentials } from "../models/reader";
+import { Account } from "../models/reader";
 import { joiOptions, reduceJoiErrors } from "./validator";
 import { signUpSchema } from "./validator";
 import { ValidationError } from "@hapi/joi";
