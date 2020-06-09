@@ -1,8 +1,5 @@
 import request from "superagent";
 import {
-  TypedJSON
-} from "typedjson";
-import {
   readerApi,
   KEY_USER_ID,
   KEY_UNION_ID,
@@ -25,8 +22,6 @@ import { AccountKind } from "../models/enums";
 import { oauth, noCache } from "../util/request";
 import { EmailData } from "../models/form-data";
 import { PwResetLetter, PasswordResetter, Credentials, RequestLocation, Passwords } from "../models/request-data";
-
-const sessSerializer = new TypedJSON(WxSession);
 
 class AccountService {
 
@@ -127,7 +122,7 @@ class AccountService {
       .set(KEY_APP_ID, appId)
       .send({ code });
 
-    return sessSerializer.parse(resp.text)!;
+    return resp.body;
   }
 
   // Fetch Wechat account by union id.

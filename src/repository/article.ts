@@ -1,7 +1,4 @@
 import request from "superagent";
-import { 
-    TypedJSON 
-} from "typedjson";
 import {
     readerApi,
     KEY_USER_ID,
@@ -18,7 +15,6 @@ import {
 } from "../models/reader";
 import { oauth } from "../util/request";
 
-const serializer = new TypedJSON(Article);
 
 class ArticleRepo {
     async list(account: Account, paging: IPagination): Promise<Array<Article>> {
@@ -28,7 +24,7 @@ class ArticleRepo {
             .set(KEY_USER_ID, account.id)
             .query(paging);
 
-        return serializer.parseAsArray(resp.text)!;
+        return resp.body;
     }
 
     async unstar(account: Account, id: string): Promise<boolean> {
