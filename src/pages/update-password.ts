@@ -117,7 +117,7 @@ export class UpdatePasswordBuilder {
         this.account.id,
         {
           oldPassword: this.passwords.oldPassword,
-          newPassword: this.passwords.password,
+          password: this.passwords.password,
         },
       );
 

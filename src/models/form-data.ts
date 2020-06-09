@@ -1,5 +1,5 @@
 import { AccountKind } from "./enums";
-import { Credentials } from "./request-data";
+import { Credentials, Passwords } from "./request-data";
 
 export type SignUpForm = Credentials & {
   confirmPassword: string;
@@ -20,17 +20,10 @@ export interface ProfileFormData {
   birthday?: string;
 }
 
-export interface Passwords {
-  oldPassword: string;
-  newPassword: string;
-}
-
 // Data converted from `IPwResetFormData` and passed to API
 
 
-export interface PasswordsFormData {
-  oldPassword: string;
-  password: string;
+export type PasswordsFormData = Passwords & {
   confirmPassword: string;
 }
 

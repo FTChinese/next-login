@@ -24,8 +24,8 @@ import {
 } from "../config/viper";
 import { AccountKind } from "../models/enums";
 import { oauth, noCache } from "../util/request";
-import { Passwords, EmailData } from "../models/form-data";
-import { PwResetLetter, PasswordResetter, Credentials, RequestLocation } from "../models/request-data";
+import { EmailData } from "../models/form-data";
+import { PwResetLetter, PasswordResetter, Credentials, RequestLocation, Passwords } from "../models/request-data";
 
 const sessSerializer = new TypedJSON(WxSession);
 
