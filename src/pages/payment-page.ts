@@ -10,7 +10,7 @@ import { AliOrder, WxOrder } from "../models/order";
 import { subRepo } from "../repository/subscription";
 import { Account, buildIdHeaders } from "../models/reader";
 import { IHeaderApp } from "../models/header";
-import { APIError } from "../repository/api-response";
+import { APIError } from "../models/api-response";
 import MobileDetect from "mobile-detect";
 import { toDataURL } from "qrcode";
 import { subsMap } from "../config/sitemap";

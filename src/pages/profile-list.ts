@@ -1,5 +1,5 @@
 import debug from "debug";
-import { APIError } from "../repository/api-response";
+import { APIError } from "../models/api-response";
 import {
   Account,
   Profile,

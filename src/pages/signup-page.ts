@@ -11,8 +11,9 @@ import { joiOptions, reduceJoiErrors } from "./validator";
 import { signUpSchema } from "./validator";
 import { ValidationError } from "@hapi/joi";
 import { IHeaderApp } from "../models/header";
-import { APIError } from "../repository/api-response";
+import { APIError, errMsg } from "../models/api-response";
 import { accountService } from "../repository/account";
+import { SignUpForm } from "../models/form-data";
 
 export interface SignUpPage {
   flash?: Flash;
@@ -20,22 +21,16 @@ export interface SignUpPage {
   loginLink: string;
 }
 
-export interface SignUpData extends Credentials {
-  confirmPassword: string;
-}
-
-const msgTooManyRequests: string = "您创建账号过于频繁，请稍后再试";
-
 export class SignUpBuilder {
   errors: Map<string, string> = new Map();
   flashMsg?: string;
-  data: SignUpData = {
+  data: SignUpForm = {
     email: '',
     password: '',
     confirmPassword: ''
   };
 
-  async validate(data: SignUpData): Promise<boolean> {
+  async validate(data: SignUpForm): Promise<boolean> {
     try {
       const result = await signUpSchema.validateAsync(data, joiOptions);
 
@@ -62,7 +57,7 @@ export class SignUpBuilder {
       const errResp = new APIError(e);
 
       if (errResp.status == 429) {
-        this.flashMsg = msgTooManyRequests;
+        this.flashMsg = errMsg.signUp.tooMany;
         return null;
       }
 
@@ -93,7 +88,7 @@ export class SignUpBuilder {
           id: "confirmPassword",
           type: "password",
           name: "credentials[confirmPassword]",
-          placeholder: "再次输入新密码",
+          placeholder: "再次输入密码",
           maxlength: 32,
           required: true,
         }),

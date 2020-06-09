@@ -1,6 +1,6 @@
 import { Account, Address } from "../models/reader";
 import { profileService } from "../repository/profile";
-import { APIError } from "../repository/api-response";
+import { APIError } from "../models/api-response";
 import { joiOptions, reduceJoiErrors, addressSchema } from "./validator";
 import { Flash } from "../widget/flash";
 import { Button } from "../widget/button";

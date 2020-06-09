@@ -3,7 +3,7 @@ import { androidRepo } from "../repository/app-release";
 import { androidMap } from "../config/sitemap";
 import { Paging } from "../models/pagination";
 import { Flash } from "../widget/flash";
-import { APIError } from "../repository/api-response";
+import { APIError } from "../models/api-response";
 
 interface LatestReleasePage {
   flash?: Flash;

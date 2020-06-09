@@ -145,7 +145,7 @@ class AccountService {
 
   // Create an account for a wechat-logged-in user,
   // and returns the account's uuid.
-  async wxSignUp(c: Credentials, unionId: string, app: IHeaderApp): Promise<string> {
+  async wxSignUp(c: Credentials, unionId: string, app: IHeaderApp): Promise<Account> {
     const resp = await request
       .post(readerApi.wxSignUp)
       .use(oauth)
@@ -154,13 +154,7 @@ class AccountService {
       .set(KEY_UNION_ID, unionId)
       .send(c);
 
-    const body = resp.body;
-
-    if (body.id) {
-      return body.id;
-    }
-
-    throw new Error("Incorrect API response");
+    return resp.body
   }
 
   async requestPwResetLetter(data: PwResetLetter, app: IHeaderApp): Promise<boolean> {

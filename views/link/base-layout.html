@@ -1,0 +1,29 @@
+{% extends "layouts/content.html" %}
+
+{% block content %}
+<h2 class="mt-3 mb-5">{{ pageTitle }}</h2>
+<div class="row justify-content-center">
+  <div class="col-md-8 text-center">
+
+    {% block extraContent %}{% endblock %}
+    
+    {% if form %}
+    <form method="{{form.method}}" action="{{form.action}}">
+      {% for control in form.controls %} {% endif %} 
+      
+      {{ form.submitBtn.render() | safe }}
+    </form>
+    {% endif %}
+
+    {# show links such password reset link #}
+    {% if alternativeActions %}
+    <div class="d-flex justify-content-between mt-3">
+      {% for link in alternativeActions %}
+      <a {% if link.external %}target="_blank" {% endif %}
+        href="{{ link.href }}">{{ link.text }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

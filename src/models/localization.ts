@@ -10,18 +10,10 @@ export const paymentMethodsCN: Record<PaymentMethod, string> = {
     "b2b": "B2B",
 };
 
-export function localizePayMethod(pm: PaymentMethod): string {
-    return getProperty(paymentMethodsCN, pm);
-}
-
 export const gendersCN: Record<Gender, string> = {
   M: "男",
   F: "女",
 };
-
-export function localizeGender(gender: Gender): string {
-    return getProperty(gendersCN, gender);
-}
 
 export const cyclesCN: Record<Cycle, string> = {
   year: "年",

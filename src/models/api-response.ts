@@ -155,3 +155,11 @@ export interface IFetchResult<T> {
     errResp?: APIError;
 }
 
+export const errMsg = {
+  credentials: {
+    notFound: '邮箱或密码错误',
+  },
+  signUp: {
+    tooMany: '您创建账号过于频繁，请稍后再试',
+  },
+}

@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" sizes="76x76" href="{{iconUrl}}/apple-touch-icon-76x76.png">
   <link href="{{iconUrl}}/favicon.ico" type="image/x-icon" rel="shortcut icon"/>
 
-  <title>{% block title %}用户中心{% endblock %} - FT中文网</title>
+  <title>{{ pageTitle }} - FT中文网</title>
   
   {% if env.isProd %}
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/{{env.bsVersion}}/css/bootstrap.min.css" rel="stylesheet">

@@ -1,7 +1,7 @@
 import {
   accountService,
 } from "../repository/account";
-import { APIError } from "../repository/api-response";
+import { APIError } from "../models/api-response";
 import { accountMap, entranceMap } from "../config/sitemap";
 import { Link } from "../widget/link";
 import { Account } from "../models/reader";

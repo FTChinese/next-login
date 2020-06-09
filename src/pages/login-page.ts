@@ -6,11 +6,11 @@ import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
 import { TextInputElement } from "../widget/text-input";
 import { entranceMap } from "../config/sitemap";
-import { loginSchema, joiOptions, reduceJoiErrors } from "./validator";
+import { loginSchema, joiOptions, reduceJoiErrors, textLen } from "./validator";
 import { accountService } from "../repository/account";
 import { IHeaderApp } from "../models/header";
 import { Account, Credentials } from "../models/reader";
-import { APIError } from "../repository/api-response";
+import { APIError, errMsg } from "../models/api-response";
 import { CheckboxInputElement } from "../widget/radio-input";
 
 const msgInvalidCredentials = "邮箱或密码错误";
@@ -61,7 +61,7 @@ export class CredentialBuilder {
       const errResp = new APIError(e);
 
       if (errResp.notFound || errResp.forbidden) {
-        this.flashMsg = msgInvalidCredentials;
+        this.flashMsg = errMsg.credentials.notFound;
         return null;
       }
   
@@ -128,7 +128,7 @@ export function buildCredentialControls(data: Credentials, errors: Map<string, s
         name: "credentials[email]",
         value: data.email,
         placeholder: "电子邮箱",
-        maxlength: 32,
+        maxlength: textLen.email.max,
         required: true,
       }),
       error: errors.get("email"),
@@ -143,7 +143,7 @@ export function buildCredentialControls(data: Credentials, errors: Map<string, s
         type: "password",
         name: "credentials[password]",
         placeholder: "密码",
-        maxlength: 32,
+        maxlength: textLen.password.max,
         required: true,
       }),
       error: errors.get("password"),

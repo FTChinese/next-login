@@ -1,6 +1,6 @@
 import {
   APIError,
-} from "../repository/api-response";
+} from "../models/api-response";
 import {
   Account,
 } from "../models/reader";

@@ -1,6 +1,6 @@
 import { Account, Membership } from "../models/reader";
 import { accountService } from "../repository/account";
-import { APIError } from "../repository/api-response";
+import { APIError } from "../models/api-response";
 import { subsMap } from "../config/sitemap";
 import { DateTime } from "luxon";
 import { Tier } from "../models/enums";

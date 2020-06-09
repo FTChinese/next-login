@@ -1,9 +1,9 @@
 import { Account } from "../models/reader";
 import { Flash } from "../widget/flash";
-import { IListItem } from "../viewmodels/ui";
+import { ListItem } from "../widget/list";
 import { AliOrder, IAliCallback, formatPlanName, WxOrder, IWxQueryResult } from "../models/order";
 import { accountService } from "../repository/account";
-import { APIError } from "../repository/api-response";
+import { APIError } from "../models/api-response";
 import { subsMap } from "../config/sitemap";
 import { subRepo } from "../repository/subscription";
 import { formatMoneyInCent, iso8601ToCST } from "../util/formatter";
@@ -12,7 +12,7 @@ interface PayResultPage {
   flash?: Flash;
   product: string;
   caption: string;
-  rows?: Array<IListItem>;
+  rows?: Array<ListItem>;
   backLink: string;
 }
 

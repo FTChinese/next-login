@@ -11,6 +11,7 @@ interface FooterSection {
 
 interface BaseLayoutPage {
   iconUrl: string;
+  pageTitle: string;
   env: {
     isProd: boolean;
     year: number;
@@ -144,9 +145,13 @@ const footer: FooterSection[] = [
   }
 ];
 
+/**
+ * The data is added in env() middleware.
+ */
 export function buildBaseLayoutPage(): BaseLayoutPage {
   return {
     iconUrl: "http://interactive.ftchinese.com/favicons",
+    pageTitle: "我的FT",
     env: {
       isProd: isProduction,
       year: new Date().getFullYear(),
@@ -198,6 +203,7 @@ interface ContentLayoutPage {
   sideNav: SidebarItem[];
 }
 
+/** The data is added to global context.state in checkSession() middleware. It will be added only when user session exists. */
 export function buildContentPage(account: Account, currentPath: string): ContentLayoutPage {
   return {
     requestVerificationAction: account.isFtcOnly() && !account.isVerified

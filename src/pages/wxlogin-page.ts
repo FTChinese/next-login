@@ -14,7 +14,7 @@ import {
 } from "../util/time";
 import { entranceMap, accountMap } from "../config/sitemap";
 import { accountService } from "../repository/account";
-import { APIError } from "../repository/api-response";
+import { APIError } from "../models/api-response";
 import { Flash } from "../widget/flash";
 
 /**

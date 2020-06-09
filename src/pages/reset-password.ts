@@ -8,7 +8,7 @@ import { Button } from "../widget/button";
 import { TextInputElement } from "../widget/text-input";
 import { ControlType } from "../widget/widget";
 import { accountService } from "../repository/account";
-import { APIError } from "../repository/api-response";
+import { APIError } from "../models/api-response";
 import { KeyDone } from "./request-pw-reset";
 import { FormPage } from "./form-page";
 

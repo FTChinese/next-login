@@ -1,7 +1,7 @@
 import { Profile, Account } from "../models/reader";
 import { profileService } from "../repository/profile";
-import { APIError } from "../repository/api-response";
-import { userNameSchema, joiOptions, reduceJoiErrors } from "./validator";
+import { APIError } from "../models/api-response";
+import { userNameSchema, joiOptions, reduceJoiErrors, textLen } from "./validator";
 import { Flash } from "../widget/flash";
 import { Form } from "../widget/form";
 import { Button } from "../widget/button";
@@ -112,7 +112,7 @@ export class DisplayNameBuilder {
               type: "text",
               name: "userName",
               value: this.userName,
-              maxlength: 32,
+              maxlength: textLen.userName.max,
             }),
             desc: "32字符以内",
             error: this.errors.get("userName"),

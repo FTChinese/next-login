@@ -1,3 +1,10 @@
+import { Credentials } from "./reader";
+import { AccountKind } from "./enums";
+
+export type SignUpForm = Credentials & {
+  confirmPassword: string;
+}
+
 export interface NameForm {
   userName: string;
 }
@@ -38,4 +45,12 @@ export interface EmailData {
 
 export type PwResetLetter = EmailData & {
   sourceUrl: string;
+}
+
+export interface LinkingFormData {
+  targetId: string;
+}
+
+export interface UnlinkFormData {
+  anchor?: AccountKind;
 }

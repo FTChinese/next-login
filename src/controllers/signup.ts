@@ -10,7 +10,8 @@ import {
   profileMap
 } from "../config/sitemap";
 import { IOAuthSession, oauthServer } from "../models/ftc-oauth";
-import { SignUpBuilder, SignUpData } from "../pages/signup-page";
+import { SignUpBuilder } from "../pages/signup-page";
+import { SignUpForm } from "../models/form-data";
 
 const router = new Router();
 
@@ -29,7 +30,7 @@ router.get("/", async (ctx, next) => {
  * @description Handle signup data.
  */
 router.post("/", collectAppHeaders(), async (ctx, next) => {
-  const formData: SignUpData | undefined = ctx.request.body.credentials;
+  const formData: SignUpForm | undefined = ctx.request.body.credentials;
 
   if (!formData) {
     throw new Error("form data not found");

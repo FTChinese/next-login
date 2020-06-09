@@ -2,7 +2,7 @@ import { joiOptions, emailSchema, reduceJoiErrors } from "./validator";
 import { ValidationError } from "@hapi/joi";
 import { IHeaderApp } from "../models/header";
 import { accountService } from "../repository/account";
-import { APIError } from "../repository/api-response";
+import { APIError } from "../models/api-response";
 import { Flash } from "../widget/flash";
 import { Form } from "../widget/form";
 import { TextInputElement } from "../widget/text-input";

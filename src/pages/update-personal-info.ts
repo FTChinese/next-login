@@ -8,7 +8,7 @@ import { Button } from "../widget/button";
 import { ValidationError } from "@hapi/joi";
 import { profileSchema, joiOptions, reduceJoiErrors } from "./validator";
 import { profileService } from "../repository/profile";
-import { APIError } from "../repository/api-response";
+import { APIError } from "../models/api-response";
 import { ProfileFormData } from "../models/form-data";
 import { Account, Profile } from "../models/reader";
 import debug from "debug";

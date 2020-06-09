@@ -108,14 +108,63 @@ export const joiOptions: ValidationOptions = {
     }
 }
 
+export const textLen = {
+  email: {
+    max: 32,
+  },
+  password: {
+    max: 32,
+    min: 8
+  },
+  userName: {
+    max: 32,
+  },
+  mobile: {
+    max: 11,
+  },
+  familyName: {
+    max: 32,
+  },
+  givenName: {
+    max: 32,
+  },
+  birthday: {
+    max: 10,
+  },
+  country: {
+    max: 32,
+  },
+  province: {
+    max: 32,
+  },
+  city: {
+    max: 32,
+  },
+  district: {
+    max: 32,
+  },
+  street: {
+    max: 64,
+  },
+  postcode: {
+    max: 16,
+  },
+};
+
 const email = string().trim().email().required().messages({
   'string.email': '请输入有效的邮箱地址',
   'any.required': '邮箱为必填项'
 });
-const password = string().trim().min(8).max(64).required().messages({
-  'string.min': '不能少于8个字符',
-  'string.max': '不能超过64个字符'
-});
+
+const password = string()
+  .trim()
+  .min(textLen.password.min)
+  .max(textLen.password.max)
+  .required()
+  .messages({
+    'string.min': '不能少于8个字符',
+    'string.max': '不能超过64个字符'
+  });
 
 export const emailSchema = object().keys({
     email,
@@ -140,37 +189,33 @@ export const signUpSchema = passwordsSchema.keys({
     email,
 });
 
-export interface ISignUpFormData extends Credentials {
-    confirmPassword: string;
-}
-
 export const passwordUpdatingSchema = passwordsSchema.keys({
     // Legacy password.
     oldPassword: string().trim().required(),
 });
 
 export const userNameSchema = object().keys({
-    userName: string().trim().max(64).required(),
+    userName: string().trim().max(textLen.userName.max).required(),
 });
 
 export const mobileSchema = object().keys({
-    mobile: string().trim().max(11).required(),
+    mobile: string().trim().max(textLen.mobile.max).required(),
 });
 
 export const profileSchema = object().keys({
-    familyName: string().trim().empty('').max(64).default(null),
-    givenName: string().trim().empty('').max(64).default(null),
+    familyName: string().trim().empty('').max(textLen.familyName.max).default(null),
+    givenName: string().trim().empty('').max(textLen.givenName.max).default(null),
     gender: string().empty('').valid("M", "F").default(null),
-    birthday: string().empty('').max(10).default(null),
+    birthday: string().empty('').max(textLen.birthday.max).default(null),
 });
 
 export const addressSchema = object().keys({
-    country: string().trim().empty('').max(64).default(null),
-    province: string().trim().empty('').max(64).default(null),
-    city: string().trim().empty('').max(64).default(null),
-    district: string().trim().empty('').max(64).default(null),
-    street: string().trim().empty('').max(128).default(null),
-    postcode: string().trim().empty('').max(16).default(null),
+    country: string().trim().empty('').max(textLen.country.max).default(null),
+    province: string().trim().empty('').max(textLen.province.max).default(null),
+    city: string().trim().empty('').max(textLen.city.max).default(null),
+    district: string().trim().empty('').max(textLen.district.max).default(null),
+    street: string().trim().empty('').max(textLen.street.max).default(null),
+    postcode: string().trim().empty('').max(textLen.postcode.max).default(null),
 });
 
 

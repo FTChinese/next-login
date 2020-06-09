@@ -1,9 +1,9 @@
 import { Account } from "../models/reader";
 import { FormPage } from "./form-page";
 import { ValidationError } from "@hapi/joi";
-import { emailSchema, joiOptions, reduceJoiErrors } from "./validator";
+import { emailSchema, joiOptions, reduceJoiErrors, textLen } from "./validator";
 import { accountService } from "../repository/account";
-import { APIError } from "../repository/api-response";
+import { APIError } from "../models/api-response";
 import { Flash } from "../widget/flash";
 import { Form } from "../widget/form";
 import { FormControl } from "../widget/form-control";
@@ -95,11 +95,11 @@ export class UpdateEmailBuilder {
         new FormControl({
           controlType: ControlType.Text,
           field: new TextInputElement({
-            id: "name",
+            id: "email",
             type: "text",
             name: "email",
             value: email,
-            maxlength: 11,
+            maxlength: textLen.email.max,
           }),
           error: this.errors.get("email"),
         })

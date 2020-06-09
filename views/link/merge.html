@@ -1,0 +1,32 @@
+{% extends "link/base-layout.html" %} 
+
+{% block extraContent %}
+  <h5 class="text-center mb-3">{{ heading }}</h5>
+
+  {% if done %}
+    <div class="text-center">
+      <a href="{{done.href}}">{{done.text}}</a>
+    </div>
+  {% endif %}
+
+  {% for card in cards %}
+  <div class="card mb-5">
+
+    <div class="card-header">{{ card.header }}</div>
+
+    <ul class="list-group list-group-flush">
+      {% for item in card.list %}
+      <li class="list-group-item d-flex justify-content-between">
+        <span>{{ item.label }}</span>
+        <span>{{ item.value }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+
+  </div>
+  {% endfor %}
+
+  {% if denyMerge %}
+    <p class="text-danger">{{ denyMerge }}</p>
+  {% endif %}
+{% endblock %}

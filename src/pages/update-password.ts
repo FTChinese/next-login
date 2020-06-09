@@ -6,9 +6,9 @@ import { TextInputElement } from "../widget/text-input";
 import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
 import { ValidationError } from "@hapi/joi";
-import { passwordUpdatingSchema, joiOptions, reduceJoiErrors } from "./validator";
+import { passwordUpdatingSchema, joiOptions, reduceJoiErrors, textLen } from "./validator";
 import { accountService } from "../repository/account";
-import { APIError } from "../repository/api-response";
+import { APIError } from "../models/api-response";
 import { Account } from "../models/reader";
 import { PasswordsFormData } from "../models/form-data";
 
@@ -61,8 +61,8 @@ export class UpdatePasswordBuilder {
               type: "password",
               name: "password",
               required: true,
-              minlength: 8,
-              maxlength: 32,
+              minlength: textLen.password.min,
+              maxlength: textLen.password.max,
             }),
             desc: "最少8个字符",
             error: this.errors.get("password"),
@@ -78,8 +78,8 @@ export class UpdatePasswordBuilder {
               name: "confirmPassword",
               placeholder: "",
               required: true,
-              minlength: 8,
-              maxlength: 32,
+              minlength: textLen.password.min,
+              maxlength: textLen.password.max,
             }),
             desc: "两次输入的新密码须一致",
             error: this.errors.get("password"),

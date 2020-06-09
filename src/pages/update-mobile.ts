@@ -1,7 +1,7 @@
 import { Profile, Account } from "../models/reader";
 import { profileService } from "../repository/profile";
-import { APIError } from "../repository/api-response";
-import { joiOptions, reduceJoiErrors, mobileSchema } from "./validator";
+import { APIError } from "../models/api-response";
+import { joiOptions, reduceJoiErrors, mobileSchema, textLen } from "./validator";
 import { Flash } from "../widget/flash";
 import { Form } from "../widget/form";
 import { Button } from "../widget/button";
@@ -101,11 +101,11 @@ export class MobileBuilder {
           new FormControl({
             controlType: ControlType.Text,
             field: new TextInputElement({
-              id: "name",
+              id: "mobile",
               type: "text",
               name: "mobile",
               value: this.mobileNumber,
-              maxlength: 11,
+              maxlength: textLen.mobile.max,
             }),
             error: this.errors.get("mobile"),
           })
