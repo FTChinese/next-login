@@ -1,5 +1,6 @@
 import { resolve } from "path";
 import { configure, render } from "nunjucks";
+// @ts-ignore
 import makrdown from "nunjucks-markdown";
 import marked from "marked";
 import { formatMoney, iso8601ToCST } from "./formatter";
