@@ -1,4 +1,4 @@
-export class AndroidRelease {
+export interface AndroidRelease {
     versionName: string;
     versionCode: number;
     body?: string;
