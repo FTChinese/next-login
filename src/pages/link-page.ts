@@ -9,13 +9,14 @@ import { Button } from "../widget/button";
 import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
 import { TextInputElement } from "../widget/text-input";
-import { Account } from "../models/reader";
+import { Account, isAccountLinked, isAccountEqual } from "../models/reader";
 import { entranceMap, accountMap } from "../config/sitemap";
 import { IHeaderApp } from "../models/header";
 import { ListItem } from "../widget/list";
 import { localizeTier } from "../models/localization";
 import { Link } from "../widget/link";
 import { Credentials } from "../models/request-data";
+import { isMemberExpired } from "../models/membership";
 
 class LinkEmailPage {
   pageTitle: string; // Override global pageTitle.
@@ -447,27 +448,27 @@ export class MergePageBuilder {
       return false
     }
     const { ftc, wx } = this.accounts;
-    if (ftc.isEqual(wx)) {
+    if (isAccountEqual(ftc, wx)) {
       this.deny = `两个账号已经绑定，无需操作。如果您未看到绑定后的账号信息，请点击"账号安全"刷新。`;
 
       return false;
     }
 
-    if (ftc.isLinked()) {
+    if (isAccountLinked(ftc)) {
       this.deny = `账号 ${ftc.email} 已经绑定了其他微信账号。一个FT中文网账号只能绑定一个微信账号。`;
 
       return false;
     }
 
-    if (wx.isLinked()) {
+    if (isAccountLinked(wx)) {
       this.deny = `微信账号 ${wx.wechat.nickname} 已经绑定了其他FT中文网账号。一个FT中文网账号只能绑定一个微信账号。`;
 
       return false;
     }
 
     if (
-      !ftc.membership.isExpired &&
-      !wx.membership.isExpired
+      !isMemberExpired(ftc.membership) &&
+      !isMemberExpired(wx.membership)
     ) {
       this.deny = `您的微信账号和FT中文网的账号均购买了会员服务，两个会员均未到期。合并账号会删除其中一个账号的会员信息。为保障您的权益，暂不支持绑定两个会员未过期的账号。您可以寻求客服帮助。`;
 

@@ -4,7 +4,7 @@ import {
   paging,
 } from "./middleware";
 import {
-  Account,
+  Account, isAccountWxOnly,
 } from "../models/reader";
 import { starredMap } from "../config/sitemap";
 import { StarredPageBuilder } from "./starred-page";
@@ -14,7 +14,7 @@ const router = new Router();
 router.get("/", paging(10), async (ctx, next) => {
   const account: Account = ctx.state.user;
 
-  if (account.isWxOnly()) {
+  if (isAccountWxOnly(account)) {
     return await next();
   }
 
@@ -44,7 +44,7 @@ router.get("/", paging(10), async (ctx, next) => {
 router.post("/:id/delete", async (ctx, next) => {
   const account: Account = ctx.state.user;
 
-  if (account.isWxOnly()) {
+  if (isAccountWxOnly(account)) {
     ctx.status = 404;
     return;
   }

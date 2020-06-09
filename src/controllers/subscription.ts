@@ -48,23 +48,6 @@ router.get("/", async (ctx, next) => {
   ctx.body = await render("subscription/membership.html", ctx.state);
 });
 
-/**
- * @description Renew membership
- * /user/subscription/renew
- */
-router.get("/renew", async (ctx, next) => {
-  const account: Account = ctx.state.user;
-
-  const redirectTo = account.membership.renewalUrl;
-
-  if (!redirectTo) {
-    ctx.status = 404;
-    return;
-  }
-
-  ctx.redirect(redirectTo);
-});
-
 router.get("/orders", async (ctx, next) => {
   const account: Account = ctx.state.user;
 

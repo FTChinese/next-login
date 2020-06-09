@@ -25,13 +25,9 @@ import {
   CallbackParams, OAuthSession, OAuthClient,
 } from "../models/wx-oauth";
 import { accountService } from "../repository/account";
-import {
-  oauthServer,
-  IOAuthSession as IFtcOAuthSession,
-} from "../models/ftc-oauth";
-import { toBoolean } from "../util/converter";
 import { CredentialBuilder } from "../pages/login-page";
 import { Credentials } from "../models/request-data";
+import { unixSeconds } from "../util/time";
 
 const log = debug("user:login");
 
@@ -94,7 +90,7 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
   ctx.cookies.set("USER_NAME", account.userName || "");
   ctx.cookies.set("USER_NAME_FT", account.userName || "");
   ctx.cookies.set("paywall", account.membership.tier || "");
-  ctx.cookies.set("paywall_expire", `${account.membership.expireSeconds}`);
+  ctx.cookies.set("paywall_expire", `${unixSeconds(account.membership.expireDate)}`);
 
 
   return ctx.redirect(profileMap.base);

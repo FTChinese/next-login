@@ -4,6 +4,7 @@ import render from "../util/render";
 import {
   Account,
   Address,
+  isAccountWxOnly,
 } from "../models/reader";
 import { ProfilePageBuilder } from "../pages/profile-list";
 import { profileMap } from "../config/sitemap";
@@ -25,7 +26,7 @@ router.get("/", async (ctx, next) => {
 
   // If current account is a wechat-only one,
   // use the sesson data to show user profile.
-  if (account.isWxOnly()) {
+  if (isAccountWxOnly(account)) {
     return await next();
   }
 

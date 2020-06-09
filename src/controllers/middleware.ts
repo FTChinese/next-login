@@ -50,7 +50,7 @@ export function checkSession(redirect: boolean = true): Middleware {
     if (ctx.path == "/favicon.ico") return;
 
     if (isLoggedIn(ctx.session)) {
-      ctx.state.user = accountSerializer.parse(ctx.session.user);
+      ctx.state.user = ctx.session.user;
 
       Object.assign(
         ctx.state, 

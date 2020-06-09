@@ -1,4 +1,4 @@
-import { Account } from "../models/reader";
+import { Account, isAccountFtcOnly } from "../models/reader";
 import { accountMap, profileMap, subsMap, starredMap, entranceMap } from "../config/sitemap";
 import { Link } from "../widget/link";
 import { isProduction } from "../config/viper";
@@ -206,7 +206,7 @@ interface ContentLayoutPage {
 /** The data is added to global context.state in checkSession() middleware. It will be added only when user session exists. */
 export function buildContentPage(account: Account, currentPath: string): ContentLayoutPage {
   return {
-    requestVerificationAction: account.isFtcOnly() && !account.isVerified
+    requestVerificationAction: isAccountFtcOnly(account) && !account.isVerified
       ? accountMap.requestVerification
       : undefined,
     sideNav: sidebarItems.map(item => {

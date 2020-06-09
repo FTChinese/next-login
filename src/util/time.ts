@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
 /**
  * @description Returns the current Unix time in seconds.
  */
@@ -16,4 +18,12 @@ export function isExpired(timestamp: number, duration: number): boolean {
     }
 
     return false;
+}
+
+export function unixSeconds(str: string | null): number {
+  if (!str) {
+    return 0;
+  }
+
+  return DateTime.fromISO(str).toSeconds();
 }

@@ -8,7 +8,7 @@ import { FormControl } from "../widget/form-control";
 import { RadioInputElement } from "../widget/radio-input";
 import { ControlType } from "../widget/widget";
 import { AccountKind } from "../models/enums";
-import { Account } from "../models/reader";
+import { Account, isMember } from "../models/reader";
 import { localizeTier } from "../models/localization";
 import { accountService } from "../repository/account";
 import { APIError } from "../models/api-response";
@@ -34,7 +34,7 @@ export class UnlinkPageBuilder {
     readonly account: Account,
     readonly unlinked: boolean = false
   ) {
-    this.hasMember = account.membership.isMember;
+    this.hasMember = isMember(account.membership);
 
     this.isMemberEmailOnly = (account.membership.payMethod !== "alipay") && (account.membership.payMethod !== "wechat");
 
@@ -44,7 +44,7 @@ export class UnlinkPageBuilder {
   }
 
   validate(formData: UnlinkFormData): boolean {
-    if (!this.account.membership.isMember) {
+    if (!this.hasMember) {
       this.anchor = undefined;
       return true;
     }

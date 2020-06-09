@@ -11,7 +11,6 @@ import {
 } from "../config/api";
 import {
   Account,
-  accountSerializer,
 } from "../models/reader";
 import {
   IHeaderApp,
@@ -41,7 +40,7 @@ class AccountService {
       .use(noCache)
       .set(KEY_USER_ID, id);
 
-    return accountSerializer.parse(resp.text)!;
+    return resp.body;
   }
 
   async refreshAccount(account: Account): Promise<Account> {
@@ -73,7 +72,7 @@ class AccountService {
       .set(app)
       .send(c);
 
-    return accountSerializer.parse(resp.text)!;
+    return resp.body;
   }
 
   async emailExists(email: string): Promise<boolean> {
@@ -139,7 +138,7 @@ class AccountService {
       .use(noCache)
       .set(KEY_UNION_ID, unionId);
 
-    return accountSerializer.parse(resp.text)!;
+    return resp.body;
   }
 
   // Create an account for a wechat-logged-in user,

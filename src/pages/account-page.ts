@@ -2,7 +2,7 @@ import {
   APIError,
 } from "../models/api-response";
 import {
-  Account,
+  Account, isAccountLinked,
 } from "../models/reader";
 import {
   IHeaderApp,
@@ -68,7 +68,7 @@ export class AccountPageBuilder {
       link: {
         email: accountMap.email,
         password: accountMap.password,
-        wechat: this.account.isLinked()
+        wechat: isAccountLinked(this.account)
           ? accountMap.unlinkWx
           : entranceMap.wxLogin,
       }

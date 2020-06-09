@@ -1,7 +1,7 @@
 import Router from "koa-router";
 import render from "../util/render";
 import { collectAppHeaders } from "./middleware";
-import { Account } from "../models/reader";
+import { Account, isAccountWxOnly, isAccountLinked } from "../models/reader";
 import { IHeaderApp } from "../models/header";
 import { accountMap } from "../config/sitemap";
 import { KeyUpdated } from "../pages/redirection";
@@ -27,7 +27,7 @@ router.get(
   async (ctx, next) => {
     const account: Account = ctx.state.user;
 
-    if (account.isWxOnly()) {
+    if (isAccountWxOnly(account)) {
       return await next();
     }
 
@@ -59,7 +59,7 @@ router.get(
 router.get("/email", async (ctx, next) => {
   const account: Account = ctx.state.user;
 
-  if (account.isWxOnly()) {
+  if (isAccountWxOnly(account)) {
     ctx.status = 404;
     return;
   }
@@ -77,7 +77,7 @@ router.post(
   async (ctx, next) => {
     const account: Account = ctx.state.user;
 
-    if (account.isWxOnly()) {
+    if (isAccountWxOnly(account)) {
       ctx.status = 404;
       return;
     }
@@ -128,7 +128,7 @@ router.post(
   async (ctx, next) => {
     const account: Account = ctx.state.user;
 
-    if (account.isWxOnly()) {
+    if (isAccountWxOnly(account)) {
       ctx.status = 404;
       return;
     }
@@ -169,7 +169,7 @@ router.post(
   async (ctx, next) => {
     const account: Account = ctx.state.user;
 
-    if (account.isWxOnly()) {
+    if (isAccountWxOnly(account)) {
       ctx.status = 404;
       return;
     }
@@ -456,7 +456,7 @@ router.get("/link/merge", async (ctx, next) => {
 router.post("/link/merge", async (ctx, next) => {
   const account: Account = ctx.state.user;
 
-  if (account.isLinked()) {
+  if (isAccountLinked(account)) {
     ctx.status = 404;
     return;
   }
@@ -491,7 +491,7 @@ router.post("/link/merge", async (ctx, next) => {
 router.get("/unlink", async (ctx, next) => {
   const account: Account = ctx.state.user;
 
-  if (!account.isLinked()) {
+  if (!isAccountLinked(account)) {
     ctx.status = 404;
     return;
   }
@@ -518,7 +518,7 @@ router.post(
   async (ctx, next) => {
     const account: Account = ctx.state.user;
 
-    if (!account.isLinked()) {
+    if (!isAccountLinked(account)) {
       ctx.status = 404;
       return;
     }

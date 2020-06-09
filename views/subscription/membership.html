@@ -29,8 +29,7 @@
         <a href="{{ data.ordersLink }}">订单历史</a>
       </div>
       {% endif %}
-
-      {% include "partials/customer-service.html" %}
+      
     </div>
   {% else %}
 
@@ -78,4 +77,6 @@
       </div>
     {% endfor %}
   </div>
+
+  <p class="pt-5">如果订阅时遇到问题，可以致函 <a href="{{ serviceMail }}">FT客服邮箱</a></p>
 {% endblock %}

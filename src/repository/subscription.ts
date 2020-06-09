@@ -1,6 +1,6 @@
 import request from "superagent";
 import {
-  Account,
+  Account, collectAccountIDs,
 } from "../models/reader";
 import {
   Plan,
@@ -11,8 +11,6 @@ import {
 import {
   AliOrder,
   WxOrder,
-  aliOrderSerializer,
-  wxOrderSerializer,
   IWxQueryResult,
 } from "../models/order";
 import {
@@ -42,7 +40,7 @@ class Subscription {
       })
       .set(headers);
 
-    return aliOrderSerializer.parse(resp.text)!;
+    return resp.body;
   }
 
   async aliMobilePay(plan: Plan, headers: IHeaderReaderId & IHeaderApp, sandbox: boolean): Promise<AliOrder> {
@@ -62,7 +60,7 @@ class Subscription {
       })
       .set(headers);
 
-    return aliOrderSerializer.parse(resp.text)!;
+    return resp.body;
   }
 
   async wxDesktopPay(plan: Plan, headers: IHeaderReaderId & IHeaderApp, sandbox: boolean): Promise<WxOrder> {
@@ -79,13 +77,13 @@ class Subscription {
       .use(noCache)
       .set(headers);
 
-    return wxOrderSerializer.parse(resp.text)!;
+    return resp.body;
   }
 
   async wxOrderQuery(account: Account, orderId: string): Promise<IWxQueryResult> {
 
     const headers: IHeaderReaderId & IHeaderWxAppId = {
-      ...(account.idHeaders),
+      ...(collectAccountIDs(account)),
       "X-App-Id": viper.getConfig().wxapp.web_pay.app_id
     }
 

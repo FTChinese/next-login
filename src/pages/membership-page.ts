@@ -1,4 +1,4 @@
-import { Account, Membership } from "../models/reader";
+import { Account, customerServiceEmail } from "../models/reader";
 import { accountService } from "../repository/account";
 import { APIError } from "../models/api-response";
 import { subsMap } from "../config/sitemap";
@@ -6,6 +6,7 @@ import { DateTime } from "luxon";
 import { Tier } from "../models/enums";
 import { Flash } from "../widget/flash";
 import { IPaywall, Banner, Plan, scheduler } from "../models/paywall";
+import { Membership } from "../models/membership";
 
 interface UIMembership {
   tier?: Tier;
@@ -31,6 +32,7 @@ interface MembershipPage {
   flash?: Flash;
   member?: UIMembership;
   paywall: UIPaywall;
+  serviceMail: string;
 }
 
 export class MembershipPageBuilder {
@@ -71,6 +73,7 @@ export class MembershipPageBuilder {
       flash: this.flashMsg ? Flash.danger(this.flashMsg) : undefined,
       member: this.buildMemberUI(),
       paywall: this.buildPaywallUI(scheduler.paywall),
+      serviceMail: customerServiceEmail(this._account),
     };
   }
 
@@ -134,7 +137,7 @@ export class MembershipPageBuilder {
     }
 
     const remainingDays = this.memberRemainingDays();
-    const expiration = this.account.membership.vip 
+    const expiration = this.account.membership.tier === "vip" 
       ? "无限期"
       : this.account.membership.expireDate;
     const urgeMsg = this.urgeRenewal(remainingDays)
