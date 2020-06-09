@@ -174,8 +174,14 @@ router.post(
       return;
     }
 
+    const sourceUrl = ctx.origin + "/verify/email";
+
     const builder = new AccountPageBuilder(account);
-    const ok = await builder.requestVerification(ctx.state.appHeaders);
+    const ok = await builder.requestVerification(
+      {
+        sourceUrl,
+      }, 
+      ctx.state.appHeaders);
 
     if (!ok) {
       const uiData = builder.build();

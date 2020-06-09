@@ -25,8 +25,6 @@ import {
 import { KEY_UNION_ID, KEY_USER_ID } from "../config/api";
 import { ProfileFormData } from "./form-data";
 
-
-
 @jsonObject
 export class Wechat {
   @jsonMember

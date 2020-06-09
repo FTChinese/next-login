@@ -16,6 +16,7 @@ import {
 } from "../config/sitemap";
 import { KeyUpdated, getMsgUpdated } from "./redirection";
 import { Flash } from "../widget/flash";
+import { RequestLocation } from "../models/request-data";
 
 interface AccountPage {
   flash?: Flash;
@@ -25,8 +26,6 @@ interface AccountPage {
     wechat: string;
   }
 }
-
-const msgNotFound = "用户不存在或服务器错误！";
 
 export class AccountPageBuilder {
 
@@ -51,9 +50,9 @@ export class AccountPageBuilder {
     }
   }
 
-  async requestVerification(app: IHeaderApp): Promise<boolean> {
+  async requestVerification(source: RequestLocation, app: IHeaderApp): Promise<boolean> {
     try {
-      const ok = await accountService.requestVerification(this.account.id, app);
+      const ok = await accountService.requestVerification(this.account.id, source, app);
 
       return ok;
     } catch (e) {

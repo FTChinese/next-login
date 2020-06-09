@@ -25,7 +25,7 @@ import {
 import { AccountKind } from "../models/enums";
 import { oauth, noCache } from "../util/request";
 import { Passwords, EmailData } from "../models/form-data";
-import { PwResetLetter, PasswordResetter, Credentials } from "../models/request-data";
+import { PwResetLetter, PasswordResetter, Credentials, RequestLocation } from "../models/request-data";
 
 const sessSerializer = new TypedJSON(WxSession);
 
@@ -192,13 +192,14 @@ class AccountService {
     return resp.noContent;
   }
 
-  async requestVerification(id: string, app: IHeaderApp): Promise<boolean> {
+  async requestVerification(id: string, source: RequestLocation, app: IHeaderApp): Promise<boolean> {
     const resp = await request
       .post(readerApi.requestVerification)
       .use(oauth)
       .use(noCache)
       .set(app)
-      .set(KEY_USER_ID, id);
+      .set(KEY_USER_ID, id)
+      .send(source);
 
     return resp.noContent;
   }
