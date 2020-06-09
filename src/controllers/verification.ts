@@ -2,7 +2,7 @@ import Router from "koa-router";
 import render from "../util/render";
 import {  
     Account, accountVierified,
-} from "../models/reader";
+} from "../models/account";
 import { EmailVerifiedBuilder } from "../pages/email-verified";
 
 const router = new Router();

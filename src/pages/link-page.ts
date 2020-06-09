@@ -9,7 +9,7 @@ import { Button } from "../widget/button";
 import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
 import { TextInputElement } from "../widget/text-input";
-import { Account, isAccountLinked, isAccountEqual } from "../models/reader";
+import { Account, isAccountLinked, isAccountEqual } from "../models/account";
 import { entranceMap, accountMap } from "../config/sitemap";
 import { IHeaderApp } from "../models/header";
 import { ListItem } from "../widget/list";

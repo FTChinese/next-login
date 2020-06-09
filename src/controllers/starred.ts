@@ -5,7 +5,7 @@ import {
 } from "./middleware";
 import {
   Account, isAccountWxOnly,
-} from "../models/reader";
+} from "../models/account";
 import { starredMap } from "../config/sitemap";
 import { StarredPageBuilder } from "./starred-page";
 

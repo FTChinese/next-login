@@ -1,6 +1,6 @@
 import request from "superagent";
 import { readerApi, KEY_USER_ID } from "../config/api";
-import { Profile, Address } from "../models/reader";
+import { Profile, Address } from "../models/account";
 import { oauth, noCache } from "../util/request";
 import { NameForm, MobileForm, ProfileFormData } from "../models/form-data";
 

@@ -5,7 +5,7 @@ import {
   Account,
   Address,
   isAccountWxOnly,
-} from "../models/reader";
+} from "../models/account";
 import { ProfilePageBuilder } from "../pages/profile-list";
 import { profileMap } from "../config/sitemap";
 import { PersonalInfoBuilder } from "../pages/update-personal-info";

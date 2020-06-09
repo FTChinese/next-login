@@ -5,7 +5,7 @@ import {
 } from "../models/wx-oauth";
 import {
   Account,
-} from "../models/reader";
+} from "../models/account";
 import {
   IHeaderApp,
 } from "../models/header";

@@ -2,7 +2,6 @@ import debug from "debug";
 import { Middleware } from "koa";
 import { Session } from "koa-session";
 import { Paging } from "../models/pagination";
-import { accountSerializer } from "../models/reader";
 import { entranceMap, androidMap } from "../config/sitemap";
 import render from "../util/render";
 import { IHeaderApp } from "../models/header";

@@ -9,7 +9,7 @@ import { ValidationError } from "@hapi/joi";
 import { passwordUpdatingSchema, joiOptions, reduceJoiErrors, textLen } from "./validator";
 import { accountService } from "../repository/account";
 import { APIError } from "../models/api-response";
-import { Account } from "../models/reader";
+import { Account } from "../models/account";
 import { PasswordsFormData } from "../models/form-data";
 
 interface PasswordPage {

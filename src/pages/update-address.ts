@@ -1,4 +1,4 @@
-import { Account, Address } from "../models/reader";
+import { Account, Address } from "../models/account";
 import { profileService } from "../repository/profile";
 import { APIError } from "../models/api-response";
 import { joiOptions, reduceJoiErrors, addressSchema } from "./validator";

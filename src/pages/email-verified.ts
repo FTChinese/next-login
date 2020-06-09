@@ -4,7 +4,7 @@ import {
 import { APIError } from "../models/api-response";
 import { accountMap, entranceMap } from "../config/sitemap";
 import { Link } from "../widget/link";
-import { Account } from "../models/reader";
+import { Account } from "../models/account";
 
 interface EmailVerifiedPage {
   message: string;

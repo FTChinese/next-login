@@ -1,4 +1,4 @@
-import { Account, customerServiceEmail } from "../models/reader";
+import { Account, customerServiceEmail } from "../models/account";
 import { accountService } from "../repository/account";
 import { APIError } from "../models/api-response";
 import { subsMap } from "../config/sitemap";

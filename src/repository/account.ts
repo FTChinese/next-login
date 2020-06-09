@@ -8,7 +8,7 @@ import {
 } from "../config/api";
 import {
   Account,
-} from "../models/reader";
+} from "../models/account";
 import {
   IHeaderApp,
 } from "../models/header";

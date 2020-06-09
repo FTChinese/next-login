@@ -1,7 +1,7 @@
 import request from "superagent";
 import {
   Account, collectAccountIDs,
-} from "../models/reader";
+} from "../models/account";
 import {
   Plan,
 } from "../models/paywall";

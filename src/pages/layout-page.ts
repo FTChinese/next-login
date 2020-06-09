@@ -1,4 +1,4 @@
-import { Account, isAccountFtcOnly } from "../models/reader";
+import { Account, isAccountFtcOnly } from "../models/account";
 import { accountMap, profileMap, subsMap, starredMap, entranceMap } from "../config/sitemap";
 import { Link } from "../widget/link";
 import { isProduction } from "../config/viper";

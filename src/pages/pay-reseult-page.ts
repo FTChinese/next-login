@@ -1,4 +1,4 @@
-import { Account } from "../models/reader";
+import { Account } from "../models/account";
 import { Flash } from "../widget/flash";
 import { ListItem } from "../widget/list";
 import { AliOrder, IAliCallback, formatPlanName, WxOrder, IWxQueryResult } from "../models/order";

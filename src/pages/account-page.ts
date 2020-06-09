@@ -3,7 +3,7 @@ import {
 } from "../models/api-response";
 import {
   Account, isAccountLinked,
-} from "../models/reader";
+} from "../models/account";
 import {
   IHeaderApp,
 } from "../models/header";

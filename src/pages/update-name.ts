@@ -1,4 +1,4 @@
-import { Profile, Account } from "../models/reader";
+import { Profile, Account } from "../models/account";
 import { profileService } from "../repository/profile";
 import { APIError } from "../models/api-response";
 import { userNameSchema, joiOptions, reduceJoiErrors, textLen } from "./validator";

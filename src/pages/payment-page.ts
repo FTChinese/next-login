@@ -8,7 +8,7 @@ import { RadioInputElement } from "../widget/radio-input";
 import { PaymentMethod } from "../models/enums";
 import { AliOrder, WxOrder } from "../models/order";
 import { subRepo } from "../repository/subscription";
-import { Account, buildIdHeaders } from "../models/reader";
+import { Account, buildIdHeaders } from "../models/account";
 import { IHeaderApp } from "../models/header";
 import { APIError } from "../models/api-response";
 import MobileDetect from "mobile-detect";

@@ -6,7 +6,7 @@ import {
 } from "./middleware";
 import {
   Account,
-} from "../models/reader";
+} from "../models/account";
 import {
   Tier,
   Cycle,

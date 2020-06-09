@@ -1,4 +1,4 @@
-import { Account } from "../models/reader";
+import { Account } from "../models/account";
 import { FormPage } from "./form-page";
 import { ValidationError } from "@hapi/joi";
 import { emailSchema, joiOptions, reduceJoiErrors, textLen } from "./validator";

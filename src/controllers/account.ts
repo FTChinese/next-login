@@ -1,7 +1,7 @@
 import Router from "koa-router";
 import render from "../util/render";
 import { collectAppHeaders } from "./middleware";
-import { Account, isAccountWxOnly, isAccountLinked } from "../models/reader";
+import { Account, isAccountWxOnly, isAccountLinked } from "../models/account";
 import { IHeaderApp } from "../models/header";
 import { accountMap } from "../config/sitemap";
 import { KeyUpdated } from "../pages/redirection";

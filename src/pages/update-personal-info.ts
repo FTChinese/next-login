@@ -10,7 +10,7 @@ import { profileSchema, joiOptions, reduceJoiErrors } from "./validator";
 import { profileService } from "../repository/profile";
 import { APIError } from "../models/api-response";
 import { ProfileFormData } from "../models/form-data";
-import { Account, Profile } from "../models/reader";
+import { Account, Profile } from "../models/account";
 import debug from "debug";
 
 const log = debug("user:update-personal-info");

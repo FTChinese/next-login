@@ -4,7 +4,7 @@ import {
   Account,
   Profile,
   Address,
-} from "../models/reader";
+} from "../models/account";
 
 import { profileService } from "../repository/profile";
 import { Flash } from "../widget/flash";

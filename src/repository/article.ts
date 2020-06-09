@@ -12,7 +12,7 @@ import {
 } from "../models/pagination";
 import {
     Account,
-} from "../models/reader";
+} from "../models/account";
 import { oauth } from "../util/request";
 
 

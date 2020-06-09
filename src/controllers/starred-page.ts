@@ -1,6 +1,6 @@
 import { Article } from "../models/bookmarks";
 import { Paging } from "../models/pagination";
-import { Account } from "../models/reader";
+import { Account } from "../models/account";
 import { articleRepo } from "../repository/article";
 import { APIError } from "../models/api-response";
 import { Flash } from "../widget/flash";

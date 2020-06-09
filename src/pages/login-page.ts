@@ -9,7 +9,7 @@ import { entranceMap } from "../config/sitemap";
 import { loginSchema, joiOptions, reduceJoiErrors, textLen } from "./validator";
 import { accountService } from "../repository/account";
 import { IHeaderApp } from "../models/header";
-import { Account } from "../models/reader";
+import { Account } from "../models/account";
 import { APIError, errMsg } from "../models/api-response";
 import { CheckboxInputElement } from "../widget/radio-input";
 import { Credentials } from "../models/request-data";
