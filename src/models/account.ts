@@ -142,6 +142,7 @@ export interface Profile extends ProfileFormData {
   telephone?: string;
   createdAt?: string;
   updatedAt?: string;
+  address: Address;
 }
 
 export interface Address {

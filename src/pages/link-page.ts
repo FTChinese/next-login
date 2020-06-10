@@ -77,7 +77,6 @@ export class LinkEmailPageBuilder {
       pageTitle: "绑定FT中文网账号",
       flash: this.flashMsg
         ? Flash.danger(this.flashMsg)
-          .setDismissible(true)
         : undefined,
       form: new Form({
         disabled: false,
@@ -181,7 +180,6 @@ export class LinkLoginPageBuilder {
       pageTitle: "绑定FT中文网账号",
       flash: this.flashMsg
         ? Flash.danger(this.flashMsg)
-          .setDismissible(true)
         : undefined,
       form: new Form({
         disabled: false,
@@ -303,7 +301,6 @@ export class WxSignUpPageBuilder {
       pageTitle: "注册并绑定FT中文网账号",
       flash: this.flashMsg
         ? Flash.danger(this.flashMsg)
-          .setDismissible(true)
         : undefined,
       form: new Form({
         disabled: false,
@@ -379,6 +376,7 @@ export interface Card {
   list: Array<ListItem>;
 }
 
+/** template: link/merge.html */
 interface MergePage {
   flash?: Flash; // Any error message
   pageTitle: string;
@@ -521,7 +519,6 @@ export class MergePageBuilder {
 
     p.flash = this.flashMsg
       ? Flash.danger(this.flashMsg)
-        .setDismissible(true)
       : undefined;
 
     p.cards = [

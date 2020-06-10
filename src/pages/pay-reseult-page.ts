@@ -8,6 +8,7 @@ import { subsMap } from "../config/sitemap";
 import { subRepo } from "../repository/subscription";
 import { formatMoneyInCent, iso8601ToCST } from "../util/formatter";
 
+/** template: subscription/pay-done.html */
 interface PayResultPage {
   flash?: Flash;
   product: string;

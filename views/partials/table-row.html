@@ -1,0 +1,17 @@
+<div class="d-flex justify-content-between mb-3 pb-3{% if not loop.last %} border-bottom{% endif %}">
+            
+  <div class="pr-2 flex-grow-1">
+    {% for cell in row.cells %}
+      <div class="d-flex justify-content-between">
+        <span>{{cell.left}}</span>
+        <span class="pl-2">{{cell.right}}</span>
+      </div>
+    {% endfor %}
+  </div>
+  
+  {% if row.disclosure %}
+    <a href="{{ row.disclosure.href }}" 
+      class="align-self-center pl-2 pr-2">{{ row.disclosure.text }}</a>
+  {% endif %}
+
+</div>

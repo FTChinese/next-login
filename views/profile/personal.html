@@ -2,12 +2,9 @@
 
 {% block content %}
 
-<section class="mt-3">
-  <h5>个人信息</h5>
-
-  {% if flash %}{{ flash.render() | safe }}{% endif %}
-
-  {% if form %}
+<h5>个人信息</h5>
+  
+{% if form %}
   <form method="post">
     <div class="form-row">
       {{ form.familyName.render() | safe }}
@@ -24,8 +21,7 @@
     
     {{ form.submitBtn.render() | safe }}
   </form>
-  {% endif %}
-</section>
+{% endif %}
 
 
 {% endblock %}

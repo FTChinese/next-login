@@ -24,26 +24,18 @@ const log = debug("user:profile");
 router.get("/", async (ctx, next) => {
   const account: Account = ctx.state.user;
 
-  // If current account is a wechat-only one,
-  // use the sesson data to show user profile.
-  if (isAccountWxOnly(account)) {
-    return await next();
-  }
-
   // If this page is accessed from redirection after updating successfully.
 
   // @ts-ignore
   const key: KeyUpdated | undefined = ctx.session.ok;
 
-  const builder = new ProfilePageBuilder();
-  await builder.fetchData(account);
+  const builder = new ProfilePageBuilder(account);
+  await builder.fetchData();
 
   const uiData = builder.build(key);
 
   Object.assign(ctx.state, uiData);
 
-  await next();
-}, async (ctx, next) => {
   ctx.body = await render("profile/profile.html", ctx.state);
 
   // @ts-ignore
@@ -60,7 +52,7 @@ router.get("/display-name", async (ctx, next) => {
 
   Object.assign(ctx.state, uiData);
 
-  ctx.body = await render("profile/single-input.html", ctx.state);
+  ctx.body = await render("single-input.html", ctx.state);
 });
 
 router.post("/display-name", async (ctx, next) => {
@@ -93,7 +85,7 @@ router.post("/display-name", async (ctx, next) => {
   ctx.session.ok = key;
   return ctx.redirect(profileMap.base);
 }, async (ctx, next) => {
-    ctx.body = await render("profile/single-input.html", ctx.state);
+    ctx.body = await render("single-input.html", ctx.state);
   }
 );
 
@@ -106,7 +98,7 @@ router.get("/mobile", async (ctx, next) => {
   const uiData = builder.build();
   Object.assign(ctx.state, uiData);
 
-  ctx.body = await render("profile/single-input.html", ctx.state);
+  ctx.body = await render("single-input.html", ctx.state);
 });
 
 router.post("/mobile", async (ctx, next) => {
@@ -136,7 +128,7 @@ router.post("/mobile", async (ctx, next) => {
 
   return ctx.redirect(profileMap.base);
 }, async (ctx, next) => {
-  ctx.body = await render("profile/single-input.html", ctx.state);
+  ctx.body = await render("single-input.html", ctx.state);
 });
 
 router.get("/info", async (ctx, next) => {

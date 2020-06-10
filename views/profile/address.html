@@ -1,11 +1,9 @@
 {% extends "layouts/content.html" %} 
 
 {% block content %}
+  <h5>地址</h5>
 
-  <div class="mt-3">
-    <h5>地址</h5>
-
-    {% if form %}
+  {% if form %}
     <form method="post">
       
       {{ form.country.render() | safe }}
@@ -22,6 +20,6 @@
       
       {{ form.submitBtn.render() | safe }}
     </form>
-    {% endif %}   
-  </div>
+  {% endif %}   
+
 {% endblock %}

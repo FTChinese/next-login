@@ -64,7 +64,7 @@ export class PaymentPageBuilder {
   async build(): Promise<PaymentPage> {
     const p: PaymentPage = {
       flash: this.flashMsg 
-        ? Flash.danger(this.flashMsg).setDismissible(true) 
+        ? Flash.danger(this.flashMsg)
         : undefined,
       plan: this.plan,
     };

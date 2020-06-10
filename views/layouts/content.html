@@ -21,7 +21,6 @@
 
 {% block main %}
   
-  
   <div class="row">
     <div class="col-sm-3">
       <div id="o-header-drawer" class="collapse d-sm-block o-header__drawer">
@@ -59,7 +58,10 @@
         {{ flash.render() | safe }}
       {% endif %}
 
-      {% block content %}{% endblock %}
+      <div class="mt-3">
+        {% block content %}{% endblock %}
+      </div>
+      
     </div>
   </div>
 

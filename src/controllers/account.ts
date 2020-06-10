@@ -48,7 +48,7 @@ router.get(
     return await next();
   },
   async (ctx, next) => {
-    ctx.body = await render("account/account.html", ctx.state);
+    ctx.body = await render("account.html", ctx.state);
 
     // @ts-ignore
     delete ctx.session.ok;
@@ -68,7 +68,7 @@ router.get("/email", async (ctx, next) => {
   const uiData = await builder.build();
   Object.assign(ctx.state, uiData);
 
-  ctx.body = await render("profile/single-input.html", ctx.state);
+  ctx.body = await render("single-input.html", ctx.state);
 });
 
 /** Update email */
@@ -109,7 +109,7 @@ router.post(
     return ctx.redirect(accountMap.base);
   },
   async (ctx, next) => {
-    ctx.body = await render("profile/single-input.html", ctx.state);
+    ctx.body = await render("single-input.html", ctx.state);
   }
 );
 
@@ -120,7 +120,7 @@ router.get("/password", async (ctx, next) => {
 
   Object.assign(ctx.state, uiData);
 
-  ctx.body = await render("profile/single-input.html", ctx.state);
+  ctx.body = await render("single-input.html", ctx.state);
 });
 
 router.post(
@@ -158,7 +158,7 @@ router.post(
     return ctx.redirect(accountMap.base);
   },
   async (ctx, next) => {
-    ctx.body = await render("profile/single-input.html", ctx.state);
+    ctx.body = await render("single-input.html", ctx.state);
   }
 );
 

@@ -3,42 +3,44 @@ import { APIError } from "../models/api-response";
 import {
   Account,
   Profile,
-  Address,
+  Wechat,
+  isAccountWxOnly,
 } from "../models/account";
 
 import { profileService } from "../repository/profile";
 import { Flash } from "../widget/flash";
-import { profileMap } from "../config/sitemap";
+import { profileMap, accountMap } from "../config/sitemap";
 import { KeyUpdated, getMsgUpdated } from "./redirection";
+import { TableRow } from "../widget/list";
+import { localizeGender } from "../models/localization";
 
 const log = debug("user:profile-viewmodel");
 
+/** template: profile/profile.html */
 interface ProfilePage {
+  pageTitle: string;
   flash?: Flash;
-  profile?: Profile;
-  address?: Address;
-  links: {
-    displayName: string;
-    mobile: string;
-    personal: string;
-    address: string;
-  };
+  isWxOnly: boolean;
+  wechat: Wechat;
+  linkFtcUrl: string;
+  rows?: TableRow[];
 }
 
 export class ProfilePageBuilder {
   flashMsg?: string
   profile?: Profile;
-  address?: Address;
 
-  async fetchData(account: Account): Promise<boolean> {
+  constructor (readonly account: Account) {}
+
+  async fetchData(): Promise<boolean> {
+    if (isAccountWxOnly(this.account)) {
+      return true;
+    }
+    
     try {
-      const [profile, address] = await Promise.all([
-        profileService.fetchProfile(account.id),
-        profileService.fetchAddress(account.id),
-      ]);
+      const profile = await profileService.fetchProfile(this.account.id);
 
       this.profile = profile;
-      this.address = address;
       return true;
     } catch (e) {
       const errResp = new APIError(e);
@@ -61,12 +63,86 @@ export class ProfilePageBuilder {
       flash = Flash.danger(this.flashMsg);
     }
     
-    return {
+    const p: ProfilePage = {
+      pageTitle: "我的资料",
       flash: flash,
-      profile: this.profile,
-      address: this.address,
-      links: profileMap,
-    };
+      isWxOnly: isAccountWxOnly(this.account),
+      wechat: this.account.wechat,
+      linkFtcUrl: accountMap.linkEmail
+    }
+
+    if (p.isWxOnly) {
+      return p;
+    }
+
+    p.rows = [
+      {
+        cells: [
+          {
+            left: "用户名",
+            right: this.profile?.userName || ""
+          },
+        ],
+        disclosure: {
+          text: "修改",
+          href: profileMap.displayName,
+        },
+      },
+      {
+        cells: [
+          {
+            left: "手机号码",
+            right: this.profile?.mobile || ""
+          }
+        ],
+        disclosure: {
+          text: "修改",
+          href: profileMap.mobile,
+        },
+      },
+      {
+        cells: [
+          {
+            left: "姓名",
+            right: this.profile?.familyName || "",
+          },
+          {
+            left: "性别",
+            right: localizeGender(this.profile?.gender),
+          },
+          {
+            left: "生日",
+            right: this.profile?.birthday || "",
+          },
+        ],
+        disclosure: {
+          text: "修改",
+          href: profileMap.personal,
+        }
+      },
+      {
+        cells: [
+          {
+            left: "地址",
+            right: `${this.profile?.address.country || ""} ${this.profile?.address.province || ""} ${this.profile?.address.city} ${this.profile?.address.district}`,
+          },
+          {
+            left: "",
+            right: this.profile?.address.street || ""
+          },
+          {
+            left: "",
+            right: this.profile?.address.postcode || ""
+          }
+        ],
+        disclosure: {
+          text: "修改",
+          href: profileMap.address,
+        }
+      }
+    ];
+
+    return p;
   }
 }
 

@@ -15,6 +15,14 @@ export const gendersCN: Record<Gender, string> = {
   F: "女",
 };
 
+export function localizeGender(g?: Gender): string {
+  if (!g) {
+    return "";
+  }
+
+  return gendersCN[g];
+}
+
 export const cyclesCN: Record<Cycle, string> = {
   year: "年",
   month: "月",

@@ -1,4 +1,4 @@
-import { AccountKind } from "./enums";
+import { AccountKind, Gender } from "./enums";
 import { Credentials, Passwords } from "./request-data";
 
 export type SignUpForm = Credentials & {
@@ -16,7 +16,7 @@ export interface MobileForm {
 export interface ProfileFormData {
   familyName?: string;
   givenName?: string;
-  gender?: string;
+  gender?: Gender;
   birthday?: string;
 }
 

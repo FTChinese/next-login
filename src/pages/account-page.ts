@@ -2,7 +2,7 @@ import {
   APIError,
 } from "../models/api-response";
 import {
-  Account, isAccountLinked,
+  Account, isAccountLinked, isAccountWxOnly,
 } from "../models/account";
 import {
   IHeaderApp,
@@ -17,14 +17,15 @@ import {
 import { KeyUpdated, getMsgUpdated } from "./redirection";
 import { Flash } from "../widget/flash";
 import { RequestLocation } from "../models/request-data";
+import { TableSection } from "../widget/list";
 
+/** template: account/account.html */
 interface AccountPage {
+  pageTitle: string,
   flash?: Flash;
-  link: {
-    email: string;
-    password: string;
-    wechat: string;
-  }
+  isWxOnly: boolean;
+  linkFtcUrl: string;
+  sections: TableSection[];
 }
 
 export class AccountPageBuilder {
@@ -64,14 +65,72 @@ export class AccountPageBuilder {
   }
 
   build(done?: KeyUpdated): AccountPage {
+
+    const isLinked = isAccountLinked(this.account);
+
     const page: AccountPage = {
-      link: {
-        email: accountMap.email,
-        password: accountMap.password,
-        wechat: isAccountLinked(this.account)
-          ? accountMap.unlinkWx
-          : entranceMap.wxLogin,
-      }
+      pageTitle: "账号安全",
+      isWxOnly: isAccountWxOnly(this.account),
+      linkFtcUrl: accountMap.linkEmail,
+      sections: [
+        {
+          header: undefined,
+          rows: [
+            {
+              cells: [
+                {
+                  left: "登录邮箱",
+                  right: this.account.email
+                }
+              ],
+              disclosure: {
+                text: "修改",
+                href: accountMap.email,
+              },
+            },
+            {
+              cells: [
+                {
+                  left: "密码",
+                  right: ""
+                }
+              ],
+              disclosure: {
+                text: "修改",
+                href: accountMap.password,
+              },
+            },
+          ]
+        },
+        {
+          header: "账号绑定",
+          rows: [
+            isLinked ? {
+              cells: [
+                {
+                  left: "微信",
+                  right: `已绑定 ${this.account.wechat.nickname}`
+                }
+              ],
+              disclosure: {
+                text: "解除绑定",
+                href: accountMap.unlinkWx,
+              },
+            } : {
+              cells: [
+                {
+                  left: "微信",
+                  right: "",
+                },
+              ],
+              disclosure: {
+                text: "尚未绑定",
+                href: entranceMap.wxLogin
+              }
+            },
+          ],
+        },
+      ],
     };
 
     if (done) {
