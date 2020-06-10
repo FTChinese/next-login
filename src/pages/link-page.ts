@@ -12,11 +12,11 @@ import { TextInputElement } from "../widget/text-input";
 import { Account, isAccountLinked, isAccountEqual } from "../models/account";
 import { entranceMap, accountMap } from "../config/sitemap";
 import { IHeaderApp } from "../models/header";
-import { ListItem } from "../widget/list";
 import { localizeTier } from "../models/localization";
 import { Link } from "../widget/link";
 import { Credentials } from "../models/request-data";
 import { isMemberExpired } from "../models/membership";
+import { Card } from "../widget/card";
 
 class LinkEmailPage {
   pageTitle: string; // Override global pageTitle.
@@ -369,11 +369,6 @@ export class WxSignUpPageBuilder {
 interface LinkingAccounts {
   ftc: Account;
   wx: Account;
-}
-
-export interface Card {
-  header?: string;
-  list: Array<ListItem>;
 }
 
 /** template: link/merge.html */
