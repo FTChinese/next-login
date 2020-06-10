@@ -25,6 +25,10 @@ export class Element {
   }
 
   addClass(value: string): Element {
+    value = value.trim();
+    if (!value) {
+      return this;
+    }
     this.classList.push(value);
     return this;
   }
