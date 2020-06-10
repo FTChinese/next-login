@@ -30,7 +30,7 @@ class ReaderAPI {
     }
     readonly resetPassword: string       = `${this.baseUrlPreLogin}/password-reset`;
 
-    readonly account: string                = `${this.baseUrlUser}/account/v2`;
+    readonly account: string                = `${this.baseUrlUser}/account`;
     readonly profile: string                 = `${this.baseUrlUser}/profile`;
     readonly email: string                  = `${this.baseUrlUser}/email`;
     readonly requestVerification: string     = `${this.baseUrlUser}/email/request-verification`
