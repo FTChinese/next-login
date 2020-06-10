@@ -1,0 +1,15 @@
+<div class="card">
+
+  <div class="card-header">{{ card.header }}</div>
+
+  {% if card.list %}
+  <ul class="list-group list-group-flush">
+    {% for item in card.list %}
+    <li class="list-group-item d-flex justify-content-between">
+      <span>{{ item.label }}</span>
+      <span>{{ item.value }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>

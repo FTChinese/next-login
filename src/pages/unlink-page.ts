@@ -1,5 +1,4 @@
 import { Flash } from "../widget/flash";
-import { Card } from "./link-page";
 import { Link } from "../widget/link";
 import { accountMap } from "../config/sitemap";
 import { Form } from "../widget/form";
@@ -14,6 +13,7 @@ import { accountService } from "../repository/account";
 import { APIError } from "../models/api-response";
 import { UnlinkFormData } from "../models/form-data";
 import { isMember } from "../models/membership";
+import { Card } from "../widget/card";
 
 interface UnlinkPage {
   flash?: Flash;
@@ -105,7 +105,7 @@ export class UnlinkPageBuilder {
     };
 
     if (this.account.membership.tier && this.account.membership.expireDate ) {
-      p.card.list.concat([
+      p.card.list?.concat([
         {
           label: "会员类型",
           value: localizeTier(this.account.membership.tier),
