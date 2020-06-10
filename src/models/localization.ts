@@ -15,7 +15,7 @@ export const gendersCN: Record<Gender, string> = {
   F: "女",
 };
 
-export function localizeGender(g?: Gender): string {
+export function localizeGender(g: Gender | null): string {
   if (!g) {
     return "";
   }
@@ -38,8 +38,11 @@ export const tiersCN: Record<Tier, string> = {
   vip: "VIP",
 };
 
-export function localizeTier(tier: Tier): string {
-    return getProperty(tiersCN, tier);
+export function localizeTier(tier: Tier | null): string {
+  if (!tier) {
+    return "尚未成为会员";
+  }
+  return getProperty(tiersCN, tier);
 }
 
 export const currencySymbols: Dictionary<string> = {
@@ -50,3 +53,7 @@ export const currencySymbols: Dictionary<string> = {
     "jpy": "¥",
     "usd": "US$",
 };
+
+export function localizeCurrency(str: string): string {
+  return currencySymbols[str] || str;
+}
