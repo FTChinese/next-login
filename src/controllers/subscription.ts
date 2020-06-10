@@ -1,5 +1,4 @@
 import Router from "koa-router";
-import debug from "debug";
 import render from "../util/render";
 import {
   collectAppHeaders,
@@ -24,7 +23,6 @@ import { MembershipPageBuilder } from "../pages/membership-page";
 import { PaymentPageBuilder, isMobile } from "../pages/payment-page";
 import { AlipayResultBuilder, WxpayResultBuilder } from "../pages/pay-reseult-page";
 
-const log = debug("user:subscription");
 const router = new Router();
 
 /**
