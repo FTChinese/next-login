@@ -2,78 +2,67 @@
 
 {% block content %}
   {% if member %}
-    <div class="mt-3">
 
-      {% if member.renewalReminder %}
-        {{ member.renewalReminder.render() | safe }}
-      {% endif %}
+    {% if member.renewalReminder %}
+      {{ member.renewalReminder.render() | safe }}
+    {% endif %}
 
-      <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
-        <span>会员类型</span>
-        <span>{{member.tier | localizeTier}}</span>
+    <div class="row mb-3 justify-content-center">
+
+      <div class="col-md-6">
+        {% set card = member.card %}
+        {% include "partials/card.html" %}
+
+        {% if member.renewalUrl %}
+          <div class="mt-3 text-right">
+            <a href="{{ member.renewalUrl }}" class="btn btn-primary">续订</a>
+          </div>
+        {% endif %}
+
+        {% if member.ordersLink %}
+          <div class="mt-3 text-right">
+            <a href="{{ data.ordersLink }}">订单历史</a>
+          </div>
+        {% endif %}
       </div>
 
-      <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
-        <span>会员期限</span>
-        <span>{{member.expiration}}</span>
-      </div>
-
-      {% if member.renewalUrl %}
-      <div class="mb-3 text-right">
-        <a href="{{ member.renewalUrl }}" class="btn btn-primary">续订</a>
-      </div>
-      {% endif %}
-
-      {% if member.ordersLink %}
-      <div class="text-right">
-        <a href="{{ data.ordersLink }}">订单历史</a>
-      </div>
-      {% endif %}
-      
     </div>
   {% else %}
 
-  <div class="d-flex justify-content-between">
-    <h2>订阅FT中文网会员</h2>
-    {# <a class="btn btn-link" href="{{ sitemap.redeem }}">有礼品卡？</a>#}
-  </div>
+    <div class="d-flex justify-content-between">
+      <h2>订阅FT中文网会员</h2>
+      {# <a class="btn btn-link" href="{{ sitemap.redeem }}">有礼品卡？</a>#}
+    </div>
 
   {% endif %}
 
   <div class="row justify-content-around o-card-group">
-    {% for product in paywall.products %}
+    {% for product in products %}
       <div class="col-lg-6 mb-3">
         <div class="card">
           <div class="card-body">
             <h3 class="card-title text-center mb-3 pb-3">{{product.heading}}</h3>
             <ul>
-              {% for item in product.benefits %}
-                <li>{{ item }}</li>
+              {% for para in product.description %}
+                <li>{{ para }}</li>
               {% endfor %}
             </ul>
+            
             {% if product.smallPrint %}
               <small>{{product.smallPrint}}</small>
             {% endif %}
           </div>
 
-          {% if not member %}
           <div class="card-footer">
-            {% for plan in product.plans %}
-            <div class="text-center mb-2">
-              <a class="{{"btn btn-primary text-white" if plan.highlight else "btn btn-outline-primary"}}"
-                href="{{ plan.paymentLink }}">
 
-                {% if plan.crossedPrice %}
-                  <s>{{ plan.crossedPrice }}</s>
-                {% endif %}
-                {{ plan.paidAmount }}
-              </a>
+            <div class="text-center mb-2">
+              {% for elem in product.priceElems %}
+                {{ elem.render() | safe }}
+              {% endfor %}
             </div>
-            {% endfor %}
-          </div>
-          {% endif %}
-          
-        </div>
+
+          </div><!-- End card footer-->
+        </div><!-- End product card-->
       </div>
     {% endfor %}
   </div>
