@@ -3,7 +3,7 @@ import { InputElement } from "./element";
 
 export class TextInputElement extends InputElement {
 
-  readonly value?: string | number;
+  readonly value?: string | number | null;
 
   constructor(opts: TextInputOptions) {
     super("input");

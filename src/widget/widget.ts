@@ -44,7 +44,7 @@ export interface TextInputOptions extends FieldSharedAttrs {
     | "url"
     | "week";
 
-  value?: string | number;
+  value?: string | number | null;
 
   max?: number;
   min?: number;
