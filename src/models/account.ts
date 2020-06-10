@@ -136,21 +136,21 @@ export interface IClientApp {
 export interface Profile extends ProfileFormData {
   id: string;
   email: string;
-  userName?: string;
-  mobile?: string;
-  avatarUrl?: string;
-  telephone?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  userName: string | null;
+  mobile: string | null;
+  avatarUrl: string | null;
+  telephone: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
   address: Address;
 }
 
 export interface Address {
-  country?: string;
-  province?: string;
-  city?: string;
-  district?: string;
-  street?: string;
-  postcode?: string;
+  country: string | null;
+  province: string | null;
+  city: string | null;
+  district: string | null;
+  street: string | null;
+  postcode: string | null;
 }
 
