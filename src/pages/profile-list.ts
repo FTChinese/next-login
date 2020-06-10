@@ -108,7 +108,7 @@ export class ProfilePageBuilder {
           },
           {
             left: "性别",
-            right: localizeGender(this.profile?.gender),
+            right: localizeGender(this.profile?.gender || null),
           },
           {
             left: "生日",
