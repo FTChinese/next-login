@@ -1,0 +1,22 @@
+{% extends "layouts/content.html" %} 
+
+{% block content %}
+  {% if isWxOnly %}
+    <div class="text-center">
+      {% include "partials/urge-link.html" %}
+    </div>
+
+  {% else %}
+
+    {% for section in sections %}
+      {% if section.header %}
+        <h5 class="pb-2 border-bottom mt-3">{{section.header}}</h5>
+      {% endif %}
+
+      {% for row in section.rows %}
+        {% include "partials/table-row.html" %}
+      {% endfor %}
+    {% endfor %}
+
+  {% endif %}
+{% endblock %}
