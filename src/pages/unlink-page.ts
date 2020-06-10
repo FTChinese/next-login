@@ -8,11 +8,12 @@ import { FormControl } from "../widget/form-control";
 import { RadioInputElement } from "../widget/radio-input";
 import { ControlType } from "../widget/widget";
 import { AccountKind } from "../models/enums";
-import { Account, isMember } from "../models/account";
+import { Account } from "../models/account";
 import { localizeTier } from "../models/localization";
 import { accountService } from "../repository/account";
 import { APIError } from "../models/api-response";
 import { UnlinkFormData } from "../models/form-data";
+import { isMember } from "../models/membership";
 
 interface UnlinkPage {
   flash?: Flash;

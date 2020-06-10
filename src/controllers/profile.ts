@@ -85,7 +85,7 @@ router.post("/display-name", async (ctx, next) => {
   }
   const key: KeyUpdated = "saved";
 
-  account.userName = builder.formData?.userName;
+  account.userName = builder.formData?.userName || null;
 
   // @ts-ignore
   ctx.session.user = account;

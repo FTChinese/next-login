@@ -29,12 +29,12 @@ export class Wechat {
 
 export interface Account {
   id: string;
-  unionId?: string;
-  stripeId?: string;
-  userName?: string;
+  unionId: string | null;
+  stripeId: string | null;
+  userName: string | null;
   email: string;
   isVerified: boolean;
-  avatarUrl?: string;
+  avatarUrl: string | null;
   loginMethod: LoginMethod;
   wechat: Wechat;
   membership: Membership;
