@@ -3,14 +3,15 @@ import { accountService } from "../repository/account";
 import { APIError } from "../models/api-response";
 import { subsMap } from "../config/sitemap";
 import { DateTime } from "luxon";
-import { Tier } from "../models/enums";
 import { Flash } from "../widget/flash";
-import { IPaywall, Banner, Plan, scheduler } from "../models/paywall";
-import { Membership } from "../models/membership";
+import { Membership, isMember } from "../models/membership";
+import { Card } from "../widget/card";
+import { localizeTier } from "../models/localization";
+import { Product, listPrice, netPrice, paywall, paymentUrl } from "../models/product";
+import { Element } from "../widget/element";
 
 interface UIMembership {
-  tier?: Tier;
-  expiration: string;
+  card: Card;
   renewalReminder?: Flash; // Present when expireDate is approaching or already expired.
   renewalUrl?: string; // If expireDate - today <= 3 years
   ordersLink?: string; // Only present for payment method alipay and wechat. Stripe, Appl IAP and B2B do not have orders.
@@ -18,20 +19,56 @@ interface UIMembership {
 
 interface UIProduct {
   heading: string;
-  benefits: Array<string>;
-  smallPrint?: string;
-  plans: Array<Plan>
+  description: string[];
+  smallPrint: string | null;
+  priceElems: Element[];
 }
 
-interface UIPaywall {
-  banner: Banner;
-  products: Array<UIProduct>;
+/** Build HTML element for price here. These are dynamic and too hard to maitain in template. */
+function buildProductUI(isMember: boolean, product: Product): UIProduct {
+
+  const wrappers = product.plans.map(p => {
+    const lPrice = listPrice(p);
+    const nPrice = netPrice(p);
+
+    const wrapper = isMember
+      ? new Element("div")
+      : new Element("a")
+        .addClass("btn")
+        .addClass(
+          p.cycle === "year" 
+            ? " btn-primary" 
+            : "btn-outline-primary"
+        )
+        .setAttribute("href", paymentUrl(p.tier, p.cycle));
+
+    wrapper.appendChild(
+      new Element("span").withText(lPrice)
+    );
+
+    if (nPrice) {
+      wrapper.appendChild(
+        new Element("s").withText(nPrice)
+      );
+    }
+
+    return wrapper;
+  });
+
+  return {
+    heading: product.heading,
+    description: product.description,
+    smallPrint: product.smallPrint,
+    priceElems: wrappers,
+  }
 }
 
+/** template: subscription/membership.html */
 interface MembershipPage {
+  pageTitle: string;
   flash?: Flash;
   member?: UIMembership;
-  paywall: UIPaywall;
+  products: UIProduct[];
   serviceMail: string;
 }
 
@@ -39,6 +76,7 @@ export class MembershipPageBuilder {
   flashMsg?: string;
   private _account: Account;
   private expireOn: DateTime | null = null;
+  private isMember: boolean = false;
 
   constructor(account: Account) {
     this.initAccount = account;
@@ -49,6 +87,7 @@ export class MembershipPageBuilder {
     if (val.membership.expireDate) {
       this.expireOn = DateTime.fromISO(val.membership.expireDate);
     }
+    this.isMember = isMember(val.membership)
   }
 
   get account(): Account {
@@ -70,13 +109,60 @@ export class MembershipPageBuilder {
 
   build(): MembershipPage {
     return {
+      pageTitle: "会员订阅",
       flash: this.flashMsg ? Flash.danger(this.flashMsg) : undefined,
       member: this.buildMemberUI(),
-      paywall: this.buildPaywallUI(scheduler.paywall),
-      serviceMail: customerServiceEmail(this._account),
+      products: paywall.products
+        .map(p => buildProductUI(this.isMember, p)),
+      serviceMail: customerServiceEmail(this.account),
     };
   }
 
+  private buildMemberUI(): UIMembership | undefined {
+    const m = this.account.membership;
+
+    if (!isMember(m)) {
+      return undefined;
+    }
+
+    const remainingDays = this.memberRemainingDays();
+    const expiration = this.account.membership.tier === "vip" 
+      ? "无限期"
+      : this.account.membership.expireDate;
+    const urgeMsg = this.urgeRenewal(remainingDays)
+    const renewalUrl = this.renewalUrl(m);
+
+    return {
+      card: {
+        header: "我的订阅",
+        list: [
+          {
+            label: "会员类型",
+            value: localizeTier(m.tier),
+          },
+          {
+            label: "会员期限",
+            value: m.expireDate || "",
+          }
+        ]
+      },
+      renewalReminder: urgeMsg 
+        ? Flash.danger(urgeMsg)
+          .setDismissible(false) 
+        : undefined,
+      renewalUrl: renewalUrl,
+      ordersLink: (m.payMethod === "alipay" || m.payMethod === 'wechat')
+        ? subsMap.orders
+        : undefined,
+    };
+  }
+
+  /**
+   * Determine whether a subscriptin is allowed to renew.
+   * Only when a subscription exists and expiration date
+   * does not goes beyond 3 years later.
+   * expiration date - today <= 3
+   */
   private permitRenewal(): boolean {
     if (!this.expireOn) {
       return false;
@@ -113,10 +199,6 @@ export class MembershipPageBuilder {
     return "";
   }
 
-  /**
-   * @todo Limit max renewal length to 3 years.
-   * @param m 
-   */
   private renewalUrl(m: Membership): string {
     if (!m.tier || !m.cycle) {
       return "";
@@ -126,66 +208,6 @@ export class MembershipPageBuilder {
       return ""
     }
 
-    return `${subsMap.pay}/${m.tier}/${m.cycle}`;
-  }
-
-  private buildMemberUI(): UIMembership | undefined {
-    const m = this.account.membership;
-
-    if (m.tier || m.cycle || m.expireDate) {
-      return undefined;
-    }
-
-    const remainingDays = this.memberRemainingDays();
-    const expiration = this.account.membership.tier === "vip" 
-      ? "无限期"
-      : this.account.membership.expireDate;
-    const urgeMsg = this.urgeRenewal(remainingDays)
-    const renewalUrl = this.renewalUrl(m);
-
-    return {
-      tier: this.account.membership.tier || undefined,
-      expiration: expiration || "",
-      renewalReminder: urgeMsg ? Flash.danger(urgeMsg) : undefined,
-      renewalUrl: renewalUrl,
-      ordersLink: (m.payMethod === "alipay" || m.payMethod === 'wechat')
-        ? subsMap.orders
-        : undefined,
-    };
-  }
-
-  private buildPaywallUI(data: IPaywall): UIPaywall {
-    return {
-      banner: new Banner(),
-      products: [
-        {
-          heading: "标准会员",
-          benefits: [
-            `专享订阅内容每日仅需${data.plans.standard_year.dailyPrice}元(或按月订阅每日${data.plans.standard_month.dailyPrice}元)`,
-            "精选深度分析",
-            "中英双语内容",
-            "金融英语速读训练",
-            "英语原声电台",
-            "无限浏览7日前所有历史文章（近8万篇）"
-          ],
-          plans: [
-            data.plans.standard_year,
-            data.plans.standard_month,
-          ]
-        },
-        {
-          heading: "高端会员",
-          benefits: [
-            `专享订阅内容每日仅需${data.plans.premium_year.dailyPrice}元`,
-            "享受“标准会员”所有权益",
-            "编辑精选，总编/各版块主编每周五为您推荐本周必读资讯，分享他们的思考与观点",
-            "FT中文网2018年度论坛门票2张，价值3999元/张 （不含差旅与食宿）"
-          ],
-          plans: [
-            data.plans.premium_year,
-          ]
-        },
-      ],
-    };
+    return paymentUrl(m.tier, m.cycle);
   }
 }
