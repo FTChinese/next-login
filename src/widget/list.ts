@@ -8,7 +8,7 @@ export interface ListItem {
 
 interface TableCell {
   left: string;
-  right?: string;
+  right: string;
 }
 
 export interface TableRow {
