@@ -4,7 +4,7 @@ import {
 } from "../models/account";
 import {
   subsApi,
-} from "../config/api";
+} from "./api";
 import {
   AliOrder,
   WxOrder,
@@ -14,73 +14,88 @@ import {
   viper,
 } from "../config/viper";
 import {
-  IHeaderReaderId,
-  IHeaderApp,
-  IHeaderWxAppId,
+  HeaderReaderId,
+  HeaderApp,
+  HeaderWxAppId,
 } from "../models/header";
 import { oauth, noCache } from "../util/request";
 import { Plan } from "../models/product";
 
-class Subscription {
-  /**
-   * @todo: build this url dynamcially, based on which site the app is run.
-   */
-  readonly aliReturnUrl: string = "http://next.ftchinese.com/user/subscription/done/ali";
+export type PayConfig = {
+  idHeaders: HeaderReaderId;
+  appHeaders: HeaderApp;
+  sandbox: boolean;
+}
 
-  async aliDesktopPay(plan: Plan, headers: IHeaderReaderId & IHeaderApp, sandbox: boolean): Promise<AliOrder> {
+export type AlipayConfig =  PayConfig & {
+  aliCallbackUrl: string;
+}
+
+class Subscription {
+
+  async aliDesktopPay(plan: Plan, config: AlipayConfig): Promise<AliOrder> {
 
     const resp = await request
-      .post(subsApi.aliPayDesktop(plan.tier, plan.cycle, sandbox))
+      .post(subsApi.aliPayDesktop(plan.tier, plan.cycle, config.sandbox))
       .use(oauth)
       .use(noCache)
       .query({
-        return_url: this.aliReturnUrl,
+        return_url: config.aliCallbackUrl,
       })
-      .set(headers);
+      .set({
+        ...config.idHeaders,
+        ...config.appHeaders,
+      });
 
     return resp.body;
   }
 
-  async aliMobilePay(plan: Plan, headers: IHeaderReaderId & IHeaderApp, sandbox: boolean): Promise<AliOrder> {
+  async aliMobilePay(plan: Plan, config: AlipayConfig): Promise<AliOrder> {
 
     const resp = await request
       .post(
         subsApi.aliPayMobile(
           plan.tier,
           plan.cycle,
-          sandbox,
+          config.sandbox,
         )
       )
       .use(oauth)
       .use(noCache)
       .query({
-        return_url: this.aliReturnUrl,
+        return_url: config.aliCallbackUrl,
       })
-      .set(headers);
+      .set({
+        ...config.idHeaders,
+        ...config.appHeaders,
+      });
 
     return resp.body;
   }
 
-  async wxDesktopPay(plan: Plan, headers: IHeaderReaderId & IHeaderApp, sandbox: boolean): Promise<WxOrder> {
+  async wxDesktopPay(plan: Plan, config: PayConfig): Promise<WxOrder> {
 
     const resp = await request
       .post(
         subsApi.wxPayDesktop(
           plan.tier,
           plan.cycle,
-          sandbox,
+          config.sandbox,
         )
       )
       .use(oauth)
       .use(noCache)
-      .set(headers);
+      .set({
+        ...config.idHeaders,
+        ...config.appHeaders,
+      });
 
     return resp.body;
   }
 
   async wxOrderQuery(account: Account, orderId: string): Promise<IWxQueryResult> {
 
-    const headers: IHeaderReaderId & IHeaderWxAppId = {
+    const headers: HeaderReaderId & HeaderWxAppId = {
       ...(collectAccountIDs(account)),
       "X-App-Id": viper.getConfig().wxapp.web_pay.app_id
     }
