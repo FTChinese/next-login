@@ -2,28 +2,50 @@
 
 {% block content %}
   
-  <h5 class="text-center mt-3">感谢您订阅FT中文网会员</h5>
+  <div class="text-center mt-3">
+    {% if guide.header %}
+      <h5>{{ guide.header}}</h5>
+    {% endif %}
 
-  <p class="text-center">{{ product }}</p>
-
-  <table class="table">
-    <caption class="text-center">{{ caption }}</caption>
+    {% for row in guide.rows %}
+      <p>{{ row }}</p>
+    {% endfor %}
+  </div>
   
+  {% if success %}
+  <table class="table">
+
+    {% if success.caption %}
+      <caption class="text-center">{{ success.caption }}</caption>
+    {% endif %}
+
     <tbody>
-      {% for row in rows %}
+      {% for row in success.rows %}
       <tr>
-        <th scope="col">{{ row.label }}</th>
-        <td>{{ row.value }}</td>
+        {% for col in row %}
+          {% if loop.index == 1 %}
+            <th scope="col">{{ col }}</th>
+          {% else %}
+            <td>{{ col }}</td>
+          {% endif %}
+        {% endfor %}
       </tr>
       {% endfor %}
     </tbody>
     
   </table>
+  {% endif %}
 
-  {% if rows %}
-    <p class="text-center">您可以打印本页以备日后查询，或者在<a href="{{ backLink }}">用户中心</a>查看会员状态和订单历史。</p>
-  {% else %}
-    <p class="text-center">暂时未查询到支付结果，您可以前往<a href="{{ backLink }}">用户中心</a>查看会员状态和订单历史。</p>
+  {% if failed %}
+    <div class="text-center mt-3">
+      {% if failed.header %}
+        <h5>{{ failed.header}}</h5>
+      {% endif %}
+
+      {% for row in failed.rows %}
+        <p>{{ row }}</p>
+      {% endfor %}
+    </div>
   {% endif %}
 
   <p class="text-center">
