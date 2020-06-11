@@ -9,10 +9,13 @@ import {
 import { 
     entranceMap 
 } from "../config/sitemap";
-import { KeyDone } from "../pages/request-pw-reset";
-import { EmailBuilder } from "../pages/request-pw-reset";
+import { KeyDone } from "../pages/request-pw-reset-page";
+import { EmailBuilder } from "../pages/request-pw-reset-page";
 import { ResetPwBuilder, PwResetData } from "../pages/reset-password";
 import { EmailData } from "../models/form-data";
+import debug from "debug";
+
+const log = debug("user:forgot-password");
 
 const router = new Router();
 
@@ -23,14 +26,15 @@ router.get("/", async (ctx, next) => {
   // @ts-ignore
   const key: KeyPwReset | undefined = ctx.session.ok;
 
-  console.log("url: %s", ctx.url);
-  console.log("originalUrl: %s", ctx.originalUrl);
-  console.log("origin: %s", ctx.origin);
-  console.log("href: %s", ctx.href);
-  console.log("URL: %s", ctx.URL);
+  log("url: %s", ctx.url);
+  log("originalUrl: %s", ctx.originalUrl);
+  log("origin: %s", ctx.origin);
+  log("href: %s", ctx.href);
+  log("URL: %s", ctx.URL);
   
-  const uiData = (new EmailBuilder(ctx.href)).build(key);
-    Object.assign(ctx.state, uiData);
+
+  const uiData = (new EmailBuilder()).build(key);
+  Object.assign(ctx.state, uiData);
   
   return await next();
 }, async (ctx, next) => {
@@ -48,10 +52,10 @@ router.get("/", async (ctx, next) => {
  */
 router.post("/", collectAppHeaders(), async (ctx, next) => {
     const formData: EmailData = ctx.request.body;
-
     const headers: HeaderApp = ctx.state.appHeaders;
 
-    const emailBuilder = new EmailBuilder(ctx.href);
+    const emailBuilder = new EmailBuilder();
+
     const isValid = await emailBuilder.validate(formData);
     if (!isValid) {
       const uiData = emailBuilder.build();
@@ -59,7 +63,10 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
       return await next();
     }
 
-    const ok = await emailBuilder.requestLetter(headers);
+    const ok = await emailBuilder.requestLetter({
+      sourceUrl: `${ctx.origin}${entranceMap.passwordReset}`,
+      appHeaders: headers,
+    });
 
     if (!ok) {
         const uiData = emailBuilder.build();

@@ -7,6 +7,7 @@ export const entranceMap = {
     wxLogin:        `${prefix}/login/wechat`,
     authorize:      `${prefix}/oauth2/authorize`,
     logout:         `${prefix}/logout`,
+    verifyEmail:    `${prefix}/verify/email`,
 };
 
 export const profileMap = {
