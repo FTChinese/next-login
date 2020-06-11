@@ -137,12 +137,12 @@ export class MembershipPageBuilder {
         header: "我的订阅",
         list: [
           {
-            label: "会员类型",
-            value: localizeTier(m.tier),
+            primary: "会员类型",
+            secondary: localizeTier(m.tier),
           },
           {
-            label: "会员期限",
-            value: expiration,
+            primary: "会员期限",
+            secondary: expiration,
           }
         ]
       },
