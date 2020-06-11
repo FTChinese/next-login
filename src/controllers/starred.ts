@@ -7,7 +7,7 @@ import {
   Account, isAccountWxOnly,
 } from "../models/account";
 import { starredMap } from "../config/sitemap";
-import { StarredPageBuilder } from "./starred-page";
+import { StarredPageBuilder } from "../pages/starred-page";
 
 const router = new Router();
 
