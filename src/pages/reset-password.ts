@@ -10,7 +10,7 @@ import { ControlType } from "../widget/widget";
 import { accountService } from "../repository/account";
 import { APIError } from "../models/api-response";
 import { KeyDone } from "./request-pw-reset-page";
-import { FormPage } from "./form-page";
+import { FormPage } from "./base-page";
 
 export interface PwResetData {
   password: string;
@@ -97,6 +97,7 @@ export class ResetPwBuilder {
 
   build(): FormPage {
     return {
+      pageTitle: "重置密码",
       heading: this.email ? `更改 ${this.email} 的密码` : "更改密码",
       flash: this.flashMsg ? Flash.danger(this.flashMsg) : undefined,
       form: this.showForm ? new Form({

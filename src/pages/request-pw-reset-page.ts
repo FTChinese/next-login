@@ -11,7 +11,7 @@ import { FormControl } from "../widget/form-control";
 import { Button } from "../widget/button";
 import { Link } from "../widget/link";
 import { entranceMap } from "../config/sitemap";
-import { FormPage } from "./form-page";
+import { FormPage } from "./base-page";
 import { EmailData } from "../models/form-data";
 import debug from "debug";
 import { RequestLocation } from "../models/request-data";
@@ -115,10 +115,11 @@ export class EmailBuilder {
     }
 
     return {
+      pageTitle: "找回密码",
       heading: "找回密码",
       flash: this.flashMsg ? Flash.danger(this.flashMsg) : undefined,
       done,
-      form: new Form({
+      form:  done ? undefined : new Form({
         disabled: false,
         method: "post",
         action: "",
