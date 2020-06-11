@@ -4,23 +4,10 @@
   <div class="row justify-content-center">
     <div class="col-sm-6">
 
-      <div class="card mb-5">
-        <div class="card-header">订阅FT会员</div>
-        <ul class="list-group list-group-flush">
-
-          <li class="list-group-item d-flex justify-content-between">
-            <span>会员类型:</span>
-            <span>{{ plan.tier | localizeTier }}/{{ plan.cycle | localizeCycle }}</span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between">
-            <span>支付金额:</span>
-            <span>{{ plan.price | toCurrency }}</span>
-          </li>
-        </ul>
-      </div>
-
+      {% include "partials/card.html" %}
+      
       {% if form %}
-      <div class="card">
+      <div class="card mt-5">
         <div class="card-header">请选择支付方式</div>
         <div class="card-body">
           <form action="{{ form.action }}" method="{{form.method}}">
@@ -40,7 +27,7 @@
       <!-- End card -->
 
       {% if qr %}
-      <div class="text-center">
+      <div class="text-center mt-5">
         <h4>请打开微信扫码</h4>
         <img src="{{ qr.dataUrl }}" alt="">
         <div class="mt-1">
