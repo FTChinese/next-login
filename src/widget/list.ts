@@ -1,8 +1,8 @@
 import { Link } from "./link";
 
 export interface ListItem {
-  label: string;
-  value?: string;
+  primary: string;
+  secondary?: string;
   link?: Link;
 }
 
@@ -19,4 +19,15 @@ export interface TableRow {
 export interface TableSection {
   header?: string;
   rows: TableRow[];
+}
+
+export interface SimpleList {
+  header?: string;
+  rows: string[];
+}
+
+// The structure for HTML table.
+export interface Table {
+  caption?: string;
+  rows: Array<string[]>;
 }
