@@ -6,7 +6,7 @@ import { DateTime } from "luxon";
 import { Flash } from "../widget/flash";
 import { Membership, isMember } from "../models/membership";
 import { Card } from "../widget/card";
-import { localizeTier } from "../models/localization";
+import { localizeTier, localizeCycle } from "../models/localization";
 import { Product, listPrice, netPrice, paywall, paymentUrl } from "../models/product";
 import { Element } from "../widget/element";
 
@@ -43,12 +43,12 @@ function buildProductUI(isMember: boolean, product: Product): UIProduct {
         .setAttribute("href", paymentUrl(p.tier, p.cycle));
 
     wrapper.appendChild(
-      new Element("span").withText(lPrice)
+      new Element("span").withText(`${lPrice}/${localizeCycle(p.cycle)}`)
     );
 
     if (nPrice) {
       wrapper.appendChild(
-        new Element("s").withText(nPrice)
+        new Element("s").withText(`${nPrice}/${localizeCycle(p.cycle)}`)
       );
     }
 
@@ -128,7 +128,7 @@ export class MembershipPageBuilder {
     const remainingDays = this.memberRemainingDays();
     const expiration = this.account.membership.tier === "vip" 
       ? "无限期"
-      : this.account.membership.expireDate;
+      : this.account.membership.expireDate || "";
     const urgeMsg = this.urgeRenewal(remainingDays)
     const renewalUrl = this.renewalUrl(m);
 
@@ -142,7 +142,7 @@ export class MembershipPageBuilder {
           },
           {
             label: "会员期限",
-            value: m.expireDate || "",
+            value: expiration,
           }
         ]
       },
