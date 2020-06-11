@@ -1,5 +1,5 @@
 import { Account } from "../models/account";
-import { FormPage } from "./form-page";
+import { FormPage } from "./base-page";
 import { ValidationError } from "@hapi/joi";
 import { emailSchema, joiOptions, reduceJoiErrors, textLen } from "./validator";
 import { accountService } from "../repository/account";
@@ -76,6 +76,7 @@ export class UpdateEmailBuilder {
 
   build(): FormPage {
     const page: FormPage = {
+      pageTitle: "更新邮箱",
       heading: "更改登录邮箱",
     }
 

@@ -8,7 +8,7 @@ import { Button } from "../widget/button";
 import { FormControl } from "../widget/form-control";
 import { TextInputElement } from "../widget/text-input";
 import { ControlType } from "../widget/widget";
-import { FormPage } from "./form-page";
+import { FormPage } from "./base-page";
 import debug from "debug";
 import { NameForm } from "../models/form-data";
 
@@ -96,6 +96,7 @@ export class DisplayNameBuilder {
   build(): FormPage {
     
     return {
+      pageTitle: "更新用户名",
       heading: "用户名",
       flash: this.flashMsg
         ? Flash.danger(this.flashMsg)

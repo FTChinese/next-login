@@ -8,7 +8,7 @@ import { Button } from "../widget/button";
 import { FormControl } from "../widget/form-control";
 import { TextInputElement } from "../widget/text-input";
 import { ControlType } from "../widget/widget";
-import { FormPage } from "./form-page";
+import { FormPage } from "./base-page";
 import { MobileForm } from "../models/form-data";
 
 export class MobileBuilder {
@@ -89,6 +89,7 @@ export class MobileBuilder {
   build(): FormPage {
     
     return {
+      pageTitle: "更新手机号",
       heading: "手机号码",
       flash: this.flashMsg
         ? Flash.danger(this.flashMsg)
