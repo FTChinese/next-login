@@ -1,6 +1,5 @@
 import { Flash } from "../widget/flash";
 import { Form } from "../widget/form";
-import { Plan } from "../models/paywall";
 import { Button } from "../widget/button";
 import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
@@ -14,17 +13,22 @@ import { APIError } from "../models/api-response";
 import MobileDetect from "mobile-detect";
 import { toDataURL } from "qrcode";
 import { subsMap } from "../config/sitemap";
+import { Card } from "../widget/card";
+import { subsPlanName, listPrice, netPrice, Plan } from "../models/product";
+import { isMember } from "../models/membership";
 
 interface UIQR {
   dataUrl: string;
   doneLink: string;
 }
 
+/** template: subscription/pay.html */
 interface PaymentPage {
   flash?: Flash;
   plan: Plan;
+  card: Card;
   form?: Form;
-  qr?: UIQR;
+  qr?: UIQR; // Use to show Wechat payment QR Code if user selected wxpay.
 }
 
 export function isMobile(ua: string): boolean {
@@ -67,6 +71,21 @@ export class PaymentPageBuilder {
         ? Flash.danger(this.flashMsg)
         : undefined,
       plan: this.plan,
+      card: {
+        header: isMember(this.account.membership)
+          ? "续订FT会员"
+          : "订阅FT会员",
+        list: [
+          {
+            label: "会员类型:",
+            value: subsPlanName(this.plan.tier, this.plan.cycle)
+          },
+          {
+            label: "支付金额:",
+            value: netPrice(this.plan) || listPrice(this.plan)
+          }
+        ]
+      }
     };
 
     // If wxOrder does not exist, show the 

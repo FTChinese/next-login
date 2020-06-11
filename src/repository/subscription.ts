@@ -3,9 +3,6 @@ import {
   Account, collectAccountIDs,
 } from "../models/account";
 import {
-  Plan,
-} from "../models/paywall";
-import {
   subsApi,
 } from "../config/api";
 import {
@@ -22,6 +19,7 @@ import {
   IHeaderWxAppId,
 } from "../models/header";
 import { oauth, noCache } from "../util/request";
+import { Plan } from "../models/product";
 
 class Subscription {
   /**
