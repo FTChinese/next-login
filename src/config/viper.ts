@@ -53,11 +53,10 @@ class Viper {
     private filePath: string;
     private fileName: string;
     private config: any;
-    private isProduction: boolean
     private accessToken: string
+    readonly port = 8200;
 
-    constructor(isProd: boolean) {
-        this.isProduction = isProd
+    constructor(readonly isProduction: boolean) {
     }
 
     setConfigPath(p?: string): Viper {
@@ -81,6 +80,22 @@ class Viper {
 
     getConfig(): Config {
         return this.config;
+    }
+
+    get readerAPIBaseUrl(): string {
+      return this.isProduction
+        ? this.getConfig().api_url.reader_v1
+        : "http://localhost:8000"
+    }
+
+    get subsAPIBaseUrl(): string {
+      return this.isProduction
+        ? this.getConfig().api_url.subscription_v1
+        : "http://localhost:8200";
+    }
+
+    get subsAPISandboxBaseUrl(): string {
+      return this.getConfig().api_url.sub_sandbox
     }
 
     getAccessToken(): string {
@@ -108,8 +123,7 @@ class Viper {
     }
 }
 
-export const isProduction = process.env.NODE_ENV == "production";
-export const viper = new Viper(isProduction)
+export const viper = new Viper(process.env.NODE_ENV == "production")
     .setConfigPath(process.env.HOME)
     .setConfigName("config/api.toml")
     .readInConfig();
