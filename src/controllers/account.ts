@@ -27,10 +27,6 @@ router.get(
   async (ctx, next) => {
     const account: Account = ctx.state.user;
 
-    if (isAccountWxOnly(account)) {
-      return await next();
-    }
-
     // @ts-ignore
     const key: KeyUpdated | undefined = ctx.session.ok;
 

@@ -1,3 +1,4 @@
+import debug from "debug";
 import {
   APIError,
 } from "../models/api-response";
@@ -18,6 +19,8 @@ import { KeyUpdated, getMsgUpdated } from "./redirection";
 import { Flash } from "../widget/flash";
 import { RequestLocation } from "../models/request-data";
 import { TableSection } from "../widget/list";
+
+const log = debug("user:account-page");
 
 /** template: account/account.html */
 interface AccountPage {
@@ -72,7 +75,11 @@ export class AccountPageBuilder {
       pageTitle: "账号安全",
       isWxOnly: isAccountWxOnly(this.account),
       linkFtcUrl: accountMap.linkEmail,
-      sections: [
+      sections: [],
+    };
+
+    if (!page.isWxOnly) {
+      page.sections = [
         {
           header: undefined,
           rows: [
@@ -130,8 +137,10 @@ export class AccountPageBuilder {
             },
           ],
         },
-      ],
-    };
+      ];
+    }
+
+    console.log("Account page: %O", page);
 
     if (done) {
       page.flash = Flash.success(getMsgUpdated(done));

@@ -55,11 +55,11 @@
 
           <div class="card-footer">
 
+            {% for elem in product.priceElems %}
             <div class="text-center mb-2">
-              {% for elem in product.priceElems %}
                 {{ elem.render() | safe }}
-              {% endfor %}
             </div>
+            {% endfor %}
 
           </div><!-- End card footer-->
         </div><!-- End product card-->

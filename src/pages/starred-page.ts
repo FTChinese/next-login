@@ -16,34 +16,49 @@ interface StarredPage {
 }
 
 export class StarredPageBuilder {
-  
+  private flashMsg?: string;
+  private articles: Article[] = [];
+  private paging?: Paging;
+
   constructor(readonly account: Account) {}
+
+  async load(paging: Paging): Promise<boolean> {
+    try {
+      this.articles = await articleRepo.list(this.account, paging.toObject());
+
+      this.paging = paging.setSize(this.articles.length);
+      return true;
+    } catch (e) {
+      this.flashMsg = (new APIError(e)).message;
+      return false;
+    }
+  }
 
   /**
    * 
    * @param paging 
    * @param errMsg The error message from direction after delete, if present.
    */
-  async buildUI(paging: Paging, errMsg?: string): Promise<StarredPage> {
+  buildUI(errMsg?: string): StarredPage {
 
     const p: StarredPage = {
       pageTitle: "收藏的文章",
       isWxOnly: isAccountWxOnly(this.account),
       linkFtcUrl: accountMap.linkEmail,
+      articles: this.articles,
+      paging: this.paging,
     };
 
-    try {
-      p.articles = await articleRepo.list(this.account, paging.toObject());
-
-      p.paging = paging.setSize(p.articles.length);
-      
-      return p;
-    } catch (e) {
-      const errResp = new APIError(e);
-
-      p.flash = Flash.danger(errResp.message);
+    if (errMsg) {
+      p.flash = Flash.danger(errMsg);
       return p;
     }
+
+    if (this.flashMsg) {
+      p.flash = Flash.danger(this.flashMsg);
+    }
+
+    return p
   }
 
   async delete(id: string): Promise<APIError | null> {

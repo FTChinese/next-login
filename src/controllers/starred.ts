@@ -1,4 +1,5 @@
 import Router from "koa-router";
+import debug from "debug";
 import render from "../util/render";
 import {
   paging,
@@ -9,35 +10,26 @@ import {
 import { starredMap } from "../config/sitemap";
 import { StarredPageBuilder } from "../pages/starred-page";
 
+const log = debug("user:starred");
 const router = new Router();
 
 router.get("/", paging(10), async (ctx, next) => {
   const account: Account = ctx.state.user;
+  // @ts-ignore
+  const redirectErrMsg: string | undefined = ctx.session.error;
 
-  if (isAccountWxOnly(account)) {
-    return await next();
-  }
+  log("Redirect error: %O", redirectErrMsg);
 
   const builder = new StarredPageBuilder(account);
-  // @ts-ignore
-  if (ctx.session.error) {
-    const uiData = await builder.buildUI(
-      ctx.state.paging,
-      // @ts-ignore
-      ctx.session.error,
-    );
 
-    Object.assign(ctx.state, uiData);
-
-    return await next();
+  if (account.id) {
+    await builder.load(ctx.state.paging);
   }
-
-  const uiData = await builder.buildUI(ctx.state.paging);
+  
+  const uiData = builder.buildUI(redirectErrMsg);
 
   Object.assign(ctx.state, uiData);
 
-  return await next();
-}, async (ctx, next) => {
   ctx.body = await render("starred.html", ctx.state);
 });
 
