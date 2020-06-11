@@ -13,6 +13,10 @@ import { Link } from "../widget/link";
 import { entranceMap } from "../config/sitemap";
 import { FormPage } from "./form-page";
 import { EmailData } from "../models/form-data";
+import debug from "debug";
+import { RequestLocation } from "../models/request-data";
+
+const log = debug("user:request-pw-reset");
 
 // Describes the UI structure after an action is done.
 interface DoneAction {
@@ -37,8 +41,6 @@ export class EmailBuilder {
     email: ''
   };
 
-  constructor(readonly sourceUrl: string) {}
-
   async validate(data: EmailData): Promise<boolean> {
     try {
       const result = await emailSchema.validateAsync(data, joiOptions);
@@ -53,13 +55,17 @@ export class EmailBuilder {
     }
   }
 
-  async requestLetter(app: HeaderApp): Promise<boolean> {
-
+  async requestLetter(config: RequestLocation & { appHeaders: HeaderApp }): Promise<boolean> {
+    log("Source URL for password reset letter: %s", config.sourceUrl);
+    
     try {
-      const ok = await accountService.requestPwResetLetter({
-        sourceUrl: this.sourceUrl,
-        ...this.formData
-      }, app)
+      const ok = await accountService.requestPwResetLetter(
+        {
+          sourceUrl: config.sourceUrl,
+          email: this.formData.email,
+        }, 
+        config.appHeaders
+      );
 
       return ok;
     } catch (e) {

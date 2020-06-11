@@ -3,7 +3,7 @@ import render from "../util/render";
 import { collectAppHeaders } from "./middleware";
 import { Account, isAccountWxOnly, isAccountLinked } from "../models/account";
 import { HeaderApp } from "../models/header";
-import { accountMap } from "../config/sitemap";
+import { accountMap, entranceMap } from "../config/sitemap";
 import { KeyUpdated } from "../pages/redirection";
 import { AccountPageBuilder } from "../pages/account-page";
 import { viper } from "../config/viper";
@@ -175,7 +175,7 @@ router.post(
     const builder = new AccountPageBuilder(account);
     const ok = await builder.requestVerification(
       {
-        sourceUrl,
+        sourceUrl: `${ctx.origin}${entranceMap.verifyEmail}`,
       }, 
       ctx.state.appHeaders);
 

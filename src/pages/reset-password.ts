@@ -9,7 +9,7 @@ import { TextInputElement } from "../widget/text-input";
 import { ControlType } from "../widget/widget";
 import { accountService } from "../repository/account";
 import { APIError } from "../models/api-response";
-import { KeyDone } from "./request-pw-reset";
+import { KeyDone } from "./request-pw-reset-page";
 import { FormPage } from "./form-page";
 
 export interface PwResetData {

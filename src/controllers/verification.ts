@@ -7,6 +7,10 @@ import { EmailVerifiedBuilder } from "../pages/email-verified";
 
 const router = new Router();
 
+/**
+ * Verify email.
+ * /verify/email/<token>
+ */
 router.get("/email/:token", async (ctx, next) => {
     const token: string = ctx.params.token;
     const account: Account | undefined = ctx.state.user;
