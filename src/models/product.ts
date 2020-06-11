@@ -1,6 +1,6 @@
 import { formatMoney } from "../util/formatter";
 import { Tier, Cycle } from "./enums";
-import { localizeCurrency, localizeCycle, localizeTier } from "./localization";
+import { localizeCurrency, localizeCycle, localizeTier, tiersCN } from "./localization";
 import { DateTime } from "luxon";
 import { subsMap } from "../config/sitemap";
 
@@ -40,7 +40,7 @@ export function isDiscountValid(d: Discount): boolean {
   return today >= startOn && today <= endOn;
 }
 
-interface Plan {
+export interface Plan {
   id: string;
   price: number;
   currency: string
@@ -58,7 +58,7 @@ export function dailyPrice(p: Plan): string {
 }
 
 export function listPrice(p: Plan): string {
-  return `${localizeCurrency(p.currency)} ${formatMoney(p.price)}/${localizeCycle(p.cycle)}`;
+  return `${localizeCurrency(p.currency)} ${formatMoney(p.price)}`;
 }
 
 export function netPrice(p: Plan): string | null {
@@ -67,11 +67,11 @@ export function netPrice(p: Plan): string | null {
     return null;
   }
 
-  return `${localizeCurrency(p.currency)} ${formatMoney(p.price - p.discount.priceOff)}/${localizeCycle(p.cycle)}`;
+  return `${localizeCurrency(p.currency)} ${formatMoney(p.price - p.discount.priceOff)}`;
 }
 
 const planStdYear: Plan = {
-  id: "stadnard_year",
+  id: "standard_year",
   price: 258,
   currency: "cny",
   tier: "standard",
@@ -85,7 +85,7 @@ const planStdYear: Plan = {
 }
 
 const planStdMonth: Plan = {
-  id: "month_year",
+  id: "standard_month",
   price: 28,
   currency: "cny",
   tier: "standard",
@@ -110,6 +110,18 @@ const planPrmYear: Plan = {
     startUtc: null,
     endUtc: null,
   },
+}
+
+const plans: Map<string, Plan> = new Map([
+  [planStdYear.id, planStdYear],
+  [planStdMonth.id, planStdMonth],
+  [planPrmYear.id, planPrmYear],
+]);
+
+export function findPlan(tier: Tier, cycle: Cycle): Plan | null {
+    const key = `${tier}_${cycle}`;
+
+    return plans.get(key) || null;
 }
 
 export interface Product {
@@ -180,3 +192,4 @@ export const paywall: Paywall = {
     productPrm
   ],
 };
+
