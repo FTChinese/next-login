@@ -1,4 +1,5 @@
 import Router from "koa-router";
+import debug from "debug";
 import render from "../util/render";
 import {
   collectAppHeaders,
@@ -12,7 +13,7 @@ import {
   PaymentMethod,
 } from "../models/enums";
 import {
-  isProduction,
+  viper,
 } from "../config/viper";
 import {
   IAliCallback, AliOrder, WxOrder,
@@ -22,6 +23,9 @@ import { MembershipPageBuilder } from "../pages/membership-page";
 import { PaymentPageBuilder, isMobile } from "../pages/payment-page";
 import { AlipayResultBuilder, WxpayResultBuilder } from "../pages/pay-reseult-page";
 import { findPlan } from "../models/product";
+import { subsMap } from "../config/sitemap";
+
+const log = debug("user:subscription");
 
 const router = new Router();
 
@@ -99,9 +103,10 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
   }
 
   const sandbox: boolean = toBoolean(ctx.request.query.sandbox);
-  const payMethod: PaymentMethod | undefined = ctx.request.body.payMethod;
   
   const builder = new PaymentPageBuilder(plan, account, sandbox);
+
+  const payMethod: PaymentMethod | undefined = ctx.request.body.payMethod;
 
   const isValid = builder.validate(payMethod);
   if (!isValid) {
@@ -112,10 +117,15 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
 
   switch (payMethod) {
     case 'alipay': {
-      const aliOrder = await builder.alipay(
-        ctx.state.appHeaders,
-        isMobile(ctx.header["user-agent"])
-      );
+      const callbackUrl = ctx.origin + subsMap.alipayDone;
+
+      log("Alipay return url: %s", callbackUrl);
+
+      const aliOrder = await builder.alipay({
+        appHeaders: ctx.state.appHeaders,
+        aliCallbackUrl: callbackUrl,
+        isMobile: isMobile(ctx.header["user-agent"])
+      });
 
       if (!aliOrder) {
         const uiData = await builder.build();
@@ -157,6 +167,12 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
  * @description Show alipay result.
  * The result is parsed from url query paramters.
  * GET /subscription/done/ali
+ * 
+ * Ali first generate url:
+ * https://unitradeprod.alipay.com/acq/cashierReturn.htm?sign=K1iSL1z2omRMXaV4MI%252BZ%252F%252B3nlrLJc4hUdi%252F35xPxrHY4t1SYHHAUa9CiaewKvxkZbMv9Ag%253D%253D&outTradeNo=FTA4C1568C670A4ACA&pid=2088521304936335&type=1
+ * 
+ * Then redirect to:
+ * http://next.ftchinese.com/subscription/done/ali?charset=utf-8&out_trade_no=FTA4C1568C670A4ACA&method=alipay.trade.page.pay.return&total_amount=0.01&sign=FX%2B8SO%2ByATsQQblDr07qTEzJE5vNtq2YvMWyWyuSy635VEaTIhg5Rp9%2BYXJMK0wRQnCnf3XZ7nkwMroQMktoLJLciTCNGO%2FbimHbHW6%2BKomWNNYN9Qfsc2O4jGjoN0cnlfHU6ak%2FG0vrx%2FgZqxluaFRGlWLPr5koymr%2FCbIhUMrpCsd8ZfuIto5t1bilPHzkgZqZYNpp%2F7OepZCgudeiwP3sa%2FOYKXesCvl%2Bq%2BnDGUudLOvVXhAkbeFXwKfbC5c6I3Pqv4dZbK0U24Zr3Z7oZFENlufRA%2FbInb8FtchZ4tabI8lF0%2Bu5M%2BtGjIQW%2F%2FA0z0nZRB7kcCivNlqxJQzDXg%3D%3D&trade_no=2020061122001440031406266305&auth_app_id=2018053060263354&version=1.0&app_id=2018053060263354&sign_type=RSA2&seller_id=2088521304936335&timestamp=2020-06-11+15%3A14%3A40
  */
 router.get("/done/ali", async (ctx, next) => {
   const account: Account = ctx.state.user;
@@ -193,7 +209,7 @@ router.get("/done/ali", async (ctx, next) => {
   Object.assign(ctx.state, uiDate);
 
   // For development, keep session to test ui.
-  if (isProduction) {
+  if (viper.isProduction) {
     // @ts-ignore
     delete ctx.session.order;
   }
@@ -212,15 +228,7 @@ router.get("/done/wx", async (ctx, next) => {
     throw new Error("Order data missing in this session!");
   }
 
-  // To test UI.
-  // const queryResult: IWxQueryResult = {
-  //     "paymentState": "SUCCESS",
-  //     "paymentStateDesc": "支付成功",
-  //     "totalFee": 1,
-  //     "transactionId": "4200000252201903069440709666",
-  //     "ftcOrderId": "FT1D3CEDDB2599EFB9",
-  //     "paidAt": "2019-03-06T07:21:18Z"
-  // };
+  log("Order to verify: %O", order);
 
   const builder = new WxpayResultBuilder(account, order);
 
@@ -247,7 +255,7 @@ router.get("/done/wx", async (ctx, next) => {
   const uiDate = builder.build();
   Object.assign(ctx.state, uiDate);
 
-  if (isProduction) {
+  if (viper.isProduction) {
     // @ts-ignore
     delete ctx.session.order;
   }
