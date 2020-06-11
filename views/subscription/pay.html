@@ -1,9 +1,12 @@
 {% extends "layouts/content.html" %} 
 
 {% block content %}
+  {% if sandbox %}
+    <div class="alert alert-danger">⚠️您当前处于沙箱模式！沙箱模式下微信和支付宝收取1分钱供测试，会员状态不会改变</div>
+  {% endif %}
   <div class="row justify-content-center">
     <div class="col-sm-6">
-
+      
       {% include "partials/card.html" %}
       
       {% if form %}
