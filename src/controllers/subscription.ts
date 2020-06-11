@@ -14,7 +14,6 @@ import {
 import {
   isProduction,
 } from "../config/viper";
-import { scheduler } from "../models/paywall";
 import {
   IAliCallback, AliOrder, WxOrder,
 } from "../models/order";
@@ -22,6 +21,7 @@ import { toBoolean } from "../util/converter";
 import { MembershipPageBuilder } from "../pages/membership-page";
 import { PaymentPageBuilder, isMobile } from "../pages/payment-page";
 import { AlipayResultBuilder, WxpayResultBuilder } from "../pages/pay-reseult-page";
+import { findPlan } from "../models/product";
 
 const router = new Router();
 
@@ -61,7 +61,7 @@ router.get("/pay/:tier/:cycle", async (ctx, next) => {
   const cycle: Cycle = ctx.params.cycle;
   const account: Account = ctx.state.user;
 
-  const plan = scheduler.findPlan(tier, cycle);
+  const plan = findPlan(tier, cycle);
   const sandbox: boolean = toBoolean(ctx.request.query.sandbox);
 
   if (!plan) {
@@ -92,7 +92,7 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
   const cycle: Cycle = ctx.params.cycle;
   const account: Account = ctx.state.user;
 
-  const plan = scheduler.findPlan(tier, cycle);
+  const plan = findPlan(tier, cycle);
   if (!plan) {
     ctx.status = 404;
     return;
