@@ -6,9 +6,9 @@ import { ControlType } from "../widget/widget";
 import { RadioInputElement } from "../widget/radio-input";
 import { PaymentMethod } from "../models/enums";
 import { AliOrder, WxOrder } from "../models/order";
-import { subRepo } from "../repository/subscription";
-import { Account, buildIdHeaders } from "../models/account";
-import { IHeaderApp } from "../models/header";
+import { subRepo, AlipayConfig } from "../repository/subscription";
+import { Account, collectAccountIDs } from "../models/account";
+import { HeaderApp, HeaderReaderId } from "../models/header";
 import { APIError } from "../models/api-response";
 import MobileDetect from "mobile-detect";
 import { toDataURL } from "qrcode";
@@ -24,12 +24,14 @@ interface UIQR {
 
 /** template: subscription/pay.html */
 interface PaymentPage {
+  pageTitle: string,
   flash?: Flash;
-  plan: Plan;
+  sandbox: boolean;
   card: Card;
   form?: Form;
   qr?: UIQR; // Use to show Wechat payment QR Code if user selected wxpay.
 }
+
 
 export function isMobile(ua: string): boolean {
   const md = new MobileDetect(ua);
@@ -41,12 +43,15 @@ export class PaymentPageBuilder {
   flashMsg?: string;
   payMethod?: PaymentMethod;
   wxOrder?: WxOrder;
+  idHeaders: HeaderReaderId;
 
   constructor(
     readonly plan: Plan,
     readonly account: Account,
     readonly sandbox: boolean
-  ) {}
+  ) {
+    this.idHeaders = collectAccountIDs(account);
+  }
 
   validate(payMethod?: PaymentMethod): boolean {
     if (!payMethod) {
@@ -67,22 +72,23 @@ export class PaymentPageBuilder {
 
   async build(): Promise<PaymentPage> {
     const p: PaymentPage = {
+      pageTitle: "订阅支付",
       flash: this.flashMsg 
         ? Flash.danger(this.flashMsg)
         : undefined,
-      plan: this.plan,
+      sandbox: this.sandbox,
       card: {
         header: isMember(this.account.membership)
           ? "续订FT会员"
           : "订阅FT会员",
         list: [
           {
-            label: "会员类型:",
-            value: subsPlanName(this.plan.tier, this.plan.cycle)
+            primary: "会员类型:",
+            secondary: subsPlanName(this.plan.tier, this.plan.cycle)
           },
           {
-            label: "支付金额:",
-            value: netPrice(this.plan) || listPrice(this.plan)
+            primary: "支付金额:",
+            secondary: netPrice(this.plan) || listPrice(this.plan)
           }
         ]
       }
@@ -145,28 +151,24 @@ export class PaymentPageBuilder {
     return p;
   }
 
-  async alipay(client: IHeaderApp, isMobile: boolean): Promise<AliOrder | null> {
+  async alipay(config: Pick<AlipayConfig, "appHeaders" | "aliCallbackUrl"> & { isMobile: boolean }): Promise<AliOrder | null> {
     
     try {
-      if (isMobile) {
-        return await subRepo.aliMobilePay(
-          this.plan,
-          {
-            ...buildIdHeaders(this.account),
-            ...client
-          },
-          this.sandbox,
-        );
+      if (config.isMobile) {
+        return await subRepo.aliMobilePay(this.plan, {
+          idHeaders: this.idHeaders,
+          appHeaders: config.appHeaders,
+          sandbox: this.sandbox,
+          aliCallbackUrl: config.aliCallbackUrl,
+        });
       }
       
-      return await subRepo.aliDesktopPay(
-        this.plan,
-        {
-          ...buildIdHeaders(this.account),
-          ...client
-        },
-        this.sandbox,
-      );
+      return await subRepo.aliDesktopPay(this.plan, {
+        idHeaders: this.idHeaders,
+        appHeaders: config.appHeaders,
+        sandbox: this.sandbox,
+        aliCallbackUrl: config.aliCallbackUrl,
+      });
     } catch (e) {
       const errResp = new APIError(e);
       this.flashMsg = errResp.message;
@@ -174,16 +176,13 @@ export class PaymentPageBuilder {
     }
   }
 
-  async wxpay(client: IHeaderApp): Promise<boolean> {
+  async wxpay(client: HeaderApp): Promise<boolean> {
     try {
-      const wxOrder = await subRepo.wxDesktopPay(
-        this.plan,
-        {
-          ...buildIdHeaders(this.account),
-          ...client,
-        },
-        this.sandbox
-      );
+      const wxOrder = await subRepo.wxDesktopPay(this.plan,{
+        idHeaders: this.idHeaders,
+        appHeaders: client,
+        sandbox: this.sandbox,
+      });
 
       this.wxOrder = wxOrder;
 
