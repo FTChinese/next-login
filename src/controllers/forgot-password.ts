@@ -14,6 +14,7 @@ import { EmailBuilder } from "../pages/request-pw-reset-page";
 import { ResetPwBuilder, PwResetData } from "../pages/reset-password";
 import { EmailData } from "../models/form-data";
 import debug from "debug";
+import { viper } from "../config/viper";
 
 const log = debug("user:forgot-password");
 
@@ -21,10 +22,16 @@ const router = new Router();
 
 /**
  * @description Show input box to let user to enter email.
+ * 
+ * ?key="invalid_token" | "letter_sent" | "pw_reset" for testing ui.
  */
 router.get("/", async (ctx, next) => {
   // @ts-ignore
-  const key: KeyPwReset | undefined = ctx.session.ok;
+  let key: KeyDone | undefined = ctx.session.ok;
+
+  if (!viper.isProduction) {
+    key = ctx.query.key;
+  }
 
   log("url: %s", ctx.url);
   log("originalUrl: %s", ctx.originalUrl);
