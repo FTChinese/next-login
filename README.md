@@ -155,7 +155,7 @@ But be careful wechat might change the lenght any time. So it might be better to
 
 # Alipay
 
-Alipay studpid design: Its so-called api only accepts HTML form!
+Alipay stupid design: Its so-called api only accepts HTML form!
 
 Its SDK build an HTML form and automatically submit it and  then redirect to Alipay website.
 
