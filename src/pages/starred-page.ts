@@ -1,13 +1,17 @@
 import { Article } from "../models/bookmarks";
 import { Paging } from "../models/pagination";
-import { Account } from "../models/account";
+import { Account, isAccountWxOnly } from "../models/account";
 import { articleRepo } from "../repository/article";
 import { APIError } from "../models/api-response";
 import { Flash } from "../widget/flash";
+import { accountMap } from "../config/sitemap";
 
 interface StarredPage {
+  pageTitle: string
   flash?: Flash;
-  articles: Array<Article>;
+  isWxOnly: boolean;
+  linkFtcUrl:string;
+  articles?: Array<Article>;
   paging?: Paging;
 }
 
@@ -21,21 +25,24 @@ export class StarredPageBuilder {
    * @param errMsg The error message from direction after delete, if present.
    */
   async buildUI(paging: Paging, errMsg?: string): Promise<StarredPage> {
-    try {
-      const articles = await articleRepo.list(this.account, paging.toObject());
 
-      return {
-        flash: errMsg ? Flash.danger(errMsg) : undefined,
-        articles,
-        paging: paging.setSize(articles.length),
-      };
+    const p: StarredPage = {
+      pageTitle: "收藏的文章",
+      isWxOnly: isAccountWxOnly(this.account),
+      linkFtcUrl: accountMap.linkEmail,
+    };
+
+    try {
+      p.articles = await articleRepo.list(this.account, paging.toObject());
+
+      p.paging = paging.setSize(p.articles.length);
+      
+      return p;
     } catch (e) {
       const errResp = new APIError(e);
 
-      return {
-        flash: Flash.danger(errResp.message),
-        articles: [],
-      }
+      p.flash = Flash.danger(errResp.message);
+      return p;
     }
   }
 

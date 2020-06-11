@@ -2,7 +2,7 @@
 
 {% block content %}
 
-  {% if user.isWxOnly() %}
+  {% if isWxOnly %}
     <div class="mt-3">
       <div class="mt-3 text-center">
         <p>绑定FT中文网账号后可以收藏文章</p>
@@ -18,11 +18,11 @@
             <h5 class="card-title"><a href="{{ article.originalUrl }}" target="__blank">{{article.title}}</a></h5>
             <p>{{article.standfirst}}</p>
             <div>
-                更新于 <time datetime="{{article.updatedAt}}">{{ article.updatedCST }}</time>
+                更新于 <time datetime="{{article.updatedAt}}">{{ article.updatedAt | toCST(false) }}</time>
             </div>
           </div>
           <div class="card-footer d-flex justify-content-between">
-            <span>收藏于 <time datetime="{{ article.starredAt }}">{{ article.starredCST }}</time></span>
+            <span>收藏于 <time datetime="{{ article.starredAt }}">{{ article.starredAt | toCST(false) }}</time></span>
             <form action="{{ article.deleteUrl }}" method="post">
               <button class="btn btn-outline-primary py-0">删除</button>
             </form>

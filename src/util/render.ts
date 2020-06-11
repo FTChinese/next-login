@@ -19,8 +19,8 @@ env.addFilter("toCurrency", function(num: number) {
   return formatMoney(num);
 });
 
-env.addFilter("toCST", (str: string) => {
-  return iso8601ToCST(str);
+env.addFilter("toCST", (str: string, zone: boolean) => {
+  return iso8601ToCST(str, { withZone: zone});
 });
 
 env.addFilter("localizeTier", (tier: Tier) => {
