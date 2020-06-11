@@ -6,20 +6,15 @@ import {
   LoginMethod,
   Platform,
 } from "./enums";
-import { KEY_UNION_ID, KEY_USER_ID } from "../config/api";
 import { ProfileFormData } from "./form-data";
 import { URLs } from "../config/urls";
 import { isMember, Membership } from "./membership";
+import { HeaderReaderId, KEY_USER_ID, KEY_UNION_ID } from "./header";
 
 export interface IAccountId {
   compoundId: string;
   ftcId?: string;
   unionId?: string;
-}
-
-interface IdHeaders {
-  [KEY_UNION_ID]?: string;
-  [KEY_USER_ID]?: string;
 }
 
 export class Wechat {
@@ -77,8 +72,8 @@ export function isAccountEqual(a: Account, b: Account): boolean {
   return a.id === b.id;
 }
 
-export function collectAccountIDs(a: Account): IdHeaders {
-  const headers: IdHeaders = {};
+export function collectAccountIDs(a: Account): HeaderReaderId {
+  const headers: HeaderReaderId = {};
   if (a.id) {
     headers[KEY_USER_ID] = a.id;
   }
@@ -112,19 +107,7 @@ export function customerServiceEmail(account: Account): string {
   return mailTo.href;
 }
 
-export function buildIdHeaders(account: Account): IdHeaders {
-  const headers: IdHeaders = {};
 
-  if (account.id) {
-    headers[KEY_USER_ID] = account.id;
-  }
-
-  if (account.unionId) {
-    headers[KEY_UNION_ID] = account.unionId;
-  }
-
-  return headers;
-}
 
 export interface IClientApp {
   clientType: Platform;

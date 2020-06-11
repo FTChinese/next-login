@@ -1,8 +1,9 @@
 import request from "superagent";
-import { readerApi, KEY_USER_ID } from "../config/api";
+import { readerApi } from "./api";
 import { Profile, Address } from "../models/account";
 import { oauth, noCache } from "../util/request";
 import { NameForm, MobileForm, ProfileFormData } from "../models/form-data";
+import { KEY_USER_ID } from "../models/header";
 
 class ProfileService {
   async fetchProfile(ftcId: string): Promise<Profile> {

@@ -10,7 +10,7 @@ import { Account } from "../models/account";
 import { joiOptions, reduceJoiErrors } from "./validator";
 import { signUpSchema } from "./validator";
 import { ValidationError } from "@hapi/joi";
-import { IHeaderApp } from "../models/header";
+import { HeaderApp } from "../models/header";
 import { APIError, errMsg } from "../models/api-response";
 import { accountService } from "../repository/account";
 import { SignUpForm } from "../models/form-data";
@@ -43,7 +43,7 @@ export class SignUpBuilder {
     }
   }
 
-  async create(app: IHeaderApp): Promise<Account | null> {
+  async create(app: HeaderApp): Promise<Account | null> {
     try {
       const userId = await accountService.createReader({
         email: this.data.email,

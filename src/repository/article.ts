@@ -1,8 +1,7 @@
 import request from "superagent";
 import {
     readerApi,
-    KEY_USER_ID,
-} from "../config/api";
+} from "./api";
 
 import { 
     Article
@@ -14,6 +13,7 @@ import {
     Account,
 } from "../models/account";
 import { oauth } from "../util/request";
+import { KEY_USER_ID } from "../models/header";
 
 
 class ArticleRepo {

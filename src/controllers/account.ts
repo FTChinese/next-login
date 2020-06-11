@@ -2,11 +2,11 @@ import Router from "koa-router";
 import render from "../util/render";
 import { collectAppHeaders } from "./middleware";
 import { Account, isAccountWxOnly, isAccountLinked } from "../models/account";
-import { IHeaderApp } from "../models/header";
+import { HeaderApp } from "../models/header";
 import { accountMap } from "../config/sitemap";
 import { KeyUpdated } from "../pages/redirection";
 import { AccountPageBuilder } from "../pages/account-page";
-import { isProduction } from "../config/viper";
+import { viper } from "../config/viper";
 import { UpdateEmailBuilder } from "../pages/update-email";
 import { UpdatePasswordBuilder } from "../pages/update-password";
 import { EmailData, PasswordsFormData, SignUpForm, LinkingFormData, UnlinkFormData } from "../models/form-data";
@@ -277,7 +277,7 @@ router.get("/link/login", async (ctx, next) => {
 
   ctx.body = await render("link/base-layout.html", ctx.state);
 
-  if (isProduction) {
+  if (viper.isProduction) {
     // @ts-ignore
     delete ctx.session.email;
   }
@@ -294,7 +294,7 @@ router.post(
       throw new Error("form data not found");
     }
 
-    const headers: IHeaderApp = ctx.state.appHeaders;
+    const headers: HeaderApp = ctx.state.appHeaders;
 
     const builder = new LinkLoginPageBuilder();
 
@@ -340,7 +340,7 @@ router.get("/link/signup", async (ctx, next) => {
 
   ctx.body = await render("link/base-layout.html", ctx.state);
 
-  if (isProduction) {
+  if (viper.isProduction) {
     // @ts-ignore
     delete ctx.session.email;
   }
@@ -359,7 +359,7 @@ router.post(
       throw new Error("form data not found");
     }
 
-    const headers: IHeaderApp = ctx.state.appHeaders;
+    const headers: HeaderApp = ctx.state.appHeaders;
     const account: Account = ctx.state.user;
     if (!account.unionId) {
       throw new Error("You are not logged in with Wechat account");

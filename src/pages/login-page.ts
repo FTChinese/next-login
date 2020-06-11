@@ -8,7 +8,7 @@ import { TextInputElement } from "../widget/text-input";
 import { entranceMap } from "../config/sitemap";
 import { loginSchema, joiOptions, reduceJoiErrors, textLen } from "./validator";
 import { accountService } from "../repository/account";
-import { IHeaderApp } from "../models/header";
+import { HeaderApp } from "../models/header";
 import { Account } from "../models/account";
 import { APIError, errMsg } from "../models/api-response";
 import { CheckboxInputElement } from "../widget/radio-input";
@@ -48,7 +48,7 @@ export class CredentialBuilder {
     }
   }
 
-  async login(app: IHeaderApp): Promise<Account | null> {
+  async login(app: HeaderApp): Promise<Account | null> {
     if (!this.formData) {
       throw new Error('No form data submitted!');
     }

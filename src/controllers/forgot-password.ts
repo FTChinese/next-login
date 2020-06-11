@@ -4,7 +4,7 @@ import {
     collectAppHeaders,
 } from "./middleware";
 import {
-    IHeaderApp,
+    HeaderApp,
 } from "../models/header";
 import { 
     entranceMap 
@@ -49,7 +49,7 @@ router.get("/", async (ctx, next) => {
 router.post("/", collectAppHeaders(), async (ctx, next) => {
     const formData: EmailData = ctx.request.body;
 
-    const headers: IHeaderApp = ctx.state.appHeaders;
+    const headers: HeaderApp = ctx.state.appHeaders;
 
     const emailBuilder = new EmailBuilder(ctx.href);
     const isValid = await emailBuilder.validate(formData);

@@ -11,7 +11,7 @@ import { ControlType } from "../widget/widget";
 import { TextInputElement } from "../widget/text-input";
 import { Account, isAccountLinked, isAccountEqual } from "../models/account";
 import { entranceMap, accountMap } from "../config/sitemap";
-import { IHeaderApp } from "../models/header";
+import { HeaderApp } from "../models/header";
 import { localizeTier } from "../models/localization";
 import { Link } from "../widget/link";
 import { Credentials } from "../models/request-data";
@@ -148,7 +148,7 @@ export class LinkLoginPageBuilder {
     }
   }
 
-  async login(app: IHeaderApp): Promise<Account | null> {
+  async login(app: HeaderApp): Promise<Account | null> {
     if (!this.formData) {
       throw new Error("No form data submitted!");
     }
@@ -268,7 +268,7 @@ export class WxSignUpPageBuilder {
     }
   }
 
-  async create(unionId: string, app: IHeaderApp): Promise<Account | null> {
+  async create(unionId: string, app: HeaderApp): Promise<Account | null> {
     try {
       const account = await accountService.wxSignUp({
           email: this.formData.email,
@@ -521,18 +521,18 @@ export class MergePageBuilder {
         header: "FT中文网账号",
         list: [
           {
-            label: "邮箱",
-            value: ftc.email,
+            primary: "邮箱",
+            secondary: ftc.email,
           },
           {
-            label: "会员类型",
-            value: ftc.membership.tier
+            primary: "会员类型",
+            secondary: ftc.membership.tier
               ? localizeTier(ftc.membership.tier)
               : "-",
           },
           {
-            label: "会员期限",
-            value: ftc.membership.expireDate || "-",
+            primary: "会员期限",
+            secondary: ftc.membership.expireDate || "-",
           },
         ],
       },
@@ -540,18 +540,18 @@ export class MergePageBuilder {
         header: "微信账号",
         list: [
           {
-            label: "昵称",
-            value: wx.wechat.nickname || "-",
+            primary: "昵称",
+            secondary: wx.wechat.nickname || "-",
           },
           {
-            label: "会员类型",
-            value: wx.membership.tier
+            primary: "会员类型",
+            secondary: wx.membership.tier
               ? localizeTier(wx.membership.tier)
               : "-",
           },
           {
-            label: "会员期限",
-            value: wx.membership.expireDate || "-",
+            primary: "会员期限",
+            secondary: wx.membership.expireDate || "-",
           },
         ],
       }

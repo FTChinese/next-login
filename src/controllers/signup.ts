@@ -4,7 +4,7 @@ import {
   collectAppHeaders,
 } from "./middleware";
 import {
-  IHeaderApp,
+  HeaderApp,
 } from "../models/header";
 import {
   profileMap
@@ -36,7 +36,7 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
     throw new Error("form data not found");
   }
 
-  const headers: IHeaderApp = ctx.state.appHeaders;
+  const headers: HeaderApp = ctx.state.appHeaders;
 
   const builder = new SignUpBuilder();
   const isValid = await builder.validate(formData);

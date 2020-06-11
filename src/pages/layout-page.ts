@@ -1,7 +1,7 @@
 import { Account, isAccountFtcOnly } from "../models/account";
 import { accountMap, profileMap, subsMap, starredMap, entranceMap } from "../config/sitemap";
 import { Link } from "../widget/link";
-import { isProduction } from "../config/viper";
+import { viper } from "../config/viper";
 const pkg = require("../../package.json");
 
 interface FooterSection {
@@ -153,7 +153,7 @@ export function buildBaseLayoutPage(): BaseLayoutPage {
     iconUrl: "http://interactive.ftchinese.com/favicons",
     pageTitle: "我的FT",
     env: {
-      isProd: isProduction,
+      isProd: viper.isProduction,
       year: new Date().getFullYear(),
       footer,
       version: pkg.version,

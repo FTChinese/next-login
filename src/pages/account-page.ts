@@ -5,7 +5,7 @@ import {
   Account, isAccountLinked, isAccountWxOnly,
 } from "../models/account";
 import {
-  IHeaderApp,
+  HeaderApp,
 } from "../models/header";
 import {
   accountService,
@@ -51,7 +51,7 @@ export class AccountPageBuilder {
     }
   }
 
-  async requestVerification(source: RequestLocation, app: IHeaderApp): Promise<boolean> {
+  async requestVerification(source: RequestLocation, app: HeaderApp): Promise<boolean> {
     try {
       const ok = await accountService.requestVerification(this.account.id, source, app);
 

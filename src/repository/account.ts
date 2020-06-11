@@ -1,16 +1,13 @@
 import request from "superagent";
 import {
   readerApi,
-  KEY_USER_ID,
-  KEY_UNION_ID,
   subsApi,
-  KEY_APP_ID,
-} from "../config/api";
+} from "./api";
 import {
   Account,
 } from "../models/account";
 import {
-  IHeaderApp,
+  HeaderApp, KEY_USER_ID, KEY_UNION_ID, KEY_APP_ID,
 } from "../models/header";
 import {
   WxSession
@@ -57,7 +54,7 @@ class AccountService {
   /**
    * @description As the first step of login process, or verify password when linking accounts.
    */
-  async authenticate(c: Credentials, app: IHeaderApp): Promise<Account> {
+  async authenticate(c: Credentials, app: HeaderApp): Promise<Account> {
     console.log(c);
 
     const resp = await request
@@ -94,7 +91,7 @@ class AccountService {
     }
   }
 
-  async createReader(c: Credentials, app: IHeaderApp): Promise<string> {
+  async createReader(c: Credentials, app: HeaderApp): Promise<string> {
     const resp = await request
       .post(readerApi.signup)
       .use(oauth)
@@ -111,7 +108,7 @@ class AccountService {
     throw new Error("Incorrect api response");
   }
 
-  async fetchWxSession(code: string, app: IHeaderApp): Promise<WxSession> {
+  async fetchWxSession(code: string, app: HeaderApp): Promise<WxSession> {
     const appId = viper.getConfig().wxapp.web_oauth.app_id;
 
     const resp = await request
@@ -138,7 +135,7 @@ class AccountService {
 
   // Create an account for a wechat-logged-in user,
   // and returns the account's uuid.
-  async wxSignUp(c: Credentials, unionId: string, app: IHeaderApp): Promise<Account> {
+  async wxSignUp(c: Credentials, unionId: string, app: HeaderApp): Promise<Account> {
     const resp = await request
       .post(readerApi.wxSignUp)
       .use(oauth)
@@ -150,7 +147,7 @@ class AccountService {
     return resp.body
   }
 
-  async requestPwResetLetter(data: PwResetLetter, app: IHeaderApp): Promise<boolean> {
+  async requestPwResetLetter(data: PwResetLetter, app: HeaderApp): Promise<boolean> {
     const resp = await request
       .post(readerApi.passwordResetLetter)
       .use(oauth)
@@ -186,7 +183,7 @@ class AccountService {
     return resp.noContent;
   }
 
-  async requestVerification(id: string, source: RequestLocation, app: IHeaderApp): Promise<boolean> {
+  async requestVerification(id: string, source: RequestLocation, app: HeaderApp): Promise<boolean> {
     const resp = await request
       .post(readerApi.requestVerification)
       .use(oauth)

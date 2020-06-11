@@ -3,7 +3,7 @@ import Router from "koa-router";
 import MobileDetect from "mobile-detect";
 import render from "../util/render";
 import {
-  isProduction,
+  viper,
 } from "../config/viper";
 import {
   collectAppHeaders,
@@ -12,7 +12,7 @@ import {
   Account,
 } from "../models/account";
 import {
-  IHeaderApp,
+  HeaderApp,
 } from "../models/header";
 import {
   profileMap,
@@ -72,7 +72,7 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
     return await next();
   }
 
-  const headers: IHeaderApp = ctx.state.appHeaders;
+  const headers: HeaderApp = ctx.state.appHeaders;
   const account = await builder.login(headers);
 
   if (!account) {
@@ -154,7 +154,7 @@ router.get("/wechat", async (ctx, next) => {
 });
 
 router.get("/wechat/test", collectAppHeaders(), async (ctx, next) => {
-  if (isProduction) {
+  if (viper.isProduction) {
     ctx.status = 404;
     return;
   }
@@ -219,12 +219,12 @@ router.get("/wechat/callback", collectAppHeaders(), async (ctx, next) => {
 
   // @ts-ignore
   const wxOAuthSess: OAuthSession | undefined = ctx.session.wx_oauth;
-  if (isProduction) {
+  if (viper.isProduction) {
     // @ts-ignore
     delete ctx.session.wx_oauth;
   };
 
-  const headers: IHeaderApp = ctx.state.appHeaders;
+  const headers: HeaderApp = ctx.state.appHeaders;
   const localAccount: Account | undefined = ctx.state.user;
 
   const builder = new WxCallbackBuilder(localAccount);

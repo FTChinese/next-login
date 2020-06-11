@@ -7,7 +7,7 @@ import {
   Account,
 } from "../models/account";
 import {
-  IHeaderApp,
+  HeaderApp,
 } from "../models/header";
 import {
   isExpired,
@@ -95,7 +95,7 @@ export class WxCallbackBuilder {
     return true;
   }
 
-  async getApiSession(app: IHeaderApp): Promise<WxSession | null> {
+  async getApiSession(app: HeaderApp): Promise<WxSession | null> {
 
     try {
       const wxSession = await accountService.fetchWxSession(this.code, app);

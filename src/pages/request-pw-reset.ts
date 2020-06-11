@@ -1,6 +1,6 @@
 import { joiOptions, emailSchema, reduceJoiErrors } from "./validator";
 import { ValidationError } from "@hapi/joi";
-import { IHeaderApp } from "../models/header";
+import { HeaderApp } from "../models/header";
 import { accountService } from "../repository/account";
 import { APIError } from "../models/api-response";
 import { Flash } from "../widget/flash";
@@ -53,7 +53,7 @@ export class EmailBuilder {
     }
   }
 
-  async requestLetter(app: IHeaderApp): Promise<boolean> {
+  async requestLetter(app: HeaderApp): Promise<boolean> {
 
     try {
       const ok = await accountService.requestPwResetLetter({

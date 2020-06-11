@@ -1,6 +1,6 @@
 import request from "superagent";
 import { AndroidRelease } from "../models/android";
-import { readerApi } from "../config/api";
+import { readerApi } from "./api";
 import { IPagination } from "../models/pagination";
 import { oauth } from "../util/request";
 

@@ -4,7 +4,7 @@ import { Session } from "koa-session";
 import { Paging } from "../models/pagination";
 import { entranceMap, androidMap } from "../config/sitemap";
 import render from "../util/render";
-import { IHeaderApp } from "../models/header";
+import { HeaderApp } from "../models/header";
 import { buildBaseLayoutPage, buildContentPage } from "../pages/layout-page";
 const pkg = require("../../package.json");
 
@@ -110,7 +110,7 @@ export function noCache(): Middleware {
 
 export function collectAppHeaders(): Middleware {
   return async function (ctx, next) {
-    const headers: IHeaderApp = {
+    const headers: HeaderApp = {
       "X-Client-Type": "web",
       "X-Client-Version": pkg.version,
       "X-User-Ip": ctx.ip,

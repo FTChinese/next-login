@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 import debug from "debug";
 import { Dictionary } from "./data-types";
 import { IWxApp, viper } from "../config/viper";
-import { subsApi } from "../config/api";
+import { subsApi } from "../repository/api";
 import { unixNow } from "../util/time";
 import { pool } from "../util/random";
 
