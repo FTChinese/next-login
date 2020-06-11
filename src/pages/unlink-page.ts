@@ -94,12 +94,12 @@ export class UnlinkPageBuilder {
     p.card = {
       list: [
         {
-          label: "FT账号",
-          value: this.account.email,
+          primary: "FT账号",
+          secondary: this.account.email,
         },
         {
-          label: "微信账号",
-          value: this.account.wechat.nickname,
+          primary: "微信账号",
+          secondary: this.account.wechat.nickname,
         },
       ],
     };
@@ -107,12 +107,12 @@ export class UnlinkPageBuilder {
     if (this.account.membership.tier && this.account.membership.expireDate ) {
       p.card.list?.concat([
         {
-          label: "会员类型",
-          value: localizeTier(this.account.membership.tier),
+          primary: "会员类型",
+          secondary: localizeTier(this.account.membership.tier),
         },
         {
-          label: "会员期限",
-          value: this.account.membership.expireDate,
+          primary: "会员期限",
+          secondary: this.account.membership.expireDate,
         },
       ]);
     }
