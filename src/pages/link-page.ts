@@ -227,7 +227,8 @@ export class LinkLoginPageBuilder {
       alternativeActions: [
         {
           text: "忘记密码?",
-          href: entranceMap.passwordReset
+          href: entranceMap.passwordReset,
+          external: true,
         }
       ],
     };
