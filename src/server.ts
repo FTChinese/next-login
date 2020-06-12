@@ -68,7 +68,7 @@ router.get("/logout", authGuard(), async function (ctx, next) {
   return;
 });
 router.use("/verify", verification);
-router.use("/password-reset", noAuthGuard(), forgotPassword);
+router.use("/password-reset", forgotPassword);
 router.use("/profile", authGuard(), profile);
 router.use("/account", authGuard(), account);
 router.use("/subscription", authGuard(), subscription);
