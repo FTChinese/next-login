@@ -1,10 +1,5 @@
 import { ListItem } from "./list";
-import { Link } from "./link";
-
-interface Image {
-  src: string;
-  alt?: string;
-}
+import { Link, Image } from "./link";
 
 interface CardBody {
   title: string;
