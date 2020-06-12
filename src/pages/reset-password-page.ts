@@ -17,12 +17,6 @@ export interface PwResetData {
   confirmPassword: string;
 }
 
-export interface ResetPasswordPage {
-  heading: string;
-  flash?: Flash;
-  form?: Form;
-}
-
 export class ResetPwBuilder {
 
   private errors: Map<string, string> = new Map(); // Hold validator error for each form field. Key is field's name attribute.
@@ -98,7 +92,7 @@ export class ResetPwBuilder {
   build(): FormPage {
     return {
       pageTitle: "重置密码",
-      heading: this.email ? `更改 ${this.email} 的密码` : "更改密码",
+      heading: this.email ? `重置 ${this.email} 的密码` : "更改密码",
       flash: this.flashMsg ? Flash.danger(this.flashMsg) : undefined,
       form: this.showForm ? new Form({
         disabled: false,
@@ -118,6 +112,7 @@ export class ResetPwBuilder {
               minlength: 8,
               maxlength: 64,
             }),
+            desc: "长度最少8位",
             error: this.errors.get("password"),
           }),
           new FormControl({

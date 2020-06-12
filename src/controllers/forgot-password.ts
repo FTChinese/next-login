@@ -11,7 +11,7 @@ import {
 } from "../config/sitemap";
 import { KeyDone } from "../pages/request-pw-reset-page";
 import { EmailBuilder } from "../pages/request-pw-reset-page";
-import { ResetPwBuilder, PwResetData } from "../pages/reset-password";
+import { ResetPwBuilder, PwResetData } from "../pages/reset-password-page";
 import { EmailData } from "../models/form-data";
 import debug from "debug";
 import { viper } from "../config/viper";
@@ -29,7 +29,8 @@ router.get("/", async (ctx, next) => {
   // @ts-ignore
   let key: KeyDone | undefined = ctx.session.ok;
 
-  if (!viper.isProduction) {
+  // For testing.
+  if (!viper.isProduction && !key) {
     key = ctx.query.key;
   }
 
