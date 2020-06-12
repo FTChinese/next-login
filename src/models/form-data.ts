@@ -47,7 +47,7 @@ export interface ProfileFormData {
 }
 
 export interface LinkingFormData {
-  targetId: string;
+  targetId?: string;
 }
 
 export interface UnlinkFormData {
