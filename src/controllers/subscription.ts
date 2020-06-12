@@ -20,10 +20,11 @@ import {
 } from "../models/order";
 import { toBoolean } from "../util/converter";
 import { MembershipPageBuilder } from "../pages/membership-page";
-import { PaymentPageBuilder, isMobile } from "../pages/payment-page";
+import { PaymentPageBuilder } from "../pages/payment-page";
 import { AlipayResultBuilder, WxpayResultBuilder } from "../pages/pay-reseult-page";
 import { findPlan } from "../models/product";
 import { subsMap } from "../config/sitemap";
+import { isMobile } from "../util/detector";
 
 const log = debug("user:subscription");
 

@@ -10,7 +10,6 @@ import { subRepo, AlipayConfig } from "../repository/subscription";
 import { Account, collectAccountIDs } from "../models/account";
 import { HeaderApp, HeaderReaderId } from "../models/header";
 import { APIError } from "../models/api-response";
-import MobileDetect from "mobile-detect";
 import { toDataURL } from "qrcode";
 import { subsMap } from "../config/sitemap";
 import { Card } from "../widget/card";
@@ -30,13 +29,6 @@ interface PaymentPage {
   card: Card;
   form?: Form;
   qr?: UIQR; // Use to show Wechat payment QR Code if user selected wxpay.
-}
-
-
-export function isMobile(ua: string): boolean {
-  const md = new MobileDetect(ua);
-
-  return !!md.mobile();
 }
 
 export class PaymentPageBuilder {
