@@ -7,18 +7,19 @@ import { ControlType } from "../widget/widget";
 import { TextInputElement } from "../widget/text-input";
 import { buildCredentialControls } from "./login-page";
 import { Account } from "../models/account";
-import { joiOptions, reduceJoiErrors } from "./validator";
+import { joiOptions, reduceJoiErrors, textLen } from "./validator";
 import { signUpSchema } from "./validator";
 import { ValidationError } from "@hapi/joi";
 import { HeaderApp } from "../models/header";
 import { APIError, errMsg } from "../models/api-response";
 import { accountService } from "../repository/account";
 import { SignUpForm } from "../models/form-data";
+import { FormPage } from "./base-page";
+import { Link } from "../widget/link";
 
-export interface SignUpPage {
-  flash?: Flash;
-  form: Form;
-  loginLink: string;
+export type SignUpPage = FormPage & {
+  signUpLic: Link;
+  loginLink: Link;
 }
 
 export class SignUpBuilder {
@@ -89,7 +90,8 @@ export class SignUpBuilder {
           type: "password",
           name: "credentials[confirmPassword]",
           placeholder: "再次输入密码",
-          maxlength: 32,
+          minlength: textLen.password.min,
+          maxlength: textLen.password.max,
           required: true,
         }),
         error: this.errors.get("confirmPassword"),
@@ -97,6 +99,8 @@ export class SignUpBuilder {
     );
 
     return {
+      pageTitle: "注册",
+      heading: "创建FT中文网账号",
       flash: this.flashMsg ? Flash.danger(this.flashMsg) : undefined,
       form: new Form({
         disabled: false,
@@ -108,7 +112,14 @@ export class SignUpBuilder {
           .setName("注册")
           .setDisableWith("正在注册...")
       }),
-      loginLink: entranceMap.login,
+      signUpLic: {
+        text: "《用户注册协议》",
+        href: "http://www.ftchinese.com/m/corp/service.html",
+      },
+      loginLink: {
+        text: "登录",
+        href: entranceMap.login
+      },
     };
   }
 }

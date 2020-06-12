@@ -28,6 +28,7 @@ import { accountService } from "../repository/account";
 import { CredentialBuilder } from "../pages/login-page";
 import { Credentials } from "../models/form-data";
 import { unixSeconds } from "../util/time";
+import { isMobile } from "../util/detector";
 
 const log = debug("user:login");
 
@@ -38,14 +39,13 @@ const router = new Router();
  * Only show wechat login for desktop browsers.
  */
 router.get("/", async (ctx, next) => {
-  const uiData = (new CredentialBuilder()).build();
+  const builder = new CredentialBuilder();
+
+  const uiData = builder.build(isMobile(ctx.header["user-agent"]));
 
   Object.assign(ctx.state, uiData);
 
-  const md = new MobileDetect(ctx.header["user-agent"]);
-  ctx.state.isMobile = !!md.mobile();
-
-  ctx.body = await render("login.html", ctx.state);
+  ctx.body = await render("entrance.html", ctx.state);
 });
 
 /**
@@ -66,7 +66,7 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
 
   const isValid = await builder.validate(formData);
   if (!isValid) {
-    const uiData = builder.build();
+    const uiData = builder.build(isMobile(ctx.header["user-agent"]));
     Object.assign(ctx.state, uiData);
 
     return await next();
@@ -76,7 +76,7 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
   const account = await builder.login(headers);
 
   if (!account) {
-    const uiData = builder.build();
+    const uiData = builder.build(isMobile(ctx.header["user-agent"]));
     Object.assign(ctx.state, uiData);
 
     return await next();
@@ -96,7 +96,7 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
   return ctx.redirect(profileMap.base);
 
 }, async (ctx, next) => {
-  ctx.body = await render("login.html", ctx.state);
+  ctx.body = await render("entrance.html", ctx.state);
 });
 
 /**

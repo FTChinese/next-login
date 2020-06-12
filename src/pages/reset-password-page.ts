@@ -23,8 +23,14 @@ export class ResetPwBuilder {
   };
 
   email: string;
+  // False only if error occurred upon verify token.
   private showForm = true;
 
+  // Verify if a token is valid.
+  // 3 possible states:
+  // 1. Token is valid and api returns the email associated with it.
+  // 2. Token is not found thus it is invalid, perform rediretion.
+  // 3. Other errors, and only show a flash message.
   async verifyToken(token: string): Promise<KeyDone | null> {
     try {
       const result = await accountService.verifyPwResetToken(token);
@@ -39,12 +45,6 @@ export class ResetPwBuilder {
       }
 
       this.showForm = false;
-
-      if (errResp.unprocessable) {
-        this.errors = errResp.controlErrs;
-        return null;
-      }
-
       this.flashMsg = errResp.message;
 
       return null;
@@ -88,7 +88,9 @@ export class ResetPwBuilder {
   build(): FormPage {
     return {
       pageTitle: "重置密码",
-      heading: this.email ? `重置 ${this.email} 的密码` : "更改密码",
+      heading: this.email 
+        ? `重置 ${this.email} 的密码` 
+        : "更改密码",
       flash: this.flashMsg ? Flash.danger(this.flashMsg) : undefined,
       form: this.showForm ? new Form({
         disabled: false,
