@@ -21,6 +21,7 @@ import { Flash } from "../widget/flash";
  * @description The UI if Wechat OAuth login failed.
  */
 interface WxCallbackPage {
+  pageTitle: string;
   flash?: Flash;
   reason?: CallbackParams;
   link: string;
@@ -111,6 +112,7 @@ export class WxCallbackBuilder {
 
   buildUI(): WxCallbackPage {
     return {
+      pageTitle: "微信登录",
       flash: this.flashMsg
         ? Flash.danger(this.flashMsg)
         : undefined,
