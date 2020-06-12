@@ -26,8 +26,6 @@ interface DoneAction {
 
 export type KeyDone = "invalid_token" | "letter_sent" | "pw_reset";
 
-const msgEmailNotFound: string = "该邮箱不存在，请检查您输入的邮箱是否正确";
-
 export type RequestPwResetPage = FormPage & {
   done?: DoneAction; // This descibes what the UI should look like after a redirection. It is mutually exclusive with form.
 }
@@ -71,7 +69,7 @@ export class EmailBuilder {
       const errResp = new APIError(e);
 
       if (errResp.notFound) {
-        this.flashMsg = msgEmailNotFound;
+        this.flashMsg = "该邮箱不存在，请检查您输入的邮箱是否正确";
         return false;
       }
 
