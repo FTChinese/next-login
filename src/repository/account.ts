@@ -250,19 +250,17 @@ class AccountService {
     return resp.noContent;
   }
 
+  // anchor is only required when membership exists.
   async unlink(account: Account, anchor?: AccountKind): Promise<boolean> {
-    const req = request
+    const resp = await  request
       .delete(readerApi.linking)
       .use(oauth)
       .use(noCache)
-      .set(KEY_UNION_ID, account.unionId!)
-      .set(KEY_USER_ID, account.id);
-
-    if (anchor) {
-      req.set({ anchor });
-    }
-
-    const resp = await req;
+      .set(KEY_USER_ID, account.id)
+      .send({
+        unionId: account.unionId,
+        anchor: anchor || null,
+      });
 
     return resp.noContent;
   }

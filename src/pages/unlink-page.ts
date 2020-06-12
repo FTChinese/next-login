@@ -65,6 +65,7 @@ export class UnlinkPageBuilder {
   }
 
   async unlink(): Promise<boolean> {
+    
     try {
       const ok = await accountService.unlink(this.account, this.anchor);
 
@@ -124,7 +125,7 @@ export class UnlinkPageBuilder {
       controls: this.hasMember ? [
         new FormControl({
           label: {
-            text: "FTC账号",
+            text: "FT账号",
             suffix: true
           },
           controlType: ControlType.Radio,
@@ -149,6 +150,7 @@ export class UnlinkPageBuilder {
             value: "wechat",
             checked: this.anchor === "wechat"
           }),
+          extraWrapperClass: "mb-3",
           error: this.errors.get("anchor"),
         }),
       ] : [],

@@ -1,6 +1,8 @@
 <div class="card">
 
+  {% if card.header %}
   <div class="card-header">{{ card.header }}</div>
+  {% endif %}
 
   {% if card.list %}
   <ul class="list-group list-group-flush">
