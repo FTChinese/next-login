@@ -11,8 +11,8 @@ import {
 } from "../config/sitemap";
 import { KeyDone } from "../pages/request-pw-reset-page";
 import { EmailBuilder } from "../pages/request-pw-reset-page";
-import { ResetPwBuilder, PwResetData } from "../pages/reset-password-page";
-import { EmailData } from "../models/form-data";
+import { ResetPwBuilder } from "../pages/reset-password-page";
+import { PasswordResetForm, EmailForm } from "../models/form-data";
 import debug from "debug";
 import { viper } from "../config/viper";
 
@@ -59,7 +59,7 @@ router.get("/", async (ctx, next) => {
  * is sent.
  */
 router.post("/", collectAppHeaders(), async (ctx, next) => {
-    const formData: EmailData = ctx.request.body;
+    const formData: EmailForm = ctx.request.body;
     const headers: HeaderApp = ctx.state.appHeaders;
 
     const emailBuilder = new EmailBuilder();
@@ -132,7 +132,7 @@ router.get("/:token", async (ctx, next) => {
 router.post("/:token", async (ctx, next) => {
     const token = ctx.params.token;
 
-    const formData: PwResetData | undefined = ctx.request.body.credentials;
+    const formData: PasswordResetForm | undefined = ctx.request.body.credentials;
 
     if (!formData) {
         throw new Error("form data not found");

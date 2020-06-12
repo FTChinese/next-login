@@ -11,17 +11,13 @@ import { accountService } from "../repository/account";
 import { APIError } from "../models/api-response";
 import { KeyDone } from "./request-pw-reset-page";
 import { FormPage } from "./base-page";
-
-export interface PwResetData {
-  password: string;
-  confirmPassword: string;
-}
+import { PasswordResetForm } from "../models/form-data";
 
 export class ResetPwBuilder {
 
   private errors: Map<string, string> = new Map(); // Hold validator error for each form field. Key is field's name attribute.
   private flashMsg?: string; // Hold message for API non-422 error.
-  private formData: PwResetData = {
+  private formData: PasswordResetForm = {
     password: '',
     confirmPassword: ''
   };
@@ -55,7 +51,7 @@ export class ResetPwBuilder {
     }
   }
 
-  async validate(data: PwResetData): Promise<boolean> {
+  async validate(data: PasswordResetForm): Promise<boolean> {
     try {
       const result = await passwordsSchema.validateAsync(data, joiOptions)
 

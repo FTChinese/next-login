@@ -26,7 +26,7 @@ import {
 } from "../models/wx-oauth";
 import { accountService } from "../repository/account";
 import { CredentialBuilder } from "../pages/login-page";
-import { Credentials } from "../models/request-data";
+import { Credentials } from "../models/form-data";
 import { unixSeconds } from "../util/time";
 
 const log = debug("user:login");

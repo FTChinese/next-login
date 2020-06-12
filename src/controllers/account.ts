@@ -9,11 +9,11 @@ import { AccountPageBuilder } from "../pages/account-page";
 import { viper } from "../config/viper";
 import { UpdateEmailBuilder } from "../pages/update-email";
 import { UpdatePasswordBuilder } from "../pages/update-password";
-import { EmailData, PasswordsFormData, SignUpForm, LinkingFormData, UnlinkFormData } from "../models/form-data";
+import { PasswordsFormData, SignUpForm, LinkingFormData, UnlinkFormData, EmailForm } from "../models/form-data";
 import { LinkEmailPageBuilder, LinkLoginPageBuilder, WxSignUpPageBuilder, MergePageBuilder } from "../pages/link-page";
 import { accountService } from "../repository/account";
 import { UnlinkPageBuilder } from "../pages/unlink-page";
-import { Credentials } from "../models/request-data";
+import { Credentials } from "../models/form-data";
 
 const router = new Router();
 
@@ -78,7 +78,7 @@ router.post(
       return;
     }
 
-    const formData: EmailData = ctx.request.body;
+    const formData: EmailForm = ctx.request.body;
     const builder = new UpdateEmailBuilder(account);
 
     const isValid = await builder.validate(formData);
@@ -176,8 +176,8 @@ router.post(
     const ok = await builder.requestVerification(
       {
         sourceUrl: `${ctx.origin}${entranceMap.verifyEmail}`,
-      }, 
-      ctx.state.appHeaders);
+        appHeaders: ctx.state.appHeaders
+      });
 
     if (!ok) {
       const uiData = builder.build();
@@ -213,7 +213,7 @@ router.get("/link/email", async (ctx, next) => {
 router.post(
   "/link/email",
   async (ctx, next) => {
-    const formData: EmailData = ctx.request.body;
+    const formData: EmailForm = ctx.request.body;
 
     const builder = new LinkEmailPageBuilder();
 

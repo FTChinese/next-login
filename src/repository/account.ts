@@ -17,8 +17,8 @@ import {
 } from "../config/viper";
 import { AccountKind } from "../models/enums";
 import { oauth, noCache } from "../util/request";
-import { EmailData } from "../models/form-data";
-import { PwResetLetter, PasswordResetter, Credentials, RequestLocation, Passwords } from "../models/request-data";
+import { EmailForm, Credentials, AccountFields } from "../models/form-data";
+import { PwResetLetter, PasswordResetter, PasswordUpdater } from "../models/request-data";
 
 class AccountService {
 
@@ -158,7 +158,7 @@ class AccountService {
     return resp.noContent;
   }
 
-  async verifyPwResetToken(token: string): Promise<EmailData> {
+  async verifyPwResetToken(token: string): Promise<EmailForm> {
     const resp = await request
       .get(readerApi.passwordResetToken(token))
       .use(oauth)
@@ -183,7 +183,7 @@ class AccountService {
     return resp.noContent;
   }
 
-  async requestVerification(id: string, source: RequestLocation, app: HeaderApp): Promise<boolean> {
+  async requestVerification(id: string, source: Pick<AccountFields, "sourceUrl">, app: HeaderApp): Promise<boolean> {
     const resp = await request
       .post(readerApi.requestVerification)
       .use(oauth)
@@ -204,7 +204,7 @@ class AccountService {
     return resp.noContent;
   }
 
-  async updateEmail(ftcId: string, data: EmailData): Promise<boolean> {
+  async updateEmail(ftcId: string, data: EmailForm): Promise<boolean> {
     const resp = await request
       .patch(readerApi.email)
       .use(oauth)
@@ -215,7 +215,7 @@ class AccountService {
     return resp.noContent;
   }
 
-  async updatePassword(ftcId: string, data: Passwords): Promise<boolean> {
+  async updatePassword(ftcId: string, data: PasswordUpdater): Promise<boolean> {
     const resp = await request
       .patch(readerApi.password)
       .use(oauth)

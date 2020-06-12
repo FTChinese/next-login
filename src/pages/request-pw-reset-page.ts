@@ -12,9 +12,8 @@ import { Button } from "../widget/button";
 import { Link } from "../widget/link";
 import { entranceMap } from "../config/sitemap";
 import { FormPage } from "./base-page";
-import { EmailData } from "../models/form-data";
+import { EmailForm, AccountFields } from "../models/form-data";
 import debug from "debug";
-import { RequestLocation } from "../models/request-data";
 
 const log = debug("user:request-pw-reset");
 
@@ -34,11 +33,11 @@ export class EmailBuilder {
 
   errors: Map<string, string> = new Map(); // Hold validator error for each form field. Key is field's name attribute.
   flashMsg?: string; // Hold message for API non-422 error.
-  formData: EmailData = {
+  formData: EmailForm = {
     email: ''
   };
 
-  async validate(data: EmailData): Promise<boolean> {
+  async validate(data: EmailForm): Promise<boolean> {
     try {
       const result = await emailSchema.validateAsync(data, joiOptions);
 
@@ -52,16 +51,16 @@ export class EmailBuilder {
     }
   }
 
-  async requestLetter(config: RequestLocation & { appHeaders: HeaderApp }): Promise<boolean> {
-    log("Source URL for password reset letter: %s", config.sourceUrl);
+  async requestLetter(app: Pick<AccountFields, "sourceUrl" | "appHeaders">): Promise<boolean> {
+    log("Source URL for password reset letter: %s", app.sourceUrl);
     
     try {
       const ok = await accountService.requestPwResetLetter(
         {
-          sourceUrl: config.sourceUrl,
+          sourceUrl: app.sourceUrl,
           email: this.formData.email,
         }, 
-        config.appHeaders
+        app.appHeaders
       );
 
       return ok;

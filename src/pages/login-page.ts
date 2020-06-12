@@ -12,7 +12,7 @@ import { HeaderApp } from "../models/header";
 import { Account } from "../models/account";
 import { APIError, errMsg } from "../models/api-response";
 import { CheckboxInputElement } from "../widget/radio-input";
-import { Credentials } from "../models/request-data";
+import { Credentials } from "../models/form-data";
 
 export interface LoginPage {
   flash?: Flash | undefined; // Only exists when API returns a non-validation error.

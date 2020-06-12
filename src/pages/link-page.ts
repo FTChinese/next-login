@@ -1,6 +1,6 @@
 import { Flash } from "../widget/flash";
 import { Form } from "../widget/form";
-import { EmailData, SignUpForm, LinkingFormData } from "../models/form-data";
+import { SignUpForm, LinkingFormData, EmailForm } from "../models/form-data";
 import { emailSchema, joiOptions, reduceJoiErrors, textLen, loginSchema, signUpSchema } from "./validator";
 import { ValidationError } from "@hapi/joi";
 import { accountService } from "../repository/account";
@@ -14,7 +14,7 @@ import { entranceMap, accountMap } from "../config/sitemap";
 import { HeaderApp } from "../models/header";
 import { localizeTier } from "../models/localization";
 import { Link } from "../widget/link";
-import { Credentials } from "../models/request-data";
+import { Credentials } from "../models/form-data";
 import { isMemberExpired } from "../models/membership";
 import { Card } from "../widget/card";
 
@@ -27,9 +27,9 @@ class LinkEmailPage {
 export class LinkEmailPageBuilder {
   flashMsg?: string;
   errors: Map<string, string> = new Map();
-  formData?: EmailData;
+  formData?: EmailForm;
 
-  async validate(data: EmailData): Promise<boolean> {
+  async validate(data: EmailForm): Promise<boolean> {
     try {
       const result = await emailSchema.validateAsync(data, joiOptions);
 
