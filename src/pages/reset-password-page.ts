@@ -11,30 +11,26 @@ import { accountService } from "../repository/account";
 import { APIError } from "../models/api-response";
 import { KeyDone } from "./request-pw-reset-page";
 import { FormPage } from "./base-page";
-
-export interface PwResetData {
-  password: string;
-  confirmPassword: string;
-}
-
-export interface ResetPasswordPage {
-  heading: string;
-  flash?: Flash;
-  form?: Form;
-}
+import { PasswordResetForm } from "../models/form-data";
 
 export class ResetPwBuilder {
 
   private errors: Map<string, string> = new Map(); // Hold validator error for each form field. Key is field's name attribute.
   private flashMsg?: string; // Hold message for API non-422 error.
-  private formData: PwResetData = {
+  private formData: PasswordResetForm = {
     password: '',
     confirmPassword: ''
   };
 
   email: string;
+  // False only if error occurred upon verify token.
   private showForm = true;
 
+  // Verify if a token is valid.
+  // 3 possible states:
+  // 1. Token is valid and api returns the email associated with it.
+  // 2. Token is not found thus it is invalid, perform rediretion.
+  // 3. Other errors, and only show a flash message.
   async verifyToken(token: string): Promise<KeyDone | null> {
     try {
       const result = await accountService.verifyPwResetToken(token);
@@ -49,19 +45,13 @@ export class ResetPwBuilder {
       }
 
       this.showForm = false;
-
-      if (errResp.unprocessable) {
-        this.errors = errResp.controlErrs;
-        return null;
-      }
-
       this.flashMsg = errResp.message;
 
       return null;
     }
   }
 
-  async validate(data: PwResetData): Promise<boolean> {
+  async validate(data: PasswordResetForm): Promise<boolean> {
     try {
       const result = await passwordsSchema.validateAsync(data, joiOptions)
 
@@ -98,7 +88,9 @@ export class ResetPwBuilder {
   build(): FormPage {
     return {
       pageTitle: "重置密码",
-      heading: this.email ? `更改 ${this.email} 的密码` : "更改密码",
+      heading: this.email 
+        ? `重置 ${this.email} 的密码` 
+        : "更改密码",
       flash: this.flashMsg ? Flash.danger(this.flashMsg) : undefined,
       form: this.showForm ? new Form({
         disabled: false,
@@ -118,6 +110,7 @@ export class ResetPwBuilder {
               minlength: 8,
               maxlength: 64,
             }),
+            desc: "长度最少8位",
             error: this.errors.get("password"),
           }),
           new FormControl({

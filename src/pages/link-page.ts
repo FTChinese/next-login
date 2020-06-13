@@ -1,6 +1,6 @@
 import { Flash } from "../widget/flash";
 import { Form } from "../widget/form";
-import { EmailData, SignUpForm, LinkingFormData } from "../models/form-data";
+import { SignUpForm, LinkingFormData, EmailForm } from "../models/form-data";
 import { emailSchema, joiOptions, reduceJoiErrors, textLen, loginSchema, signUpSchema } from "./validator";
 import { ValidationError } from "@hapi/joi";
 import { accountService } from "../repository/account";
@@ -14,7 +14,7 @@ import { entranceMap, accountMap } from "../config/sitemap";
 import { HeaderApp } from "../models/header";
 import { localizeTier } from "../models/localization";
 import { Link } from "../widget/link";
-import { Credentials } from "../models/request-data";
+import { Credentials } from "../models/form-data";
 import { isMemberExpired } from "../models/membership";
 import { Card } from "../widget/card";
 
@@ -27,9 +27,9 @@ class LinkEmailPage {
 export class LinkEmailPageBuilder {
   flashMsg?: string;
   errors: Map<string, string> = new Map();
-  formData?: EmailData;
+  formData?: EmailForm;
 
-  async validate(data: EmailData): Promise<boolean> {
+  async validate(data: EmailForm): Promise<boolean> {
     try {
       const result = await emailSchema.validateAsync(data, joiOptions);
 
@@ -227,7 +227,8 @@ export class LinkLoginPageBuilder {
       alternativeActions: [
         {
           text: "忘记密码?",
-          href: entranceMap.passwordReset
+          href: entranceMap.passwordReset,
+          external: true,
         }
       ],
     };
@@ -382,25 +383,38 @@ interface MergePage {
   form?: Form; // Visible if accounts is allowed to link.
 }
 
+const errLinking: Record<string, string> = {
+  userId_missing_field: "提交的数据缺少userId字段",
+  account_link_taken: "两个欲绑定的账号必须尚未绑定任何其他账号",
+  membership_link_taken: "两个账号所属的会员数据可能已经绑定到其他账号下",
+  membership_both_valid: "两个关联账号均拥有尚未到期的会员，为保障您的利益，禁止绑定",
+};
+
 export class MergePageBuilder {
   flashMsg?: string;
   accounts?: LinkingAccounts;
   deny?: string;
+  private targetId?: string;
+  private errors: Map<string, string> = new Map();
 
   /**
    * 
-   * @param linked - Used to buil ui after accounts linked.
+   * @param showLinkResult - Used to buil ui after accounts linked.
    */
-  constructor(readonly linked: boolean = false) {}
+  constructor(
+    readonly currentAccount: Account,
+    readonly showLinkResult: boolean = false
+  ) {}
 
-  async fetchAccountToLink(account: Account, targetId: string): Promise<boolean> {
+  async fetchAccountToLink(targetId: string): Promise<boolean> {
+    this.targetId = targetId;
     try {
-      switch (account.loginMethod) {
+      switch (this.currentAccount.loginMethod) {
         case "email": {
           const wxAccount = await accountService.fetchWxAccount(targetId);
           
           this.accounts =  {
-            ftc: account,
+            ftc: this.currentAccount,
             wx: wxAccount,
           };
 
@@ -412,7 +426,7 @@ export class MergePageBuilder {
 
           this.accounts =  {
             ftc: ftcAccount,
-            wx: account,
+            wx: this.currentAccount,
           };
 
           return true;
@@ -435,7 +449,7 @@ export class MergePageBuilder {
     }
   }
 
-  validate(): boolean {
+  isMergeAllowed(): boolean {
     if (!this.accounts) {
       this.flashMsg = "合并账号数据缺失";
       return false
@@ -471,9 +485,26 @@ export class MergePageBuilder {
     return true;
   }
 
-  async merge(account: Account, formData: LinkingFormData): Promise<boolean> {
+  validate(form: LinkingFormData): boolean {
+    if (!form.targetId) {
+      return false;
+    }
+
+    const targetId = form.targetId.trim();
+    if (!targetId) {
+      return false;
+    }
+
+    this.targetId = targetId;
+    return true;
+  }
+
+  async merge(): Promise<boolean> {
+    if (!this.targetId) {
+      throw new Error("No target id to link provided!")
+    }
     try {
-      const ok = await accountService.link(account, formData.targetId);
+      const ok = await accountService.link(this.currentAccount, this.targetId);
 
       return ok;
     } catch (e) {
@@ -486,6 +517,12 @@ export class MergePageBuilder {
       // fieldd: memberships, code: none_expired
       // 404 Not Found if one of the account is not found from DB.
       const errResp = new APIError(e);
+      if (errResp.unprocessable) {
+        const key = `${errResp.unprocessable.field}.${errResp.unprocessable.code}`;
+
+        this.flashMsg = errLinking[key];
+        return false;
+      }
       this.flashMsg = errResp.message;
       return false;
     }
@@ -497,7 +534,7 @@ export class MergePageBuilder {
       heading: "",
     };
 
-    if (this.linked) {
+    if (this.showLinkResult) {
       p.done = {
         text: "返回",
         href: accountMap.base,
@@ -506,56 +543,53 @@ export class MergePageBuilder {
       return p;
     }
 
-    if (!this.accounts) {
-      throw new Error("linking accounts missing");
-    }
-
-    const { ftc, wx } = this.accounts;
-
     p.flash = this.flashMsg
       ? Flash.danger(this.flashMsg)
       : undefined;
 
-    p.cards = [
-      {
-        header: "FT中文网账号",
-        list: [
-          {
-            primary: "邮箱",
-            secondary: ftc.email,
-          },
-          {
-            primary: "会员类型",
-            secondary: ftc.membership.tier
-              ? localizeTier(ftc.membership.tier)
-              : "-",
-          },
-          {
-            primary: "会员期限",
-            secondary: ftc.membership.expireDate || "-",
-          },
-        ],
-      },
-      {
-        header: "微信账号",
-        list: [
-          {
-            primary: "昵称",
-            secondary: wx.wechat.nickname || "-",
-          },
-          {
-            primary: "会员类型",
-            secondary: wx.membership.tier
-              ? localizeTier(wx.membership.tier)
-              : "-",
-          },
-          {
-            primary: "会员期限",
-            secondary: wx.membership.expireDate || "-",
-          },
-        ],
-      }
-    ];
+    if (this.accounts) {
+      const { ftc, wx } = this.accounts;
+      p.cards = [
+        {
+          header: "FT中文网账号",
+          list: [
+            {
+              primary: "邮箱",
+              secondary: ftc.email,
+            },
+            {
+              primary: "会员类型",
+              secondary: ftc.membership.tier
+                ? localizeTier(ftc.membership.tier)
+                : "-",
+            },
+            {
+              primary: "会员期限",
+              secondary: ftc.membership.expireDate || "-",
+            },
+          ],
+        },
+        {
+          header: "微信账号",
+          list: [
+            {
+              primary: "昵称",
+              secondary: wx.wechat.nickname || "-",
+            },
+            {
+              primary: "会员类型",
+              secondary: wx.membership.tier
+                ? localizeTier(wx.membership.tier)
+                : "-",
+            },
+            {
+              primary: "会员期限",
+              secondary: wx.membership.expireDate || "-",
+            },
+          ],
+        }
+      ];
+    }
 
     if (this.deny) {
       p.denyMerge = this.deny
@@ -571,7 +605,7 @@ export class MergePageBuilder {
               id: "targetId",
               name: "targetId",
               type: "hidden",
-              value: "",
+              value: this.targetId,
             }),
           }),
         ],

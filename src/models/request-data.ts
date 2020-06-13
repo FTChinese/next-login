@@ -1,22 +1,8 @@
-import { EmailData } from "./form-data";
+import { AccountFields } from "./form-data";
 
-export interface RequestLocation {
-  sourceUrl: string;
-}
+// Send the site base url and email to API when requesting password reset letter.
+export type PwResetLetter = Pick<AccountFields, "email" | "sourceUrl">;
 
-export type PwResetLetter = EmailData & RequestLocation;
+export type PasswordResetter = Pick<AccountFields, "password" | "token">;
 
-export interface PasswordResetter {
-  token: string;
-  password: string;
-}
-
-export interface Credentials {
-  email: string;
-  password: string;
-}
-
-export interface Passwords {
-  oldPassword: string;
-  password: string;
-}
+export type PasswordUpdater = Pick<AccountFields, "oldPassword" | "password">;

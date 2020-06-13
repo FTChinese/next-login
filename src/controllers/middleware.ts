@@ -2,7 +2,7 @@ import debug from "debug";
 import { Middleware } from "koa";
 import { Session } from "koa-session";
 import { Paging } from "../models/pagination";
-import { entranceMap, androidMap } from "../config/sitemap";
+import { entranceMap, androidMap, accountMap, profileMap } from "../config/sitemap";
 import render from "../util/render";
 import { HeaderApp } from "../models/header";
 import { buildBaseLayoutPage, buildContentPage } from "../pages/layout-page";
@@ -44,7 +44,7 @@ function isLoggedIn(session?: Session): Boolean {
  * Please pay attention ctx.session.user and ctx.state.user are totally different types,
  * although they have the same object shape.
  */
-export function checkSession(redirect: boolean = true): Middleware {
+export function authGuard(): Middleware {
   return async (ctx, next) => {
     if (ctx.path == "/favicon.ico") return;
 
@@ -61,14 +61,24 @@ export function checkSession(redirect: boolean = true): Middleware {
 
     ctx.state.user = null;
 
-    if (!redirect) {
-      return await next();
-    }
-
     ctx.redirect(entranceMap.login);
   };
 }
 
+/**
+ * noAuthGuard ensures a path is only accessible when user is not logged int.
+ */
+export function noAuthGuard(): Middleware {
+  return async (ctx, next) => {
+    if (ctx.path == '/favicon.ico') return;
+
+    if (isLoggedIn(ctx.session)) {
+      return ctx.redirect(profileMap.base);
+    }
+
+    await next();
+  }
+}
 export function paging(perPage = 20): Middleware {
   return async (ctx, next) => {
     const currentPage: string | undefined = ctx.request.query.page;

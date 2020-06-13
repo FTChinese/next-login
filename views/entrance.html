@@ -1,0 +1,65 @@
+{% extends "layouts/base.html" %}
+
+{# This file is mostly used for situations when used has not logged in yet. #}
+
+{% block main %}
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6 col-xl-5">
+      <div class="mt-4">
+        <h4 class="text-center">{{ heading }}</h4>
+      
+        {% if flash %}{{ flash.render() | safe }}{% endif %}
+      
+        {# Show message after password reset letter is sent, or password is reset. #}
+      
+        {% if done %}
+          <div class="text-center">{{ done.message }}</div>
+          {% if done.link %}
+            <a class="btn btn-primary btn-block mt-5" href="{{ done.link.href }}">{{ done.link.text }}</a>
+          {% endif %}
+        {% endif %}
+      
+        {% if form %}
+          <form method="{{form.method}}" action="{{form.action}}">
+      
+            {% for control in form.controls %}
+              {{ control.render() | safe }}
+            {% endfor %}
+      
+            {{ form.submitBtn.render() | safe }}
+      
+          </form>
+        {% endif %}
+      
+        {# Shown on login page #}
+        {% if entranceNav %}
+          <div class="d-flex justify-content-between mt-3">
+            {% for link in entranceNav %}
+              <a href="{{ link.href }}">{{link.text}}</a>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {# Only show it on desktop browser since Wechat does not give us permission to perform login inside mobile browser on unauthorized sites. #}
+
+        {% if not wxLogin %}
+          <div class="text-center mt-5">
+            <a href="{{ wxLogin.href }}">
+              <img src="{{ wxLogin.src }}" alt="{{ wxLogin.alt }}">
+            </a>
+          </div>
+        {% endif %}
+
+        {# Shown on sign up page #}
+
+        {% if signUpLic %}
+          <p class="text-center"><small class="">注册即代表您同意FT中文网<a href="{{ signUpLic.href }}" target="_blank">{{ signUpLic.text }}</a></small></p>
+        {% endif %}
+
+        {% if loginLink %}
+          <p class="text-center">已有账号？<a href="{{ loginLink.href }}">{{ loginLink.text }}</a></p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

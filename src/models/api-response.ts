@@ -59,7 +59,7 @@ const invalids: Record<string, InvalidMsg> = {
     },
     userName: {
       already_exists: "该用户名已被使用",
-    }
+    },
 }
 
 // Define SuperAgent error response.

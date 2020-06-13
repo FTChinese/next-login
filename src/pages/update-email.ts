@@ -10,13 +10,13 @@ import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
 import { TextInputElement } from "../widget/text-input";
 import { Button } from "../widget/button";
-import { EmailData } from "../models/form-data";
+import { EmailForm } from "../models/form-data";
 
 export class UpdateEmailBuilder {
   flashMsg?: string;
   errors: Map<string, string> = new Map();
   account: Account;
-  formData?: EmailData;
+  formData?: EmailForm;
 
   constructor (account: Account) {
     this.account = account;
@@ -27,7 +27,7 @@ export class UpdateEmailBuilder {
         ? Object.assign(this.account, this.formData)
         : this.account;
   }
-  async validate(data: EmailData): Promise<boolean> {
+  async validate(data: EmailForm): Promise<boolean> {
     try {
       const result = await emailSchema.validateAsync(data, joiOptions);
 

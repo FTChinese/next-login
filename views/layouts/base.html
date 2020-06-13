@@ -25,10 +25,14 @@
   <header class="navbar o-header">
     <div class="container justify-content-between">
 
-      <a class="navbar-brand" href="http://www.ftchinese.com" target="__blank">FT中文网</a>
+      <div class="d-flex align-items-center">
+        <a class="navbar-brand" href="http://www.ftchinese.com" target="__blank">FT中文网</a>
 
-      {% block subBrand%}{% endblock %}
-
+        {% block subBrand%}
+          <a class="navbar-text" href="/">我的FT</a>
+        {% endblock %}
+      </div>
+      
       {% block headerDrawer%}{% endblock %}
     </div>
   </header>

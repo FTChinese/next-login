@@ -12,15 +12,13 @@ import { HeaderApp } from "../models/header";
 import { Account } from "../models/account";
 import { APIError, errMsg } from "../models/api-response";
 import { CheckboxInputElement } from "../widget/radio-input";
-import { Credentials } from "../models/request-data";
+import { Credentials } from "../models/form-data";
+import { FormPage } from "./base-page";
+import { Image, Link } from "../widget/link";
 
-export interface LoginPage {
-  flash?: Flash | undefined; // Only exists when API returns a non-validation error.
-  form: Form;
-  pwResetLink: string;
-  signUpLink: string;
-  wxLoginLink: string;
-  wxIcon: string;
+export type LoginPage = FormPage & {
+  entranceNav: Link[];
+  wxLogin?: Image;
 }
 
 export class CredentialBuilder {
@@ -75,7 +73,12 @@ export class CredentialBuilder {
     }
   }
 
-  build(): LoginPage {
+  /**
+   * 
+   * @param isMobile - determines whether the Wechat login button is visible.
+   * It is not visible on mobile devices.
+   */
+  build(isMobile: boolean): LoginPage {
 
     const controls = buildCredentialControls(this.formData, this.errors);
     controls.push(
@@ -94,6 +97,8 @@ export class CredentialBuilder {
     );
     
     return {
+      pageTitle: "登录",
+      heading: "登录FT中文网",
       flash: this.flashMsg ? Flash.danger(this.flashMsg) : undefined,
       form: new Form({
         disabled: false,
@@ -105,11 +110,21 @@ export class CredentialBuilder {
           .setName("登录")
           .setDisableWith("正在登录..."),
       }),
-      pwResetLink: entranceMap.passwordReset,
-      signUpLink: entranceMap.signup,
-      wxIcon:
-      "https://open.weixin.qq.com/zh_CN/htmledition/res/assets/res-design-download/icon32_wx_button.png",
-      wxLoginLink: entranceMap.wxLogin
+      entranceNav: [
+        {
+          text: "忘记密码?",
+          href: entranceMap.passwordReset,
+        },
+        {
+          text: "新建账号",
+          href: entranceMap.signup
+        }
+      ],
+      wxLogin: isMobile ? undefined : {
+        alt: "微信登录",
+        src: "https://open.weixin.qq.com/zh_CN/htmledition/res/assets/res-design-download/icon32_wx_button.png",
+        href: entranceMap.wxLogin
+      },
     }; 
   }
 }

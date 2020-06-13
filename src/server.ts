@@ -1,7 +1,5 @@
 import "reflect-metadata";
-import {
-    viper,
-} from "./config/viper";
+import { viper } from "./config/viper";
 
 const config = viper.getConfig();
 
@@ -15,10 +13,11 @@ import serve from "koa-static";
 const pkg = require("../package.json");
 
 import {
-    env,
-    checkSession,
-    handleError,
-    noCache,
+  env,
+  authGuard,
+  handleError,
+  noCache,
+  noAuthGuard,
 } from "./controllers/middleware";
 import login from "./controllers/login";
 import signUp from "./controllers/signup";
@@ -30,9 +29,7 @@ import subscription from "./controllers/subscription";
 import starred from "./controllers/starred";
 import android from "./controllers/android";
 
-import { 
-    entranceMap,
-} from "./config/sitemap";
+import { entranceMap, profileMap } from "./config/sitemap";
 
 const app = new Koa();
 const router = new Router();
@@ -41,62 +38,66 @@ app.proxy = true;
 app.keys = [config.koa_session.next_user];
 
 if (process.env.NODE_ENV != "production") {
-    app.use(
-        serve(
-            resolve(__dirname, "../node_modules")
-        )
-    );
-    app.use(
-        serve(
-            resolve(__dirname, "../build")
-        )
-    );
+  app.use(serve(resolve(__dirname, "../node_modules")));
+  app.use(serve(resolve(__dirname, "../build")));
 }
 
 app.use(env());
 app.use(logger());
-app.use(session({
-    key: "_ftc:next",
-    renew: true,
-}, app));
+app.use(
+  session(
+    {
+      key: "_ftc:next",
+      renew: true,
+    },
+    app
+  )
+);
 app.use(bodyParser());
 app.use(noCache());
 app.use(handleError());
 
-router.use("/login", checkSession(false), login);
-router.use("/signup", checkSession(false), signUp);
-router.get("/logout", checkSession(false), async (ctx, next) => {
-    ctx.session = null;
-    ctx.redirect(entranceMap.login);
-    return;
+router.get("/", authGuard, async function (ctx, next) {
+  ctx.redirect(profileMap.base);
 });
-router.use("/verify", checkSession(false), verification);
-router.use("/password-reset", checkSession(false), forgotPassword);
-router.use("/profile", checkSession(), profile);
-router.use("/account", checkSession(), account);
-router.use('/subscription', checkSession(), subscription);
-router.use("/starred", checkSession(), starred);
+router.use("/login", noAuthGuard(), login);
+router.use("/signup", noAuthGuard(), signUp);
+router.get("/logout", authGuard(), async function (ctx, next) {
+  ctx.session = null;
+  ctx.redirect(entranceMap.login);
+  return;
+});
+router.use("/verify", verification);
+router.use("/password-reset", forgotPassword);
+router.use("/profile", authGuard(), profile);
+router.use("/account", authGuard(), account);
+router.use("/subscription", authGuard(), subscription);
+router.use("/starred", authGuard(), starred);
 router.use("/android", android);
 
 app.use(router.routes());
 
-console.log(router.stack.map(layer => layer.path));
+console.log(router.stack.map((layer) => layer.path));
 
 async function bootUp(app: Koa, port: number, appName: string = pkg.name) {
-    console.log(`Booting ${appName}`);
+  console.log(`Booting ${appName}`);
 
-    const server = app.listen(port);
+  const server = app.listen(port);
 
-    server.on("error", err => {
-        console.error("Server error: %O", err);
-    });
+  server.on("error", (err) => {
+    console.error("Server error: %O", err);
+  });
 
-    server.on("listening", () => {
-        console.log("%s running on port %s. NODE_ENV: %s", appName, server.address(), process.env.NODE_ENV);
-    });
+  server.on("listening", () => {
+    console.log(
+      "%s running on port %s. NODE_ENV: %s",
+      appName,
+      server.address(),
+      process.env.NODE_ENV
+    );
+  });
 }
 
-bootUp(app, 4300)
-    .catch(err => {
-        console.error("Boot error: %O", err);
-    });
+bootUp(app, 4300).catch((err) => {
+  console.error("Boot error: %O", err);
+});

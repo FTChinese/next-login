@@ -6,9 +6,6 @@ import {
   Account, isAccountLinked, isAccountWxOnly,
 } from "../models/account";
 import {
-  HeaderApp,
-} from "../models/header";
-import {
   accountService,
 } from "../repository/account";
 import {
@@ -17,8 +14,8 @@ import {
 } from "../config/sitemap";
 import { KeyUpdated, getMsgUpdated } from "./redirection";
 import { Flash } from "../widget/flash";
-import { RequestLocation } from "../models/request-data";
 import { TableSection } from "../widget/list";
+import { AccountFields } from "../models/form-data";
 
 const log = debug("user:account-page");
 
@@ -54,9 +51,14 @@ export class AccountPageBuilder {
     }
   }
 
-  async requestVerification(source: RequestLocation, app: HeaderApp): Promise<boolean> {
+  async requestVerification(app: Pick<AccountFields, "sourceUrl" | "appHeaders">): Promise<boolean> {
     try {
-      const ok = await accountService.requestVerification(this.account.id, source, app);
+      const ok = await accountService.requestVerification(
+        this.account.id,
+        {
+          sourceUrl: app.sourceUrl,
+        },
+        app.appHeaders);
 
       return ok;
     } catch (e) {

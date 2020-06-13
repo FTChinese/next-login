@@ -11,7 +11,7 @@ router.get("/latest", async (ctx, next) => {
 
   Object.assign(ctx.state, uiData);
 
-  ctx.body = await render("android/latest.html", ctx.state);
+  ctx.body = await render("android.html", ctx.state);
 });
 
 router.get("/releases", paging(10), async (ctx, next) => {
@@ -21,7 +21,7 @@ router.get("/releases", paging(10), async (ctx, next) => {
 
   Object.assign(ctx.state, uiData);
 
-  ctx.body = await render("android/list.html", ctx.state);
+  ctx.body = await render("android.html", ctx.state);
 });
 
 export default router.routes();

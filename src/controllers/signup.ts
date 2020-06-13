@@ -9,7 +9,6 @@ import {
 import {
   profileMap
 } from "../config/sitemap";
-import { IOAuthSession, oauthServer } from "../models/ftc-oauth";
 import { SignUpBuilder } from "../pages/signup-page";
 import { SignUpForm } from "../models/form-data";
 
@@ -23,7 +22,7 @@ router.get("/", async (ctx, next) => {
 
   Object.assign(ctx.state, uiData);
 
-  ctx.body = await render("signup.html", ctx.state);
+  ctx.body = await render("entrance.html", ctx.state);
 });
 
 /**
@@ -56,24 +55,12 @@ router.post("/", collectAppHeaders(), async (ctx, next) => {
   }
 
   // @ts-ignore
-  ctx.session.user = success;
+  ctx.session.user = account;
 
-  // @ts-ignore
-  if (ctx.session.oauth) {
-    // @ts-ignore
-    const oauthSession: IOAuthSession = ctx.session.oauth;
-
-    ctx.redirect(oauthServer.buildAuthorizeUrl(oauthSession));
-
-    // @ts-ignore
-    delete ctx.session.oauth;
-
-    return;
-  }
   return ctx.redirect(profileMap.base);
 
 }, async (ctx, next) => {
-  ctx.body = await render('signup.html', ctx.state);
+  ctx.body = await render('entrance.html', ctx.state);
 });
 
 export default router.routes();

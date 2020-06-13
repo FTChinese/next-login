@@ -124,7 +124,7 @@ export class ProfilePageBuilder {
         cells: [
           {
             left: "地址",
-            right: `${this.profile?.address.country || ""} ${this.profile?.address.province || ""} ${this.profile?.address.city} ${this.profile?.address.district}`,
+            right: `${this.profile?.address.country || ""} ${this.profile?.address.province || ""} ${this.profile?.address.city || ""} ${this.profile?.address.district || ""}`,
           },
           {
             left: "",
