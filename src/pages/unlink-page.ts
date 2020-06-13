@@ -18,7 +18,7 @@ import { Card } from "../widget/card";
 interface UnlinkPage {
   flash?: Flash;
   pageTitle: string;
-  done?: Link;
+  done?: Link; // show success message. Excludes card, formHeader and form fields.
   card?: Card;
   formHeader? : string;
   form?: Form;
@@ -44,20 +44,28 @@ export class UnlinkPageBuilder {
     }
   }
 
+  // Validate anchor for membership.
   validate(formData: UnlinkFormData): boolean {
+    // If user has no membership, no anchor to keep it.
     if (!this.hasMember) {
       this.anchor = undefined;
-      return true;
-    }
-
-    if (this.isMemberEmailOnly) {
-      this.anchor = "ftc";
       return true;
     }
 
     if (!formData.anchor) {
       this.errors.set("anchor", "请选择会员信息保留在哪个账号下")
       return false;
+    }
+
+    // If membership should only be kept on email account.
+    if (this.isMemberEmailOnly) {
+      if (formData.anchor !== "ftc") {
+        this.errors.set("anchor", "通过苹果内购、Stripe或B2B建立的会员只能保留在邮箱账号")
+        return false;
+      }
+
+      this.anchor = "ftc";
+      return true;
     }
 
     this.anchor = formData.anchor;
@@ -121,6 +129,7 @@ export class UnlinkPageBuilder {
       disabled: false,
       method: "post",
       action: "",
+      // Only show form controls if use has membership.
       controls: this.hasMember ? [
         new FormControl({
           label: {
@@ -143,7 +152,7 @@ export class UnlinkPageBuilder {
           },
           controlType: ControlType.Radio,
           field: new RadioInputElement({
-            disabled: this.isMemberEmailOnly,
+            disabled: this.isMemberEmailOnly, // For payment method apple, stripe, b2b the membership is always kept on email account.
             id: "anchorWechat",
             name: "anchor",
             value: "wechat",
