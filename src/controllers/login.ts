@@ -1,6 +1,5 @@
 import debug from "debug";
 import Router from "koa-router";
-import MobileDetect from "mobile-detect";
 import render from "../util/render";
 import {
   viper,
