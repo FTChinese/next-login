@@ -13,11 +13,13 @@ import serve from "koa-static";
 const pkg = require("../package.json");
 
 import {
-  env,
+  baseLayout,
+  contentLayout,
+  androidLayout,
   authGuard,
+  noAuthGuard,
   handleError,
   noCache,
-  noAuthGuard,
 } from "./controllers/middleware";
 import login from "./controllers/login";
 import signUp from "./controllers/signup";
@@ -42,7 +44,6 @@ if (process.env.NODE_ENV != "production") {
   app.use(serve(resolve(__dirname, "../build")));
 }
 
-app.use(env());
 app.use(logger());
 app.use(
   session(
@@ -57,23 +58,23 @@ app.use(bodyParser());
 app.use(noCache());
 app.use(handleError());
 
-router.get("/", authGuard, async function (ctx, next) {
+router.get("/", authGuard(), contentLayout(), async function (ctx, next) {
   ctx.redirect(profileMap.base);
 });
-router.use("/login", noAuthGuard(), login);
-router.use("/signup", noAuthGuard(), signUp);
-router.get("/logout", authGuard(), async function (ctx, next) {
+router.use("/login", noAuthGuard(), baseLayout(), login);
+router.use("/signup", noAuthGuard(), baseLayout(), signUp);
+router.get("/logout", authGuard(), contentLayout(), async function (ctx, next) {
   ctx.session = null;
   ctx.redirect(entranceMap.login);
   return;
 });
-router.use("/verify", verification);
-router.use("/password-reset", forgotPassword);
-router.use("/profile", authGuard(), profile);
-router.use("/account", authGuard(), account);
-router.use("/subscription", authGuard(), subscription);
-router.use("/starred", authGuard(), starred);
-router.use("/android", android);
+router.use("/verify", baseLayout(), verification);
+router.use("/password-reset", baseLayout(), forgotPassword);
+router.use("/profile", authGuard(), contentLayout(), profile);
+router.use("/account", authGuard(), contentLayout(), account);
+router.use("/subscription", authGuard(), contentLayout(), subscription);
+router.use("/starred", authGuard(), contentLayout(), starred);
+router.use("/android", androidLayout(), android);
 
 app.use(router.routes());
 
