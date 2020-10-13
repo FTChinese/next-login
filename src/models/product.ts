@@ -1,6 +1,6 @@
 import { formatMoney } from "../util/formatter";
 import { Tier, Cycle } from "./enums";
-import { localizeCurrency, localizeCycle, localizeTier, tiersCN } from "./localization";
+import { localizeCurrency, localizeCycle, localizeTier } from "./localization";
 import { DateTime } from "luxon";
 import { subsMap } from "../config/sitemap";
 

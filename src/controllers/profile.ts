@@ -4,7 +4,6 @@ import render from "../util/render";
 import {
   Account,
   Address,
-  isAccountWxOnly,
 } from "../models/account";
 import { ProfilePageBuilder } from "../pages/profile-list";
 import { profileMap } from "../config/sitemap";

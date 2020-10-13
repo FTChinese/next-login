@@ -32,7 +32,7 @@ export function contentLayout(): Middleware {
   return async (ctx, next) => {
     Object.assign(
       ctx.state, 
-      LayoutBuilder.content(ctx.state.user, ctx.path),build(),
+      LayoutBuilder.content(ctx.state.user, ctx.path).build(),
     );
 
     await next();
