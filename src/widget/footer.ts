@@ -1,28 +1,11 @@
-import { Account, isAccountFtcOnly } from "../models/account";
-import { accountMap, profileMap, subsMap, starredMap, entranceMap } from "../config/sitemap";
-import { Link } from "../widget/link";
-import { viper } from "../config/viper";
-const pkg = require("../../package.json");
+import { Link } from "./link";
 
-interface FooterSection {
+export interface FooterSection {
   title: string;
   items: Link[];
 }
 
-interface BaseLayoutPage {
-  iconUrl: string;
-  pageTitle: string;
-  env: {
-    isProd: boolean;
-    year: number;
-    footer: FooterSection[];
-    version: string;
-    bsVersion: string;
-    bsNativeVersion: string
-  }
-}
-
-const footer: FooterSection[] = [
+export const footer: FooterSection[] = [
   {
     "title": "支持",
     "items": [
@@ -144,74 +127,3 @@ const footer: FooterSection[] = [
     ]
   }
 ];
-
-/**
- * The data is added in env() middleware.
- */
-export function buildBaseLayoutPage(): BaseLayoutPage {
-  return {
-    iconUrl: "http://interactive.ftchinese.com/favicons",
-    pageTitle: "我的FT",
-    env: {
-      isProd: viper.isProduction,
-      year: new Date().getFullYear(),
-      footer,
-      version: pkg.version,
-      bsVersion: pkg.devDependencies.bootstrap.replace("^", ""),
-      bsNativeVersion: pkg.devDependencies["bootstrap.native"].replace("^", "")
-    },
-  };
-}
-
-type SidebarItem = Link & {
-  active: boolean
-}
-
-const sidebarItems: SidebarItem[] = [
-  {
-    href: profileMap.base,
-    text: "我的资料",
-    active: false,
-  },
-  {
-    href: accountMap.base,
-    text: "账号安全",
-    active: false,
-  },
-  {
-    href: subsMap.base,
-    text: "会员",
-    active: false,
-  },
-  {
-    href: starredMap.base,
-    text: "收藏的文章",
-    active: false,
-  },
-  {
-    href: entranceMap.logout,
-    text: "退出",
-    active: false,
-  },
-];
-
-/**
- * @description Data used to render content.html
- */
-interface ContentLayoutPage {
-  requestVerificationAction?: string;
-  sideNav: SidebarItem[];
-}
-
-/** The data is added to global context.state in checkSession() middleware. It will be added only when user session exists. */
-export function buildContentPage(account: Account, currentPath: string): ContentLayoutPage {
-  return {
-    requestVerificationAction: isAccountFtcOnly(account) && !account.isVerified
-      ? accountMap.requestVerification
-      : undefined,
-    sideNav: sidebarItems.map(item => {
-      item.active = currentPath.startsWith(item.href);
-      return item; 
-    }),
-  };
-}

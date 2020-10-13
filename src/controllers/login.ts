@@ -162,6 +162,7 @@ router.get("/wechat/test", collectAppHeaders(), async (ctx, next) => {
 
   console.log(account);
 
+  // @ts-ignore
   ctx.session.user = account;
 
   ctx.redirect(profileMap.base);

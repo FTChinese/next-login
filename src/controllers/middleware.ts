@@ -1,27 +1,12 @@
-import debug from "debug";
 import { Middleware } from "koa";
 import { Session } from "koa-session";
 import { Paging } from "../models/pagination";
-import { entranceMap, androidMap, accountMap, profileMap } from "../config/sitemap";
+import { entranceMap, profileMap } from "../config/sitemap";
 import render from "../util/render";
 import { HeaderApp } from "../models/header";
-import { buildBaseLayoutPage, buildContentPage } from "../pages/layout-page";
+import { LayoutBuilder } from "../pages/layout";
+import { build } from "@hapi/joi";
 const pkg = require("../../package.json");
-
-const log = debug("user:middleware");
-
-export function env(): Middleware {
-  return async (ctx, next) => {
-    Object.assign(ctx.state, buildBaseLayoutPage());
-
-    ctx.state.globalUrl = {
-      androidHome: androidMap.latest,
-      login: entranceMap.login,
-    };
-
-    await next();
-  };
-}
 
 function isLoggedIn(session?: Session): Boolean {
   if (session == null) {
@@ -33,6 +18,36 @@ function isLoggedIn(session?: Session): Boolean {
   }
 
   return true;
+}
+
+export function baseLayout(): Middleware {
+  return async (ctx, next) => {
+    Object.assign(ctx.state, LayoutBuilder.base().build());
+
+    await next();
+  };
+}
+
+export function contentLayout(): Middleware {
+  return async (ctx, next) => {
+    Object.assign(
+      ctx.state, 
+      LayoutBuilder.content(ctx.state.user, ctx.path),build(),
+    );
+
+    await next();
+  };
+}
+
+export function androidLayout(): Middleware {
+  return async (ctx, next) => {
+    Object.assign(
+      ctx.state, 
+      LayoutBuilder.android().build(),
+    );
+
+    await next();
+  }
 }
 
 /**
@@ -48,30 +63,30 @@ export function authGuard(): Middleware {
   return async (ctx, next) => {
     if (ctx.path == "/favicon.ico") return;
 
+    // @ts-ignore
     if (isLoggedIn(ctx.session)) {
+      // @ts-ignore
       ctx.state.user = ctx.session.user;
-
-      Object.assign(
-        ctx.state, 
-        buildContentPage(ctx.state.user, ctx.path)
-      );
 
       return await next();
     }
 
     ctx.state.user = null;
 
+    console.log('not logged in. redirect');
+
     ctx.redirect(entranceMap.login);
   };
 }
 
 /**
- * noAuthGuard ensures a path is only accessible when user is not logged int.
+ * noAuthGuard ensures a path is only accessible when user is not logged in.
  */
 export function noAuthGuard(): Middleware {
   return async (ctx, next) => {
     if (ctx.path == '/favicon.ico') return;
 
+    // @ts-ignore
     if (isLoggedIn(ctx.session)) {
       return ctx.redirect(profileMap.base);
     }

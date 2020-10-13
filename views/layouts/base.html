@@ -12,13 +12,13 @@
 
   <title>{{ pageTitle }} - FT中文网</title>
   
-  {% if env.isProd %}
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/{{env.bsVersion}}/css/bootstrap.min.css" rel="stylesheet">
-    {% include "assets/style.html" %}
-  {% else %}
-    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.css">
-    <link rel="stylesheet" href="/style/main.css">
-  {% endif %}
+  {% for link in styles.links %}
+    <link href="{{link}}" rel="stylesheet">
+  {% endfor %}
+
+  {% for incl in styles.includes %}
+    {% include incl %}
+  {% endfor %}
   
 </head>
 <body>
@@ -28,9 +28,8 @@
       <div class="d-flex align-items-center">
         <a class="navbar-brand" href="http://www.ftchinese.com" target="__blank">FT中文网</a>
 
-        {% block subBrand%}
-          <a class="navbar-text" href="/">我的FT</a>
-        {% endblock %}
+        <a class="navbar-text" href="{{subBrand.href}}">{{subBrand.text}}</a>
+
       </div>
       
       {% block headerDrawer%}{% endblock %}
@@ -66,23 +65,22 @@
 
       <div class="o-footer__copyright">
         <small>
-          © FT中文网 {{env.year}}.
+          {{env.copyright}}.
           <abbr title="Financial Times" aria-label="F T">FT</abbr> and ‘Financial Times’ are trademarks of The Financial Times Ltd.
         </small>
       </div>
       <div class="text-muted pb-3">
-        <small>测试版 v{{env.version}}</small>
+        <small>v{{env.appVersion}}</small>
       </div>
     </div>
   </footer>
   
-  {% if env.isProd %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/{{env.bsNativeVersion}}/bootstrap-native-v4.min.js"></script>
-    {% include "assets/script.html" %}
+  {% for url in scripts.links %}
+    <script src="{{url}}"></script>
+  {% endfor %}
 
-  {% else %}
-    <script src="/bootstrap.native/dist/bootstrap-native.js"></script>
-    <script src="/script/main.js"></script>
-  {% endif %}
+  {% for incl in scripts.includes %}
+    {% include incl %}
+  {% endfor %}
 </body>
 </html>
