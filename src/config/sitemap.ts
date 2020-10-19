@@ -1,3 +1,5 @@
+import { Cycle, Tier } from "../models/enums";
+
 const prefix = "";
 
 export const entranceMap = {
@@ -30,17 +32,26 @@ export const accountMap = {
     unlinkWx:       `${prefix}/account/unlink`,
 };
 
-export const subsMap = {
-    base:           `${prefix}/subscription`,
-    test:           `${prefix}/subscription/test`,
-    renewal:        `${prefix}/subscription/renew`,
-    orders:         `${prefix}/subscription/orders`,
-    pay:            `${prefix}/subscription/pay`,
-    alipayDone:     `${prefix}/subscription/done/ali`,
-    wxpayDone:      `${prefix}/subscription/done/wx`,
-    redeem:         `${prefix}/subscription/redeem`,
-    aliReturnUrl:   `http://next.ftchinese.com/user/subscription/done/ali`,
-};
+class SubsMap {
+  readonly base =           `${prefix}/subscription`;
+  readonly test =           `${this.base}/test`;
+  readonly renewal =        `${this.base}/renew`;
+  readonly orders =         `${this.base}/orders`;
+  readonly pay =            `${this.base}/pay`;
+  readonly alipayDone =     `${this.base}/done/ali`;
+  readonly wxpayDone =      `${this.base}/done/wx`;
+  readonly redeem =         `${this.base}/redeem`;
+
+  checkoutUrl(tier: Tier, cycle: Cycle): string {
+    return `${this.pay}/${tier}/${cycle}`;
+  }
+
+  aliReturnUrl(origin: string): string {
+    return `${origin}${this.alipayDone}`
+  }
+}
+
+export const subsMap = new SubsMap();
 
 export const starredMap = {
     base: `${prefix}/starred`,
