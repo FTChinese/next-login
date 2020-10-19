@@ -5,7 +5,6 @@ import { entranceMap, profileMap } from "../config/sitemap";
 import render from "../util/render";
 import { HeaderApp } from "../models/header";
 import { LayoutBuilder } from "../pages/layout";
-import { build } from "@hapi/joi";
 const pkg = require("../../package.json");
 
 function isLoggedIn(session?: Session): Boolean {

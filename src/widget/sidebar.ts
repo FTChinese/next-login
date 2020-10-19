@@ -1,4 +1,5 @@
 import { profileMap, accountMap, subsMap, starredMap, entranceMap } from "../config/sitemap";
+import { Account, getReaderName } from "../models/account";
 import { Link } from "./link";
 
 export type SidebarItem = Link & {
@@ -6,11 +7,6 @@ export type SidebarItem = Link & {
 }
 
 export const sidebarItems: SidebarItem[] = [
-  {
-    href: profileMap.base,
-    text: "我的资料",
-    active: false,
-  },
   {
     href: accountMap.base,
     text: "账号安全",
@@ -33,9 +29,15 @@ export const sidebarItems: SidebarItem[] = [
   },
 ];
 
-export function buildSidebar(currentPath: string): SidebarItem[] {
-  return sidebarItems.map(item => {
-    item.active = currentPath.startsWith(item.href);
-    return item; 
-  })
+export function buildSidebar(currentPath: string, a?: Account): SidebarItem[] {
+  return [{
+    href: profileMap.base,
+    text: a ? getReaderName(a) : '我的资料',
+    active: false,
+  }]
+    .concat(sidebarItems)
+    .map(item => {
+      item.active = currentPath.startsWith(item.href);
+      return item; 
+    });
 }

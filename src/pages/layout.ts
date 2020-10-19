@@ -79,6 +79,10 @@ export class LayoutBuilder {
     return this;
   }
 
+  /**
+   * @description Used to decide which navigation item should be highlighted. Use only after logged-in.
+   * @param p - current request path.
+   */
   setPath(p: string): LayoutBuilder {
     this.reqPath = p;
     return this;
@@ -116,7 +120,7 @@ export class LayoutBuilder {
         ? accountMap.requestVerification
         : undefined,
       sideNav: this.reqPath
-        ? buildSidebar(this.reqPath)
+        ? buildSidebar(this.reqPath, this.account)
         : [],
     }
   }
