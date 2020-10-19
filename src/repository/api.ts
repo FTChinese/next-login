@@ -49,17 +49,11 @@ class SubAPI {
     return sandbox ? this.sandboxBaseUrl : this.baseUrl;
   }
 
-  aliPayDesktop(tier: Tier, cycle: Cycle, sandbox: boolean): string {
-    return `${this.getBaseUrl(sandbox)}/alipay/desktop/${tier}/${cycle}`;
-  }
-
-  aliPayMobile(tier: Tier, cycle: Cycle, sandbox: boolean): string {
-    return `${this.getBaseUrl(sandbox)}/alipay/mobile/${tier}/${cycle}`;
-  }
-
-  wxPayDesktop(tier: Tier, cycle: Cycle, sandbox: boolean): string {
-    return `${this.getBaseUrl(sandbox)}/wxpay/desktop/${tier}/${cycle}`;
-  }
+  readonly paywall = `${this.baseUrl}/paywall`;
+  readonly pricingPlans = `${this.paywall}/pricing`;
+  readonly aliPayDesktop = `${this.baseUrl}/alipay/desktop`;
+  readonly aliPayMobile = `${this.baseUrl}/alipay/mobile`;
+  readonly wxPayDesktop = `${this.baseUrl}/wxpay/desktop`;
 
   wxQueryOrder(orderId: string): string {
     return `${this.baseUrl}/wxpay/query/${orderId}`;
