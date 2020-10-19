@@ -18,13 +18,10 @@ import {
 import {
   IAliCallback, AliOrder, WxOrder,
 } from "../models/order";
-import { toBoolean } from "../util/converter";
 import { MembershipPageBuilder } from "../pages/membership-page";
 import { PaymentPageBuilder } from "../pages/payment-page";
 import { AlipayResultBuilder, WxpayResultBuilder } from "../pages/pay-reseult-page";
-import { findPlan } from "../models/product";
-import { subsMap } from "../config/sitemap";
-import { isMobile } from "../util/detector";
+import { paywallCache } from "../repository/cache";
 
 const log = debug("user:subscription");
 
@@ -34,7 +31,7 @@ const router = new Router();
  * @description Show membership
  * /user/subscription
  */
-router.get("/", async (ctx, next) => {
+router.get("/", async (ctx) => {
   const account: Account = ctx.state.user;
 
   const builder = new MembershipPageBuilder(account);
@@ -51,30 +48,32 @@ router.get("/", async (ctx, next) => {
   ctx.body = await render("subscription/membership.html", ctx.state);
 });
 
-router.get("/orders", async (ctx, next) => {
-  const account: Account = ctx.state.user;
+router.get("/orders", async (ctx) => {
 
   ctx.body = await render("subscription/orders.html", ctx.state)
 });
 
 /**
  * @description Show payment methods
- * URL query: `?sandbox=true|false`
  */
 router.get("/pay/:tier/:cycle", async (ctx, next) => {
   const tier: Tier = ctx.params.tier;
   const cycle: Cycle = ctx.params.cycle;
   const account: Account = ctx.state.user;
 
-  const plan = findPlan(tier, cycle);
-  const sandbox: boolean = toBoolean(ctx.request.query.sandbox);
+  log('Cached plans: %O', paywallCache.inspect());
 
-  if (!plan) {
-    ctx.status = 404;
-    return;
+  const builder = new PaymentPageBuilder(account);
+
+  const ok = await builder.loadPlan(tier, cycle);
+  if (!ok) {
+    const uiData = await builder.build();
+    Object.assign(
+      ctx.state,
+      uiData,
+    );
+    return await next();
   }
-
-  const builder = new PaymentPageBuilder(plan, account, sandbox);
 
   const uiData = await builder.build();
 
@@ -83,29 +82,30 @@ router.get("/pay/:tier/:cycle", async (ctx, next) => {
     uiData,
   );
 
+  await next();
+}, async (ctx) => {
   ctx.body = await render("subscription/pay.html", ctx.state);
 });
 
 /**
  * @description Start payment process.
  * `ctx.session.order: OrderBase` is added for verification after callback.
- * 
- * URL query: `?sandbox=true|false`
  */
 router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
   const tier: Tier = ctx.params.tier;
   const cycle: Cycle = ctx.params.cycle;
   const account: Account = ctx.state.user;
-
-  const plan = findPlan(tier, cycle);
-  if (!plan) {
-    ctx.status = 404;
-    return;
-  }
-
-  const sandbox: boolean = toBoolean(ctx.request.query.sandbox);
   
-  const builder = new PaymentPageBuilder(plan, account, sandbox);
+  const builder = new PaymentPageBuilder(account);
+  const ok = await builder.loadPlan(tier, cycle);
+  if (!ok) {
+    const uiData = await builder.build();
+    Object.assign(
+      ctx.state,
+      uiData,
+    );
+    return await next();
+  }
 
   const payMethod: PaymentMethod | undefined = ctx.request.body.payMethod;
 
@@ -118,16 +118,13 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
 
   switch (payMethod) {
     case 'alipay': {
-      const callbackUrl = ctx.origin + subsMap.alipayDone;
-
-      log("Alipay return url: %s", callbackUrl);
 
       const aliOrder = await builder.alipay({
         appHeaders: ctx.state.appHeaders,
-        aliCallbackUrl: callbackUrl,
-        isMobile: isMobile(ctx.header["user-agent"])
+        originUrl: ctx.origin,
       });
 
+      // Order creation error.
       if (!aliOrder) {
         const uiData = await builder.build();
         Object.assign(ctx.state, uiData);
@@ -140,7 +137,8 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
       ctx.session.order = aliOrder;
       return ctx.redirect(aliOrder.redirectUrl);
     }
-      
+    
+    // For wechat redisplay this page with an qr code.
     case 'wechat': {
       const ok = await builder.wxpay(ctx.state.appHeaders);
 
@@ -157,10 +155,10 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
     }
      
     default:
-      throw new Error('Unkonw payment method');
+      throw new Error('Unknown payment method');
   }
   
-}, async (ctx, next) => {
+}, async (ctx) => {
   ctx.body = await render("subscription/pay.html", ctx.state);
 });
 
@@ -216,7 +214,7 @@ router.get("/done/ali", async (ctx, next) => {
   }
 
   return await next();
-}, async (ctx, next) => {
+}, async (ctx) => {
   ctx.body = await render("subscription/pay-done.html", ctx.state);
 });
 
