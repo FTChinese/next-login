@@ -35,7 +35,11 @@ export interface Account {
   membership: Membership;
 }
 
-export function accountVierified(account: Account): Account {
+export function isTestAccount(a: Account): boolean {
+  return a.email.endsWith('.test@ftchinese.com');
+}
+
+export function accountVerified(account: Account): Account {
   account.isVerified = true;
   return account;
 }
