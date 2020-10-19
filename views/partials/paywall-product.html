@@ -1,0 +1,24 @@
+<div class="card">
+  <div class="card-body">
+    <h3 class="card-title text-center mb-3 pb-3">{{product.heading}}</h3>
+    <ul>
+      {% for para in product.description | split %}
+        <li>{{ para }}</li>
+      {% endfor %}
+    </ul>
+    
+    {% if product.smallPrint %}
+      <small>{{product.smallPrint}}</small>
+    {% endif %}
+  </div>
+
+  <div class="card-footer">
+
+    {% for price in product.prices %}
+    <div class="text-center mb-2">
+        {% include "partials/price-btn.html" %}
+    </div>
+    {% endfor %}
+
+  </div><!-- End card footer-->
+</div><!-- End product card-->

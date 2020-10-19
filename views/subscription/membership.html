@@ -2,70 +2,36 @@
 
 {% block content %}
   {% if member %}
-
-    {% if member.renewalReminder %}
-      {{ member.renewalReminder.render() | safe }}
-    {% endif %}
-
-    <div class="row mb-3 justify-content-center">
-
-      <div class="col-md-6">
-        {% set card = member.card %}
-        {% include "partials/card.html" %}
-
-        {% if member.renewalUrl %}
-          <div class="mt-3 text-right">
-            <a href="{{ member.renewalUrl }}" class="btn btn-primary">续订</a>
-          </div>
-        {% endif %}
-
-        {% if member.ordersLink %}
-          <div class="mt-3 text-right">
-            <a href="{{ data.ordersLink }}">订单历史</a>
-          </div>
-        {% endif %}
-      </div>
-
-    </div>
+    {% include "partials/member-status.html" %}
   {% else %}
+    <h2 class="text-center mb-3">订阅FT中文网会员</h2>
+  {% endif %}
 
-    <div class="d-flex justify-content-center mb-3">
-      <h2>订阅FT中文网会员</h2>
-      {# <a class="btn btn-link" href="{{ sitemap.redeem }}">有礼品卡？</a>#}
-    </div>
-
+  {% if paywall.promo %}
+    {% set promo = paywall.promo %}
+    {% include "partials/paywall-promo.html" %}
   {% endif %}
 
   <div class="row justify-content-around o-card-group">
-    {% for product in products %}
+    {% for product in paywall.products %}
       <div class="col-lg-6 mb-3">
-        <div class="card">
-          <div class="card-body">
-            <h3 class="card-title text-center mb-3 pb-3">{{product.heading}}</h3>
-            <ul>
-              {% for para in product.description %}
-                <li>{{ para }}</li>
-              {% endfor %}
-            </ul>
-            
-            {% if product.smallPrint %}
-              <small>{{product.smallPrint}}</small>
-            {% endif %}
-          </div>
-
-          <div class="card-footer">
-
-            {% for elem in product.priceElems %}
-            <div class="text-center mb-2">
-                {{ elem.render() | safe }}
-            </div>
-            {% endfor %}
-
-          </div><!-- End card footer-->
-        </div><!-- End product card-->
+        {% include "partials/paywall-product.html" %}
       </div>
     {% endfor %}
   </div>
+
+  {% if paywall.promo and paywall.promo.terms %}
+  <div class="text-muted">
+    <h6>活动条款</h6>
+    <ul>
+      {% for row in paywall.promo.terms | split %}
+        <li>{{row}}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {# <a class="btn btn-link" href="{{ sitemap.redeem }}">礼品卡兑换</a>#}
 
   <p class="pt-5">如果订阅时遇到问题，可以致函 <a href="{{ serviceMail }}">FT客服邮箱</a></p>
 {% endblock %}

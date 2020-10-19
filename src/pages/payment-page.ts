@@ -4,17 +4,17 @@ import { Button } from "../widget/button";
 import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
 import { RadioInputElement } from "../widget/radio-input";
-import { PaymentMethod } from "../models/enums";
+import { Cycle, PaymentMethod, Tier } from "../models/enums";
 import { AliOrder, WxOrder } from "../models/order";
-import { subRepo, AlipayConfig } from "../repository/subscription";
-import { Account, collectAccountIDs } from "../models/account";
+import { subsService, AlipayConfig } from "../repository/subscription";
+import { Account, collectAccountIDs, isTestAccount } from "../models/account";
 import { HeaderApp, HeaderReaderId } from "../models/header";
 import { APIError } from "../models/api-response";
 import { toDataURL } from "qrcode";
 import { subsMap } from "../config/sitemap";
-import { Card } from "../widget/card";
-import { subsPlanName, listPrice, netPrice, Plan } from "../models/product";
 import { isMember } from "../models/membership";
+import { Cart, newCart, Plan} from "../models/paywall";
+import { isMobile } from "../util/detector";
 
 interface UIQR {
   dataUrl: string;
@@ -26,7 +26,7 @@ interface PaymentPage {
   pageTitle: string,
   flash?: Flash;
   sandbox: boolean;
-  card: Card;
+  cart: Cart;
   form?: Form;
   qr?: UIQR; // Use to show Wechat payment QR Code if user selected wxpay.
 }
@@ -36,13 +36,30 @@ export class PaymentPageBuilder {
   payMethod?: PaymentMethod;
   wxOrder?: WxOrder;
   idHeaders: HeaderReaderId;
-
+  private isTest = false;
+  private plan: Plan;
+  
   constructor(
-    readonly plan: Plan,
     readonly account: Account,
-    readonly sandbox: boolean
   ) {
     this.idHeaders = collectAccountIDs(account);
+    this.isTest = isTestAccount(this.account);
+  }
+
+  async loadPlan(tier: Tier, cycle: Cycle): Promise<boolean> {
+    try {
+      const plan = await subsService.pricingPlan(tier, cycle);
+      if (plan) {
+        this.plan = plan;
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      const errResp = new APIError(e);
+      this.flashMsg = errResp.message;
+      return false;
+    }
   }
 
   validate(payMethod?: PaymentMethod): boolean {
@@ -63,27 +80,14 @@ export class PaymentPageBuilder {
   }
 
   async build(): Promise<PaymentPage> {
+
     const p: PaymentPage = {
       pageTitle: "订阅支付",
       flash: this.flashMsg 
         ? Flash.danger(this.flashMsg)
         : undefined,
-      sandbox: this.sandbox,
-      card: {
-        header: isMember(this.account.membership)
-          ? "续订FT会员"
-          : "订阅FT会员",
-        list: [
-          {
-            primary: "会员类型:",
-            secondary: subsPlanName(this.plan.tier, this.plan.cycle)
-          },
-          {
-            primary: "支付金额:",
-            secondary: netPrice(this.plan) || listPrice(this.plan)
-          }
-        ]
-      }
+      sandbox: this.isTest,
+      cart: newCart(this.plan, isMember(this.account.membership))
     };
 
     // If wxOrder does not exist, show the 
@@ -93,7 +97,7 @@ export class PaymentPageBuilder {
       p.form = new Form({
         disabled: false,
         method: "post",
-        action: this.sandbox ? "?sandbox=true" : "",
+        action: "",
         controls: [
           new FormControl({
             label: {
@@ -127,7 +131,7 @@ export class PaymentPageBuilder {
           }),
         ],
         submitBtn: Button.primary()
-          .setName("支付")
+          .setName(`支付 ${p.cart.payable}`)
           .setBlock()
           .setDisableWith("提交..."),
       });
@@ -143,24 +147,25 @@ export class PaymentPageBuilder {
     return p;
   }
 
-  async alipay(config: Pick<AlipayConfig, "appHeaders" | "aliCallbackUrl"> & { isMobile: boolean }): Promise<AliOrder | null> {
+  async alipay(config: Pick<AlipayConfig, "appHeaders" | "originUrl">): Promise<AliOrder | null> {
     
+    const mobile = isMobile(config.appHeaders["X-User-Agent"]);
+
     try {
-      if (config.isMobile) {
-        return await subRepo.aliMobilePay(this.plan, {
+      if (mobile) {
+        return await subsService.aliMobilePay(this.plan, {
+          ...config,
           idHeaders: this.idHeaders,
-          appHeaders: config.appHeaders,
-          sandbox: this.sandbox,
-          aliCallbackUrl: config.aliCallbackUrl,
+          sandbox: this.isTest,
         });
       }
       
-      return await subRepo.aliDesktopPay(this.plan, {
+      return await subsService.aliDesktopPay(this.plan, {
+        ...config,
         idHeaders: this.idHeaders,
-        appHeaders: config.appHeaders,
-        sandbox: this.sandbox,
-        aliCallbackUrl: config.aliCallbackUrl,
+        sandbox: this.isTest,
       });
+
     } catch (e) {
       const errResp = new APIError(e);
       this.flashMsg = errResp.message;
@@ -170,10 +175,10 @@ export class PaymentPageBuilder {
 
   async wxpay(client: HeaderApp): Promise<boolean> {
     try {
-      const wxOrder = await subRepo.wxDesktopPay(this.plan,{
+      const wxOrder = await subsService.wxDesktopPay(this.plan,{
         idHeaders: this.idHeaders,
         appHeaders: client,
-        sandbox: this.sandbox,
+        sandbox: this.isTest,
       });
 
       this.wxOrder = wxOrder;

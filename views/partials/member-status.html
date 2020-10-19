@@ -1,0 +1,20 @@
+{% if member.reminder %}
+  {{ member.reminder.render() | safe }}
+{% endif %}
+
+<div class="jumbotron">
+  <h3>{{member.tier}}</h3>
+  <h4>{{member.expiration}}</h4>
+
+  <hr>
+
+  {% if member.renewalLink %}
+    <a href="{{member.renewalLink}}" class="btn btn-primary">续订</a>
+  {% endif %}
+
+  {% if member.upgradeLink %}
+    <a href="{{member.upgradeLink}}">升级为高端会员</a>
+  {% endif %}
+
+  <a href="{{member.ordersLink}}">订单历史</a>
+</div>

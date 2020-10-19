@@ -1,0 +1,18 @@
+{% macro priceText(p) %}
+  {% if p.discounted %}
+    <del>{{ p.original }}</del>
+    <span>{{ p.discounted }}</span>
+  {% else %}
+    <span>{{ p.original }}</span>
+  {% endif %}
+{% endmacro %}
+
+{% if price.href %}
+  <a href="{{price.href}}" class="btn {{'btn-primary' if price.highlight else 'btn-outline-primary'}}">
+    {{priceText(price)}}
+  </a>
+{% else %}
+  <div>
+    {{priceText(price)}}
+  </div>
+{% endif %}

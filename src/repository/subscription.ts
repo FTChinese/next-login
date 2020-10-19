@@ -19,7 +19,10 @@ import {
   HeaderWxAppId,
 } from "../models/header";
 import { oauth, noCache } from "../util/request";
-import { Plan } from "../models/product";
+import { Paywall, Plan } from "../models/paywall";
+import { paywallCache } from "./cache";
+import { Tier, Cycle } from "../models/enums";
+import { subsMap } from "../config/sitemap";
 
 export type PayConfig = {
   idHeaders: HeaderReaderId;
@@ -28,23 +31,64 @@ export type PayConfig = {
 }
 
 export type AlipayConfig =  PayConfig & {
-  aliCallbackUrl: string;
+  originUrl: string;
 }
 
-class Subscription {
+class SubscriptionService {
+
+  async paywall(): Promise<Paywall> {
+    const value = paywallCache.getPaywall();
+    
+    if (value) {
+      return value;
+    }
+
+    const resp = await request
+      .get(subsApi.paywall)
+      .use(oauth);
+
+    const body:  Paywall = resp.body;
+
+    paywallCache.savePaywall(body);
+
+    return body;
+  }
+
+  async pricingPlan(tier: Tier, cycle: Cycle): Promise<Plan | undefined> {
+    const plan = paywallCache.getPlan(tier, cycle);
+    if (plan) {
+      return plan;
+    }
+
+    const resp = await request
+      .get(subsApi.pricingPlans)
+      .use(oauth);
+
+    const body: Plan[] = resp.body;
+
+    paywallCache.savePlans(body);
+
+    return body.find(plan => plan.tier == tier && plan.cycle == cycle);
+  }
 
   async aliDesktopPay(plan: Plan, config: AlipayConfig): Promise<AliOrder> {
 
     const resp = await request
-      .post(subsApi.aliPayDesktop(plan.tier, plan.cycle, config.sandbox))
+      .post(subsApi.aliPayDesktop)
       .use(oauth)
       .use(noCache)
       .query({
-        return_url: config.aliCallbackUrl,
+        test: config.sandbox,
       })
       .set({
         ...config.idHeaders,
         ...config.appHeaders,
+      })
+      .send({
+        tier: plan.tier,
+        cycle: plan.cycle,
+        planId: plan.id,
+        returnUrl: subsMap.aliReturnUrl(config.originUrl),
       });
 
     return resp.body;
@@ -53,21 +97,21 @@ class Subscription {
   async aliMobilePay(plan: Plan, config: AlipayConfig): Promise<AliOrder> {
 
     const resp = await request
-      .post(
-        subsApi.aliPayMobile(
-          plan.tier,
-          plan.cycle,
-          config.sandbox,
-        )
-      )
+      .post(subsApi.aliPayMobile)
       .use(oauth)
       .use(noCache)
       .query({
-        return_url: config.aliCallbackUrl,
+        test: config.sandbox,
       })
       .set({
         ...config.idHeaders,
         ...config.appHeaders,
+      })
+      .send({
+        tier: plan.tier,
+        cycle: plan.cycle,
+        planId: plan.id,
+        returnUrl: subsMap.aliReturnUrl(config.originUrl),
       });
 
     return resp.body;
@@ -76,18 +120,17 @@ class Subscription {
   async wxDesktopPay(plan: Plan, config: PayConfig): Promise<WxOrder> {
 
     const resp = await request
-      .post(
-        subsApi.wxPayDesktop(
-          plan.tier,
-          plan.cycle,
-          config.sandbox,
-        )
-      )
+      .post(subsApi.wxPayDesktop)
       .use(oauth)
       .use(noCache)
       .set({
         ...config.idHeaders,
         ...config.appHeaders,
+      })
+      .send({
+        tier: plan.tier,
+        cycle: plan.cycle,
+        planId: plan.id,
       });
 
     return resp.body;
@@ -110,4 +153,4 @@ class Subscription {
   }
 }
 
-export const subRepo = new Subscription();
+export const subsService = new SubscriptionService();

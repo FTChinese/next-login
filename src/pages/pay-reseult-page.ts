@@ -2,55 +2,35 @@ import { Account } from "../models/account";
 import debug from "debug";
 import { Flash } from "../widget/flash";
 import { SimpleList, Table } from "../widget/list";
-import { AliOrder, IAliCallback, formatPlanName, WxOrder, IWxQueryResult } from "../models/order";
+import { AliOrder, IAliCallback, WxOrder, IWxQueryResult } from "../models/order";
 import { accountService } from "../repository/account";
 import { APIError } from "../models/api-response";
 import { subsMap } from "../config/sitemap";
-import { subRepo } from "../repository/subscription";
+import { subsService } from "../repository/subscription";
 import { formatMoneyInCent, iso8601ToCST } from "../util/formatter";
-import { Plan, findPlan, netPrice, listPrice } from "../models/product";
+import { Cart, cartHeader, newCart, Plan, planName } from "../models/paywall";
+import { isMember } from "../models/membership";
+import { pl } from "date-fns/locale";
 
 const log = debug("user:pay-result-page");
 
 /** template: subscription/pay-done.html */
 interface PayResultPage {
   flash?: Flash;
-  guide: SimpleList;
-  backLink: string;
+  cart: Cart;
   success?: Table;
   failed?: SimpleList;
+  backLink: string;
 }
-
-const successMsg = "您可以打印本页以备日后查询，或者返回查看会员状态和订单历史。";
-const failureMsg = "暂时未查询到支付结果，您可以返回查看会员状态和订单历史。";
 
 abstract class PayResultBuilder {
   
   flashMsg?: string;
-  plan?: Plan;
   failureMsg?: string;
 
   constructor(
     protected account: Account,
   ) {}
-
-  protected buildThanksMsg(succeeded: boolean): SimpleList {
-    const rows = [];
-    if (this.plan) {
-      rows.push(formatPlanName(this.plan.tier, this.plan.cycle));
-      rows.push(netPrice(this.plan) || listPrice(this.plan));
-    }
-
-    if (succeeded) {
-      rows.push(successMsg)
-    } else {
-      rows.push(failureMsg)
-    }
-    return {
-      header: "感谢您订阅FT中文网会员",
-      rows,
-    }
-  }
 
   async refresh(): Promise<Account | null> {
     try {
@@ -72,7 +52,6 @@ export class AlipayResultBuilder extends PayResultBuilder{
     private order: AliOrder,
   ){
     super(account);
-    this.plan = findPlan(order.tier, order.cycle) || undefined;
   }
 
   validate(param: IAliCallback): boolean {
@@ -86,11 +65,17 @@ export class AlipayResultBuilder extends PayResultBuilder{
   }
 
   build(): PayResultPage {
+
     return {
       flash: this.flashMsg 
         ? Flash.danger(this.flashMsg)
         : undefined,
-      guide: this.buildThanksMsg(!!this.param),
+      cart: {
+        header: cartHeader(isMember(this.account.membership)),
+        planName: planName(this.order.tier, this.order.cycle),
+        price: '',
+        payable: '',
+      },
       backLink: subsMap.base,
       success: this.param ? {
         caption: "支付宝支付结果",
@@ -120,7 +105,6 @@ export class WxpayResultBuilder extends PayResultBuilder {
     readonly order: WxOrder,
   ) {
     super(account);
-    this.plan = findPlan(order.tier, order.cycle) || undefined;
   }
 
   // Query payment result from Wechat API.
@@ -135,7 +119,7 @@ export class WxpayResultBuilder extends PayResultBuilder {
     //     "paidAt": "2019-03-06T07:21:18Z"
     // };
     try {
-      const result = await subRepo.wxOrderQuery(this.account, this.order.id);
+      const result = await subsService.wxOrderQuery(this.account, this.order.id);
 
       log("WX order validation result: %O", result);
 
@@ -160,7 +144,12 @@ export class WxpayResultBuilder extends PayResultBuilder {
       flash: this.flashMsg
         ? Flash.danger(this.flashMsg)
         : undefined,
-      guide: this.buildThanksMsg(!!this.queryResult),
+      cart: {
+        header: cartHeader(isMember(this.account.membership)),
+        planName: planName(this.order.tier, this.order.cycle),
+        price: '',
+        payable: ''
+      },
       backLink: subsMap.base,
       success: this.queryResult ? {
         caption: "微信支付结果",

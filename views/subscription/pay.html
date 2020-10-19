@@ -2,12 +2,17 @@
 
 {% block content %}
   {% if sandbox %}
-    <div class="alert alert-danger">⚠️您当前处于沙箱模式！沙箱模式下微信和支付宝收取1分钱供测试，会员状态不会改变</div>
+    <div class="alert alert-danger">⚠️测试模式！</div>
   {% endif %}
   <div class="row justify-content-center">
     <div class="col-sm-6">
       
-      {% include "partials/card.html" %}
+      <div class="text-center">
+        <div class="mb-2">{{cart.header}}</div>
+        <h3 class="mb-2">{{cart.planName}}</h3>
+        <div>{{cart.price}}</div>
+        <div class="text-danger">{{cart.priceOff}}</div>
+      </div>
       
       {% if form %}
       <div class="card mt-5">

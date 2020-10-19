@@ -1,0 +1,15 @@
+<div class="row flex-row-reverse">
+  <div class="col-sm-4">
+    <div class="box-16-9">
+      <img src="{{promo.coverUrl}}" alt="">
+    </div>
+  </div>
+
+  <div class="col-sm-8">
+    <h2>{{promo.heading}}</h2>
+    <h3>{{promo.subHeading}}</h3>
+    {% for p in promo.content | split %}
+      <p>{{p}}</p>
+    {% endfor %}
+  </div>
+</div>

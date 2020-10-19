@@ -3,40 +3,42 @@
 {% block content %}
   
   <div class="text-center mt-3">
-    {% if guide.header %}
-      <h5>{{ guide.header}}</h5>
+
+    {% if cart %}
+      <h5>感谢您订阅{{cart.header}}</h5>
+      <p>{{cart.planName}}</p>
     {% endif %}
 
-    {% for row in guide.rows %}
-      <p>{{ row }}</p>
-    {% endfor %}
+    {% if success %}
+      <p>您可以打印本页以备日后查询，或者返回查看会员状态和订单历史。</p>
+    {% elif failed %}
+      <p>暂时未查询到支付结果，您可以返回查看会员状态和订单历史。</p>
+    {% endif %}
   </div>
-  
+
   {% if success %}
-  <table class="table">
+    <table class="table">
 
-    {% if success.caption %}
-      <caption class="text-center">{{ success.caption }}</caption>
-    {% endif %}
+      {% if success.caption %}
+        <caption class="text-center">{{ success.caption }}</caption>
+      {% endif %}
 
-    <tbody>
-      {% for row in success.rows %}
-      <tr>
-        {% for col in row %}
-          {% if loop.index == 1 %}
-            <th scope="col">{{ col }}</th>
-          {% else %}
-            <td>{{ col }}</td>
-          {% endif %}
+      <tbody>
+        {% for row in success.rows %}
+        <tr>
+          {% for col in row %}
+            {% if loop.index == 1 %}
+              <th scope="col">{{ col }}</th>
+            {% else %}
+              <td>{{ col }}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
         {% endfor %}
-      </tr>
-      {% endfor %}
-    </tbody>
-    
-  </table>
-  {% endif %}
-
-  {% if failed %}
+      </tbody>
+      
+    </table>
+  {% elif failed %}
     <div class="text-center mt-3">
       {% if failed.header %}
         <h5>{{ failed.header}}</h5>
