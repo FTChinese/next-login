@@ -1,7 +1,7 @@
 import Router from "koa-router";
 import render from "../util/render";
 import {  
-    Account, accountVierified,
+    Account, accountVerified,
 } from "../models/account";
 import { EmailVerifiedBuilder } from "../pages/email-verified";
 
@@ -20,7 +20,7 @@ router.get("/email/:token", async (ctx, next) => {
 
     if (ok && account) {
         // @ts-ignore
-        ctx.session.user = accountVierified(account);
+        ctx.session.user = accountVerified(account);
     }
 
     const uiData = builder.build
