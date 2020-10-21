@@ -1,9 +1,21 @@
-import { func } from "@hapi/joi";
 import { DateTime } from "luxon";
 import { subsMap } from "../config/sitemap";
 import { formatMoney } from "../util/formatter";
-import { Cycle, Tier } from "./enums";
-import { localizeCurrency, localizeCycle, localizeTier } from "./localization";
+import { Cycle, Edition, OrderType, Tier } from "./enums";
+import { localizeCurrency, localizeCycle, localizeTier, orderIntent } from "./localization";
+
+export interface Wallet {
+  balance: number;
+  cratedAt: string;
+}
+
+export interface UpgradeIntent {
+  amount: number;
+  currency: string;
+  cycleCount: number;
+  extraDays: number;
+  wallet: Wallet;
+}
 
 export interface Banner {
   id: number;
@@ -63,25 +75,13 @@ export function isDiscountValid(d: Discount): boolean {
   return isInPeriod(d);
 }
 
-export interface Plan {
+export type Plan = {
   id: string;
   productId: string;
   price: number;
-  tier: Tier;
-  cycle: Cycle;
   description: string | null;
   discount: Discount;
-}
-
-export function dailyCost(p: Plan): string {
-  switch (p.cycle) {
-    case 'year':
-      return formatMoney(p.price / 365)
-
-    case 'month':
-      return formatMoney(p.price / 30)
-  }
-}
+} & Edition;
 
 /**
  * @description The price button for a plan.
@@ -104,29 +104,7 @@ function formatPriceText(p: PriceText): string {
     ? `/${localizeCycle(p.cycle)}`
     : '';
 
-  return `${localizeCurrency(p.currency)} ${formatMoney(p.amount)}${cycle}`
-}
-
-function newPriceLink(plan: Plan, forMember: boolean): PriceLink {
-
-  return {
-    href: forMember 
-      ? undefined
-      : subsMap.checkoutUrl(plan.tier, plan.cycle),
-    highlight: plan.cycle === 'year',
-    original: formatPriceText({
-      currency: 'cny',
-      amount: plan.price,
-      cycle: plan.cycle,
-    }),
-    discounted: isDiscountValid(plan.discount) 
-      ? formatPriceText({
-        currency: 'cny',
-        amount: plan.price - (plan.discount.priceOff || 0),
-        cycle: plan.cycle,
-      })
-      : undefined,
-  };
+  return `${localizeCurrency(p.currency)}${formatMoney(p.amount)}${cycle}`
 }
 
 export interface Cart {
@@ -134,8 +112,107 @@ export interface Cart {
   planName: string;
   price: string;
   priceOff?: string;
+  balance?: string;
   payable: string;
 }
+
+export class PlanParser {
+  readonly isDiscountValid: boolean;
+
+  constructor(
+    readonly plan: Plan
+  ) {
+    if (!plan.discount.priceOff) {
+      this.isDiscountValid = false;
+    } else {
+      this.isDiscountValid = isInPeriod(plan.discount);
+    }
+  }
+
+  dailyCost(): string {
+    switch (this.plan.cycle) {
+      case 'year':
+        return formatMoney(this.plan.price / 365);
+  
+      case 'month':
+        return formatMoney(this.plan.price / 30);
+    }
+  }
+
+  get priceLink(): PriceLink {
+
+    return {
+      href: subsMap.checkoutUrl(this.plan.tier, this.plan.cycle),
+      highlight: this.plan.cycle === 'year',
+      original: formatPriceText({
+        currency: 'cny',
+        amount: this.plan.price,
+        cycle: this.plan.cycle,
+      }),
+      discounted: this.isDiscountValid 
+        ? formatPriceText({
+            currency: 'cny',
+            amount: this.plan.price - (this.plan.discount.priceOff || 0),
+            cycle: this.plan.cycle,
+          })
+        : undefined,
+    };
+  }
+
+  private get originalPrice(): string {
+    return formatPriceText({
+      currency: 'cny',
+      amount: this.plan.price,
+    });
+  }
+
+  private get offPrice(): string | undefined {
+    return this.isDiscountValid
+      ? '优惠 - ' + formatPriceText({
+        currency: 'cny',
+        amount: this.plan.discount.priceOff || 0,
+      })
+      : undefined
+  }
+
+  calculatePayable(balance: number): number {
+    const price = this.isDiscountValid
+      ? this.plan.price - (this.plan.discount.priceOff || 0) 
+      : this.plan.price;
+
+    if (balance > price) {
+      return 0;
+    }
+
+    return price - balance;
+  }
+
+  /**
+   * 
+   * @param kind - Which kind of order this user is creating: create | renew | upgrade.
+   * @param wallet - Used to calculate current balance. It only exists for ali or wx pay upgrading.
+   */
+  buildCart(kind: OrderType, wallet?: Wallet): Cart {
+    return {
+      header: orderIntent[kind],
+      planName: planName(this.plan.tier, this.plan.cycle),
+      price: this.originalPrice,
+      priceOff: this.offPrice,
+      balance: wallet 
+        ? '余额 ' + formatPriceText({
+          currency: 'cny',
+          amount: wallet.balance
+        }) 
+        : undefined,
+      payable: formatPriceText({
+        currency: 'cny',
+        amount: this.calculatePayable(wallet?.balance || 0),
+      }),
+    };
+  }
+}
+
+
 
 export function planName(tier: Tier, cycle: Cycle): string {
   return `${localizeTier(tier)}/${localizeCycle(cycle)}`;
@@ -186,14 +263,14 @@ interface ProductCard {
   prices: PriceLink[];
 }
 
-function newProductCard(product: Product, forMember: boolean): ProductCard {
+function newProductCard(product: Product): ProductCard {
 
   return {
     heading: product.heading,
     description: product.description,
     smallPrint: product.smallPrint,
     prices: product.plans.map(plan => {
-      return newPriceLink(plan, forMember)
+      return (new PlanParser(plan)).priceLink;
     })
   };
 }
@@ -209,11 +286,11 @@ export interface PaywallUI {
   products: ProductCard[]
 }
 
-export function newPaywallUI(pw: Paywall, forMember: boolean): PaywallUI {
+export function newPaywallUI(pw: Paywall): PaywallUI {
   return {
     promo: isPromoValid(pw.promo) ? pw.promo : undefined,
     products: pw.products.map(prod => {
-      return newProductCard(prod, forMember)
+      return newProductCard(prod)
     }),
   }
 }

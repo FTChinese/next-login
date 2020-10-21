@@ -38,9 +38,11 @@ class SubsMap {
   readonly renewal =        `${this.base}/renew`;
   readonly orders =         `${this.base}/orders`;
   readonly pay =            `${this.base}/pay`;
+  readonly upgrade =        `${this.base}/upgrade`;
   readonly alipayDone =     `${this.base}/done/ali`;
   readonly wxpayDone =      `${this.base}/done/wx`;
   readonly redeem =         `${this.base}/redeem`;
+  readonly paywall =        `${this.base}/__paywall`;
 
   checkoutUrl(tier: Tier, cycle: Cycle): string {
     return `${this.pay}/${tier}/${cycle}`;

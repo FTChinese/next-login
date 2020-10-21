@@ -7,10 +7,6 @@ export interface HeaderReaderId {
     [KEY_UNION_ID]?: string;
 }
 
-export interface HeaderWxAppId {
-    [KEY_APP_ID]: string;
-}
-
 export interface HeaderApp {
     "X-Client-Type": string;
     "X-Client-Version": string;

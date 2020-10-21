@@ -49,6 +49,12 @@ interface Config {
     };
 }
 
+interface SubsAPIBaseURLs {
+  dev: string;
+  prod: string;
+  sandbox: string; // Sandbox on production server. This is only used by test account for stripe pay, or iap for refreshing.
+}
+
 class Viper {
     private filePath: string;
     private fileName: string;
@@ -88,14 +94,12 @@ class Viper {
         : "http://localhost:8000"
     }
 
-    get subsAPIBaseUrl(): string {
-      return this.isProduction
-        ? this.getConfig().api_url.subscription_v1
-        : "http://localhost:8200";
-    }
-
-    get subsAPISandboxBaseUrl(): string {
-      return this.getConfig().api_url.sub_sandbox
+    get subsAPIBaseUrl(): SubsAPIBaseURLs {
+      return {
+        dev: "http://localhost:8200",
+        prod: this.getConfig().api_url.subscription_v1,
+        sandbox: this.getConfig().api_url.sub_sandbox
+      };
     }
 
     getAccessToken(): string {

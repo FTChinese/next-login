@@ -11,6 +11,7 @@ import {
   Tier,
   Cycle,
   PaymentMethod,
+  validateEdition,
 } from "../models/enums";
 import {
   viper,
@@ -22,6 +23,9 @@ import { MembershipPageBuilder } from "../pages/membership-page";
 import { PaymentPageBuilder } from "../pages/payment-page";
 import { AlipayResultBuilder, WxpayResultBuilder } from "../pages/pay-reseult-page";
 import { paywallCache } from "../repository/cache";
+import { Paywall } from "../models/paywall";
+import { subsMap } from "../config/sitemap";
+import { cy } from "date-fns/locale";
 
 const log = debug("user:subscription");
 
@@ -59,14 +63,23 @@ router.get("/orders", async (ctx) => {
 router.get("/pay/:tier/:cycle", async (ctx, next) => {
   const tier: Tier = ctx.params.tier;
   const cycle: Cycle = ctx.params.cycle;
+
+  if (!validateEdition(tier, cycle)) {
+    ctx.status = 404;
+    return;
+  }
+
   const account: Account = ctx.state.user;
 
   log('Cached plans: %O', paywallCache.inspect());
 
-  const builder = new PaymentPageBuilder(account);
+  const builder = new PaymentPageBuilder(account, {
+    tier,
+    cycle,
+  });
 
-  const ok = await builder.loadPlan(tier, cycle);
-  if (!ok) {
+  const planLoaded = await builder.loadPlan();
+  if (!planLoaded) {
     const uiData = await builder.build();
     Object.assign(
       ctx.state,
@@ -75,8 +88,27 @@ router.get("/pay/:tier/:cycle", async (ctx, next) => {
     return await next();
   }
 
-  const uiData = await builder.build();
+  const payAllowed = builder.isPaymentAllowed();
+  if (!payAllowed) {
+    const uiData = await builder.build();
+    Object.assign(
+      ctx.state,
+      uiData,
+    );
+    return await next();
+  }
 
+  const walletLoaded = await builder.loadBalance();
+  if (!walletLoaded) {
+    const uiData = await builder.build();
+    Object.assign(
+      ctx.state,
+      uiData
+    );
+    return await next();
+  }
+
+  const uiData = await builder.build();
   Object.assign(
     ctx.state,
     uiData,
@@ -94,11 +126,30 @@ router.get("/pay/:tier/:cycle", async (ctx, next) => {
 router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
   const tier: Tier = ctx.params.tier;
   const cycle: Cycle = ctx.params.cycle;
+  if (!validateEdition(tier, cycle)) {
+    ctx.status = 404;
+    return;
+  }
+
   const account: Account = ctx.state.user;
   
-  const builder = new PaymentPageBuilder(account);
-  const ok = await builder.loadPlan(tier, cycle);
-  if (!ok) {
+  const builder = new PaymentPageBuilder(account, {
+    tier,
+    cycle,
+  });
+
+  const planLoaded = await builder.loadPlan();
+  if (!planLoaded) {
+    const uiData = await builder.build();
+    Object.assign(
+      ctx.state,
+      uiData,
+    );
+    return await next();
+  }
+
+  const payAllowed = builder.isPaymentAllowed();
+  if (!payAllowed) {
     const uiData = await builder.build();
     Object.assign(
       ctx.state,
@@ -108,7 +159,6 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
   }
 
   const payMethod: PaymentMethod | undefined = ctx.request.body.payMethod;
-
   const isValid = builder.validate(payMethod);
   if (!isValid) {
     const uiData = builder.build();
@@ -119,10 +169,7 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
   switch (payMethod) {
     case 'alipay': {
 
-      const aliOrder = await builder.alipay({
-        appHeaders: ctx.state.appHeaders,
-        originUrl: ctx.origin,
-      });
+      const aliOrder = await builder.alipay(ctx.state.appHeaders, ctx.origin);
 
       // Order creation error.
       if (!aliOrder) {
@@ -135,6 +182,7 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
       // Used to validate callback data.
       // @ts-ignore
       ctx.session.order = aliOrder;
+      // Redirect to alipay site.
       return ctx.redirect(aliOrder.redirectUrl);
     }
     
@@ -148,7 +196,6 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
       }
 
       const uiData = await builder.build();
-
       Object.assign(ctx.state, uiData);
 
       return await next();
@@ -218,6 +265,9 @@ router.get("/done/ali", async (ctx, next) => {
   ctx.body = await render("subscription/pay-done.html", ctx.state);
 });
 
+/**
+ * @description Show message after wxpay.
+ */
 router.get("/done/wx", async (ctx, next) => {
   const account: Account = ctx.state.user;
   // @ts-ignore
@@ -262,6 +312,16 @@ router.get("/done/wx", async (ctx, next) => {
   return await next();
 }, async (ctx) => {
   ctx.body = await render("subscription/pay-done.html", ctx.state);
+});
+
+router.get('/__paywall', async (ctx, next) => {
+  ctx.status = 200;
+  ctx.body = paywallCache.getPaywall();;
+});
+
+router.get('/__paywall/refresh', async (ctx, next) => {
+  paywallCache.clear();
+  ctx.redirect(subsMap.paywall);
 });
 
 export default router.routes();

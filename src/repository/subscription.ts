@@ -1,6 +1,6 @@
 import request from "superagent";
 import {
-  Account, collectAccountIDs,
+  Account, collectAccountIDs, isTestAccount,
 } from "../models/account";
 import {
   subsApi,
@@ -11,23 +11,17 @@ import {
   IWxQueryResult,
 } from "../models/order";
 import {
-  viper,
-} from "../config/viper";
-import {
-  HeaderReaderId,
   HeaderApp,
-  HeaderWxAppId,
 } from "../models/header";
 import { oauth, noCache } from "../util/request";
-import { Paywall, Plan } from "../models/paywall";
+import { Paywall, Plan, UpgradeIntent } from "../models/paywall";
+import { Edition } from '../models/enums';
 import { paywallCache } from "./cache";
-import { Tier, Cycle } from "../models/enums";
 import { subsMap } from "../config/sitemap";
 
-export type PayConfig = {
-  idHeaders: HeaderReaderId;
+export type PayConfig =  {
+  account: Account;
   appHeaders: HeaderApp;
-  sandbox: boolean;
 }
 
 export type AlipayConfig =  PayConfig & {
@@ -36,7 +30,7 @@ export type AlipayConfig =  PayConfig & {
 
 class SubscriptionService {
 
-  async paywall(): Promise<Paywall> {
+  async paywall(sandbox: boolean): Promise<Paywall> {
     const value = paywallCache.getPaywall();
     
     if (value) {
@@ -44,7 +38,7 @@ class SubscriptionService {
     }
 
     const resp = await request
-      .get(subsApi.paywall)
+      .get(subsApi.paywall(sandbox))
       .use(oauth);
 
     const body:  Paywall = resp.body;
@@ -54,34 +48,48 @@ class SubscriptionService {
     return body;
   }
 
-  async pricingPlan(tier: Tier, cycle: Cycle): Promise<Plan | undefined> {
-    const plan = paywallCache.getPlan(tier, cycle);
+  async pricingPlan(e: Edition, sandbox: boolean): Promise<Plan | undefined> {
+    const plan = paywallCache.getPlan(e);
     if (plan) {
       return plan;
     }
 
     const resp = await request
-      .get(subsApi.pricingPlans)
+      .get(subsApi.pricingPlans(sandbox))
       .use(oauth);
 
     const body: Plan[] = resp.body;
 
     paywallCache.savePlans(body);
 
-    return body.find(plan => plan.tier == tier && plan.cycle == cycle);
+    return body.find(plan => plan.tier == e.tier && plan.cycle == e.cycle);
+  }
+
+  async getBalance(account: Account): Promise<UpgradeIntent> {
+    const resp = await request
+      .get(subsApi.upgradeBalance(isTestAccount(account)))
+      .use(oauth)
+      .use(noCache)
+      .set({
+        ...collectAccountIDs(account)
+      });
+
+    return resp.body;
   }
 
   async aliDesktopPay(plan: Plan, config: AlipayConfig): Promise<AliOrder> {
 
+    const sandbox = isTestAccount(config.account);
+    
     const resp = await request
-      .post(subsApi.aliPayDesktop)
+      .post(subsApi.aliPayDesktop(sandbox))
       .use(oauth)
       .use(noCache)
       .query({
-        test: config.sandbox,
+        test: sandbox,
       })
       .set({
-        ...config.idHeaders,
+        ...collectAccountIDs(config.account),
         ...config.appHeaders,
       })
       .send({
@@ -96,15 +104,17 @@ class SubscriptionService {
 
   async aliMobilePay(plan: Plan, config: AlipayConfig): Promise<AliOrder> {
 
+    const sandbox = isTestAccount(config.account);
+
     const resp = await request
-      .post(subsApi.aliPayMobile)
+      .post(subsApi.aliPayMobile(sandbox))
       .use(oauth)
       .use(noCache)
       .query({
-        test: config.sandbox,
+        test: sandbox,
       })
       .set({
-        ...config.idHeaders,
+        ...collectAccountIDs(config.account),
         ...config.appHeaders,
       })
       .send({
@@ -117,14 +127,19 @@ class SubscriptionService {
     return resp.body;
   }
 
-  async wxDesktopPay(plan: Plan, config: PayConfig): Promise<WxOrder> {
+  async wxDesktopPay(plan: Plan, config: {appHeaders: HeaderApp, account: Account}): Promise<WxOrder> {
+
+    const sandbox = isTestAccount(config.account);
 
     const resp = await request
-      .post(subsApi.wxPayDesktop)
+      .post(subsApi.wxPayDesktop(sandbox))
       .use(oauth)
       .use(noCache)
+      .query({
+        test: sandbox,
+      })
       .set({
-        ...config.idHeaders,
+        ...collectAccountIDs(config.account),
         ...config.appHeaders,
       })
       .send({
@@ -138,16 +153,11 @@ class SubscriptionService {
 
   async wxOrderQuery(account: Account, orderId: string): Promise<IWxQueryResult> {
 
-    const headers: HeaderReaderId & HeaderWxAppId = {
-      ...(collectAccountIDs(account)),
-      "X-App-Id": viper.getConfig().wxapp.web_pay.app_id
-    }
-
     const resp = await request
-      .get(subsApi.wxQueryOrder(orderId))
+      .get(subsApi.wxQueryOrder(orderId, isTestAccount(account)))
       .use(oauth)
       .use(noCache)
-      .set(headers);
+      .set(collectAccountIDs(account));
 
     return resp.body as IWxQueryResult;
   }

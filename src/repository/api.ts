@@ -40,23 +40,50 @@ class ReaderAPI {
 }
 
 class SubAPI {
-  readonly baseUrl: string = viper.subsAPIBaseUrl;
-
-  // This is alwasy online url.
-  readonly sandboxBaseUrl: string = viper.subsAPISandboxBaseUrl;
+  private baseURLs = viper.subsAPIBaseUrl;
 
   private getBaseUrl(sandbox: boolean): string {
-    return sandbox ? this.sandboxBaseUrl : this.baseUrl;
+    if (!viper.isProduction) {
+      return this.baseURLs.dev;
+    }
+
+    if (sandbox) {
+      return this.baseURLs.sandbox;
+    }
+
+    return this.baseURLs.prod;
   }
 
-  readonly paywall = `${this.baseUrl}/paywall`;
-  readonly pricingPlans = `${this.paywall}/pricing`;
-  readonly aliPayDesktop = `${this.baseUrl}/alipay/desktop`;
-  readonly aliPayMobile = `${this.baseUrl}/alipay/mobile`;
-  readonly wxPayDesktop = `${this.baseUrl}/wxpay/desktop`;
+  paywall(sandbox: boolean): string {
+    return `${this.getBaseUrl(sandbox)}/paywall`;
+  }
 
-  wxQueryOrder(orderId: string): string {
-    return `${this.baseUrl}/wxpay/query/${orderId}`;
+  pricingPlans(sandbox: boolean): string {
+    return `${this.paywall(sandbox)}/pricing`;
+  }
+
+  upgradeBalance(sandbox: boolean): string {
+    return `${this.getBaseUrl(sandbox)}/upgrade/balance`;
+  }
+
+  freeUpgrade(sandbox: boolean): string {
+    return `${this.getBaseUrl(sandbox)}/upgrade/free`;
+  }
+
+  aliPayDesktop(sandbox: boolean): string {
+    return `${this.getBaseUrl(sandbox)}/alipay/desktop`;
+  }
+
+  aliPayMobile(sandbox: boolean): string {
+    return `${this.getBaseUrl(sandbox)}/alipay/mobile`;
+  }
+
+  wxPayDesktop(sandbox: boolean): string {
+    return `${this.getBaseUrl(sandbox)}/wxpay/desktop`;
+  }
+  
+  wxQueryOrder(orderId: string, sandbox: boolean): string {
+    return `${this.getBaseUrl(sandbox)}/wxpay/query/${orderId}`;
   }
 
   private readonly wxRedirectPath: string = "/wx/oauth/callback";
@@ -68,9 +95,9 @@ class SubAPI {
   }
 
   // Send wechat OAuth2 code here
-  readonly wxLogin: string = `${this.baseUrl}/wx/oauth/login`;
+  readonly wxLogin: string = `${this.baseURLs.prod}/wx/oauth/login`;
 
-  readonly redeemGiftCard: string = `${this.baseUrl}/gift-card/redeem`;
+  readonly redeemGiftCard: string = `${this.baseURLs.prod}/gift-card/redeem`;
 }
 
 export const readerApi = new ReaderAPI();

@@ -2,19 +2,34 @@
   {{ member.reminder.render() | safe }}
 {% endif %}
 
-<div class="jumbotron">
+<div class="jumbotron text-center">
+  <p class="text-muted">我的订阅</p>
   <h3>{{member.tier}}</h3>
-  <h4>{{member.expiration}}</h4>
-
-  <hr>
+  <h4>
+    {{member.expiration}}
+  </h4>
 
   {% if member.renewalLink %}
-    <a href="{{member.renewalLink}}" class="btn btn-primary">续订</a>
+    <div class="mb-2">
+      <a href="{{member.renewalLink}}" class="btn btn-primary">续订</a>
+    </div>
   {% endif %}
 
   {% if member.upgradeLink %}
-    <a href="{{member.upgradeLink}}">升级为高端会员</a>
+    <div class="mb-2">
+      <a href="{{member.upgradeLink}}" class="btn btn-primary">升级为高端会员</a>
+    </div>
   {% endif %}
 
-  <a href="{{member.ordersLink}}">订单历史</a>
+  {% if member.sourceMsg %}
+    <p class="mb-2">
+      {{ member.sourceMsg }}
+    </p>
+  {% endif %}
+
+  <p>自动续订 {{'已开启' if member.autoRenew else '未开启'}}</p>
+
+  <div class="text-right">
+    <a href="{{member.ordersLink}}">订单历史</a>
+  </div>
 </div>

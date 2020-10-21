@@ -4,18 +4,27 @@
   {% if sandbox %}
     <div class="alert alert-danger">⚠️测试模式！</div>
   {% endif %}
+
   <div class="row justify-content-center">
     <div class="col-sm-6">
       
-      <div class="text-center">
+      {% if cart %}
+      <div class="text-center mb-5">
         <div class="mb-2">{{cart.header}}</div>
         <h3 class="mb-2">{{cart.planName}}</h3>
         <div>{{cart.price}}</div>
-        <div class="text-danger">{{cart.priceOff}}</div>
+        {% if cart.priceOff %}
+          <div class="text-danger">{{cart.priceOff}}</div>
+        {% endif %}
+        {% if cart.balance %}
+          <div>{{cart.balance}}</div>
+          <div>升级价格优先使用当前会员未使用部分金额抵扣，不足部分需要补足。如果当前余额超过产品价格，则可直接升级，无需另行支付。</div>
+        {% endif %}
       </div>
+      {% endif %}
       
       {% if form %}
-      <div class="card mt-5">
+      <div class="card">
         <div class="card-header">请选择支付方式</div>
         <div class="card-body">
           <form action="{{ form.action }}" method="{{form.method}}">
@@ -34,8 +43,14 @@
       {% endif %}
       <!-- End card -->
 
+      {% if denied %}
+        <div class="text-danger text-center">
+          {{ denied }}
+        </div>
+      {% endif %}
+
       {% if qr %}
-      <div class="text-center mt-5">
+      <div class="text-center">
         <h4>请打开微信扫码</h4>
         <img src="{{ qr.dataUrl }}" alt="">
         <div class="mt-1">

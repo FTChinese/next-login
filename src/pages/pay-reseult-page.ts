@@ -8,9 +8,8 @@ import { APIError } from "../models/api-response";
 import { subsMap } from "../config/sitemap";
 import { subsService } from "../repository/subscription";
 import { formatMoneyInCent, iso8601ToCST } from "../util/formatter";
-import { Cart, cartHeader, newCart, Plan, planName } from "../models/paywall";
+import { Cart, cartHeader, planName } from "../models/paywall";
 import { isMember } from "../models/membership";
-import { pl } from "date-fns/locale";
 
 const log = debug("user:pay-result-page");
 

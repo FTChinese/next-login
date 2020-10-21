@@ -1,13 +1,28 @@
-import { Tier, Cycle, Gender, PaymentMethod } from "./enums";
+import { Tier, Cycle, Gender, PaymentMethod, OrderType } from "./enums";
 import { getProperty } from "./index-types";
 import { Dictionary } from "./data-types";
 
 export const paymentMethodsCN: Record<PaymentMethod, string> = {
-    "wechat": "微信支付",
-    "alipay": "支付宝",
-    "stripe": "Stripe",
-    "apple": "App Store",
-    "b2b": "B2B",
+  "wechat": "微信支付",
+  "alipay": "支付宝",
+  "stripe": "Stripe",
+  "apple": "App Store",
+  "b2b": "B2B",
+};
+
+export const membershipSource: Record<PaymentMethod, string> = {
+  'wechat': '',
+  'alipay': '',
+  'stripe': 'Stripe订阅',
+  'apple': 'App Store内购',
+  'b2b': '企业订阅'
+};
+
+export const orderIntent: Record<OrderType, string> = {
+  create: '订阅FT会员',
+  renew: '续订FT会员',
+  upgrade: '升级高端版',
+  downgrade: '转为标准版',
 };
 
 export const gendersCN: Record<Gender, string> = {
