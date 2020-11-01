@@ -15,7 +15,8 @@
     "build-js": "rollup -c client/rollup.config.js",
     "watch-js": "rollup -c client/rollup.config.js -w",
     "dev": "npm-run-all --parallel watch-js watch-css",
-    "build": "npm run build-js && npm run build-css"
+    "build": "npm run build-js && npm run build-css",
+    "server": "nodemon --ext ts --ignore dist/ --exec ts-node src/server.ts"
   },
   "repository": {
     "type": "git",
