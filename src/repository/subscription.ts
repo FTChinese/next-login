@@ -8,7 +8,8 @@ import {
 import {
   AliOrder,
   WxOrder,
-  IWxQueryResult,
+  PaymentResult,
+  OrderBase,
 } from "../models/order";
 import {
   HeaderApp,
@@ -102,6 +103,16 @@ class SubscriptionService {
     return resp.body;
   }
 
+  async verifyPayResult(order: OrderBase, account: Account): Promise<PaymentResult> {
+    const sandbox = isTestAccount(account)
+    const resp = await request
+      .post(subsApi.verifyPayment(order.id, sandbox))
+      .use(oauth)
+      .use(noCache)
+
+    return resp.body;
+  }
+
   async aliMobilePay(plan: Plan, config: AlipayConfig): Promise<AliOrder> {
 
     const sandbox = isTestAccount(config.account);
@@ -151,16 +162,16 @@ class SubscriptionService {
     return resp.body;
   }
 
-  async wxOrderQuery(account: Account, orderId: string): Promise<IWxQueryResult> {
+  // async wxOrderQuery(account: Account, orderId: string): Promise<IWxQueryResult> {
 
-    const resp = await request
-      .get(subsApi.wxQueryOrder(orderId, isTestAccount(account)))
-      .use(oauth)
-      .use(noCache)
-      .set(collectAccountIDs(account));
+  //   const resp = await request
+  //     .get(subsApi.wxQueryOrder(orderId, isTestAccount(account)))
+  //     .use(oauth)
+  //     .use(noCache)
+  //     .set(collectAccountIDs(account));
 
-    return resp.body as IWxQueryResult;
-  }
+  //   return resp.body as IWxQueryResult;
+  // }
 }
 
 export const subsService = new SubscriptionService();

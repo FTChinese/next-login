@@ -231,9 +231,12 @@ router.get("/done/ali", async (ctx, next) => {
     throw new Error("Order data missing in this session!");
   }
 
+  console.log('order %o', order);
   const builder = new AlipayResultBuilder(account, order);
 
-  const isValid = builder.validate(query);
+  console.log('starting verifying')
+
+  const isValid = await builder.verifyPayment();
   if (!isValid) {
     const uiData = builder.build()
     Object.assign(ctx.state, uiData);
@@ -251,6 +254,7 @@ router.get("/done/ali", async (ctx, next) => {
   // @ts-ignore
   ctx.session.user = newAccount;
 
+  console.log('build page')
   const uiDate = builder.build();
   Object.assign(ctx.state, uiDate);
 
@@ -281,7 +285,7 @@ router.get("/done/wx", async (ctx, next) => {
 
   const builder = new WxpayResultBuilder(account, order);
 
-  const isValid = await builder.validate()
+  const isValid = await builder.verifyPayment()
 
   if (!isValid) {
     const uiData = builder.build();

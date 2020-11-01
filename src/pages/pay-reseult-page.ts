@@ -2,7 +2,7 @@ import { Account } from "../models/account";
 import debug from "debug";
 import { Flash } from "../widget/flash";
 import { SimpleList, Table } from "../widget/list";
-import { AliOrder, IAliCallback, WxOrder, IWxQueryResult } from "../models/order";
+import { AliOrder, IAliCallback, WxOrder, PaymentResult } from "../models/order";
 import { accountService } from "../repository/account";
 import { APIError } from "../models/api-response";
 import { subsMap } from "../config/sitemap";
@@ -44,6 +44,7 @@ abstract class PayResultBuilder {
 
 export class AlipayResultBuilder extends PayResultBuilder{
 
+  payResult?: PaymentResult;
   param?: IAliCallback;
 
   constructor(
@@ -63,8 +64,41 @@ export class AlipayResultBuilder extends PayResultBuilder{
     return true;
   }
 
+  // Query payment result from Wechat API.
+  async verifyPayment(): Promise<boolean> {
+    // Use the following data to test success result.
+    // const queryResult: IWxQueryResult = {
+    //     "paymentState": "SUCCESS",
+    //     "paymentStateDesc": "支付成功",
+    //     "totalFee": 1,
+    //     "transactionId": "4200000252201903069440709666",
+    //     "ftcOrderId": "FT1D3CEDDB2599EFB9",
+    //     "paidAt": "2019-03-06T07:21:18Z"
+    // };
+    try {
+      const result = await subsService.verifyPayResult(this.order, this.account);
+
+      log("Ali payment verification result: %O", result);
+
+      if (result.paymentState !== 'TRADE_SUCCESS' && result.paymentState !== 'TRADE_FINISHED') {
+        this.failureMsg = result.paymentStateDesc;
+        return false;
+      }
+
+
+      this.payResult = result;
+      return true;
+    } catch (e) {
+      const errResp = new APIError(e);
+      this.flashMsg = errResp.message;
+
+      return false;
+    }
+  }
+  
   build(): PayResultPage {
 
+    console.log(this.payResult);
     return {
       flash: this.flashMsg 
         ? Flash.danger(this.flashMsg)
@@ -76,13 +110,14 @@ export class AlipayResultBuilder extends PayResultBuilder{
         payable: '',
       },
       backLink: subsMap.base,
-      success: this.param ? {
+      success: this.payResult ? {
         caption: "支付宝支付结果",
         rows: [
-          ["订单号", this.param.out_trade_no],
-          ["金额", this.param.total_amount],
-          ["支付宝交易号", this.param.trade_no],
-          ["支付时间", this.param.timestamp]
+          ["订单号", this.payResult.ftcOrderId],
+          ["支付状态", this.payResult.paymentStateDesc],
+          ["金额", formatMoneyInCent(this.payResult.totalFee)],
+          ["支付宝交易号", this.payResult.transactionId],
+          ["支付时间", this.payResult.paidAt]
         ]
       } : undefined,
       failed: this.failureMsg ? {
@@ -97,7 +132,7 @@ export class AlipayResultBuilder extends PayResultBuilder{
 
 export class WxpayResultBuilder extends PayResultBuilder {
 
-  queryResult?: IWxQueryResult;
+  queryResult?: PaymentResult;
 
   constructor(
     account: Account,
@@ -107,7 +142,7 @@ export class WxpayResultBuilder extends PayResultBuilder {
   }
 
   // Query payment result from Wechat API.
-  async validate(): Promise<boolean> {
+  async verifyPayment(): Promise<boolean> {
     // Use the following data to test success result.
     // const queryResult: IWxQueryResult = {
     //     "paymentState": "SUCCESS",
@@ -118,7 +153,7 @@ export class WxpayResultBuilder extends PayResultBuilder {
     //     "paidAt": "2019-03-06T07:21:18Z"
     // };
     try {
-      const result = await subsService.wxOrderQuery(this.account, this.order.id);
+      const result = await subsService.verifyPayResult(this.order, this.account);
 
       log("WX order validation result: %O", result);
 

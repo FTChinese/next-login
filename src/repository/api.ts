@@ -86,6 +86,10 @@ class SubAPI {
     return `${this.getBaseUrl(sandbox)}/wxpay/query/${orderId}`;
   }
 
+  verifyPayment(orderId: string, sandbox: boolean): string {
+    return `${this.getBaseUrl(sandbox)}/orders/${orderId}/verify-payment`;
+  }
+
   private readonly wxRedirectPath: string = "/wx/oauth/callback";
 
   // The sandbox mode is used only to test new API features.

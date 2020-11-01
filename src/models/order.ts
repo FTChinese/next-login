@@ -60,3 +60,12 @@ export interface IWxQueryResult {
     ftcOrderId: string;
     paidAt: string;
 }
+
+export interface PaymentResult {
+  paymentState: 'WAIT_BUYER_PAY' | 'TRADE_CLOSED' | 'TRADE_SUCCESS' | 'TRADE_FINISHED' | 'SUCCESS' | 'REFUND' | 'NOTPAY' | 'CLOSED' | 'REVOKED' | 'USERPAYING' | 'PAYERROR';
+  paymentStateDesc: string;
+  totalFee: number;
+  transactionId: string;
+  ftcOrderId: string;
+  paidAt: string;
+}
