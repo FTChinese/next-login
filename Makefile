@@ -38,7 +38,7 @@ run :
 pkg :
 	pkg --targets node14-linux-x64,node14-macos-x64 -c package.json --out-path $(BUILD_DIR) $(ENTRY)
 
-deploy : clean build pkg
+deploy : clean buildts pkg
 	rsync -v ./$(BUILD_DIR)/@ftchinese/$(LINUX_BIN) tk11:/home/node/next/
 	ssh tk11 supervisorctl restart $(BINARY)
 
