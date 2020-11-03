@@ -1,6 +1,6 @@
 {
   "name": "@ftchinese/next-user",
-  "version": "0.9.1",
+  "version": "0.10.0",
   "description": "User setting system",
   "main": "src/server.ts",
   "bin": "dist/server.ts",
