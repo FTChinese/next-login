@@ -3,7 +3,9 @@
   "version": "0.10.0",
   "description": "User setting system",
   "main": "src/server.ts",
-  "bin": "dist/server.ts",
+  "bin": {
+    "next-user": "dist/server.ts"
+  },
   "scripts": {
     "test": "jest",
     "postversion": "git push && git push --tags",
