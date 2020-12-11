@@ -43,10 +43,10 @@ export interface MemberStatus {
   reminder?: Flash;
   tier: string;
   expiration: string;
+  autoRenew: boolean;
+  sourceMsg?: string; // For Stripe, IAP, and B2B
   renewalLink?: string;
   upgradeLink?: string;
-  sourceMsg?: string; // For Stripe, IAP, and B2B
-  autoRenew: boolean;
   ordersLink?: string;
 }
 
