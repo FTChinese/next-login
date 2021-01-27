@@ -31,9 +31,11 @@ const styleIncludes = viper.isProduction
 // Production uses CDN while dev uses node_modes and custom js.
 const scriptLinks = viper.isProduction
   ? [
-    `https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/${bsNativeVersion}/bootstrap-native-v4.min.js"`
+    `https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/${bsNativeVersion}/bootstrap-native-v4.min.js"`,
+    'https://js.stripe.com/v3/'
   ]
   : [
+    'https://js.stripe.com/v3/',
     '/bootstrap.native/dist/bootstrap-native.js',
     '/script/main.js'
   ];
@@ -112,9 +114,7 @@ export class LayoutBuilder {
       },
       scripts: {
         // Add stripe js on payment page.
-        links: this.reqPath?.startsWith(subsMap.pay)
-          ? scriptLinks.concat(['https://js.stripe.com/v3/'])
-          : scriptLinks,
+        links: scriptLinks,
         includes: scriptIncludes,
       },
       env: {
