@@ -7,7 +7,7 @@ export type Cycle = "month" | "year";
 export type Gender = "M" | "F";
 export type Platform = "web" | "ios" | "android"
 export type SubStatus = "active" | "canceled" | "incomplete" | "incomplate_expired" | "past_due" | "trialing" | "unpaid";
-export type OrderType = "create" | "renew" | "upgrade" | 'downgrade';
+export type OrderType = "create" | "renew" | "upgrade" | 'downgrade' | 'add_on';
 export type AccountKind = "ftc" | "wechat" | "linked";
 
 export const tiers: Tier[] = ['standard', 'premium'];

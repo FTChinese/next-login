@@ -23,6 +23,7 @@ export const orderIntent: Record<OrderType, string> = {
   renew: '续订FT会员',
   upgrade: '升级高端版',
   downgrade: '转为标准版',
+  add_on: '自动续订备用包'
 };
 
 export const gendersCN: Record<Gender, string> = {
