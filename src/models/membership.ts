@@ -1,4 +1,4 @@
-import { Tier, Cycle, PaymentMethod, SubStatus, OrderType } from "./enums";
+import { Tier, Cycle, PaymentMethod, SubStatus, OrderType, Edition } from "./enums";
 import { DateTime } from "luxon";
 import { Flash } from "../widget/flash";
 import { localizeTier, membershipSource } from "./localization";
@@ -50,6 +50,15 @@ export interface MemberStatus {
   ordersLink?: string;
 }
 
+interface CheckoutIntent {
+  orderKind?: OrderType;
+  warning: string;
+  payMethods: PaymentMethod[];
+}
+
+/**
+ * MembershipParse converts Membership object into class.
+ */
 export class MembershipParser {
   readonly expirationTime?: DateTime;
   readonly today = DateTime.local().startOf('day');
@@ -77,11 +86,11 @@ export class MembershipParser {
     return this.expirationTime < this.today;
   }
 
-  get renewOffExpired(): boolean {
+  get autoRenewOffExpired(): boolean {
     return this.expired && !this.member.autoRenew;
   }
 
-  get canRenewViaAliWx(): boolean {
+  get withinAliWxRenewalPeriod(): boolean {
     if (!this.expirationTime) {
       return false;
     }
@@ -106,7 +115,7 @@ export class MembershipParser {
       return undefined;
     }
   
-    const renewable = this.isAliOrWxPay && this.canRenewViaAliWx;
+    const renewable = this.isAliOrWxPay && this.withinAliWxRenewalPeriod;
 
     const upgradable = renewable && (this.member.tier == 'standard');
 
@@ -131,6 +140,84 @@ export class MembershipParser {
         : undefined,
       autoRenew: this.member.autoRenew,
       ordersLink: subsMap.orders,
+    };
+  }
+
+  checkoutIntent(edition: Edition): CheckoutIntent {
+    if (this.autoRenewOffExpired) {
+      return {
+        orderKind: 'create',
+        payMethods: ['alipay', 'wechat', 'stripe'],
+        warning: '支付宝和微信为一次性购买，到期需重新购买。Stripe为自动续订。'
+      };
+    }
+
+    if (this.member.payMethod === 'b2b') {
+      return {
+        orderKind: 'add_on',
+        payMethods: ['alipay', 'wechat'],
+        warning: '您当前使用的订阅为企业版。在此选择微信/支付宝购买属于个人版，将在企业版到期后启用。',
+      }
+    }
+
+    // Renewal
+    if (this.member.tier === edition.tier) {
+      // Depending on how current membership is purchased.
+      switch (this.member.payMethod) {
+        // For ali and wx, should continue to use them.
+        case 'alipay':
+        case 'wechat':
+          if (!this.withinAliWxRenewalPeriod) {
+            return {
+              orderKind: 'renew',
+              payMethods: [],
+              warning: '剩余时间超出允许的最长续订期限',
+            };
+          }
+          return {
+            orderKind: 'renew',
+            payMethods: ['alipay', 'wechat', 'stripe'], // If using stripe, move remaining days to add-on.
+            warning: 'Stripe采取自动续订模式，如果转用Stripe订阅，我们会把当前订阅的剩余时间留待Stripe订阅失效后启用'
+          };
+
+        case 'stripe':
+        case 'apple':
+          return {
+            orderKind: 'add_on',
+            payMethods: ['alipay', 'wechat'],
+            warning: 'Stripe/苹果内购采用自动续订模式，通过微信/支付宝进行的一次性购买，将在自动续订失效后启用'
+          }
+      }
+    }
+
+    // Upgrade
+    if (edition.tier === 'premium') {
+      switch (this.member.payMethod) {
+        case 'alipay':
+        case 'wechat':
+          return {
+            orderKind: 'upgrade',
+            payMethods: ['alipay', 'wechat', 'stripe'],
+            warning: '升级高端会员将即可启用，标准版的剩余时间将在高端版失效后继续使用'
+          };
+
+        case 'stripe':
+          return {
+            orderKind: 'upgrade',
+            payMethods: ['stripe'],
+            warning: 'Stripe订阅升级高端版会自动调整您的扣款额度'
+          }
+        case 'apple':
+          return {
+            payMethods: [],
+            warning: '苹果内购的订阅升级高端版需要在您的苹果设备上，使用您的原有苹果账号登录后，在FT中文网APP内操作'
+          }
+      }
+    }
+
+    return {
+      payMethods: [],
+      warning: '仅支持新建订阅、续订和标准版升级高端版，不支持其他操作。'
     };
   }
 }

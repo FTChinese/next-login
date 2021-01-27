@@ -13,7 +13,7 @@ import { APIError } from "../models/api-response";
 import { toDataURL } from "qrcode";
 import { subsMap } from "../config/sitemap";
 import {  MembershipParser } from "../models/membership";
-import { Cart, Plan, PlanParser, UpgradeIntent, Wallet} from "../models/paywall";
+import { Cart, Plan, PlanParser} from "../models/paywall";
 import { isMobile } from "../util/detector";
 
 // Define the section to show wechat QR code.
@@ -31,7 +31,7 @@ interface PaymentPage {
   sandbox: boolean;
   cart?: Cart;
   // Tell Stripe and IAP user service not offered on desktop.
-  denied?: string;
+  warning?: string;
   // The form to show a list of pament method:
   // Alipay;
   // Wxpay;
@@ -40,63 +40,28 @@ interface PaymentPage {
   qr?: WxQR; // Use to show Wechat payment QR Code if user selected wxpay.
 }
 
-interface PaymentIntent {
-  denied?: string; // The payment intent is denied and the reason is provided.
-  useWallet: boolean;
-}
 
+/**
+ * PaymentPageBuilder calculates and converts the data to be visible on payment page.
+ */
 export class PaymentPageBuilder {
-  flashMsg?: string;
-  payMethod?: PaymentMethod;
+  flashMsg?: string; // In case any errors when fetching data from API, or form submitted being invalid.
+  payMethod?: PaymentMethod; // Payment method user chosen.
   wxOrder?: WxOrder;
 
   private mp: MembershipParser; // Membership.
-  private orderKind: OrderType;
-
   private plan?: Plan; // The plan chosen.
-  private paymentDenied?: string // reason why payment is denied.
-  private upgradeIntent?: UpgradeIntent;
   
+  // To build the payment page, all we need to know is
+  // user account and the edition of product.
   constructor(
     readonly account: Account,
     readonly edition: Edition,
   ) {
     this.mp = new MembershipParser(account.membership);
-    this.orderKind = this.deduceOrderKind;
   }
 
-  // Deduce what kind of order user is creating
-  // based on its current expiration time and tier.
-  // This does not take into its current payment method,
-  //  therefore you cannot take it as the final decision as different payment methods has specific requirements.
-  private get deduceOrderKind(): OrderType {
-
-    if (this.mp.renewOffExpired) {
-      return 'create';
-    }
-
-    if (this.mp.member.tier === this.edition.tier) {
-      return 'renew';
-    }
-
-    // Now user membership's tier !== selected plan tier.
-    if (this.edition.tier === 'premium') {
-      return 'upgrade';
-    }
-
-    if (this.edition.tier === 'standard') {
-      return 'downgrade';
-    }
-
-    return 'create';
-  }
-
-  // Whether we should retrieve user's wallet.
-  private get useWallet(): boolean {
-    return this.mp.isAliOrWxPay && !this.mp.expired && this.orderKind === 'upgrade';
-  }
-
-  // Find the plan use chosen.
+  // Find the plan user chosen.
   async loadPlan(): Promise<boolean> {
     try {
       const plan = await subsService.pricingPlan(this.edition, isTestAccount(this.account));
@@ -113,77 +78,76 @@ export class PaymentPageBuilder {
     }
   }
 
-  // Test if payment is allowed. Call this after loadPlan() and before loadBalance()
-  isPaymentAllowed(): boolean {
-    if (this.mp.renewOffExpired) {
-      return true
+  
+
+  private buildPayControls(payMethods: PaymentMethod[]): FormControl[] {
+    const controls: FormControl[] = [];
+
+    for (const method of payMethods) {
+      switch (method) {
+        case 'alipay':
+          controls.push(
+            new FormControl({
+              label: {
+                text: '支付宝',
+                imageUrl: 'http://www.ftacademy.cn/images/alipay-68x24.png',
+                suffix: true,
+              },
+              controlType: ControlType.Radio,
+              field: new RadioInputElement({
+                id: "alipay",
+                name: "payMethod",
+                value: "alipay",
+                checked: this.payMethod === method,
+              }),
+              extraWrapperClass: "mb-3",
+            })
+          );
+          break;
+
+        case 'wechat':
+          controls.push(
+            new FormControl({
+              label: {
+                text: '微信支付',
+                imageUrl: 'http://www.ftacademy.cn/images/wxpay-113x24.png',
+                suffix: true,
+              },
+              controlType: ControlType.Radio,
+              field: new RadioInputElement({
+                id: "wechat",
+                name: "payMethod",
+                value: "wechat",
+                checked: this.payMethod === method,
+              }),
+              extraWrapperClass: 'mb-3',
+            })
+          );
+          break;
+
+        case 'stripe':
+          controls.push(
+            new FormControl({
+              label: {
+                text: 'Stripe',
+                imageUrl: 'http://www.ftacademy.cn/images/stripe-58x24.png',
+                suffix: true,
+              },
+              controlType: ControlType.Radio,
+              field: new RadioInputElement({
+                id: "stripe",
+                name: "payMethod",
+                value: "stripe",
+                checked: this.payMethod === method,
+              }),
+              extraWrapperClass: 'mb-3',
+            })
+          );
+          break;
+      }
     }
 
-    switch (this.mp.member.payMethod) {
-      case 'alipay':
-      case 'wechat':
-        const orderKind = this.orderKind;
-
-        if (orderKind === 'renew' && !this.mp.canRenewViaAliWx) {
-          this.paymentDenied = '剩余时间超出续订期限限制';
-          return false;
-        }
-
-        return true;
-      
-      // If stripe is supported, provide ali, wx, and tell user the purchase will only be used upon stripe expiration.
-      // There's a problem to tackle:
-      // If orderKind is upgrade, obviously user want to change it immediately.
-      case 'stripe':
-        this.paymentDenied = 'Stripe支付目前仅支持安卓平台';
-        return false;
-
-      case 'apple':
-        this.paymentDenied = 'App Store订阅需要在您的设备上管理。在您的苹果设备中依次打开“设置”，选择您的账号，点击“订阅”。';
-        return false;
-
-      case 'b2b':
-        this.paymentDenied = '企业订阅请联系您所属机构的管理员。';
-        return false
-    }
-
-    return true;
-  }
-
-  // Load balance for upgrading.
-  async loadBalance(): Promise<boolean> {
-    if (!this.useWallet) {
-      return true;
-    }
-
-    try {
-      const ui = await subsService.getBalance(this.account);
-
-      this.upgradeIntent = ui;
-      return true;
-    } catch (e) {
-      const errResp = new APIError(e);
-      this.flashMsg = errResp.message;
-      return false;
-    }
-  }
-
-  // Validate payment method after user submitted it.
-  validate(payMethod?: PaymentMethod): boolean {
-    if (!payMethod) {
-      this.flashMsg = "请选择支付方式";
-
-      return false;
-    }
-
-    if (payMethod != "alipay" && payMethod != "wechat") {
-      this.flashMsg = "请从支付宝或微信支付中选择一种支付方式";
-
-      return false;
-    }
-
-    this.payMethod = payMethod
-    return true;
+    return controls;
   }
 
   async build(): Promise<PaymentPage> {
@@ -191,6 +155,8 @@ export class PaymentPageBuilder {
       throw new Error('Pricing plan not found');
     }
 
+    const intent = this.mp.checkoutIntent(this.edition);
+    // Use pricing plan to build cart.
     const planParser = new PlanParser(this.plan);
 
     const p: PaymentPage = {
@@ -199,11 +165,13 @@ export class PaymentPageBuilder {
         ? Flash.danger(this.flashMsg)
         : undefined,
       sandbox: isTestAccount(this.account),
-      cart: planParser.buildCart(this.orderKind, this.upgradeIntent?.wallet),
-      denied: this.paymentDenied,
+      cart: intent.orderKind
+        ? planParser.buildCart(intent.orderKind)
+        : undefined,
+      warning: intent.warning,
     };
 
-    if (p.flash || p.denied) {
+    if (p.flash || intent.payMethods.length == 0) {
       return p;
     }
 
@@ -218,38 +186,7 @@ export class PaymentPageBuilder {
         disabled: false,
         method: "post",
         action: "",
-        controls: [
-          new FormControl({
-            label: {
-              text: '支付宝',
-              imageUrl: 'http://www.ftacademy.cn/images/alipay-68x24.png',
-              suffix: true,
-            },
-            controlType: ControlType.Radio,
-            field: new RadioInputElement({
-              id: "alipay",
-              name: "payMethod",
-              value: "alipay",
-              checked: this.payMethod === "alipay",
-            }),
-            extraWrapperClass: "mb-3",
-          }),
-          new FormControl({
-            label: {
-              text: '微信支付',
-              imageUrl: 'http://www.ftacademy.cn/images/wxpay-113x24.png',
-              suffix: true,
-            },
-            controlType: ControlType.Radio,
-            field: new RadioInputElement({
-              id: "wechat",
-              name: "payMethod",
-              value: "wechat",
-              checked: this.payMethod === "wechat",
-            }),
-            extraWrapperClass: 'mb-3',
-          }),
-        ],
+        controls: this.buildPayControls(intent.payMethods),
         submitBtn: Button.primary()
           .setName(`支付 ${p.cart?.payable}`)
           .setBlock()
@@ -267,6 +204,30 @@ export class PaymentPageBuilder {
     };
 
     return p;
+  }
+
+  // Validate payment method after user submitted it.
+  validate(payMethod?: PaymentMethod): boolean {
+    if (!payMethod) {
+      this.flashMsg = "请选择支付方式";
+
+      return false;
+    }
+
+    const allowedMethods: PaymentMethod[] = [
+      'alipay',
+      'wechat',
+      'stripe'
+    ];
+
+    if (!allowedMethods.includes(payMethod)) {
+      this.flashMsg = "请从支付宝或微信支付中选择一种支付方式";
+
+      return false;
+    }
+
+    this.payMethod = payMethod
+    return true;
   }
 
   async alipay(client: HeaderApp, origin: string): Promise<AliOrder | null> {

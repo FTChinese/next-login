@@ -17,15 +17,13 @@ import {
   viper,
 } from "../config/viper";
 import {
-  IAliCallback, AliOrder, WxOrder,
+  AliOrder, WxOrder,
 } from "../models/order";
 import { MembershipPageBuilder } from "../pages/membership-page";
 import { PaymentPageBuilder } from "../pages/payment-page";
 import { AlipayResultBuilder, WxpayResultBuilder } from "../pages/pay-reseult-page";
 import { paywallCache } from "../repository/cache";
-import { Paywall } from "../models/paywall";
 import { subsMap } from "../config/sitemap";
-import { cy } from "date-fns/locale";
 
 const log = debug("user:subscription");
 
@@ -78,32 +76,13 @@ router.get("/pay/:tier/:cycle", async (ctx, next) => {
     cycle,
   });
 
+  // Find the pricing plan user chosen to build cart.
   const planLoaded = await builder.loadPlan();
   if (!planLoaded) {
     const uiData = await builder.build();
     Object.assign(
       ctx.state,
       uiData,
-    );
-    return await next();
-  }
-
-  const payAllowed = builder.isPaymentAllowed();
-  if (!payAllowed) {
-    const uiData = await builder.build();
-    Object.assign(
-      ctx.state,
-      uiData,
-    );
-    return await next();
-  }
-
-  const walletLoaded = await builder.loadBalance();
-  if (!walletLoaded) {
-    const uiData = await builder.build();
-    Object.assign(
-      ctx.state,
-      uiData
     );
     return await next();
   }
@@ -138,18 +117,9 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
     cycle,
   });
 
+  // Find out which pricing plan user chosen.
   const planLoaded = await builder.loadPlan();
   if (!planLoaded) {
-    const uiData = await builder.build();
-    Object.assign(
-      ctx.state,
-      uiData,
-    );
-    return await next();
-  }
-
-  const payAllowed = builder.isPaymentAllowed();
-  if (!payAllowed) {
     const uiData = await builder.build();
     Object.assign(
       ctx.state,
@@ -222,7 +192,6 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
  */
 router.get("/done/ali", async (ctx, next) => {
   const account: Account = ctx.state.user;
-  const query: IAliCallback = ctx.request.query;
 
   // @ts-ignore
   const order: AliOrder | undefined = ctx.session.order;
@@ -318,12 +287,12 @@ router.get("/done/wx", async (ctx, next) => {
   ctx.body = await render("subscription/pay-done.html", ctx.state);
 });
 
-router.get('/__paywall', async (ctx, next) => {
+router.get('/__paywall', async (ctx) => {
   ctx.status = 200;
   ctx.body = paywallCache.getPaywall();;
 });
 
-router.get('/__paywall/refresh', async (ctx, next) => {
+router.get('/__paywall/refresh', async (ctx) => {
   paywallCache.clear();
   ctx.redirect(subsMap.paywall);
 });

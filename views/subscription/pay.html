@@ -16,10 +16,6 @@
         {% if cart.priceOff %}
           <div class="text-danger">{{cart.priceOff}}</div>
         {% endif %}
-        {% if cart.balance %}
-          <div>{{cart.balance}}</div>
-          <div>升级价格优先使用当前会员未使用部分金额抵扣，不足部分需要补足。如果当前余额超过产品价格，则可直接升级，无需另行支付。</div>
-        {% endif %}
       </div>
       {% endif %}
       
@@ -43,9 +39,9 @@
       {% endif %}
       <!-- End card -->
 
-      {% if denied %}
-        <div class="text-danger text-center">
-          {{ denied }}
+      {% if warning %}
+        <div class="text-danger text-center mb-5">
+          {{ warning }}
         </div>
       {% endif %}
 

@@ -15,7 +15,7 @@ import {
   HeaderApp,
 } from "../models/header";
 import { oauth, noCache } from "../util/request";
-import { Paywall, Plan, UpgradeIntent } from "../models/paywall";
+import { Paywall, Plan } from "../models/paywall";
 import { Edition } from '../models/enums';
 import { paywallCache } from "./cache";
 import { subsMap } from "../config/sitemap";
@@ -64,18 +64,6 @@ class SubscriptionService {
     paywallCache.savePlans(body);
 
     return body.find(plan => plan.tier == e.tier && plan.cycle == e.cycle);
-  }
-
-  async getBalance(account: Account): Promise<UpgradeIntent> {
-    const resp = await request
-      .get(subsApi.upgradeBalance(isTestAccount(account)))
-      .use(oauth)
-      .use(noCache)
-      .set({
-        ...collectAccountIDs(account)
-      });
-
-    return resp.body;
   }
 
   async aliDesktopPay(plan: Plan, config: AlipayConfig): Promise<AliOrder> {

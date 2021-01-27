@@ -4,19 +4,6 @@ import { formatMoney } from "../util/formatter";
 import { Cycle, Edition, OrderType, Tier } from "./enums";
 import { localizeCurrency, localizeCycle, localizeTier, orderIntent } from "./localization";
 
-export interface Wallet {
-  balance: number;
-  cratedAt: string;
-}
-
-export interface UpgradeIntent {
-  amount: number;
-  currency: string;
-  cycleCount: number;
-  extraDays: number;
-  wallet: Wallet;
-}
-
 export interface Banner {
   id: number;
   heading: string;
@@ -112,7 +99,6 @@ export interface Cart {
   planName: string;
   price: string;
   priceOff?: string;
-  balance?: string;
   payable: string;
 }
 
@@ -175,16 +161,10 @@ export class PlanParser {
       : undefined
   }
 
-  calculatePayable(balance: number): number {
-    const price = this.isDiscountValid
+  private get payable(): number {
+    return this.isDiscountValid
       ? this.plan.price - (this.plan.discount.priceOff || 0) 
       : this.plan.price;
-
-    if (balance > price) {
-      return 0;
-    }
-
-    return price - balance;
   }
 
   /**
@@ -192,21 +172,15 @@ export class PlanParser {
    * @param kind - Which kind of order this user is creating: create | renew | upgrade.
    * @param wallet - Used to calculate current balance. It only exists for ali or wx pay upgrading.
    */
-  buildCart(kind: OrderType, wallet?: Wallet): Cart {
+  buildCart(kind: OrderType): Cart {
     return {
       header: orderIntent[kind],
       planName: planName(this.plan.tier, this.plan.cycle),
       price: this.originalPrice,
       priceOff: this.offPrice,
-      balance: wallet 
-        ? '余额 ' + formatPriceText({
-          currency: 'cny',
-          amount: wallet.balance
-        }) 
-        : undefined,
       payable: formatPriceText({
         currency: 'cny',
-        amount: this.calculatePayable(wallet?.balance || 0),
+        amount: this.payable,
       }),
     };
   }
@@ -220,31 +194,6 @@ export function planName(tier: Tier, cycle: Cycle): string {
 
 export function cartHeader(forMember: boolean): string {
   return forMember ? '续订FT会员' : '订阅FT会员';
-}
-
-export function newCart(plan: Plan, forMember: boolean): Cart {
-  const hasDiscount = isDiscountValid(plan.discount);
-
-  return {
-    header: cartHeader(forMember),
-    planName: planName(plan.tier, plan.cycle),
-    price: formatPriceText({
-      currency: 'cny',
-      amount: plan.price,
-    }),
-    priceOff: hasDiscount
-      ? '优惠减 ' + formatPriceText({
-        currency: 'cny',
-        amount: plan.discount.priceOff || 0,
-      })
-      : undefined,
-    payable: formatPriceText({
-      currency: 'cny',
-      amount: hasDiscount 
-        ? plan.price - (plan.discount.priceOff || 0) 
-        : plan.price
-    }),
-  }
 }
 
 export interface Product {
