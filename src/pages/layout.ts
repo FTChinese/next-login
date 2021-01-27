@@ -1,8 +1,8 @@
 import { Account, isAccountFtcOnly } from "../models/account";
 import { viper } from "../config/viper";
-import { buildSidebar, SidebarItem, sidebarItems } from "../widget/sidebar";
+import { buildSidebar, SidebarItem } from "../widget/sidebar";
 import { FooterSection, footer } from "../widget/footer";
-import { accountMap, androidMap, entranceMap } from "../config/sitemap";
+import { accountMap, androidMap, entranceMap, subsMap } from "../config/sitemap";
 import { Link } from "../widget/link";
 const pkg = require("../../package.json");
 
@@ -74,13 +74,14 @@ export class LayoutBuilder {
     href: entranceMap.login,
   }
 
+  // Override default title.
   setTitle(t: string): LayoutBuilder {
     this.title = t;
     return this;
   }
 
   /**
-   * @description Used to decide which navigation item should be highlighted. Use only after logged-in.
+   * @description Used to decide which navigation item should be highlighted. Used only after logged-in.
    * @param p - current request path.
    */
   setPath(p: string): LayoutBuilder {
@@ -88,6 +89,8 @@ export class LayoutBuilder {
     return this;
   }
 
+  // Determine whether we should show the box to urge
+  // user to verify email address.
   setAccount(a: Account): LayoutBuilder {
     this.account = a;
     return this;
@@ -108,7 +111,10 @@ export class LayoutBuilder {
         includes: styleIncludes,
       },
       scripts: {
-        links: scriptLinks,
+        // Add stripe js on payment page.
+        links: this.reqPath?.startsWith(subsMap.pay)
+          ? scriptLinks.concat(['https://js.stripe.com/v3/'])
+          : scriptLinks,
         includes: scriptIncludes,
       },
       env: {
