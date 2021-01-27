@@ -103,7 +103,7 @@ class Viper {
 
     get subsAPIBaseUrl(): SubsAPIBaseURLs {
       return {
-        dev: "http://localhost:8200",
+        dev: "http://localhost:8202",
         prod: this.getConfig().api_url.subscription_v1,
         v2: this.getConfig().api_url.subs_v2,
         sandbox: this.getConfig().api_url.sub_sandbox
