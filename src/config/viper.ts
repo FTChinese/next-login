@@ -7,11 +7,16 @@ export interface IOAuthClient {
     client_secret: string;
 }
 
-export interface IAccessToken {
-    development: string;
-    production: string;
+interface APIKeys {
+  dev: string;
+  prod: string;
 }
 
+interface WebAppConfig {
+  koa_session: string;
+  jwt_signing_key: string;
+  csrf_key: string;
+}
 export interface IWxApp {
     app_id: string;
     secret: string;
@@ -27,9 +32,9 @@ interface OAuthHeader {
 }
 
 interface Config {
-    koa_session: {
-        next_user: string;
-    };
+    web_app: {
+      next_reader: WebAppConfig;
+    }
     wxapp: {
         web_pay: IWxPayApp;
         web_oauth: IWxApp;
@@ -42,16 +47,18 @@ interface Config {
     api_url: {
         reader_v1: string;
         subscription_v1: string;
+        subs_v2: string;
         sub_sandbox: string;
     };
-    access_token: {
-        next_reader: IAccessToken;
-    };
+    api_keys: {
+      next_reader: APIKeys;
+    }
 }
 
 interface SubsAPIBaseURLs {
   dev: string;
   prod: string;
+  v2: string;
   sandbox: string; // Sandbox on production server. This is only used by test account for stripe pay, or iap for refreshing.
 }
 
@@ -98,6 +105,7 @@ class Viper {
       return {
         dev: "http://localhost:8200",
         prod: this.getConfig().api_url.subscription_v1,
+        v2: this.getConfig().api_url.subs_v2,
         sandbox: this.getConfig().api_url.sub_sandbox
       };
     }
@@ -108,13 +116,13 @@ class Viper {
         }
 
         const tokens = this.getConfig()
-            .access_token
+            .api_keys
             .next_reader;
 
         if (this.isProduction) {
-            this.accessToken = tokens.production;
+            this.accessToken = tokens.prod;
         } else {
-            this.accessToken = tokens.development
+            this.accessToken = tokens.dev
         }
 
         return this.accessToken;

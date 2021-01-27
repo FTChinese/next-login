@@ -37,7 +37,7 @@ const app = new Koa();
 const router = new Router();
 
 app.proxy = true;
-app.keys = [config.koa_session.next_user];
+app.keys = [config.web_app.next_reader.koa_session];
 
 if (process.env.NODE_ENV != "production") {
   app.use(serve(resolve(__dirname, "../node_modules")));
