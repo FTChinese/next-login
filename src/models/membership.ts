@@ -124,7 +124,7 @@ export class MembershipParser {
         ? subsMap.checkoutUrl(this.member.tier!, this.member.cycle!) 
         : undefined,
       upgradeLink: upgradable
-        ? subsMap.upgrade
+        ? subsMap.checkoutUrl("premium", "year")
         : undefined,
       sourceMsg: this.member.payMethod
         ? membershipSource[this.member.payMethod]
