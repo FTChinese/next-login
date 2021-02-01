@@ -89,6 +89,12 @@ export function collectAccountIDs(a: Account): HeaderReaderId {
   return headers;
 }
 
+export function collectFtcID(a: Account): HeaderReaderId {
+  const headers: HeaderReaderId = {};
+  headers[KEY_USER_ID] = a.id;
+  return headers;
+}
+
 export function customerServiceEmail(account: Account): string {
 
   if (!isMember(account.membership)) {
