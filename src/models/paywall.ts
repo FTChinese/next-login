@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import { subsMap } from "../config/sitemap";
 import { formatMoney } from "../util/formatter";
 import { Cycle, Edition, OrderType, Tier } from "./enums";
-import { localizeCurrency, localizeCycle, localizeTier, orderIntent } from "./localization";
+import { formatPriceText, localizeCurrency, localizeCycle, localizeTier, orderIntent } from "./localization";
 
 export interface Banner {
   id: number;
@@ -78,20 +78,6 @@ interface PriceLink {
   highlight: boolean;
   original: string;
   discounted?: string;
-}
-
-interface PriceText {
-  currency: string;
-  amount: number;
-  cycle?: Cycle;
-}
-
-function formatPriceText(p: PriceText): string {
-  const cycle = p.cycle
-    ? `/${localizeCycle(p.cycle)}`
-    : '';
-
-  return `${localizeCurrency(p.currency)}${formatMoney(p.amount)}${cycle}`
 }
 
 export interface Cart {
@@ -185,8 +171,6 @@ export class PlanParser {
     };
   }
 }
-
-
 
 export function planName(tier: Tier, cycle: Cycle): string {
   return `${localizeTier(tier)}/${localizeCycle(cycle)}`;
