@@ -1,0 +1,17 @@
+{
+  "ext": "ts",
+  "exec": "ts-node src/server.ts",
+  "ignore": [
+    "Makefile",
+    "build/**",
+    "client/**",
+    "views/**",
+    "test/**"
+  ],
+  "env": {
+    "NODE_ENV": "development",
+    "PORT": 4300,
+    "DEBUG": "user*"
+  },
+  "verbose": true
+}

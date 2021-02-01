@@ -9,7 +9,7 @@ ENTRY := dist/server.js
 .PHONY: start watchts watchode build run pkg deploy clean
 
 start :
-	$(cmd_prefix)/nodemon --ext ts --ignore dist/ --exec ${cmd_prefix}/ts-node src/server.ts
+	$(cmd_prefix)/nodemon
 
 watchts :
 	$(cmd_prefix)/tsc -w
