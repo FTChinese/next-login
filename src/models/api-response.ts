@@ -148,6 +148,19 @@ export class APIError extends Error{
         [this.unprocessable.field, msg]
       ]);
     }
+
+    // Error payload for the /api router.
+    get apiResp(): ApiErrorPayload {
+      const p: ApiErrorPayload =  {
+        message: this.message,
+      }
+
+      if (this.unprocessable) {
+        p.error = this.unprocessable;
+      }
+
+      return p;
+    }
 }
 
 export interface IFetchResult<T> {
