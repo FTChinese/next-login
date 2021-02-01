@@ -12,13 +12,14 @@ import {
   OrderBase,
 } from "../models/order";
 import {
-  HeaderApp,
+  HeaderApp, KEY_USER_ID,
 } from "../models/header";
 import { oauth, noCache } from "../util/request";
 import { Paywall, Plan } from "../models/paywall";
 import { Edition } from '../models/enums';
 import { paywallCache } from "./cache";
 import { subsMap } from "../config/sitemap";
+import { CheckoutJWTPayload, CheckoutSession, newCheckoutReq, Price, StripeEdition } from "../models/stripe";
 
 export type PayConfig =  {
   account: Account;
@@ -31,6 +32,10 @@ export type AlipayConfig =  PayConfig & {
 
 class SubscriptionService {
 
+  /**
+   * @description Fetch ftc paywall data
+   * @param sandbox 
+   */
   async paywall(sandbox: boolean): Promise<Paywall> {
     const value = paywallCache.getPaywall();
     
@@ -49,23 +54,33 @@ class SubscriptionService {
     return body;
   }
 
-  async pricingPlan(e: Edition, sandbox: boolean): Promise<Plan | undefined> {
-    const plan = paywallCache.getPlan(e);
+  /**
+   * @description Fetch a ftc plan.
+   * @param e 
+   * @param sandbox 
+   */
+  async getFtcPlan(e: Edition, sandbox: boolean): Promise<Plan | undefined> {
+    const plan = paywallCache.getFtcPlan(e);
     if (plan) {
       return plan;
     }
 
     const resp = await request
-      .get(subsApi.pricingPlans(sandbox))
+      .get(subsApi.ftcPlans(sandbox))
       .use(oauth);
 
     const body: Plan[] = resp.body;
 
-    paywallCache.savePlans(body);
+    paywallCache.saveFtcPlans(body);
 
     return body.find(plan => plan.tier == e.tier && plan.cycle == e.cycle);
   }
 
+  /**
+   * @description Create order for alipay in desktop browser.
+   * @param plan 
+   * @param config 
+   */
   async aliDesktopPay(plan: Plan, config: AlipayConfig): Promise<AliOrder> {
 
     const sandbox = isTestAccount(config.account);
@@ -91,16 +106,7 @@ class SubscriptionService {
     return resp.body;
   }
 
-  async verifyPayResult(order: OrderBase, account: Account): Promise<PaymentResult> {
-    const sandbox = isTestAccount(account)
-    const resp = await request
-      .post(subsApi.verifyPayment(order.id, sandbox))
-      .use(oauth)
-      .use(noCache)
-
-    return resp.body;
-  }
-
+  // Create order for alipay on mobile browser
   async aliMobilePay(plan: Plan, config: AlipayConfig): Promise<AliOrder> {
 
     const sandbox = isTestAccount(config.account);
@@ -126,6 +132,13 @@ class SubscriptionService {
     return resp.body;
   }
 
+  /**
+   * Create order for wechat pay on desktop.
+   * Payment in mobile browsers cannot be performed
+   * in this app since Wechat verifies the origin's IP.
+   * @param plan 
+   * @param config 
+   */
   async wxDesktopPay(plan: Plan, config: {appHeaders: HeaderApp, account: Account}): Promise<WxOrder> {
 
     const sandbox = isTestAccount(config.account);
@@ -150,16 +163,66 @@ class SubscriptionService {
     return resp.body;
   }
 
-  // async wxOrderQuery(account: Account, orderId: string): Promise<IWxQueryResult> {
+  /**
+   * @description Verify an order to get payment result
+   * @param order 
+   * @param account 
+   */
+  async verifyPayResult(order: OrderBase, account: Account): Promise<PaymentResult> {
+    const sandbox = isTestAccount(account)
+    const resp = await request
+      .post(subsApi.verifyPayment(order.id, sandbox))
+      .use(oauth)
+      .use(noCache)
 
-  //   const resp = await request
-  //     .get(subsApi.wxQueryOrder(orderId, isTestAccount(account)))
-  //     .use(oauth)
-  //     .use(noCache)
-  //     .set(collectAccountIDs(account));
+    return resp.body;
+  }
 
-  //   return resp.body as IWxQueryResult;
-  // }
+  /**
+   * @description Fetch a list of stripe prices.
+   * @param account - Used to distinguish live or test mode.
+   */
+  async getStripePrice(e: Edition, sandbox: boolean): Promise<Price | undefined> {
+    const se: StripeEdition = {
+      tier: e.tier,
+      cycle: e.cycle,
+      live: !sandbox
+    }
+
+    const price = paywallCache.getStripePrice(se);
+
+    if (price) {
+      return price;
+    }
+
+    const resp = await request
+      .get(subsApi.stripePriceList(sandbox))
+      .use(oauth);
+
+    const prices: Price[] = resp.body;
+    paywallCache.saveStripePrices(prices);
+
+    return paywallCache.getStripePrice(se)
+  }
+
+  /**
+   * @description Create a stripe checkout session.
+   * @param body 
+   * @param account 
+   */
+  async stripeCheckoutSession(payload: CheckoutJWTPayload, origin: string): Promise<CheckoutSession> {
+
+    const resp = await request
+      .post(subsApi.stripeCheckout(payload.test))
+      .use(oauth)
+      .use(noCache)
+      .set({
+        [KEY_USER_ID]: payload.uid,
+      })
+      .send(newCheckoutReq(origin, payload));
+
+    return resp.body;
+  }
 }
 
 export const subsService = new SubscriptionService();
