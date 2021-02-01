@@ -41,6 +41,7 @@ class SubsMap {
   readonly upgrade =        `${this.base}/upgrade`;
   readonly alipayDone =     `${this.base}/done/ali`;
   readonly wxpayDone =      `${this.base}/done/wx`;
+  readonly stripeDone =     `${this.base}/done/stripe`
   readonly redeem =         `${this.base}/redeem`;
   readonly paywall =        `${this.base}/__paywall`;
 
