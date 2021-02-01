@@ -6,7 +6,6 @@ import marked from "marked";
 import { formatMoney, iso8601ToCST } from "./formatter";
 import { Tier, Cycle, PaymentMethod } from "../models/enums";
 import { tiersCN, cyclesCN, paymentMethodsCN, currencySymbols } from "../models/localization";
-import { search } from "superagent";
 
 const env = configure(
   [resolve(__dirname, "../../views"), resolve(__dirname, "../../client")],
