@@ -2,7 +2,7 @@ import { Account, isAccountFtcOnly } from "../models/account";
 import { viper } from "../config/viper";
 import { buildSidebar, SidebarItem } from "../widget/sidebar";
 import { FooterSection, footer } from "../widget/footer";
-import { accountMap, androidMap, entranceMap, subsMap } from "../config/sitemap";
+import { accountMap, androidMap, entranceMap } from "../config/sitemap";
 import { Link } from "../widget/link";
 const pkg = require("../../package.json");
 
@@ -10,54 +10,16 @@ const bsVersion = pkg.devDependencies.bootstrap.replace("^", "");
 const bsNativeVersion = pkg.devDependencies["bootstrap.native"].replace("^", "");
 
 const iconUrl = "http://interactive.ftchinese.com/favicons";
-
-// Link to bootstrap css.
-// Production uses CDN while dev uses node_modules and custom css.
-const styleLinks = viper.isProduction
-  ? [
-    `https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/${bsVersion}/css/bootstrap.min.css`,
-  ]
-  : [
-    '/bootstrap/dist/css/bootstrap.css',
-    '/style/main.css'
-  ];
-
-// Include custom css by inlining for production.
-const styleIncludes = viper.isProduction
-  ? ['assets/style.html']
-  : [];
-
-// Link to bootstrap js.
-// Production uses CDN while dev uses node_modes and custom js.
-const scriptLinks = viper.isProduction
-  ? [
-    `https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/${bsNativeVersion}/bootstrap-native-v4.min.js"`,
-    'https://js.stripe.com/v3/'
-  ]
-  : [
-    'https://js.stripe.com/v3/',
-    '/bootstrap.native/dist/bootstrap-native.js',
-    '/script/main.js'
-  ];
-
-// Include custom js by inlining for production.
-const scriptIncludes = viper.isProduction
-  ? ['assets/script.html']
-  : [];
-
 export interface Layout {
   iconBaseUrl: string;
   subBrand: Link;
   pageTitle: string;
-  styles: {
-    links: string[];
-    includes: string[];
-  };
-  scripts: {
-    links: string[];
-    includes: string[];
-  };
   env: {
+    iconDimens: number[];
+    iconBaseUrl: string;
+    bsVersion: string;
+    bsNativeVersion: string;
+    isProduction: boolean,
     footer: FooterSection[];
     copyright: string;
     appVersion: string;
@@ -108,16 +70,12 @@ export class LayoutBuilder {
       iconBaseUrl: iconUrl,
       subBrand: this.subBrand,
       pageTitle: this.title,
-      styles: {
-        links: styleLinks,
-        includes: styleIncludes,
-      },
-      scripts: {
-        // Add stripe js on payment page.
-        links: scriptLinks,
-        includes: scriptIncludes,
-      },
       env: {
+        iconDimens: [180, 152, 120, 76],
+        iconBaseUrl: iconUrl,
+        bsVersion: bsVersion,
+        bsNativeVersion: bsNativeVersion,
+        isProduction: viper.isProduction,
         footer,
         copyright: this.copyright,
         appVersion: pkg.version,
