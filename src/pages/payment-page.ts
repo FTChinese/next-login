@@ -4,7 +4,7 @@ import { Button } from "../widget/button";
 import { FormControl } from "../widget/form-control";
 import { ControlType } from "../widget/widget";
 import { RadioInputElement } from "../widget/radio-input";
-import { OrderType, PaymentMethod, Edition } from "../models/enums";
+import { PaymentMethod, Edition } from "../models/enums";
 import { AliOrder, WxOrder } from "../models/order";
 import { subsService } from "../repository/subscription";
 import { Account, isTestAccount } from "../models/account";
@@ -15,6 +15,7 @@ import { subsMap } from "../config/sitemap";
 import {  MembershipParser } from "../models/membership";
 import { Cart, Plan, PlanParser} from "../models/paywall";
 import { isMobile } from "../util/detector";
+import { buildStripeCart, newCheckoutJWTPayload } from "../models/stripe";
 
 // Define the section to show wechat QR code.
 interface WxQR {
@@ -38,6 +39,8 @@ interface PaymentPage {
   // Stripe.
   form?: Form;
   qr?: WxQR; // Use to show Wechat payment QR Code if user selected wxpay.
+  useStripe?: boolean; // Determine whether DOM element and js should be added to page. Used by the pay.html and base.html page.
+  stripeApiJwt?: string;
 }
 
 
@@ -45,9 +48,10 @@ interface PaymentPage {
  * PaymentPageBuilder calculates and converts the data to be visible on payment page.
  */
 export class PaymentPageBuilder {
-  flashMsg?: string; // In case any errors when fetching data from API, or form submitted being invalid.
-  payMethod?: PaymentMethod; // Payment method user chosen.
-  wxOrder?: WxOrder;
+  private flashMsg?: string; // In case any errors when fetching data from API, or form submitted being invalid.
+  private payMethod?: PaymentMethod; // Payment method user chosen. Exits only after the POST method and validate() method is called.
+  private wxOrder?: WxOrder;
+  private useStripe = false;
 
   private mp: MembershipParser; // Membership.
   private plan?: Plan; // The plan chosen.
@@ -64,7 +68,7 @@ export class PaymentPageBuilder {
   // Find the plan user chosen.
   async loadPlan(): Promise<boolean> {
     try {
-      const plan = await subsService.pricingPlan(this.edition, isTestAccount(this.account));
+      const plan = await subsService.getFtcPlan(this.edition, isTestAccount(this.account));
       if (plan) {
         this.plan = plan;
         return true;
@@ -77,8 +81,6 @@ export class PaymentPageBuilder {
       return false;
     }
   }
-
-  
 
   private buildPayControls(payMethods: PaymentMethod[]): FormControl[] {
     const controls: FormControl[] = [];
@@ -171,14 +173,14 @@ export class PaymentPageBuilder {
       warning: intent.warning,
     };
 
-    if (p.flash || intent.payMethods.length == 0) {
+    if (intent.payMethods.length == 0) {
       return p;
     }
 
     // If wxOrder does not exist, show the 
     // payment method selection form,
     // otherwise show Wechat payment's QRCode
-    if (!this.wxOrder) {
+    if (!this.wxOrder && !this.useStripe) {
       // Only show the form when user is not a member,
       // or membership expired.
       // For valid Stripe, IAP and B2B, do not process it.
@@ -196,17 +198,37 @@ export class PaymentPageBuilder {
       return p;
     }
 
-    const dataUrl = await toDataURL(this.wxOrder.qrCodeUrl);
+    // Wechat pay order exists.
+    if (this.wxOrder) {
+      const dataUrl = await toDataURL(this.wxOrder.qrCodeUrl);
       
-    p.qr = {
-      dataUrl,
-      doneLink: subsMap.wxpayDone,
-    };
+      p.qr = {
+        dataUrl,
+        doneLink: subsMap.wxpayDone,
+      };
+  
+      return p;
+    }
+    
+    const [ token, price ] = await Promise.all([
+      newCheckoutJWTPayload(this.account, this.plan),
+      subsService.getStripePrice(
+        this.plan, 
+        isTestAccount(this.account),
+      ),
+    ]);
 
+    if (intent.orderKind && price) {
+      p.cart = buildStripeCart(intent.orderKind, price)
+    }
+    p.stripeApiJwt = token;
+
+    // Chose to use stripe.
     return p;
   }
 
-  // Validate payment method after user submitted it.
+  // Validate payment method after user submitted it
+  // and remember it.
   validate(payMethod?: PaymentMethod): boolean {
     if (!payMethod) {
       this.flashMsg = "请选择支付方式";
@@ -227,9 +249,11 @@ export class PaymentPageBuilder {
     }
 
     this.payMethod = payMethod
+    this.useStripe = payMethod === 'stripe';
     return true;
   }
 
+  // Handles payment via Ali. Called after HTTP POST and user chosen alipay.
   async alipay(client: HeaderApp, origin: string): Promise<AliOrder | null> {
     if (!this.plan) {
       throw new Error('Pricing plan not found');
@@ -259,7 +283,9 @@ export class PaymentPageBuilder {
     }
   }
 
-  async wxpay(client: HeaderApp): Promise<boolean> {
+  // Handles payment via Wechat. Called after HTTP POSt and payment method wechat is chosen.
+  // `wxOrder` field will be populated after success.
+  async wxpay(client: HeaderApp): Promise<WxOrder | null> {
     if (!this.plan) {
       throw new Error('Pricing plan not found');
     }
@@ -272,13 +298,13 @@ export class PaymentPageBuilder {
 
       this.wxOrder = wxOrder;
 
-      return true;
+      return wxOrder;
     } catch (e) {
       const errResp = new APIError(e);
 
       this.flashMsg = errResp.message;
 
-      return false;
+      return null;
     }
   }
 }
