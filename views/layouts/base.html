@@ -4,22 +4,31 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  {% for size in env.iconDimens %}
+    <link rel="apple-touch-icon" sizes="{{size}}x{{size}}" href="{{env.iconBaseUrl}}/apple-touch-icon-{{size}}x{{size}}.png">
+  {% endfor %}
   <link rel="apple-touch-icon" sizes="180x180" href="{{iconUrl}}/apple-touch-icon-180x180.png">
   <link rel="apple-touch-icon" sizes="152x152" href="{{iconUrl}}/apple-touch-icon-152x152.png">
   <link rel="apple-touch-icon" sizes="120x120" href="{{iconUrl}}/apple-touch-icon-120x120.png">
   <link rel="apple-touch-icon" sizes="76x76" href="{{iconUrl}}/apple-touch-icon-76x76.png">
-  <link href="{{iconUrl}}/favicon.ico" type="image/x-icon" rel="shortcut icon"/>
+
+  <link href="{{iconBaseUrl}}/favicon.ico" type="image/x-icon" rel="shortcut icon"/>
 
   <title>{{ pageTitle }} - FT中文网</title>
   
-  {% for link in styles.links %}
-    <link href="{{link}}" rel="stylesheet">
-  {% endfor %}
+  {% if env.isProduction %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/{{env.bsVersion}}/css/bootstrap.min.css" rel="stylesheet">
+    {% include "assets/style.html" %}
+  {% else %}
+    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="/style/main.css">
+  {% endif %}
 
   {% for incl in styles.includes %}
     {% include incl %}
   {% endfor %}
   
+  <script src="https://js.stripe.com/v3"></script>
 </head>
 <body>
   <header class="navbar o-header">
@@ -75,12 +84,19 @@
     </div>
   </footer>
   
-  {% for url in scripts.links %}
-    <script src="{{url}}"></script>
-  {% endfor %}
+  {% if env.isProduction %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/{{env.bsNativeVersion}}/bootstrap-native-v4.min.js"></script>
+    {% include "assets/script.html" %}
+    {% if useStripe %}
 
-  {% for incl in scripts.includes %}
-    {% include incl %}
-  {% endfor %}
+    {% endif %}
+  {% else %}
+    <script src="/bootstrap.native/dist/bootstrap-native.js"></script>
+    <script src="/script/main.js"></script>
+    {% if stripeApiJwt %}
+      <script src="/script/stripe-pay.js"></script>
+    {% endif %}
+  {% endif %}
+
 </body>
 </html>
