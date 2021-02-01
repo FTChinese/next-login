@@ -8,17 +8,16 @@
   },
   "scripts": {
     "test": "jest",
+    "watch-test": "jest --watch",
     "postversion": "git push && git push --tags",
     "clean": "rm -rf build/*",
     "watch-css": "sass --watch --style=expanded --load-path=node_modules/bootstrap client/scss/main.scss build/style/main.css",
     "build-css": "sass --style=compressed --load-path=node_modules/bootstrap client/scss/main.scss build/style/main.css",
-    "build-ts": "tsc -p client --outDir build/ts-out",
-    "watch-ts": "tsc -p client -w --outDir build/ts-out",
     "build-js": "rollup -c client/rollup.config.js",
     "watch-js": "rollup -c client/rollup.config.js -w",
     "dev": "npm-run-all --parallel watch-js watch-css",
     "build": "npm run build-js && npm run build-css",
-    "server": "nodemon --ext ts --ignore dist/ --exec ts-node src/server.ts"
+    "server": "nodemon"
   },
   "repository": {
     "type": "git",
@@ -32,10 +31,13 @@
   "homepage": "https://github.com/FTChinese/next-user#readme",
   "dependencies": {
     "@hapi/joi": "^17.1.1",
+    "@types/jsonwebtoken": "^8.5.0",
     "chance": "^1.1.7",
     "csrf": "^3.1.0",
     "date-fns": "^2.16.1",
     "debug": "^4.2.0",
+    "jose": "3",
+    "jsonwebtoken": "^8.5.1",
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.3.0",
     "koa-csrf": "^3.0.8",
@@ -64,6 +66,7 @@
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-node-resolve": "^11.1.0",
     "@rollup/plugin-typescript": "^8.1.0",
+    "@stripe/stripe-js": "^1.11.0",
     "@types/chance": "^1.1.0",
     "@types/debug": "^4.1.5",
     "@types/hapi__joi": "^17.1.6",
@@ -100,19 +103,5 @@
   },
   "pkg": {
     "assets": "views/**/*"
-  },
-  "nodemonConfig": {
-    "ignore": [
-      "build/**",
-      "client/**",
-      "views/**",
-      "test/**"
-    ],
-    "env": {
-      "NODE_ENV": "development",
-      "PORT": 4300,
-      "DEBUG": "user*"
-    },
-    "verbose": true
   }
 }
