@@ -4,10 +4,10 @@ class ProgressButton {
   constructor(formEl: HTMLFormElement) {
     this.btnElm = formEl.querySelector<HTMLButtonElement>(`button[type="submit"]`);
 
-    formEl.addEventListener("submit", event => this.onSumbmit(event));
+    formEl.addEventListener("submit", event => this.onSubmit(event));
   }
 
-  onSumbmit(event: Event) {
+  onSubmit(event: Event) {
     const attrName = "data-disable-with";
     if (this.btnElm.hasAttribute(attrName)) {
       this.btnElm.textContent = this.btnElm.getAttribute(attrName);
