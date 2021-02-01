@@ -1,8 +1,5 @@
 import "reflect-metadata";
 import { viper } from "./config/viper";
-
-const config = viper.getConfig();
-
 import { resolve } from "path";
 import Koa from "koa";
 import Router from "koa-router";
@@ -30,6 +27,7 @@ import verification from "./controllers/verification";
 import subscription from "./controllers/subscription";
 import starred from "./controllers/starred";
 import android from "./controllers/android";
+import api from "./controllers/api";
 
 import { entranceMap, profileMap } from "./config/sitemap";
 
@@ -37,7 +35,7 @@ const app = new Koa();
 const router = new Router();
 
 app.proxy = true;
-app.keys = [config.web_app.next_reader.koa_session];
+app.keys = [viper.sessionKey];
 
 if (process.env.NODE_ENV != "production") {
   app.use(serve(resolve(__dirname, "../node_modules")));
@@ -58,12 +56,12 @@ app.use(bodyParser());
 app.use(noCache());
 app.use(handleError());
 
-router.get("/", authGuard(), contentLayout(), async function (ctx, next) {
+router.get("/", authGuard(), contentLayout(), async function (ctx) {
   ctx.redirect(profileMap.base);
 });
 router.use("/login", noAuthGuard(), baseLayout(), login);
 router.use("/signup", noAuthGuard(), baseLayout(), signUp);
-router.get("/logout", authGuard(), contentLayout(), async function (ctx, next) {
+router.get("/logout", authGuard(), contentLayout(), async function (ctx) {
   ctx.session = null;
   ctx.redirect(entranceMap.login);
   return;
@@ -75,6 +73,7 @@ router.use("/account", authGuard(), contentLayout(), account);
 router.use("/subscription", authGuard(), contentLayout(), subscription);
 router.use("/starred", authGuard(), contentLayout(), starred);
 router.use("/android", androidLayout(), android);
+router.use("/api", api);
 
 app.use(router.routes());
 
