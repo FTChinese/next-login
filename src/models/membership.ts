@@ -148,7 +148,7 @@ export class MembershipParser {
       return {
         orderKind: 'create',
         payMethods: ['alipay', 'wechat', 'stripe'],
-        warning: '支付宝和微信为一次性购买，到期需重新购买。Stripe为自动续订。'
+        warning: ''
       };
     }
 
@@ -156,7 +156,7 @@ export class MembershipParser {
       return {
         orderKind: 'add_on',
         payMethods: ['alipay', 'wechat'],
-        warning: '您当前使用的订阅为企业版。在此选择微信/支付宝购买属于个人版，将在企业版到期后启用。',
+        warning: '企业版订阅请阅读下方注意事项',
       }
     }
 
@@ -177,7 +177,7 @@ export class MembershipParser {
           return {
             orderKind: 'renew',
             payMethods: ['alipay', 'wechat', 'stripe'], // If using stripe, move remaining days to add-on.
-            warning: 'Stripe采取自动续订模式，如果转用Stripe订阅，我们会把当前订阅的剩余时间留待Stripe订阅失效后启用'
+            warning: '选择Stripe支付请阅读下方注意事项'
           };
 
         case 'stripe':
@@ -185,7 +185,7 @@ export class MembershipParser {
           return {
             orderKind: 'add_on',
             payMethods: ['alipay', 'wechat'],
-            warning: 'Stripe/苹果内购采用自动续订模式，通过微信/支付宝进行的一次性购买，将在自动续订失效后启用'
+            warning: 'Stripe/苹果内购会员请阅读下方注意事项'
           }
       }
     }
