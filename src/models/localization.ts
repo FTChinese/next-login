@@ -1,6 +1,7 @@
-import { Tier, Cycle, Gender, PaymentMethod, OrderType } from "./enums";
+import { Tier, Cycle, Gender, PaymentMethod, OrderType, Edition } from "./enums";
 import { getProperty } from "./index-types";
 import { Dictionary } from "./data-types";
+import { formatMoney } from "../util/formatter";
 
 export const paymentMethodsCN: Record<PaymentMethod, string> = {
   "wechat": "微信支付",
@@ -61,6 +62,10 @@ export function localizeTier(tier: Tier | null): string {
   return getProperty(tiersCN, tier);
 }
 
+export function localizeEdition(e: Edition): string {
+  return `${localizeTier(e.tier)}/${localizeCycle(e.cycle)}`;
+}
+
 export const currencySymbols: Dictionary<string> = {
     "cny": "¥",
     "eur": "€",
@@ -72,4 +77,18 @@ export const currencySymbols: Dictionary<string> = {
 
 export function localizeCurrency(str: string): string {
   return currencySymbols[str] || str;
+}
+
+export interface PriceText {
+  currency: string;
+  amount: number;
+  cycle?: Cycle;
+}
+
+export function formatPriceText(p: PriceText): string {
+  const cycle = p.cycle
+    ? `/${localizeCycle(p.cycle)}`
+    : '';
+
+  return `${localizeCurrency(p.currency)}${formatMoney(p.amount)}${cycle}`
 }
