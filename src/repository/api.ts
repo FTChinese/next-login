@@ -54,20 +54,14 @@ class SubAPI {
     return this.baseURLs.prod;
   }
 
+  private readonly wxRedirectPath: string = "/wx/oauth/callback";
+
   paywall(sandbox: boolean): string {
     return `${this.getBaseUrl(sandbox)}/paywall`;
   }
 
-  pricingPlans(sandbox: boolean): string {
-    return `${this.paywall(sandbox)}/pricing`;
-  }
-
-  upgradeBalance(sandbox: boolean): string {
-    return `${this.getBaseUrl(sandbox)}/upgrade/balance`;
-  }
-
-  freeUpgrade(sandbox: boolean): string {
-    return `${this.getBaseUrl(sandbox)}/upgrade/free`;
+  ftcPlans(sandbox: boolean): string {
+    return `${this.paywall(sandbox)}/plans`;
   }
 
   aliPayDesktop(sandbox: boolean): string {
@@ -81,16 +75,18 @@ class SubAPI {
   wxPayDesktop(sandbox: boolean): string {
     return `${this.getBaseUrl(sandbox)}/wxpay/desktop`;
   }
-  
-  wxQueryOrder(orderId: string, sandbox: boolean): string {
-    return `${this.getBaseUrl(sandbox)}/wxpay/query/${orderId}`;
-  }
 
   verifyPayment(orderId: string, sandbox: boolean): string {
     return `${this.getBaseUrl(sandbox)}/orders/${orderId}/verify-payment`;
   }
 
-  private readonly wxRedirectPath: string = "/wx/oauth/callback";
+  stripePriceList(sandbox: boolean): string {
+    return `${this.getBaseUrl(sandbox)}/stripe/prices`;
+  }
+  
+  stripeCheckout(sandbox: boolean): string {
+    return `${this.getBaseUrl(sandbox)}/stripe/checkout`;
+  }
 
   // The sandbox mode is used only to test new API features.
   // As long as Wechat does not change its API, we do not need to use the sandbox mode.
