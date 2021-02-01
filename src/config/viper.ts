@@ -52,6 +52,7 @@ interface Config {
     };
     api_keys: {
       next_reader: APIKeys;
+      stripe_publishable: APIKeys;
     }
 }
 
@@ -110,6 +111,10 @@ class Viper {
       };
     }
 
+    get sessionKey(): string {
+      return this.getConfig().web_app.next_reader.koa_session;
+    }
+
     getAccessToken(): string {
         if (this.accessToken) {
             return this.accessToken;
@@ -132,6 +137,16 @@ class Viper {
         return {
             "Authorization": `Bearer ${this.getAccessToken}`
         };
+    }
+
+    getStripePublishableKey(): string {
+      const keys = this.getConfig().api_keys.stripe_publishable;
+      
+      if (this.isProduction) {
+        return keys.prod;
+      }
+
+      return keys.dev;
     }
 }
 
