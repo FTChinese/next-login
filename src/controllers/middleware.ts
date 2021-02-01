@@ -5,6 +5,8 @@ import { entranceMap, profileMap } from "../config/sitemap";
 import render from "../util/render";
 import { HeaderApp } from "../models/header";
 import { LayoutBuilder } from "../pages/layout";
+import { verify } from "../util/jwt";
+import { viper } from "../config/viper";
 const pkg = require("../../package.json");
 
 function isLoggedIn(session?: Session): Boolean {
@@ -93,6 +95,25 @@ export function noAuthGuard(): Middleware {
     await next();
   }
 }
+
+export function verifyStripeJWT(): Middleware {
+  return async (ctx, next) => {
+    const token = ctx.get('Authorization');
+    if (!token) {
+      ctx.status = 403;
+      ctx.body = {
+        message: 'Authorization required',
+      };
+
+      return;
+    }
+
+    ctx.state.stripeJWT = await verify(token, viper.sessionKey);
+    
+    await next();
+  }
+}
+
 export function paging(perPage = 20): Middleware {
   return async (ctx, next) => {
     const currentPage: string | undefined = ctx.request.query.page;
