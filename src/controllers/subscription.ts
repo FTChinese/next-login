@@ -117,7 +117,7 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
     cycle,
   });
 
-  // Find out which pricing plan user chosen.
+  // Find out which pricing plan user chosen to build the cart.
   const planLoaded = await builder.loadPlan();
   if (!planLoaded) {
     const uiData = await builder.build();
@@ -128,6 +128,7 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
     return await next();
   }
 
+  // Get payment method from request body.
   const payMethod: PaymentMethod | undefined = ctx.request.body.payMethod;
   const isValid = builder.validate(payMethod);
   if (!isValid) {
@@ -158,19 +159,29 @@ router.post("/pay/:tier/:cycle", collectAppHeaders(), async (ctx, next) => {
     
     // For wechat redisplay this page with an qr code.
     case 'wechat': {
-      const ok = await builder.wxpay(ctx.state.appHeaders);
+      const wxOrder = await builder.wxpay(ctx.state.appHeaders);
 
-      if (ok) {
-        // @ts-ignore
-        ctx.session.order = builder.wxOrder
+      // Order creation error
+      if (!wxOrder) {
+        const uiData = await builder.build();
+        Object.assign(ctx.state, uiData);
+        return await next();
       }
 
+      // Show QR code.
+      // @ts-ignore
+      ctx.session.order = wxOrder
       const uiData = await builder.build();
       Object.assign(ctx.state, uiData);
 
       return await next();
     }
-     
+    
+    case 'stripe':
+      const uiData = await builder.build();
+      Object.assign(ctx.state, uiData);
+      return await next();
+
     default:
       throw new Error('Unknown payment method');
   }
@@ -287,11 +298,31 @@ router.get("/done/wx", async (ctx, next) => {
   ctx.body = await render("subscription/pay-done.html", ctx.state);
 });
 
+/**
+ * @description Callback for success
+ */
+router.get("/done/stripe/success", async (ctx, next) => {
+
+});
+
+/**
+ * @description Callback for cancel
+ */
+router.get("/done/stripe/cancel", async (ctx, next) => {
+
+});
+
+/**
+ * @description Show paywall in cache.
+ */
 router.get('/__paywall', async (ctx) => {
   ctx.status = 200;
   ctx.body = paywallCache.getPaywall();;
 });
 
+/**
+ * @description Clear cached paywall data.
+ */
 router.get('/__paywall/refresh', async (ctx) => {
   paywallCache.clear();
   ctx.redirect(subsMap.paywall);
