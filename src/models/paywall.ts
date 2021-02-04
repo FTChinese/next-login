@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import { subsMap } from "../config/sitemap";
 import { formatMoney } from "../util/formatter";
 import { Cycle, Edition, OrderType, Tier } from "./enums";
-import { formatPriceText, localizeCurrency, localizeCycle, localizeTier, orderIntent } from "./localization";
+import { formatPriceText, localizeCurrency, localizeCycle, localizeOrderKind, localizeTier, orderKindCN } from "./localization";
 
 export interface Banner {
   id: number;
@@ -83,9 +83,13 @@ interface PriceLink {
 export interface Cart {
   header: string;
   planName: string;
-  price: string;
+  originalPrice: string;
   priceOff?: string;
-  payable: string;
+  payable?: {
+    currency: string;
+    amount: number;
+    cycle: string;
+  };
 }
 
 export class PlanParser {
@@ -131,23 +135,7 @@ export class PlanParser {
     };
   }
 
-  private get originalPrice(): string {
-    return formatPriceText({
-      currency: 'cny',
-      amount: this.plan.price,
-    });
-  }
-
-  private get offPrice(): string | undefined {
-    return this.isDiscountValid
-      ? '优惠 - ' + formatPriceText({
-        currency: 'cny',
-        amount: this.plan.discount.priceOff || 0,
-      })
-      : undefined
-  }
-
-  private get payable(): number {
+  private get payableAmount(): number {
     return this.isDiscountValid
       ? this.plan.price - (this.plan.discount.priceOff || 0) 
       : this.plan.price;
@@ -160,14 +148,23 @@ export class PlanParser {
    */
   buildCart(kind: OrderType): Cart {
     return {
-      header: orderIntent[kind],
-      planName: planName(this.plan.tier, this.plan.cycle),
-      price: this.originalPrice,
-      priceOff: this.offPrice,
-      payable: formatPriceText({
+      header: localizeOrderKind(kind),
+      planName: localizeTier(this.plan.tier),
+      originalPrice: formatPriceText({
         currency: 'cny',
-        amount: this.payable,
+        amount: this.plan.price,
       }),
+      priceOff: this.isDiscountValid
+        ? formatPriceText({
+          currency: 'cny',
+          amount: this.plan.discount.priceOff || 0,
+        })
+        : undefined,
+      payable: {
+        currency: localizeCurrency('cny'),
+        amount: this.payableAmount,
+        cycle: localizeCycle(this.plan.cycle)
+      },
     };
   }
 }

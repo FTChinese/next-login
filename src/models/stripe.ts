@@ -1,9 +1,10 @@
+import { formatMoney } from "../util/formatter";
 import { subsMap } from "../config/sitemap";
 import { viper } from "../config/viper";
 import { sign } from "../util/jwt";
 import { Account, isTestAccount } from "./account";
 import { Edition, OrderType } from "./enums";
-import { formatPriceText, localizeEdition, orderIntent } from "./localization";
+import { formatPriceText, localizeCurrency, localizeCycle, localizeEdition, localizeOrderKind } from "./localization";
 import { Cart } from "./paywall";
 
 export type StripeEdition = Edition & {
@@ -27,10 +28,14 @@ export function buildStripeCart(kind: OrderType, price: Price): Cart {
   });
 
   return {
-    header: orderIntent[kind],
+    header: localizeOrderKind(kind),
     planName: localizeEdition(price),
-    price: priceStr,
-    payable: priceStr
+    originalPrice: priceStr,
+    payable: {
+      currency: localizeCurrency(price.currency),
+      amount: price.unitAmount / 100,
+      cycle: localizeCycle(price.cycle),
+    }
   }
 }
 

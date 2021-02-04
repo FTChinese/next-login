@@ -16,7 +16,10 @@ const log = debug("user:pay-result-page");
 /** template: subscription/pay-done.html */
 interface PayResultPage {
   flash?: Flash;
-  cart: Cart;
+  cart: {
+    header: string,
+    planName: string,
+  };
   success?: Table;
   failed?: SimpleList;
   backLink: string;
@@ -106,8 +109,6 @@ export class AlipayResultBuilder extends PayResultBuilder{
       cart: {
         header: cartHeader(isMember(this.account.membership)),
         planName: planName(this.order.tier, this.order.cycle),
-        price: '',
-        payable: '',
       },
       backLink: subsMap.base,
       success: this.payResult ? {
@@ -181,8 +182,6 @@ export class WxpayResultBuilder extends PayResultBuilder {
       cart: {
         header: cartHeader(isMember(this.account.membership)),
         planName: planName(this.order.tier, this.order.cycle),
-        price: '',
-        payable: ''
       },
       backLink: subsMap.base,
       success: this.queryResult ? {

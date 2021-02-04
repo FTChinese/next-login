@@ -5,18 +5,26 @@
     <div class="alert alert-danger">⚠️测试模式！</div>
   {% endif %}
 
+  
+
   <div class="row justify-content-center">
-    <div class="col-sm-6">
-      
+    <div class="col-sm-9">
+    
       {% if cart %}
-      <div class="text-center mb-5">
-        <div class="mb-2">{{cart.header}}</div>
-        <h3 class="mb-2">{{cart.planName}}</h3>
-        <div>{{cart.price}}</div>
-        {% if cart.priceOff %}
-          <div class="text-danger">{{cart.priceOff}}</div>
-        {% endif %}
-      </div>
+        <div class="text-center mb-5">
+          <div class="mb-2">{{cart.header}}</div>
+          <div class="fs-2">{{cart.planName}}</div>
+          <div>
+            <span class="fs-6">{{cart.payable.currency}}</span>
+            <span class="fs-2">{{cart.payable.amount}}</span>
+            <span class="fs-6">/{{cart.payable.cycle}}</span>
+          </div>
+          {% if cart.priceOff %}
+          <div class="text-muted">
+            <del>原价{{cart.originalPrice}}</del>
+          </div>
+          {% endif %}
+        </div>
       {% endif %}
       
       {% if form %}

@@ -1,6 +1,5 @@
 import { Tier, Cycle, Gender, PaymentMethod, OrderType, Edition } from "./enums";
 import { getProperty } from "./index-types";
-import { Dictionary } from "./data-types";
 import { formatMoney } from "../util/formatter";
 
 export const paymentMethodsCN: Record<PaymentMethod, string> = {
@@ -19,13 +18,17 @@ export const membershipSource: Record<PaymentMethod, string> = {
   'b2b': '企业订阅'
 };
 
-export const orderIntent: Record<OrderType, string> = {
-  create: '订阅FT会员',
-  renew: '续订FT会员',
-  upgrade: '升级高端版',
+export const orderKindCN: Record<OrderType, string> = {
+  create: '订阅FT',
+  renew: '续订FT',
+  upgrade: '升级订阅',
   downgrade: '转为标准版',
   add_on: '自动续订备用包'
 };
+
+export function localizeOrderKind(k: OrderType): string {
+  return orderKindCN[k];
+}
 
 export const gendersCN: Record<Gender, string> = {
   M: "男",
@@ -66,7 +69,7 @@ export function localizeEdition(e: Edition): string {
   return `${localizeTier(e.tier)}/${localizeCycle(e.cycle)}`;
 }
 
-export const currencySymbols: Dictionary<string> = {
+export const currencySymbols: Record<string, string> = {
     "cny": "¥",
     "eur": "€",
     "gbp": "£",
