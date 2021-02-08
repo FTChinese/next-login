@@ -47,7 +47,7 @@
     "koa-static": "^5.0.0",
     "lodash": "^4.17.20",
     "luxon": "^1.25.0",
-    "marked": "^1.2.0",
+    "marked": "^2.0.0",
     "mobile-detect": "^1.4.4",
     "node-cache": "^5.1.2",
     "numeral": "^2.0.6",
