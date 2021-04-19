@@ -3524,9 +3524,9 @@ jest@^26.5.3:
     jest-cli "^26.6.3"
 
 jose@3:
-  version "3.5.4"
-  resolved "https://registry.npm.taobao.org/jose/download/jose-3.5.4.tgz#35d929dd5e5db46b7c8be822c141a7abcacb97cd"
-  integrity sha1-Ndkp3V5dtGt8i+giwUGnq8rLl80=
+  version "3.11.4"
+  resolved "https://registry.yarnpkg.com/jose/-/jose-3.11.4.tgz#e3e9c3c66ecfe5f758799248857ac02877f06405"
+  integrity sha512-nYUGe7axercxj4O5amg7iDFMpfh2yJ15Gz+U1CrgCrRvmHzzYHUwSzTFsF5bj9xSvl6/d0GC8hPTALyhjQofDA==
 
 js-tokens@^4.0.0:
   version "4.0.0"
