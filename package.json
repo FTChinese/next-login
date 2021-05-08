@@ -58,7 +58,7 @@
     "superagent": "^6.1.0",
     "toml": "^3.0.0",
     "typedjson": "^1.5.2",
-    "ua-parser-js": "^0.7.22",
+    "ua-parser-js": "^0.7.24",
     "validator": "^13.1.17"
   },
   "devDependencies": {
